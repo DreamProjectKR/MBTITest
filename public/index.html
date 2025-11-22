@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>MBTI Zoo</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="./styles/global.css"
+    />
+  </head>
+  <body>
+    <a
+      class="skip-link"
+      href="#today-tests-heading"
+      >본문으로 건너뛰기</a
+    >
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="site-header__inner">
+          <div class="site-header__bg">
+            <a
+              class="brand"
+              href="#hero"
+              aria-label="홈으로 이동"
+            >
+              <span class="brand__text">LOGO</span>
+            </a>
+            <div class="site-header__btn-box">
+              <button
+                class="ds-button ds-button--primary"
+                type="button"
+              >
+                Btn
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main
+        id="hero"
+        class="site-main"
+      >
+        <section class="hero">
+          <div
+            class="hero__slider"
+            data-hero-slider
+          >
+            <button
+              class="slider-button slider-button--hero slider-button--prev"
+              type="button"
+              aria-label="이전 슬라이드"
+              data-hero-prev
+            >
+              ‹
+            </button>
+            <div
+              class="slider-track"
+              data-hero-track
+            >
+              <!-- Slides injected by JS -->
+            </div>
+            <button
+              class="slider-button slider-button--hero slider-button--next"
+              type="button"
+              aria-label="다음 슬라이드"
+              data-hero-next
+            >
+              ›
+            </button>
+          </div>
+        </section>
+
+        <section
+          class="section section--tests"
+          aria-labelledby="today-tests-heading"
+        >
+          <div class="section__inner">
+            <div class="section__header">
+              <h2 id="today-tests-heading">오늘의 테스트</h2>
+            </div>
+            <div
+              class="test-grid"
+              data-tests-grid
+            ></div>
+            <div class="section__footer">
+              <button
+                class="ds-button ds-button--ghost"
+                type="button"
+              >
+                다른거 보기
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="section section--forum"
+          aria-labelledby="forum-heading"
+        >
+          <div class="section__inner">
+            <div
+              class="section__header"
+              style="width: 373px"
+            >
+              <h2 id="forum-heading">16가지 MBTI, 다른 스타일?</h2>
+            </div>
+            <div class="mbti-panel">
+              <div class="mbti-grid-wrapper">
+                <ul
+                  class="mbti-grid"
+                  data-mbti-grid
+                  aria-label="MBTI 목록"
+                ></ul>
+                <ul
+                  class="mbti-grid mbti-grid--bottom"
+                  data-mbti-grid-bottom
+                ></ul>
+              </div>
+              <div
+                class="mbti-feed-slider"
+                data-mbti-feed-slider
+              >
+                <button
+                  class="slider-button slider-button--feed slider-button--prev"
+                  type="button"
+                  aria-label="이전 포럼 카드"
+                  data-mbti-feed-prev
+                >
+                  ‹
+                </button>
+                <div
+                  class="slider-track"
+                  data-mbti-feed-track
+                >
+                  <!-- Forum items injected by JS -->
+                </div>
+                <button
+                  class="slider-button slider-button--feed slider-button--next"
+                  type="button"
+                  aria-label="다음 포럼 카드"
+                  data-mbti-feed-next
+                >
+                  ›
+                </button>
+              </div>
+              <div class="forum-btn-wrapper">
+                <button
+                  class="ds-button ds-button--secondary"
+                  type="button"
+                >
+                  오늘의 MBTI 포럼
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div class="site-footer__inner">
+          <div class="site-footer__logo-box">
+            <div class="site-footer__logo">Logo</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script
+      type="module"
+      src="../scripts/main.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,131 @@
+{
+  "tests": [
+    {
+      "id": "dream-001",
+      "title": "첫번째 테스트",
+      "description": "나의 일상을 닮은 MBTI를 찾아보세요.",
+      "tags": ["#힐링", "#라이프스타일", "#트렌드"],
+      "thumbnail": "",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "주말 계획을 세울 때 나는?",
+          "answers": [
+            {
+              "id": "q1a",
+              "label": "친구들을 모아 활기찬 파티를 연다",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "q1b",
+              "label": "혼자만의 취미 시간으로 재충전을 한다",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "q2",
+          "prompt": "새로운 아이디어가 떠오르면?",
+          "answers": [
+            {
+              "id": "q2a",
+              "label": "바로 시도하면서 결과를 본다",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            },
+            {
+              "id": "q2b",
+              "label": "계획을 세우고 단계별로 진행한다",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            }
+          ]
+        }
+      ],
+      "results": {
+        "INTJ": {
+          "image": "",
+          "summary": "전략가형, 통찰력 있는 계획가"
+        },
+        "INTP": {
+          "image": "",
+          "summary": "사색가형, 호기심 많은 발명가"
+        },
+        "ENTJ": {
+          "image": "",
+          "summary": "지도자형, 결단력 있는 리더"
+        },
+        "ENTP": {
+          "image": "",
+          "summary": "변론가형, 도전적인 토론가"
+        },
+        "INFJ": {
+          "image": "",
+          "summary": "옹호자형, 통찰력 있는 이상주의자"
+        },
+        "INFP": {
+          "image": "",
+          "summary": "중재자형, 감성적인 이상주의자"
+        },
+        "ENFJ": {
+          "image": "",
+          "summary": "선도자형, 따뜻한 조언자"
+        },
+        "ENFP": {
+          "image": "",
+          "summary": "재기발랄형, 열정적인 활동가"
+        },
+        "ISTJ": {
+          "image": "",
+          "summary": "현실주의자형, 성실한 관리자"
+        },
+        "ISTP": {
+          "image": "",
+          "summary": "장인형, 유연한 해결사"
+        },
+        "ESTJ": {
+          "image": "",
+          "summary": "경영자형, 체계적인 실행가"
+        },
+        "ESTP": {
+          "image": "",
+          "summary": "모험가형, 에너지 넘치는 설득가"
+        },
+        "ISFJ": {
+          "image": "",
+          "summary": "수호자형, 헌신적인 도우미"
+        },
+        "ISFP": {
+          "image": "",
+          "summary": "모험가형, 감각적인 예술가"
+        },
+        "ESFJ": {
+          "image": "",
+          "summary": "사교가형, 배려 깊은 조력가"
+        },
+        "ESFP": {
+          "image": "",
+          "summary": "연예인형, 밝은 분위기 메이커"
+        }
+      }
+    }
+  ],
+  "forumHighlights": [
+    {
+      "id": "forum-001",
+      "title": "MBTI 관련 내용요약",
+      "image": "",
+      "ctaLabel": "이글 보러가기",
+      "href": "#"
+    },
+    {
+      "id": "forum-002",
+      "title": "MBTI 관련 내용요약",
+      "image": "",
+      "ctaLabel": "이글 보러가기",
+      "href": "#"
+    }
+  ]
+}

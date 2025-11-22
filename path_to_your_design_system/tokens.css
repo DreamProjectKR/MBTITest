@@ -1,0 +1,54 @@
+:root {
+  /* Typography */
+  --font-display: 'Inter', 'Noto Sans KR', sans-serif;
+  --font-body: 'Inter', 'Noto Sans KR', sans-serif;
+  --text-size-xxl: clamp(2.5rem, 5vw, 3.5rem);
+  --text-size-xl: clamp(2rem, 4vw, 2.75rem);
+  --text-size-lg: clamp(1.5rem, 2.2vw, 2rem);
+  --text-size-md: 1.125rem;
+  --text-size-sm: 0.9375rem;
+  --text-size-xs: 0.75rem;
+
+  /* Color palette derived from DreamProject Figma */
+  --color-surface: #ffffff;
+  --color-surface-elevated: #fafafa;
+  --color-surface-hero: #f6fbff;
+  --color-surface-header: #ededed;
+  --color-surface-brand: #ffdede;
+  --color-surface-brand-strong: #e3c2c2;
+  --color-border: #dcdcdc;
+  --color-border-strong: #b3b3b3;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #7a7a7a;
+  --color-text-muted: #9d9d9d;
+  --color-accent: #ff6f61;
+  --color-accent-muted: #ffdede;
+  --color-success: #2e8540;
+  --color-error: #c62828;
+
+  /* Layout + spacing */
+  --layout-max-width: 1230px;
+  --layout-header-height: 100px;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 15px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 20px 45px rgba(0, 0, 0, 0.12);
+
+  /* Animation */
+  --easing-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-standard: 220ms;
+}
