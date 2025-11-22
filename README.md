@@ -8,7 +8,7 @@ Figma 기획안
 
 ## 폴더 구조
 
-```
+```text
 public/                    # 정적 페이지 (index, admin)
 public/styles/global.css    # 레이아웃 및 페이지 단위 스타일
 path_to_your_design_system/ # 디자인 토큰 + 컴포넌트 정의
@@ -105,7 +105,13 @@ assets/data/mbti-tests.json # 샘플 테스트 및 결과 데이터
    들어집니다.
 2. GitHub 저장소의 **Settings > Pages**로 이동해 **Source**를 `gh-pages` 브랜치
    의 루트로 설정하고 저장합니다.
-3. 커밋마다 `main` 브랜치로 푸시하면 workflow가 실행되며, GitHub Pages에서 곧바
+3. **Settings > Actions > General**에서 Workflow permissions를 **Read and write
+   permissions**로 변경하고
+   `Allow GitHub Actions to create and approve pull requests` 옵션을 체크해야
+   `github-actions[bot]`이 `gh-pages`에 푸시할 수 있습니다. (조직 정책상 불가능
+   하다면 `repo` 권한 PAT를 발급해 `GH_PAGES_TOKEN` 같은 시크릿으로 등록하고
+   workflow에서 사용하세요.)
+4. 커밋마다 `main` 브랜치로 푸시하면 workflow가 실행되며, GitHub Pages에서 곧바
    로 `public`을 서빙합니다.
 
 ## QA & 접근성 체크리스트
