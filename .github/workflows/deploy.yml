@@ -31,13 +31,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Prepare static bundle
+        run: |
+          for dir in assets scripts path_to_your_design_system; do
+            if [ -d "$dir" ]; then
+              mkdir -p "public/$dir"
+              rsync -a --delete "$dir"/ "public/$dir"/
+            fi
+          done
+      - name: List prepared bundle
+        run: find public -maxdepth 2 -type d -print
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: "."
+          path: "./public"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

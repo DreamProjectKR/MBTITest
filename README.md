@@ -111,7 +111,10 @@ assets/data/mbti-tests.json # 샘플 테스트 및 결과 데이터
    `github-actions[bot]`이 `gh-pages`에 푸시할 수 있습니다. (조직 정책상 불가능
    하다면 `repo` 권한 PAT를 발급해 `GH_PAGES_TOKEN` 같은 시크릿으로 등록하고
    workflow에서 사용하세요.)
-4. 커밋마다 `main` 브랜치로 푸시하면 workflow가 실행되며, GitHub Pages에서 곧바
+4. workflow 실행 시 `assets/`, `scripts/`, `path_to_your_design_system/` 폴더를
+   자동 으로 `public/` 안쪽으로 복사해 README에서 안내한 상대 경로(`../scripts`,
+   `../assets` 등)를 유지합니다.
+5. 커밋마다 `main` 브랜치로 푸시하면 workflow가 실행되며, GitHub Pages에서 곧바
    로 `public`을 서빙합니다.
 
 ## QA & 접근성 체크리스트
