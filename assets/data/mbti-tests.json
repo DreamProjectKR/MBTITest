@@ -1183,6 +1183,20 @@
       "image": "",
       "ctaLabel": "이글 보러가기",
       "href": "#"
+    },
+    {
+      "id": "forum-003",
+      "title": "MBTI 관련 내용요약",
+      "image": "",
+      "ctaLabel": "이글 보러가기",
+      "href": "#"
+    },
+    {
+      "id": "forum-004",
+      "title": "MBTI 관련 내용요약",
+      "image": "",
+      "ctaLabel": "이글 보러가기",
+      "href": "#"
     }
   ]
 }

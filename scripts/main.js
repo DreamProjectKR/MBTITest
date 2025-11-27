@@ -71,7 +71,8 @@ async function initHomepage() {
   feedState.prevBtn = feedPrev;
   feedState.nextBtn = feedNext;
 
-  attachFeedControls();
+  // No longer attaching manual controls since we use CSS marquee
+  // attachFeedControls();
 
   try {
     const response = await fetch(DATA_URL);
@@ -198,7 +199,8 @@ function renderForum(highlights) {
     ? highlights
     : [{ title: 'MBTI 관련 내용요약', ctaLabel: '이글 보러가기' }];
 
-  items.forEach((item) => {
+  // Helper to create a card element
+  const createCard = (item) => {
     const card = document.createElement('article');
     card.className = 'ds-card ds-card--feed';
 
@@ -224,10 +226,24 @@ function renderForum(highlights) {
     body.appendChild(link);
 
     card.appendChild(body);
+    return card;
+  };
+
+  // Append original items
+  items.forEach((item) => {
+    feedState.track.appendChild(createCard(item));
+  });
+
+  // Append duplicated items for seamless scrolling
+  // We duplicate the entire set once to ensure there's enough content to scroll
+  items.forEach((item) => {
+    const card = createCard(item);
+    card.setAttribute('aria-hidden', 'true'); // Hide duplicates from screen readers
     feedState.track.appendChild(card);
   });
 
-  setupFeedSliderMetrics();
+  // Note: setupFeedSliderMetrics and moveFeedSlider are no longer used
+  // because we switched to CSS animation.
 }
 
 function setupFeedSliderMetrics() {

@@ -370,7 +370,21 @@ select {
 .mbti-feed-slider .slider-track {
   display: flex;
   gap: 24px;
-  transition: transform 0.6s var(--easing-standard);
+  width: max-content;
+  animation: marquee 20s linear infinite;
+}
+
+.mbti-feed-slider .slider-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .slider-button--feed {
@@ -386,7 +400,7 @@ select {
   background: #ffffff;
   box-shadow: none;
   display: flex;
-  flex-direction: row; /* Changed to row for horizontal layout */
+  flex-direction: row;
   align-items: center;
   gap: 12px;
 }
@@ -429,7 +443,7 @@ select {
 }
 
 .forum-btn-wrapper {
-  grid-column: 2; /* Place in right column */
+  grid-column: 2;
   justify-self: end;
 }
 
@@ -549,54 +563,69 @@ select {
 }
 
 .test-meta strong {
-  font-size: var(--text-size-lg);
   color: var(--color-text-primary);
+  font-weight: 700;
 }
 
+.ds-chip-row {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.ds-chip {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: var(--text-size-sm);
+  background: #ffffff;
+}
+
+/* Quiz Page */
 .test-quiz-page {
-  gap: var(--space-xl);
+  max-width: 800px;
 }
 
 .test-quiz__progress {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  font-weight: 600;
+  gap: var(--space-xs);
 }
 
 .test-quiz__progress-track {
   width: 100%;
   height: 8px;
+  background: var(--color-border);
   border-radius: var(--radius-pill);
-  background: var(--color-surface-hero);
   overflow: hidden;
-  border: 1px solid var(--color-border);
 }
 
 .test-quiz__progress-fill {
   height: 100%;
-  background: var(--color-accent);
+  background: #000;
   width: var(--quiz-progress, 0%);
-  transition: width var(--duration-standard) var(--easing-standard);
+  transition: width 0.3s ease;
 }
 
 .test-quiz__question {
-  margin: 0;
-  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.4;
+  margin: var(--space-md) 0;
 }
 
 .test-quiz__options {
-  display: grid;
-  gap: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .test-option {
-  width: 100%;
+  text-align: left;
+  padding: var(--space-md);
   justify-content: flex-start;
-  font-size: var(--text-size-md);
-  padding: var(--space-md) var(--space-lg);
+  height: auto;
+  min-height: 60px;
 }
 
 .test-quiz__empty {
