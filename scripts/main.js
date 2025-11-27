@@ -572,9 +572,7 @@ function renderTestResultPage(test, mbtiType = '') {
 
   const detail = document.createElement('p');
   detail.className = 'test-result__description';
-  detail.textContent = `${test.description ?? '이 테스트'}와 가장 잘 어울리는 ${
-    normalizedType || 'MBTI'
-  } 타입의 특징이에요.`;
+  detail.textContent = `${normalizedType || 'MBTI'} 타입의 특징이에요.`;
 
   const media = document.createElement('div');
   media.className = 'test-result__media';
