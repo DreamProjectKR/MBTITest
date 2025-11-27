@@ -138,143 +138,23 @@ select {
   background: #ffffff;
 }
 
-.hero__slider {
+.hero__image-wrapper {
   width: 1230px;
   height: 320px;
   border: 1px solid #000;
   border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  position: relative;
-  background: var(--color-surface);
-  --hero-slide-transition-duration: var(--duration-carousel, 420ms);
-  --hero-slide-easing: var(--easing-emphasis, cubic-bezier(0.32, 0.72, 0, 1));
 }
 
-.hero__slider .slider-track {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform var(--hero-slide-transition-duration)
-    var(--hero-slide-easing);
-  will-change: transform;
-}
-
-.hero__slide {
-  min-width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  padding: var(--space-2xl);
-  background: var(--color-surface-hero);
-  isolation: isolate;
-  color: var(--color-text-primary);
-}
-
-.hero__slide::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    110deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.55) 45%,
-    rgba(255, 255, 255, 0) 70%
-  );
-  z-index: 0;
-}
-
-.hero__slide-media,
-.hero__slide-pan-track {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.hero__slide-media img,
-.hero__slide-pan-track img {
+.hero__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.hero__slide-pan-track {
-  display: flex;
-  width: 200%;
-}
-
-.hero__slide-pan-track img {
-  flex: 0 0 50%;
-}
-
-.hero__slide-copy {
-  position: relative;
-  z-index: 1;
-  max-width: 360px;
-  padding: var(--space-lg);
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: var(--shadow-soft);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.hero__slide-eyebrow {
-  margin: 0;
-  font-size: var(--text-size-sm);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-
-.hero__slide-copy h3 {
-  margin: 0;
-  font-size: var(--text-size-xl);
-  line-height: 1.2;
-}
-
-.hero__slide-description {
-  margin: 0;
-  font-size: var(--text-size-md);
-  color: var(--color-text-secondary);
-  line-height: 1.6;
-}
-
-.hero__slide-cta {
-  align-self: flex-start;
-  margin-top: var(--space-sm);
-}
-
-.hero__slide--clone {
-  pointer-events: none;
-}
-
-.hero__slide--fallback {
-  background: linear-gradient(
-    120deg,
-    var(--color-surface-brand) 0%,
-    var(--color-surface-hero) 60%,
-    var(--color-surface) 100%
-  );
-}
-
-.hero .slider-button--hero {
-  display: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero__slider .slider-track {
-    transition-duration: 0.01ms;
-    transition-timing-function: linear;
-  }
+  display: block;
 }
 
 /* Section - common */

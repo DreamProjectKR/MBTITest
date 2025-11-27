@@ -33,32 +33,6 @@ const MBTI_ORDER = [
   'ESFP',
 ];
 
-const heroState = {
-  track: null,
-  prevBtn: null,
-  nextBtn: null,
-  index: 0,
-  total: 0,
-  timer: null,
-  duration: 3000,
-  isLooping: false,
-};
-
-const mediaQueries = {
-  reducedMotion:
-    typeof window !== 'undefined' && window.matchMedia
-      ? window.matchMedia('(prefers-reduced-motion: reduce)')
-      : null,
-};
-
-mediaQueries.reducedMotion?.addEventListener('change', (event) => {
-  if (event.matches) {
-    stopHeroAutoPlay();
-  } else {
-    startHeroAutoPlay();
-  }
-});
-
 const feedState = {
   slider: null,
   track: null,
@@ -75,9 +49,6 @@ async function initHomepage() {
     mbtiGrid,
     mbtiGridBottom,
     mbtiFeedTrack,
-    heroSliderTrack,
-    heroPrev,
-    heroNext,
     feedSlider,
     feedPrev,
     feedNext,
@@ -86,34 +57,20 @@ async function initHomepage() {
     document.querySelector('[data-mbti-grid]'),
     document.querySelector('[data-mbti-grid-bottom]'),
     document.querySelector('[data-mbti-feed-track]'),
-    document.querySelector('[data-hero-track]'),
-    document.querySelector('[data-hero-prev]'),
-    document.querySelector('[data-hero-next]'),
     document.querySelector('[data-mbti-feed-slider]'),
     document.querySelector('[data-mbti-feed-prev]'),
     document.querySelector('[data-mbti-feed-next]'),
   ];
 
-  if (
-    !testsGrid ||
-    !mbtiGrid ||
-    !mbtiFeedTrack ||
-    !heroSliderTrack ||
-    !feedSlider
-  ) {
+  if (!testsGrid || !mbtiGrid || !mbtiFeedTrack || !feedSlider) {
     return;
   }
-
-  heroState.track = heroSliderTrack;
-  heroState.prevBtn = heroPrev;
-  heroState.nextBtn = heroNext;
 
   feedState.slider = feedSlider;
   feedState.track = mbtiFeedTrack;
   feedState.prevBtn = feedPrev;
   feedState.nextBtn = feedNext;
 
-  attachHeroControls();
   attachFeedControls();
 
   try {
@@ -137,314 +94,16 @@ async function initHomepage() {
     }
 
     renderForum(payload?.forumHighlights ?? []);
-    renderHeroSlider(tests);
     handleRouteChange();
   } catch (error) {
     console.error(error);
   }
 }
 
-function attachHeroControls() {
-  heroState.prevBtn?.addEventListener('click', () => {
-    moveHeroSlide(-1);
-    resetHeroAutoPlay();
-  });
-  heroState.nextBtn?.addEventListener('click', () => {
-    moveHeroSlide(1);
-    resetHeroAutoPlay();
-  });
-
-  heroState.track?.addEventListener('transitionend', handleHeroTransitionEnd);
-
-  const container = heroState.track?.parentElement;
-  if (container) {
-    container.addEventListener('mouseenter', stopHeroAutoPlay);
-    container.addEventListener('mouseleave', startHeroAutoPlay);
-    container.addEventListener('focusin', stopHeroAutoPlay);
-    container.addEventListener('focusout', startHeroAutoPlay);
-  }
-}
-
-function startHeroAutoPlay() {
-  stopHeroAutoPlay();
-  if (!shouldAutoPlayHero()) {
-    return;
-  }
-  heroState.timer = setInterval(() => {
-    moveHeroSlide(1);
-  }, heroState.duration);
-}
-
-function stopHeroAutoPlay() {
-  if (heroState.timer) {
-    clearInterval(heroState.timer);
-    heroState.timer = null;
-  }
-}
-
-function resetHeroAutoPlay() {
-  stopHeroAutoPlay();
-  startHeroAutoPlay();
-}
-
 function attachFeedControls() {
   feedState.prevBtn?.addEventListener('click', () => moveFeedSlider(-1));
   feedState.nextBtn?.addEventListener('click', () => moveFeedSlider(1));
   window.addEventListener('resize', debounce(setupFeedSliderMetrics, 200));
-}
-
-function renderHeroSlider(tests) {
-  if (!heroState.track) return;
-  stopHeroAutoPlay();
-  heroState.track.innerHTML = '';
-
-  const slidesData = tests.length
-    ? tests.slice(0, 3)
-    : [
-        { title: '슬라이드 1' },
-        { title: '슬라이드 2' },
-        { title: '슬라이드 3' },
-      ];
-
-  const fragment = document.createDocumentFragment();
-  slidesData.forEach((test) => {
-    fragment.appendChild(createHeroSlide(test));
-  });
-  heroState.track.appendChild(fragment);
-
-  heroState.total = slidesData.length;
-  setupHeroSliderLoop();
-  updateHeroSlider({ immediate: true });
-  startHeroAutoPlay();
-}
-
-function createHeroSlide(test) {
-  const slide = document.createElement('article');
-  slide.className = 'hero__slide';
-  if (test?.id) {
-    slide.dataset.testId = test.id;
-  }
-
-  if (test?.heroAnimation === 'pan' && test?.thumbnail) {
-    slide.classList.add('hero__slide--pan');
-    slide.appendChild(createHeroPanMedia(test));
-  } else if (test?.thumbnail) {
-    slide.classList.add('hero__slide--media');
-    slide.appendChild(createHeroStaticMedia(test));
-  } else {
-    slide.classList.add('hero__slide--fallback');
-  }
-
-  slide.appendChild(createHeroSlideCopy(test));
-  return slide;
-}
-
-function setupHeroSliderLoop() {
-  if (!heroState.track) return;
-
-  heroState.isLooping = heroState.total > 1;
-  heroState.track.dataset.heroLoop = heroState.isLooping ? 'true' : 'false';
-
-  if (!heroState.total) {
-    heroState.index = 0;
-    syncHeroActiveSlide();
-    return;
-  }
-
-  if (!heroState.isLooping) {
-    heroState.index = 0;
-    syncHeroActiveSlide();
-    return;
-  }
-
-  const slides = Array.from(heroState.track.children);
-  if (!slides.length) {
-    heroState.isLooping = false;
-    heroState.index = 0;
-    syncHeroActiveSlide();
-    return;
-  }
-
-  const firstClone = createHeroSlideClone(slides[0]);
-  const lastClone = createHeroSlideClone(slides[slides.length - 1]);
-
-  heroState.track.insertBefore(lastClone, heroState.track.firstChild);
-  heroState.track.appendChild(firstClone);
-
-  heroState.index = 1;
-  syncHeroActiveSlide();
-}
-
-function createHeroSlideClone(slide) {
-  const clone = slide.cloneNode(true);
-  clone.classList.add('hero__slide--clone');
-  clone.setAttribute('aria-hidden', 'true');
-
-  clone
-    .querySelectorAll('button, a, input, textarea, select, [tabindex]')
-    .forEach((node) => {
-      node.setAttribute('tabindex', '-1');
-      node.setAttribute('aria-hidden', 'true');
-    });
-
-  return clone;
-}
-
-function handleHeroTransitionEnd(event) {
-  if (!heroState.track || event.target !== heroState.track) return;
-  if (!heroState.isLooping) return;
-
-  if (heroState.index === 0) {
-    jumpToHeroSlide(heroState.total);
-    return;
-  }
-
-  if (heroState.index === heroState.total + 1) {
-    jumpToHeroSlide(1);
-    return;
-  }
-
-  syncHeroActiveSlide();
-}
-
-function jumpToHeroSlide(targetIndex) {
-  if (!heroState.track) return;
-  heroState.track.style.transition = 'none';
-  heroState.index = targetIndex;
-  heroState.track.style.transform = `translateX(-${heroState.index * 100}%)`;
-  syncHeroActiveSlide();
-  heroState.track.offsetHeight;
-  requestAnimationFrame(() => {
-    heroState.track?.style.removeProperty('transition');
-  });
-}
-
-function syncHeroActiveSlide() {
-  if (!heroState.track) return;
-  if (!heroState.total) {
-    heroState.track.removeAttribute('data-hero-active-slide');
-    return;
-  }
-
-  const normalizedIndex = getHeroDisplayIndex();
-  heroState.track.dataset.heroActiveSlide = String(normalizedIndex + 1);
-}
-
-function getHeroDisplayIndex(index = heroState.index) {
-  if (heroState.total <= 1) {
-    return 0;
-  }
-
-  if (index === 0) {
-    return heroState.total - 1;
-  }
-
-  if (index === heroState.total + 1) {
-    return 0;
-  }
-
-  return index - 1;
-}
-
-function shouldAutoPlayHero() {
-  if (!heroState.track) return false;
-  if (heroState.total <= 1) return false;
-  if (!heroState.isLooping) return false;
-  if (mediaQueries.reducedMotion?.matches) return false;
-  return true;
-}
-
-function createHeroStaticMedia(test) {
-  const media = document.createElement('div');
-  media.className = 'hero__slide-media';
-  media.appendChild(createHeroSlideImage(test));
-  return media;
-}
-
-function createHeroPanMedia(test) {
-  const track = document.createElement('div');
-  track.className = 'hero__slide-pan-track';
-  track.append(createHeroSlideImage(test), createHeroSlideImage(test, true));
-  return track;
-}
-
-function createHeroSlideImage(test, isDuplicate = false) {
-  const img = document.createElement('img');
-  img.src = test.thumbnail;
-  const altPrefix = test.title ?? '슬라이드 이미지';
-  img.alt = isDuplicate ? '' : `${altPrefix} 대표 이미지`;
-  if (isDuplicate) {
-    img.setAttribute('aria-hidden', 'true');
-  }
-  img.loading = 'lazy';
-  img.decoding = 'async';
-  return img;
-}
-
-function createHeroSlideCopy(test) {
-  const copy = document.createElement('div');
-  copy.className = 'hero__slide-copy';
-
-  const eyebrowText =
-    (Array.isArray(test?.tags) && test.tags.length && test.tags[0]) ||
-    '오늘의 추천 테스트';
-  const eyebrow = document.createElement('p');
-  eyebrow.className = 'hero__slide-eyebrow';
-  eyebrow.textContent = eyebrowText;
-  copy.appendChild(eyebrow);
-
-  const title = document.createElement('h3');
-  title.textContent = test?.title ?? '슬라이드';
-  copy.appendChild(title);
-
-  const description = document.createElement('p');
-  description.className = 'hero__slide-description';
-  description.textContent =
-    test?.description ?? 'MBTI 테스트를 지금 만나보세요.';
-  copy.appendChild(description);
-
-  if (test?.id) {
-    const cta = document.createElement('button');
-    cta.type = 'button';
-    cta.className = 'ds-button ds-button--primary hero__slide-cta';
-    cta.textContent = '테스트 살펴보기';
-    cta.addEventListener('click', () => navigateTo(`#/test-intro/${test.id}`));
-    copy.appendChild(cta);
-  }
-
-  return copy;
-}
-
-function moveHeroSlide(delta) {
-  if (!heroState.track || !heroState.isLooping) return;
-  heroState.index += delta;
-  updateHeroSlider();
-}
-
-function updateHeroSlider(options = {}) {
-  if (!heroState.track) return;
-
-  const { immediate = false } = options;
-
-  if (!heroState.isLooping || heroState.total <= 1) {
-    heroState.track.style.transform = 'translateX(0)';
-    syncHeroActiveSlide();
-    return;
-  }
-
-  if (immediate) {
-    heroState.track.style.transition = 'none';
-  }
-
-  heroState.track.style.transform = `translateX(-${heroState.index * 100}%)`;
-  syncHeroActiveSlide();
-
-  if (immediate) {
-    heroState.track.offsetHeight;
-    requestAnimationFrame(() => {
-      heroState.track?.style.removeProperty('transition');
-    });
-  }
 }
 
 function renderTests(container, tests) {
