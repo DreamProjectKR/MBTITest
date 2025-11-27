@@ -92,26 +92,101 @@ select {
 }
 
 .site-header__btn-box {
-  width: 170px;
-  height: 82px;
-  border: 1px solid #000;
-  background: #e3c2c2;
+  width: min(100%, 560px);
+  padding: var(--space-sm) var(--space-xl);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-header);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.site-header__btn-box .ds-button {
+.site-header__nav {
   width: 100%;
-  height: 100%;
-  font-size: 24px;
+  /* max-width: 520px; */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.site-header__nav-pill {
+  background: #d0c3e8;
+  color: #ffffff;
+  font-size: var(--text-size-sm);
   font-weight: 700;
-  border-radius: 0;
-  background: transparent;
-  border: none;
+  border-radius: 30px;
+  width: 130px;
+  height: 34px;
+  padding: 0 var(--space-lg);
   box-shadow: none;
-  color: #000;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-header__nav-title {
+  font-weight: 700;
+  font-size: var(--text-size-md);
   letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.site-header__auth-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.site-header__auth-button {
+  --btn-bg: var(--color-surface);
+  --btn-border: 1px solid var(--color-border);
+  --btn-color: var(--color-text-secondary);
+  padding: var(--space-xs) var(--space-sm);
+  gap: var(--space-2xs);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-size-sm);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-header__auth-button--login {
+  background: #d3f9ff;
+  border-top-left-radius: 30px;
+  border-bottom-left-radius: 30px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  width: 80px;
+  height: 34px;
+  color: #f8bbc2;
+}
+
+.site-header__auth-button--register {
+  background: #d3f9ff;
+  border-top-right-radius: 30px;
+  border-bottom-right-radius: 30px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  width: 80px;
+  height: 34px;
+  color: #f8bbc2;
+}
+
+.site-header__auth-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--color-surface-hero);
+  padding: 4px;
+}
+
+.site-header__auth-label {
+  white-space: nowrap;
+  font-size: 12px;
 }
 
 /* Main */

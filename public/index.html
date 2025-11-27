@@ -47,13 +47,46 @@
                 loading="lazy"
               />
             </a>
-            <div class="site-header__btn-box">
-              <button
-                class="ds-button ds-button--primary"
-                type="button"
-              >
-                Btn
-              </button>
+            <div
+              class="site-header__btn-box"
+              aria-label="메인 네비게이션 액션"
+            >
+              <div class="site-header__nav">
+                <button
+                  class="ds-button ds-button--secondary site-header__nav-pill"
+                  type="button"
+                  aria-label="나의 MBTI 확인"
+                >
+                  나의 MBTI는?
+                </button>
+                <span class="site-header__nav-title">인기포럼</span>
+                <div class="site-header__auth-group">
+                  <button
+                    class="ds-button ds-button--ghost site-header__auth-button site-header__auth-button--login"
+                    type="button"
+                  >
+                    <img
+                      class="site-header__auth-icon"
+                      src="../assets/images/Login.png"
+                      alt="로그인 아이콘"
+                      loading="lazy"
+                    />
+                    <span class="site-header__auth-label">로그인</span>
+                  </button>
+                  <button
+                    class="ds-button ds-button--ghost site-header__auth-button site-header__auth-button--register"
+                    type="button"
+                  >
+                    <span class="site-header__auth-label">회원가입</span>
+                    <img
+                      class="site-header__auth-icon"
+                      src="../assets/images/Register.png"
+                      alt="회원가입 아이콘"
+                      loading="lazy"
+                    />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

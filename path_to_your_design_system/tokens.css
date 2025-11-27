@@ -1,1 +1,65 @@
+:root {
+  /* Typography */
+  --font-body: 'Inter', 'Noto Sans KR', sans-serif;
+  --font-display: 'Inter', 'Noto Sans KR', sans-serif;
+  --text-size-xs: 12px;
+  --text-size-sm: 14px;
+  --text-size-md: 16px;
+  --text-size-lg: 20px;
+  --text-size-xl: 24px;
 
+  /* Spacing */
+  --space-xxs: 4px;
+  --space-2xs: 6px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-soft: 0 15px 35px rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 20px 45px rgba(0, 0, 0, 0.12);
+
+  /* Motion */
+  --duration-fast: 0.2s;
+  --duration-medium: 0.4s;
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --layout-max-width: 1230px;
+  --quiz-progress: 0%;
+
+  /* Surface */
+  --color-surface: #ffffff;
+  --color-surface-header: #ffffff;
+  --color-surface-brand: #e3c2c2;
+  --color-surface-brand-strong: #f5b7b3;
+  --color-surface-hero: #f6fbff;
+  --color-surface-cta: #f0e6ff;
+  --color-surface-cta-alt: #ffe6f0;
+
+  /* Border */
+  --color-border: #000000;
+  --color-border-strong: #000000;
+
+  /* Text */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #7a7a7a;
+  --color-text-muted: #a1a1a1;
+
+  /* Accent */
+  --color-accent: #7b6efc;
+  --color-accent-muted: #eef0ff;
+
+  /* Feedback */
+  --color-error: #d32f2f;
+}
