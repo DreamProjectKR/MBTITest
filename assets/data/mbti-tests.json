@@ -1,113 +1,1170 @@
 {
   "tests": [
     {
-      "id": "dream-001",
-      "title": "첫번째 테스트",
-      "description": "나의 일상을 닮은 MBTI를 찾아보세요.",
-      "tags": ["#힐링", "#라이프스타일", "#트렌드"],
-      "thumbnail": "",
+      "id": "test-spring-001",
+      "title": "나의 봄꽃 MBTI 테스트",
+      "description": "따스한 봄바람이 불어오면 나는 어떤 꽃으로 피어날까요? 당신의 봄 감성을 알아보세요.",
+      "tags": ["#봄", "#꽃", "#감성", "#성격유형"],
+      "thumbnail": "../assets/images/hero-spring.svg",
+      "heroAnimation": "pan",
       "questions": [
         {
-          "id": "q1",
-          "prompt": "주말 계획을 세울 때 나는?",
+          "id": "s_q1",
+          "prompt": "따뜻한 주말, 친구가 갑자기 꽃놀이를 가자고 한다면?",
           "answers": [
             {
-              "id": "q1a",
-              "label": "친구들을 모아 활기찬 파티를 연다",
+              "id": "s_q1_a",
+              "label": "좋아! 당장 다른 친구들도 불러서 왁자지껄하게 가자!",
               "mbtiAxis": "EI",
               "direction": "E"
             },
             {
-              "id": "q1b",
-              "label": "혼자만의 취미 시간으로 재충전을 한다",
+              "id": "s_q1_b",
+              "label": "음, 둘이서 조용히 다녀오거나 혼자 산책하는 게 더 좋아.",
               "mbtiAxis": "EI",
               "direction": "I"
             }
           ]
         },
         {
-          "id": "q2",
-          "prompt": "새로운 아이디어가 떠오르면?",
+          "id": "s_q2",
+          "prompt": "꽃놀이 장소에 도착했다. 사람들이 붐비는 포토존이 보인다.",
           "answers": [
             {
-              "id": "q2a",
-              "label": "바로 시도하면서 결과를 본다",
-              "mbtiAxis": "JP",
-              "direction": "P"
+              "id": "s_q2_a",
+              "label": "줄을 서더라도 무조건 인생샷을 남겨야지! 포즈도 다양하게!",
+              "mbtiAxis": "EI",
+              "direction": "E"
             },
             {
-              "id": "q2b",
-              "label": "계획을 세우고 단계별로 진행한다",
+              "id": "s_q2_b",
+              "label": "사람 너무 많다... 그냥 한적한 곳에서 풍경 사진이나 찍을래.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "s_q3",
+          "prompt": "뒤풀이 장소에서 처음 보는 사람과 합석하게 되었다.",
+          "answers": [
+            {
+              "id": "s_q3_a",
+              "label": "안녕하세요! 자연스럽게 대화를 주도하며 분위기를 띄운다.",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "s_q3_b",
+              "label": "어색한 미소만... 친구가 말 걸어주길 기다린다.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "s_q4",
+          "prompt": "떨어지는 벚꽃잎을 보며 든 생각은?",
+          "answers": [
+            {
+              "id": "s_q4_a",
+              "label": "바닥에 많이 떨어졌네. 청소하기 힘들겠다.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "s_q4_b",
+              "label": "마치 첫사랑이 떠나가는 것 같아... 아련하다.",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "s_q5",
+          "prompt": "도시락을 싸가기로 했다. 메뉴 선정 기준은?",
+          "answers": [
+            {
+              "id": "s_q5_a",
+              "label": "김밥, 샌드위치처럼 먹기 편하고 상하지 않는 실용적인 메뉴.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "s_q5_b",
+              "label": "예쁜 캐릭터 도시락이나 봄 느낌 나는 화려한 색감의 메뉴.",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "s_q6",
+          "prompt": "길을 걷다 우연히 버스킹 공연을 보았다.",
+          "answers": [
+            {
+              "id": "s_q6_a",
+              "label": "노래 잘하네. 기타 코드를 저렇게 잡는구나.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "s_q6_b",
+              "label": "이 봄날에 저 노래라니... 가사가 내 얘기 같아.",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "s_q7",
+          "prompt": "친구가 도시락을 싸왔는데 맛이 좀 묘하다.",
+          "answers": [
+            {
+              "id": "s_q7_a",
+              "label": "음, 간이 좀 안 맞는 것 같아. (솔직하게 말한다)",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "s_q7_b",
+              "label": "새벽부터 준비하느라 고생했겠다! 정말 고마워.",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "s_q8",
+          "prompt": "꽃놀이 중 친구가 갑자기 우울하다고 한다.",
+          "answers": [
+            {
+              "id": "s_q8_a",
+              "label": "왜? 무슨 일 있어? 원인이 뭐야?",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "s_q8_b",
+              "label": "그렇구나... 봄 타나 보다. 기분 전환하게 맛있는 거 먹자.",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "s_q9",
+          "prompt": "다음 장소로 이동하려는데 의견이 갈린다.",
+          "answers": [
+            {
+              "id": "s_q9_a",
+              "label": "다수결로 정하자. 그게 제일 합리적이야.",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "s_q9_b",
+              "label": "모두가 조금씩 양보해서 다 같이 만족할 방법을 찾자.",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "s_q10",
+          "prompt": "꽃놀이 갈 때 계획은?",
+          "answers": [
+            {
+              "id": "s_q10_a",
+              "label": "출발 시간, 이동 경로, 식당 예약까지 완벽하게 짠다.",
               "mbtiAxis": "JP",
               "direction": "J"
+            },
+            {
+              "id": "s_q10_b",
+              "label": "대충 어디 갈지만 정하고, 가서 마음 내키는 대로 움직인다.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        },
+        {
+          "id": "s_q11",
+          "prompt": "갑자기 비가 쏟아져서 일정이 꼬였다.",
+          "answers": [
+            {
+              "id": "s_q11_a",
+              "label": "플랜 B 가동! 근처 실내 카페와 전시회를 검색한다.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "s_q11_b",
+              "label": "비 오는 날도 운치 있네~ 눈에 보이는 카페로 들어간다.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        },
+        {
+          "id": "s_q12",
+          "prompt": "집에 돌아와서 할 일은?",
+          "answers": [
+            {
+              "id": "s_q12_a",
+              "label": "오늘 찍은 사진 정리하고, 가계부 쓰고, 씻고 잔다.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "s_q12_b",
+              "label": "일단 눕는다. 사진은 나중에... 피곤해.",
+              "mbtiAxis": "JP",
+              "direction": "P"
             }
           ]
         }
       ],
       "results": {
-        "INTJ": {
-          "image": "",
-          "summary": "전략가형, 통찰력 있는 계획가"
-        },
-        "INTP": {
-          "image": "",
-          "summary": "사색가형, 호기심 많은 발명가"
-        },
-        "ENTJ": {
-          "image": "",
-          "summary": "지도자형, 결단력 있는 리더"
-        },
-        "ENTP": {
-          "image": "",
-          "summary": "변론가형, 도전적인 토론가"
-        },
-        "INFJ": {
-          "image": "",
-          "summary": "옹호자형, 통찰력 있는 이상주의자"
-        },
-        "INFP": {
-          "image": "",
-          "summary": "중재자형, 감성적인 이상주의자"
-        },
-        "ENFJ": {
-          "image": "",
-          "summary": "선도자형, 따뜻한 조언자"
-        },
-        "ENFP": {
-          "image": "",
-          "summary": "재기발랄형, 열정적인 활동가"
-        },
         "ISTJ": {
-          "image": "",
-          "summary": "현실주의자형, 성실한 관리자"
-        },
-        "ISTP": {
-          "image": "",
-          "summary": "장인형, 유연한 해결사"
-        },
-        "ESTJ": {
-          "image": "",
-          "summary": "경영자형, 체계적인 실행가"
-        },
-        "ESTP": {
-          "image": "",
-          "summary": "모험가형, 에너지 넘치는 설득가"
+          "image": "../assets/images/result-spring-istj.svg",
+          "summary": "굳건한 소나무 같은 당신, 봄에도 흔들리지 않는 편안함."
         },
         "ISFJ": {
-          "image": "",
-          "summary": "수호자형, 헌신적인 도우미"
+          "image": "../assets/images/result-spring-isfj.svg",
+          "summary": "수줍은 제비꽃, 따뜻한 마음으로 봄을 맞이해요."
+        },
+        "INFJ": {
+          "image": "../assets/images/result-spring-infj.svg",
+          "summary": "신비로운 라일락, 깊은 향기처럼 은은한 매력."
+        },
+        "INTJ": {
+          "image": "../assets/images/result-spring-intj.svg",
+          "summary": "고고한 매화, 추위를 이겨내고 피어나는 지성."
+        },
+        "ISTP": {
+          "image": "../assets/images/result-spring-istp.svg",
+          "summary": "시크한 선인장, 봄에도 나만의 길을 간다."
         },
         "ISFP": {
-          "image": "",
-          "summary": "모험가형, 감각적인 예술가"
+          "image": "../assets/images/result-spring-isfp.svg",
+          "summary": "자유로운 민들레, 바람 따라 떠나는 감성 여행."
         },
-        "ESFJ": {
-          "image": "",
-          "summary": "사교가형, 배려 깊은 조력가"
+        "INFP": {
+          "image": "../assets/images/result-spring-infp.svg",
+          "summary": "몽환적인 안개꽃, 봄비처럼 촉촉한 감수성."
+        },
+        "INTP": {
+          "image": "../assets/images/result-spring-intp.svg",
+          "summary": "엉뚱한 튤립, 남들과 다른 시각으로 봄을 관찰해요."
+        },
+        "ESTP": {
+          "image": "../assets/images/result-spring-estp.svg",
+          "summary": "화려한 장미, 어디서나 주목받는 봄의 주인공."
         },
         "ESFP": {
-          "image": "",
-          "summary": "연예인형, 밝은 분위기 메이커"
+          "image": "../assets/images/result-spring-esfp.svg",
+          "summary": "유쾌한 개나리, 보는 사람까지 기분 좋게 만드는 에너지."
+        },
+        "ENFP": {
+          "image": "../assets/images/result-spring-enfp.svg",
+          "summary": "톡톡 튀는 벚꽃 팝콘, 봄 그 자체인 당신!"
+        },
+        "ENTP": {
+          "image": "../assets/images/result-spring-entp.svg",
+          "summary": "도전적인 가시나무, 봄에도 멈추지 않는 호기심."
+        },
+        "ESTJ": {
+          "image": "../assets/images/result-spring-estj.svg",
+          "summary": "질서 있는 목련, 우아하고 확실하게 봄을 리드합니다."
+        },
+        "ESFJ": {
+          "image": "../assets/images/result-spring-esfj.svg",
+          "summary": "다정한 철쭉, 모두를 챙기는 봄의 수호천사."
+        },
+        "ENFJ": {
+          "image": "../assets/images/result-spring-enfj.svg",
+          "summary": "열정적인 해바라기, 주변을 밝게 비추는 리더."
+        },
+        "ENTJ": {
+          "image": "../assets/images/result-spring-entj.svg",
+          "summary": "강인한 참나무, 숲을 지배하는 카리스마."
+        }
+      }
+    },
+    {
+      "id": "test-summer-001",
+      "title": "여름 바캉스 스타일 테스트",
+      "description": "뜨거운 태양 아래 당신의 휴가 스타일은? 해변의 파티피플일까요, 시원한 방구석 러버일까요?",
+      "tags": ["#여름", "#여행", "#휴가", "#바캉스"],
+      "thumbnail": "../assets/images/hero-summer.svg",
+      "heroAnimation": "pan",
+      "questions": [
+        {
+          "id": "su_q1",
+          "prompt": "여름 휴가지를 정할 때 나는?",
+          "answers": [
+            {
+              "id": "su_q1_a",
+              "label": "사람 많고 핫한 해운대나 풀파티!",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "su_q1_b",
+              "label": "조용한 계곡이나 인적 드문 호캉스.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "su_q2",
+          "prompt": "게스트하우스 파티가 열린다고 한다.",
+          "answers": [
+            {
+              "id": "su_q2_a",
+              "label": "무조건 참석! 새로운 사람들과 노는 게 여행의 묘미지.",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "su_q2_b",
+              "label": "모르는 사람 불편해... 그냥 우리끼리 방에서 놀자.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "su_q3",
+          "prompt": "친구들이 노래방에 가자고 한다.",
+          "answers": [
+            {
+              "id": "su_q3_a",
+              "label": "마이크는 내 것! 탬버린 흔들고 난리 남.",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "su_q3_b",
+              "label": "구석에서 박수 치며 호응해준다.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "su_q4",
+          "prompt": "바다를 보며 든 생각은?",
+          "answers": [
+            {
+              "id": "su_q4_a",
+              "label": "물 색깔 예쁘다. 들어가면 시원하겠다.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "su_q4_b",
+              "label": "저 수평선 너머엔 미지의 세계가 있을까? 인어공주 살까?",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "su_q5",
+          "prompt": "맛집을 찾을 때 나는?",
+          "answers": [
+            {
+              "id": "su_q5_a",
+              "label": "별점 높고 후기 많은 검증된 맛집.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "su_q5_b",
+              "label": "간판부터 느낌 오는 숨겨진 로컬 맛집.",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "su_q6",
+          "prompt": "여행지 기념품을 고를 때?",
+          "answers": [
+            {
+              "id": "su_q6_a",
+              "label": "실용적인 컵이나 지역 특산물.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "su_q6_b",
+              "label": "예쁘지만 쓸데없는 장식품, 감성을 산다.",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "su_q7",
+          "prompt": "친구가 산 옷이 별로 안 어울린다.",
+          "answers": [
+            {
+              "id": "su_q7_a",
+              "label": "솔직히 핏이 좀 이상해. 환불하는 게 어때?",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "su_q7_b",
+              "label": "음, 색깔은 시원해 보이네! (상처받을까 봐 돌려 말함)",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "su_q8",
+          "prompt": "친구가 여행 와서 아프다고 한다.",
+          "answers": [
+            {
+              "id": "su_q8_a",
+              "label": "약국 어디 있는지 찾아볼게. 열 재 봐.",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "su_q8_b",
+              "label": "어떡해 ㅠㅠ 많이 아파? 내가 대신 아프고 싶다.",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "su_q9",
+          "prompt": "운전 중 길을 잘못 들었다.",
+          "answers": [
+            {
+              "id": "su_q9_a",
+              "label": "내비게이션 다시 찍어. 최단 경로 재탐색.",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "su_q9_b",
+              "label": "아 짜증 나... (분위기 싸해짐)",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "su_q10",
+          "prompt": "여행 짐 쌀 때 나는?",
+          "answers": [
+            {
+              "id": "su_q10_a",
+              "label": "체크리스트 작성해서 하나씩 지워가며 싼다.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "su_q10_b",
+              "label": "떠나기 전날 밤에 눈에 보이는 대로 쑤셔 넣는다.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        },
+        {
+          "id": "su_q11",
+          "prompt": "여행 계획표를 짤 때?",
+          "answers": [
+            {
+              "id": "su_q11_a",
+              "label": "9시 기상, 10시 브런치... 분 단위로 계획.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "su_q11_b",
+              "label": "대충 '오전에 바다 가기' 정도만 정함.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        },
+        {
+          "id": "su_q12",
+          "prompt": "갑자기 가려던 식당이 문을 닫았다.",
+          "answers": [
+            {
+              "id": "su_q12_a",
+              "label": "당황스럽지만 미리 찾아둔 2안 식당으로 간다.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "su_q12_b",
+              "label": "옆집 냄새 좋은데? 저기 가자!",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        }
+      ],
+      "results": {
+        "ISTJ": {
+          "image": "../assets/images/result-summer-istj.svg",
+          "summary": "철저한 준비성, 프로 짐꾼러."
+        },
+        "ISFJ": {
+          "image": "../assets/images/result-summer-isfj.svg",
+          "summary": "모두의 안전을 책임지는 인간 구급상자."
+        },
+        "INFJ": {
+          "image": "../assets/images/result-summer-infj.svg",
+          "summary": "조용한 해변에서 사색하는 문학청년."
+        },
+        "INTJ": {
+          "image": "../assets/images/result-summer-intj.svg",
+          "summary": "최적의 동선을 설계하는 여행 전략가."
+        },
+        "ISTP": {
+          "image": "../assets/images/result-summer-istp.svg",
+          "summary": "귀찮은 건 질색, 숙소에서 에어컨 쐬는 게 최고."
+        },
+        "ISFP": {
+          "image": "../assets/images/result-summer-isfp.svg",
+          "summary": "예쁜 조개껍질 줍는 감성 여행자."
+        },
+        "INFP": {
+          "image": "../assets/images/result-summer-infp.svg",
+          "summary": "노을 보며 눈물 흘리는 감성 충만러."
+        },
+        "INTP": {
+          "image": "../assets/images/result-summer-intp.svg",
+          "summary": "남들 다 가는 관광지 분석해서 굳이 안 감."
+        },
+        "ESTP": {
+          "image": "../assets/images/result-summer-estp.svg",
+          "summary": "수상레저 마스터, 스릴을 즐기는 야생마."
+        },
+        "ESFP": {
+          "image": "../assets/images/result-summer-esfp.svg",
+          "summary": "해변의 댄싱머신, 이 구역의 인싸."
+        },
+        "ENFP": {
+          "image": "../assets/images/result-summer-enfp.svg",
+          "summary": "여기저기 다 참견하고 다니는 호기심 대장."
+        },
+        "ENTP": {
+          "image": "../assets/images/result-summer-entp.svg",
+          "summary": "무계획이 계획이다! 즉흥 여행의 달인."
+        },
+        "ESTJ": {
+          "image": "../assets/images/result-summer-estj.svg",
+          "summary": "여행 가이드 뺨치는 완벽한 인솔자."
+        },
+        "ESFJ": {
+          "image": "../assets/images/result-summer-esfj.svg",
+          "summary": "단체 사진은 내가 찍는다! 친목 도모 회장님."
+        },
+        "ENFJ": {
+          "image": "../assets/images/result-summer-enfj.svg",
+          "summary": "모두가 행복한지 확인하는 평화의 사도."
+        },
+        "ENTJ": {
+          "image": "../assets/images/result-summer-entj.svg",
+          "summary": "총무는 나에게 맡겨라, 효율적인 예산 관리자."
+        }
+      }
+    },
+    {
+      "id": "test-autumn-001",
+      "title": "가을 감성 독서 테스트",
+      "description": "책 읽기 좋은 계절 가을, 당신의 영혼을 채워줄 책 장르는 무엇일까요?",
+      "tags": ["#가을", "#독서", "#감성", "#책추천"],
+      "thumbnail": "../assets/images/hero-autumn.svg",
+      "heroAnimation": "pan",
+      "questions": [
+        {
+          "id": "au_q1",
+          "prompt": "서점에 갔을 때 나는?",
+          "answers": [
+            {
+              "id": "au_q1_a",
+              "label": "베스트셀러 코너에서 사람들 틈에 섞여 구경한다.",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "au_q1_b",
+              "label": "구석진 자리에서 조용히 책 제목을 훑어본다.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "au_q2",
+          "prompt": "북토크 행사에 참여했다.",
+          "answers": [
+            {
+              "id": "au_q2_a",
+              "label": "손 들고 작가님께 질문한다.",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "au_q2_b",
+              "label": "조용히 경청하고 마음속으로만 생각한다.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "au_q3",
+          "prompt": "친구들과 독서 모임을 한다면?",
+          "answers": [
+            {
+              "id": "au_q3_a",
+              "label": "활발하게 토론하고 내 의견을 피력한다.",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "au_q3_b",
+              "label": "주로 듣는 편이고 꼭 필요할 때만 말한다.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "au_q4",
+          "prompt": "책을 고르는 기준은?",
+          "answers": [
+            {
+              "id": "au_q4_a",
+              "label": "실용적인 정보, 자기계발, 팩트 위주의 책.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "au_q4_b",
+              "label": "상상력을 자극하는 소설, 판타지, 시집.",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "au_q5",
+          "prompt": "책 속 묘사를 읽을 때?",
+          "answers": [
+            {
+              "id": "au_q5_a",
+              "label": "글자 그대로 상황을 이해한다.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "au_q5_b",
+              "label": "장면이 머릿속에 영화처럼 그려진다.",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "au_q6",
+          "prompt": "미래에 대해 생각할 때?",
+          "answers": [
+            {
+              "id": "au_q6_a",
+              "label": "당장 내일 뭐 먹을지, 현실적인 고민.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "au_q6_b",
+              "label": "먼 미래의 인류나 우주에 대한 몽상.",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "au_q7",
+          "prompt": "슬픈 소설을 읽었을 때?",
+          "answers": [
+            {
+              "id": "au_q7_a",
+              "label": "주인공이 왜 이런 선택을 했지? 분석한다.",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "au_q7_b",
+              "label": "주인공 너무 불쌍해 ㅠㅠ 눈물 콧물 쏟는다.",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "au_q8",
+          "prompt": "친구가 책 추천을 부탁한다.",
+          "answers": [
+            {
+              "id": "au_q8_a",
+              "label": "네 상황에 도움 될 만한 정보가 담긴 책이야.",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "au_q8_b",
+              "label": "이거 읽으면 위로받는 느낌이 들 거야.",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "au_q9",
+          "prompt": "토론 중 의견이 충돌했다.",
+          "answers": [
+            {
+              "id": "au_q9_a",
+              "label": "논리적 허점을 지적하며 반박한다.",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "au_q9_b",
+              "label": "상대방 기분 상하지 않게 돌려 말한다.",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "au_q10",
+          "prompt": "독서 계획을 세울 때?",
+          "answers": [
+            {
+              "id": "au_q10_a",
+              "label": "하루 30페이지, 한 달 4권 목표 달성!",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "au_q10_b",
+              "label": "삘 꽂히는 날 밤새워서 다 읽는다.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        },
+        {
+          "id": "au_q11",
+          "prompt": "빌린 책 반납일이 다가온다.",
+          "answers": [
+            {
+              "id": "au_q11_a",
+              "label": "미리미리 읽고 여유 있게 반납한다.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "au_q11_b",
+              "label": "반납 당일에 부랴부랴 뛰어가거나 연체료 낸다.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        },
+        {
+          "id": "au_q12",
+          "prompt": "책장 정리를 할 때?",
+          "answers": [
+            {
+              "id": "au_q12_a",
+              "label": "장르별, 작가별, 색깔별로 칼각 정리.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "au_q12_b",
+              "label": "일단 꽂아둔다. 빈 공간 있으면 다행.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        }
+      ],
+      "results": {
+        "ISTJ": {
+          "image": "../assets/images/result-autumn-istj.svg",
+          "summary": "논리정연한 역사서, 팩트 체크는 필수."
+        },
+        "ISFJ": {
+          "image": "../assets/images/result-autumn-isfj.svg",
+          "summary": "따뜻한 에세이, 마음의 평화를 주는 글."
+        },
+        "INFJ": {
+          "image": "../assets/images/result-autumn-infj.svg",
+          "summary": "심오한 철학책, 인간 본연을 탐구하다."
+        },
+        "INTJ": {
+          "image": "../assets/images/result-autumn-intj.svg",
+          "summary": "미래 전략서, 세상을 꿰뚫어 보는 통찰."
+        },
+        "ISTP": {
+          "image": "../assets/images/result-autumn-istp.svg",
+          "summary": "추리 소설, 범인을 찾는 짜릿한 두뇌 게임."
+        },
+        "ISFP": {
+          "image": "../assets/images/result-autumn-isfp.svg",
+          "summary": "아름다운 화보집, 글보다는 그림과 감성."
+        },
+        "INFP": {
+          "image": "../assets/images/result-autumn-infp.svg",
+          "summary": "판타지 소설, 현실을 잊고 떠나는 모험."
+        },
+        "INTP": {
+          "image": "../assets/images/result-autumn-intp.svg",
+          "summary": "과학 잡지, 우주의 원리가 궁금해."
+        },
+        "ESTP": {
+          "image": "../assets/images/result-autumn-estp.svg",
+          "summary": "액션 만화, 지루한 글보다는 시각적 자극!"
+        },
+        "ESFP": {
+          "image": "../assets/images/result-autumn-esfp.svg",
+          "summary": "연예 가십 잡지, 핫한 트렌드는 다 내 거."
+        },
+        "ENFP": {
+          "image": "../assets/images/result-autumn-enfp.svg",
+          "summary": "동화책, 어른이 되어도 꿈을 잃지 않아."
+        },
+        "ENTP": {
+          "image": "../assets/images/result-autumn-entp.svg",
+          "summary": "사회 비평서, 논쟁적인 주제를 즐기는 토론가."
+        },
+        "ESTJ": {
+          "image": "../assets/images/result-autumn-estj.svg",
+          "summary": "리더십 관련 서적, 성공하는 사람들의 습관."
+        },
+        "ESFJ": {
+          "image": "../assets/images/result-autumn-esfj.svg",
+          "summary": "요리책/육아책, 실생활에 도움 되는 정보."
+        },
+        "ENFJ": {
+          "image": "../assets/images/result-autumn-enfj.svg",
+          "summary": "인문학 베스트셀러, 사람을 이해하고 이끄는 힘."
+        },
+        "ENTJ": {
+          "image": "../assets/images/result-autumn-entj.svg",
+          "summary": "경영/경제서, 세상을 움직이는 원리 파악."
+        }
+      }
+    },
+    {
+      "id": "test-winter-001",
+      "title": "겨울 붕어빵 테스트",
+      "description": "찬 바람이 불면 생각나는 붕어빵! 나는 어떤 맛 붕어빵일까?",
+      "tags": ["#겨울", "#간식", "#붕어빵", "#성격"],
+      "thumbnail": "../assets/images/hero-winter.svg",
+      "heroAnimation": "pan",
+      "questions": [
+        {
+          "id": "wi_q1",
+          "prompt": "붕어빵을 사러 가는 길, 친구를 만났다.",
+          "answers": [
+            {
+              "id": "wi_q1_a",
+              "label": "반갑게 인사하고 같이 사러 가자고 한다.",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "wi_q1_b",
+              "label": "눈 마주치기 전에 모른 척 지나간다.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "wi_q2",
+          "prompt": "붕어빵 사장님이 말을 건다.",
+          "answers": [
+            {
+              "id": "wi_q2_a",
+              "label": "사장님과 날씨 얘기부터 시시콜콜 수다 떤다.",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "wi_q2_b",
+              "label": "네... (빨리 주세요 현기증 난단 말이에요)",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "wi_q3",
+          "prompt": "친구들과 붕어빵 파티를 한다면?",
+          "answers": [
+            {
+              "id": "wi_q3_a",
+              "label": "내가 분위기 메이커! 게임하고 떠든다.",
+              "mbtiAxis": "EI",
+              "direction": "E"
+            },
+            {
+              "id": "wi_q3_b",
+              "label": "조용히 붕어빵 먹으며 친구들 노는 거 구경한다.",
+              "mbtiAxis": "EI",
+              "direction": "I"
+            }
+          ]
+        },
+        {
+          "id": "wi_q4",
+          "prompt": "붕어빵을 먹을 때 나는?",
+          "answers": [
+            {
+              "id": "wi_q4_a",
+              "label": "머리부터? 꼬리부터? 그냥 맛만 있으면 됨.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "wi_q4_b",
+              "label": "붕어빵도 감정이 있을까? 어디부터 먹어야 덜 아플까?",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "wi_q5",
+          "prompt": "슈크림 붕어빵을 보며 든 생각은?",
+          "answers": [
+            {
+              "id": "wi_q5_a",
+              "label": "노란색 크림이 들어있군. 달콤하겠다.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "wi_q5_b",
+              "label": "황금 잉어가 생각나네. 먹으면 행운이 올까?",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "wi_q6",
+          "prompt": "눈이 오는 풍경을 보며?",
+          "answers": [
+            {
+              "id": "wi_q6_a",
+              "label": "길 미끄럽겠다. 내일 출근 어떡하지.",
+              "mbtiAxis": "SN",
+              "direction": "S"
+            },
+            {
+              "id": "wi_q6_b",
+              "label": "세상이 하얗게 덮였어... 겨울왕국 같아.",
+              "mbtiAxis": "SN",
+              "direction": "N"
+            }
+          ]
+        },
+        {
+          "id": "wi_q7",
+          "prompt": "친구가 붕어빵을 태웠다.",
+          "answers": [
+            {
+              "id": "wi_q7_a",
+              "label": "탄 부분 떼고 먹어. 다음엔 불 조절 잘 해봐.",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "wi_q7_b",
+              "label": "아이고 아까워라... 그래도 네가 구워줘서 맛있어!",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "wi_q8",
+          "prompt": "맛없는 붕어빵 가게를 발견했다.",
+          "answers": [
+            {
+              "id": "wi_q8_a",
+              "label": "여기 반죽 비율이 별로네. 다신 안 옴.",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "wi_q8_b",
+              "label": "사장님이 추운데 고생하시는데... 마음이 아파.",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "wi_q9",
+          "prompt": "팥 vs 슈크림 논쟁이 붙었다.",
+          "answers": [
+            {
+              "id": "wi_q9_a",
+              "label": "원조는 팥이지. 데이터가 증명함.",
+              "mbtiAxis": "TF",
+              "direction": "T"
+            },
+            {
+              "id": "wi_q9_b",
+              "label": "취향 존중해주자. 둘 다 맛있잖아~",
+              "mbtiAxis": "TF",
+              "direction": "F"
+            }
+          ]
+        },
+        {
+          "id": "wi_q10",
+          "prompt": "붕어빵 사러 갈 때?",
+          "answers": [
+            {
+              "id": "wi_q10_a",
+              "label": "지갑, 현금, 계좌이체 가능 여부 확인 후 출발.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "wi_q10_b",
+              "label": "냄새 맡고 홀린 듯이 따라간다.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        },
+        {
+          "id": "wi_q11",
+          "prompt": "붕어빵을 먹고 남았다.",
+          "answers": [
+            {
+              "id": "wi_q11_a",
+              "label": "밀폐 용기에 담아 냉동 보관 후 에어프라이어.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "wi_q11_b",
+              "label": "식탁 위에 둠. 누군가 먹겠지.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        },
+        {
+          "id": "wi_q12",
+          "prompt": "겨울 간식 예산을 짠다면?",
+          "answers": [
+            {
+              "id": "wi_q12_a",
+              "label": "일주일치 간식비 딱 정해두고 쓴다.",
+              "mbtiAxis": "JP",
+              "direction": "J"
+            },
+            {
+              "id": "wi_q12_b",
+              "label": "주머니에 있는 대로 다 사 먹는다.",
+              "mbtiAxis": "JP",
+              "direction": "P"
+            }
+          ]
+        }
+      ],
+      "results": {
+        "ISTJ": {
+          "image": "../assets/images/result-winter-istj.svg",
+          "summary": "근본 있는 원조 팥 붕어빵, 변하지 않는 클래식."
+        },
+        "ISFJ": {
+          "image": "../assets/images/result-winter-isfj.svg",
+          "summary": "따끈한 고구마 붕어빵, 부드럽고 달콤한 배려."
+        },
+        "INFJ": {
+          "image": "../assets/images/result-winter-infj.svg",
+          "summary": "신비로운 흑임자 붕어빵, 알수록 깊은 맛."
+        },
+        "INTJ": {
+          "image": "../assets/images/result-winter-intj.svg",
+          "summary": "차가운 아이스크림 붕어빵, 냉철하지만 속은 꽉 참."
+        },
+        "ISTP": {
+          "image": "../assets/images/result-winter-istp.svg",
+          "summary": "심플한 미니 붕어빵, 효율적으로 한 입에 쏙."
+        },
+        "ISFP": {
+          "image": "../assets/images/result-winter-isfp.svg",
+          "summary": "예쁜 딸기 붕어빵, 보기만 해도 기분 좋아짐."
+        },
+        "INFP": {
+          "image": "../assets/images/result-winter-infp.svg",
+          "summary": "폭신한 계란빵, 몽글몽글한 감성."
+        },
+        "INTP": {
+          "image": "../assets/images/result-winter-intp.svg",
+          "summary": "실험적인 민트초코 붕어빵, 호불호 확실한 개성."
+        },
+        "ESTP": {
+          "image": "../assets/images/result-winter-estp.svg",
+          "summary": "매콤한 김치 붕어빵, 자극적이고 화끈한 맛."
+        },
+        "ESFP": {
+          "image": "../assets/images/result-winter-esfp.svg",
+          "summary": "바삭한 페스츄리 붕어빵, 언제나 파티 분위기."
+        },
+        "ENFP": {
+          "image": "../assets/images/result-winter-enfp.svg",
+          "summary": "알록달록 레인보우 붕어빵, 어디로 튈지 모르는 매력."
+        },
+        "ENTP": {
+          "image": "../assets/images/result-winter-entp.svg",
+          "summary": "피자 붕어빵, 퓨전 그 자체인 아이디어 뱅크."
+        },
+        "ESTJ": {
+          "image": "../assets/images/result-winter-estj.svg",
+          "summary": "속이 꽉 찬 왕붕어빵, 리더의 품격."
+        },
+        "ESFJ": {
+          "image": "../assets/images/result-winter-esfj.svg",
+          "summary": "달달한 슈크림 붕어빵, 누구에게나 사랑받는 맛."
+        },
+        "ENFJ": {
+          "image": "../assets/images/result-winter-enfj.svg",
+          "summary": "나눠 먹는 붕어빵 세트, 함께일 때 더 빛나는 당신."
+        },
+        "ENTJ": {
+          "image": "../assets/images/result-winter-entj.svg",
+          "summary": "프리미엄 붕어빵, 성공의 맛."
         }
       }
     }

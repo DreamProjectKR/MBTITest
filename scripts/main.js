@@ -1,4 +1,6 @@
 const DATA_URL = '../assets/data/mbti-tests.json';
+const HERO_AUTO_DELAY = 3000;
+const HERO_SLIDE_LIMIT = 3;
 const ROUTE_SEGMENTS = {
   HOME: '',
   TEST_INTRO: 'test-intro',
@@ -34,11 +36,15 @@ const MBTI_ORDER = [
 ];
 
 const heroState = {
+  slider: null,
   track: null,
   prevBtn: null,
   nextBtn: null,
   index: 0,
   total: 0,
+  autoTimer: null,
+  guardsAttached: false,
+  visibilityHandlerAttached: false,
 };
 
 const feedState = {
@@ -57,6 +63,7 @@ async function initHomepage() {
     mbtiGrid,
     mbtiGridBottom,
     mbtiFeedTrack,
+    heroSlider,
     heroSliderTrack,
     heroPrev,
     heroNext,
@@ -68,6 +75,7 @@ async function initHomepage() {
     document.querySelector('[data-mbti-grid]'),
     document.querySelector('[data-mbti-grid-bottom]'),
     document.querySelector('[data-mbti-feed-track]'),
+    document.querySelector('[data-hero-slider]'),
     document.querySelector('[data-hero-track]'),
     document.querySelector('[data-hero-prev]'),
     document.querySelector('[data-hero-next]'),
@@ -80,15 +88,18 @@ async function initHomepage() {
     !testsGrid ||
     !mbtiGrid ||
     !mbtiFeedTrack ||
+    !heroSlider ||
     !heroSliderTrack ||
     !feedSlider
   ) {
     return;
   }
 
+  heroState.slider = heroSlider;
   heroState.track = heroSliderTrack;
   heroState.prevBtn = heroPrev;
   heroState.nextBtn = heroNext;
+  attachHeroAutoplayGuards();
 
   feedState.slider = feedSlider;
   feedState.track = mbtiFeedTrack;
@@ -142,7 +153,7 @@ function renderHeroSlider(tests) {
   heroState.track.innerHTML = '';
 
   const slidesData = tests.length
-    ? tests.slice(0, 4)
+    ? tests.slice(0, HERO_SLIDE_LIMIT)
     : [
         { title: '슬라이드 1' },
         { title: '슬라이드 2' },
@@ -150,26 +161,91 @@ function renderHeroSlider(tests) {
       ];
 
   slidesData.forEach((test) => {
-    const slide = document.createElement('div');
+    const slide = document.createElement('article');
     slide.className = 'hero__slide';
-
-    if (test.thumbnail) {
-      const img = document.createElement('img');
-      img.src = test.thumbnail;
-      img.alt = test.title ?? '슬라이드 이미지';
-      slide.appendChild(img);
-    } else {
-      const label = document.createElement('p');
-      label.textContent = test.title || '슬라이드';
-      slide.appendChild(label);
+    if (test?.id) {
+      slide.dataset.testId = test.id;
     }
 
+    if (test?.heroAnimation === 'pan' && test?.thumbnail) {
+      slide.classList.add('hero__slide--pan');
+      slide.appendChild(createHeroPanMedia(test));
+    } else if (test?.thumbnail) {
+      slide.classList.add('hero__slide--media');
+      slide.appendChild(createHeroStaticMedia(test));
+    } else {
+      slide.classList.add('hero__slide--fallback');
+    }
+
+    slide.appendChild(createHeroSlideCopy(test));
     heroState.track.appendChild(slide);
   });
 
   heroState.total = slidesData.length;
   heroState.index = 0;
   updateHeroSlider();
+  restartHeroAutoplay();
+}
+
+function createHeroStaticMedia(test) {
+  const media = document.createElement('div');
+  media.className = 'hero__slide-media';
+  media.appendChild(createHeroSlideImage(test));
+  return media;
+}
+
+function createHeroPanMedia(test) {
+  const track = document.createElement('div');
+  track.className = 'hero__slide-pan-track';
+  track.append(createHeroSlideImage(test), createHeroSlideImage(test, true));
+  return track;
+}
+
+function createHeroSlideImage(test, isDuplicate = false) {
+  const img = document.createElement('img');
+  img.src = test.thumbnail;
+  const altPrefix = test.title ?? '슬라이드 이미지';
+  img.alt = isDuplicate ? '' : `${altPrefix} 대표 이미지`;
+  if (isDuplicate) {
+    img.setAttribute('aria-hidden', 'true');
+  }
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  return img;
+}
+
+function createHeroSlideCopy(test) {
+  const copy = document.createElement('div');
+  copy.className = 'hero__slide-copy';
+
+  const eyebrowText =
+    (Array.isArray(test?.tags) && test.tags.length && test.tags[0]) ||
+    '오늘의 추천 테스트';
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'hero__slide-eyebrow';
+  eyebrow.textContent = eyebrowText;
+  copy.appendChild(eyebrow);
+
+  const title = document.createElement('h3');
+  title.textContent = test?.title ?? '슬라이드';
+  copy.appendChild(title);
+
+  const description = document.createElement('p');
+  description.className = 'hero__slide-description';
+  description.textContent =
+    test?.description ?? 'MBTI 테스트를 지금 만나보세요.';
+  copy.appendChild(description);
+
+  if (test?.id) {
+    const cta = document.createElement('button');
+    cta.type = 'button';
+    cta.className = 'ds-button ds-button--primary hero__slide-cta';
+    cta.textContent = '테스트 살펴보기';
+    cta.addEventListener('click', () => navigateTo(`#/test-intro/${test.id}`));
+    copy.appendChild(cta);
+  }
+
+  return copy;
 }
 
 function moveHeroSlide(delta) {
@@ -179,6 +255,7 @@ function moveHeroSlide(delta) {
     Math.max(0, heroState.total - 1),
   );
   updateHeroSlider();
+  restartHeroAutoplay();
 }
 
 function updateHeroSlider() {
@@ -187,6 +264,67 @@ function updateHeroSlider() {
   if (heroState.prevBtn) heroState.prevBtn.disabled = heroState.index === 0;
   if (heroState.nextBtn)
     heroState.nextBtn.disabled = heroState.index >= heroState.total - 1;
+}
+
+function autoAdvanceHeroSlide() {
+  if (!heroState.track || heroState.total <= 1) {
+    return;
+  }
+  heroState.index =
+    heroState.index >= heroState.total - 1 ? 0 : heroState.index + 1;
+  updateHeroSlider();
+}
+
+function startHeroAutoplay() {
+  if (heroState.autoTimer || heroState.total <= 1) {
+    return;
+  }
+  heroState.autoTimer = window.setInterval(
+    autoAdvanceHeroSlide,
+    HERO_AUTO_DELAY,
+  );
+}
+
+function stopHeroAutoplay() {
+  if (!heroState.autoTimer) {
+    return;
+  }
+  window.clearInterval(heroState.autoTimer);
+  heroState.autoTimer = null;
+}
+
+function restartHeroAutoplay() {
+  stopHeroAutoplay();
+  if (document.hidden || heroState.total <= 1) {
+    return;
+  }
+  if (heroState.slider?.matches(':hover')) {
+    return;
+  }
+  startHeroAutoplay();
+}
+
+function attachHeroAutoplayGuards() {
+  if (!heroState.slider || heroState.guardsAttached) {
+    return;
+  }
+  heroState.slider.addEventListener('mouseenter', stopHeroAutoplay);
+  heroState.slider.addEventListener('mouseleave', restartHeroAutoplay);
+  heroState.slider.addEventListener('focusin', stopHeroAutoplay);
+  heroState.slider.addEventListener('focusout', restartHeroAutoplay);
+  if (!heroState.visibilityHandlerAttached) {
+    document.addEventListener('visibilitychange', handleHeroVisibilityChange);
+    heroState.visibilityHandlerAttached = true;
+  }
+  heroState.guardsAttached = true;
+}
+
+function handleHeroVisibilityChange() {
+  if (document.hidden) {
+    stopHeroAutoplay();
+    return;
+  }
+  restartHeroAutoplay();
 }
 
 function renderTests(container, tests) {
@@ -375,6 +513,7 @@ function bootstrapViews() {
   outlet.hidden = true;
   mainElement.appendChild(outlet);
   appState.main = mainElement;
+  appState.main.dataset.view = 'home';
   appState.homeSections = homeChildren;
   appState.routeOutlet = outlet;
 }
@@ -451,6 +590,7 @@ function setRouteContent(contentNode) {
   appState.homeSections.forEach((section) => {
     section.hidden = true;
   });
+  updateMainViewState(true);
   appState.routeOutlet.hidden = false;
   appState.routeOutlet.innerHTML = '';
   if (contentNode) {
@@ -469,6 +609,14 @@ function showHomeView() {
   });
   appState.routeOutlet.hidden = true;
   appState.routeOutlet.innerHTML = '';
+  updateMainViewState(false);
+}
+
+function updateMainViewState(isRouteView) {
+  if (!appState.main) {
+    return;
+  }
+  appState.main.dataset.view = isRouteView ? 'route' : 'home';
 }
 
 function renderLoadingView() {
@@ -515,7 +663,9 @@ function renderTestIntroPage(test) {
   const metaList = document.createElement('ul');
   metaList.className = 'test-meta';
   const questionMeta = document.createElement('li');
-  questionMeta.innerHTML = `<strong>${test.questions?.length ?? 0}</strong> 문항`;
+  questionMeta.innerHTML = `<strong>${
+    test.questions?.length ?? 0
+  }</strong> 문항`;
   const resultMeta = document.createElement('li');
   resultMeta.innerHTML = '<strong>16</strong> 가지 결과';
   metaList.append(questionMeta, resultMeta);
@@ -596,7 +746,9 @@ function renderTestQuizPage(test) {
     optionBtn.type = 'button';
     optionBtn.className = 'ds-button ds-button--secondary test-option';
     optionBtn.textContent = answer.label;
-    optionBtn.addEventListener('click', () => handleAnswerSelection(test, answer));
+    optionBtn.addEventListener('click', () =>
+      handleAnswerSelection(test, answer),
+    );
     options.appendChild(optionBtn);
   });
   if (!options.children.length) {
@@ -615,7 +767,9 @@ function renderTestResultPage(test, mbtiType = '') {
   const resultInfo = test.results?.[normalizedType] ?? null;
   const summaryCopy =
     resultInfo?.summary ??
-    `${normalizedType || 'MBTI'} 결과를 준비 중입니다. 곧 업데이트될 예정이에요.`;
+    `${
+      normalizedType || 'MBTI'
+    } 결과를 준비 중입니다. 곧 업데이트될 예정이에요.`;
 
   const wrapper = document.createElement('section');
   wrapper.className = 'route-section test-result-page';
@@ -639,9 +793,9 @@ function renderTestResultPage(test, mbtiType = '') {
 
   const detail = document.createElement('p');
   detail.className = 'test-result__description';
-  detail.textContent = `${
-    test.description ?? '이 테스트'
-  }와 가장 잘 어울리는 ${normalizedType || 'MBTI'} 타입의 특징이에요.`;
+  detail.textContent = `${test.description ?? '이 테스트'}와 가장 잘 어울리는 ${
+    normalizedType || 'MBTI'
+  } 타입의 특징이에요.`;
 
   const media = document.createElement('div');
   media.className = 'test-result__media';
