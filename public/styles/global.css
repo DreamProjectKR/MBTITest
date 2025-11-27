@@ -69,7 +69,6 @@ select {
   width: 1230px;
   height: 100px;
   border: 1px solid #000;
-  background: #ededed;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -79,9 +78,7 @@ select {
 .brand {
   width: 170px;
   height: 82px;
-  border: 1px solid #000;
   border-radius: 4px;
-  background: #ffdede;
   display: flex;
   align-items: center;
   justify-content: center;
