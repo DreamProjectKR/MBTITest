@@ -208,7 +208,6 @@ select {
 .hero__slide-pan-track {
   display: flex;
   width: 200%;
-  animation: hero-pan 26s linear infinite;
 }
 
 .hero__slide-pan-track img {
@@ -271,25 +270,10 @@ select {
   display: none;
 }
 
-@keyframes hero-pan {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .hero__slider .slider-track {
     transition-duration: 0.01ms;
     transition-timing-function: linear;
-  }
-
-  .hero__slide-pan-track {
-    animation-duration: 0.01ms;
-    animation-iteration-count: 1;
-    transform: translateX(0);
   }
 }
 
