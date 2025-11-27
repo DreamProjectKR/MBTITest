@@ -141,7 +141,7 @@ select {
 
 .site-header__auth-button {
   --btn-bg: var(--color-surface);
-  --btn-border: 1px solid var(--color-border);
+  --btn-border: var(--color-border);
   --btn-color: var(--color-text-secondary);
   padding: var(--space-xs) var(--space-sm);
   gap: var(--space-2xs);
