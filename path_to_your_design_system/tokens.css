@@ -49,6 +49,8 @@
 
   /* Animation */
   --easing-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --easing-emphasis: cubic-bezier(0.32, 0.72, 0, 1);
   --duration-fast: 120ms;
   --duration-standard: 220ms;
+  --duration-carousel: 420ms;
 }
