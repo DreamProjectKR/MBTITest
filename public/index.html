@@ -42,7 +42,7 @@
             >
               <img
                 class="brand__logo"
-                src="../assets/images/headerLogo.png"
+                src="../assets/images/Logo.png"
                 alt="MBTI ZOO 헤더 로고"
                 loading="lazy"
               />
@@ -69,13 +69,19 @@
           aria-label="MBTI 여행 일러스트"
         >
           <div class="hero__image-wrapper">
-            <img
-              class="hero__image"
-              src="../assets/images/hero.png"
-              alt="집, 숲, 캠프 배경에 다양한 MBTI 캐릭터들이 모여 있는 일러스트"
-              loading="lazy"
-              decoding="async"
-            />
+            <a
+              class="hero__image-link"
+              href="#/tests"
+              aria-label="전체 MBTI 테스트 목록 보기"
+            >
+              <img
+                class="hero__image"
+                src="../assets/images/hero.png"
+                alt="집, 숲, 캠프 배경에 다양한 MBTI 캐릭터들이 모여 있는 일러스트"
+                loading="lazy"
+                decoding="async"
+              />
+            </a>
           </div>
         </section>
 
@@ -123,8 +129,15 @@
               <button
                 class="ds-button ds-button--ghost"
                 type="button"
+                data-all-tests-trigger
               >
-                다른거 보기
+                <img
+                  src="../assets/images/Other.png"
+                  alt=""
+                  width="24"
+                  height="24"
+                />
+                더 많은 테스트
               </button>
             </div>
           </div>
@@ -195,7 +208,7 @@
           <div class="site-footer__logo-box">
             <img
               class="site-footer__logo"
-              src="../assets/images/footerLogo.png"
+              src="../assets/images/Logo.png"
               alt="MBTI ZOO 푸터 로고"
               loading="lazy"
             />

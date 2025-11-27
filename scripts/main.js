@@ -1,6 +1,7 @@
 const DATA_URL = '../assets/data/mbti-tests.json';
 const ROUTE_SEGMENTS = {
   HOME: '',
+  TEST_LIST: 'tests',
   TEST_INTRO: 'test-intro',
   TEST_QUIZ: 'test-quiz',
   TEST_RESULT: 'test-result',
@@ -61,6 +62,8 @@ async function initHomepage() {
     document.querySelector('[data-mbti-feed-prev]'),
     document.querySelector('[data-mbti-feed-next]'),
   ];
+  const allTestsTrigger = document.querySelector('[data-all-tests-trigger]');
+  allTestsTrigger?.addEventListener('click', () => navigateTo('#/tests'));
 
   if (!testsGrid || !mbtiGrid || !mbtiFeedTrack || !feedSlider) {
     return;
@@ -332,6 +335,10 @@ function handleRouteChange() {
   const test = testId ? appState.testsById[testId] : null;
 
   switch (route.name) {
+    case ROUTE_SEGMENTS.TEST_LIST: {
+      setRouteContent(renderTestListPage(appState.data.tests ?? []));
+      break;
+    }
     case ROUTE_SEGMENTS.TEST_INTRO: {
       if (!test) {
         showHomeView();
@@ -419,6 +426,51 @@ function renderLoadingView() {
   loading.className = 'route-section route-section--loading';
   loading.innerHTML = '<p>콘텐츠를 불러오는 중입니다...</p>';
   return loading;
+}
+
+function renderTestListPage(tests = []) {
+  const wrapper = document.createElement('section');
+  wrapper.className = 'route-section test-list-page';
+
+  const header = document.createElement('div');
+  header.className = 'test-list__header';
+
+  const heading = document.createElement('h2');
+  heading.textContent = '전체 MBTI 테스트';
+
+  const summary = document.createElement('p');
+  summary.className = 'test-list__summary';
+  summary.textContent = tests.length
+    ? `${tests.length}개의 MBTI 테스트를 비교하고, 원하는 스타일을 선택하세요.`
+    : '현재 준비된 테스트가 없습니다. 곧 새로운 테스트가 찾아옵니다.';
+
+  const actions = document.createElement('div');
+  actions.className = 'test-list__actions';
+
+  const homeBtn = document.createElement('button');
+  homeBtn.type = 'button';
+  homeBtn.className = 'ds-button ds-button--ghost';
+  homeBtn.textContent = '홈으로 돌아가기';
+  homeBtn.addEventListener('click', () => navigateTo('#'));
+
+  actions.append(homeBtn);
+  header.append(heading, summary, actions);
+
+  const grid = document.createElement('div');
+  grid.className = 'test-grid test-list__grid';
+
+  if (tests.length) {
+    renderTests(grid, tests);
+  } else {
+    const emptyState = document.createElement('p');
+    emptyState.className = 'test-list__empty';
+    emptyState.textContent =
+      'MBTI 테스트 목록이 비어 있습니다. 나중에 다시 확인해주세요.';
+    grid.appendChild(emptyState);
+  }
+
+  wrapper.append(header, grid);
+  return wrapper;
 }
 
 function renderTestIntroPage(test) {
