@@ -65,6 +65,9 @@ async function initHomepage() {
   const allTestsTrigger = document.querySelector('[data-all-tests-trigger]');
   allTestsTrigger?.addEventListener('click', () => navigateTo('#/tests'));
 
+  const footerLogoButton = document.querySelector('.site-footer__logo-button');
+  footerLogoButton?.addEventListener('click', () => navigateTo('#'));
+
   if (!testsGrid || !mbtiGrid || !mbtiFeedTrack || !feedSlider) {
     return;
   }

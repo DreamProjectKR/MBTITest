@@ -52,39 +52,47 @@
               aria-label="메인 네비게이션 액션"
             >
               <div class="site-header__nav">
-                <button
-                  class="ds-button ds-button--secondary site-header__nav-pill"
-                  type="button"
-                  aria-label="나의 MBTI 확인"
-                >
-                  나의 MBTI는?
-                </button>
-                <span class="site-header__nav-title">인기포럼</span>
+                <div class="site-header__nav-item">
+                  <button
+                    class="ds-button ds-button--secondary site-header__nav-pill"
+                    type="button"
+                    aria-label="나의 MBTI 확인"
+                  >
+                    나의 MBTI는?
+                  </button>
+                </div>
+                <div class="site-header__nav-item">
+                  <span class="site-header__nav-title">인기포럼</span>
+                </div>
                 <div class="site-header__auth-group">
-                  <button
-                    class="ds-button ds-button--ghost site-header__auth-button site-header__auth-button--login"
-                    type="button"
-                  >
-                    <img
-                      class="site-header__auth-icon"
-                      src="../assets/images/Login.png"
-                      alt="로그인 아이콘"
-                      loading="lazy"
-                    />
-                    <span class="site-header__auth-label">로그인</span>
-                  </button>
-                  <button
-                    class="ds-button ds-button--ghost site-header__auth-button site-header__auth-button--register"
-                    type="button"
-                  >
-                    <span class="site-header__auth-label">회원가입</span>
-                    <img
-                      class="site-header__auth-icon"
-                      src="../assets/images/Register.png"
-                      alt="회원가입 아이콘"
-                      loading="lazy"
-                    />
-                  </button>
+                  <div class="site-header__nav-item">
+                    <button
+                      class="ds-button ds-button--ghost site-header__auth-button site-header__auth-button--login"
+                      type="button"
+                    >
+                      <img
+                        class="site-header__auth-icon"
+                        src="../assets/images/Login.png"
+                        alt="로그인 아이콘"
+                        loading="lazy"
+                      />
+                      <span class="site-header__auth-label">로그인</span>
+                    </button>
+                  </div>
+                  <div class="site-header__nav-item">
+                    <button
+                      class="ds-button ds-button--ghost site-header__auth-button site-header__auth-button--register"
+                      type="button"
+                    >
+                      <span class="site-header__auth-label">회원가입</span>
+                      <img
+                        class="site-header__auth-icon"
+                        src="../assets/images/Register.png"
+                        alt="회원가입 아이콘"
+                        loading="lazy"
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -132,28 +140,34 @@
             >
               <article class="ds-card ds-card--test">
                 <div class="ds-card__thumbnail">
-                  <div class="ds-card__thumbnail-inner"></div>
-                  <div class="ds-card__body">
-                    <h3>첫번째 테스트</h3>
-                    <p class="ds-card__tags">#해시태그#해시태그#해시태그</p>
+                  <div class="ds-card__content">
+                    <div class="ds-card__thumbnail-inner"></div>
+                    <div class="ds-card__body">
+                      <h3>첫번째 테스트</h3>
+                      <p class="ds-card__tags">#해시태그#해시태그#해시태그</p>
+                    </div>
                   </div>
                 </div>
               </article>
               <article class="ds-card ds-card--test">
                 <div class="ds-card__thumbnail">
-                  <div class="ds-card__thumbnail-inner"></div>
-                  <div class="ds-card__body">
-                    <h3>두번째 테스트</h3>
-                    <p class="ds-card__tags">#해시태그#해시태그#해시태그</p>
+                  <div class="ds-card__content">
+                    <div class="ds-card__thumbnail-inner"></div>
+                    <div class="ds-card__body">
+                      <h3>두번째 테스트</h3>
+                      <p class="ds-card__tags">#해시태그#해시태그#해시태그</p>
+                    </div>
                   </div>
                 </div>
               </article>
               <article class="ds-card ds-card--test">
                 <div class="ds-card__thumbnail">
-                  <div class="ds-card__thumbnail-inner"></div>
-                  <div class="ds-card__body">
-                    <h3>세번째 테스트</h3>
-                    <p class="ds-card__tags">#해시태그#해시태그#해시태그</p>
+                  <div class="ds-card__content">
+                    <div class="ds-card__thumbnail-inner"></div>
+                    <div class="ds-card__body">
+                      <h3>세번째 테스트</h3>
+                      <p class="ds-card__tags">#해시태그#해시태그#해시태그</p>
+                    </div>
                   </div>
                 </div>
               </article>
@@ -239,12 +253,18 @@
       <footer class="site-footer">
         <div class="site-footer__inner">
           <div class="site-footer__logo-box">
-            <img
-              class="site-footer__logo"
-              src="../assets/images/Logo.png"
-              alt="MBTI ZOO 푸터 로고"
-              loading="lazy"
-            />
+            <button
+              class="site-footer__logo-button"
+              type="button"
+              aria-label="홈으로 이동"
+            >
+              <img
+                class="site-footer__logo"
+                src="../assets/images/Logo.png"
+                alt="MBTI ZOO 푸터 로고"
+                loading="lazy"
+              />
+            </button>
           </div>
         </div>
       </footer>
