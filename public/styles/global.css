@@ -628,7 +628,7 @@ select {
 /* Route pages */
 .route-outlet {
   width: 100%;
-  padding: 60px 0 80px;
+  padding: 100px 0 80px;
   display: flex;
   justify-content: center;
 }
@@ -689,13 +689,13 @@ select {
   background: var(--color-surface-hero);
   color: var(--color-text-secondary);
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .route-section--loading {
   align-items: center;
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .test-intro-page {
@@ -722,7 +722,7 @@ select {
 
 .test-page__media[data-placeholder] {
   color: var(--color-text-secondary);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 18px;
 }
 
@@ -902,7 +902,7 @@ select {
 
 .test-result__media[data-placeholder] {
   color: var(--color-text-secondary);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 @media (max-width: 1280px) {
