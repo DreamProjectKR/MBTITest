@@ -26,11 +26,6 @@
     />
   </head>
   <body>
-    <a
-      class="skip-link"
-      href="#today-tests-heading"
-      >본문으로 건너뛰기</a
-    >
     <div class="page-shell">
       <header class="site-header">
         <div class="site-header__inner">
@@ -47,9 +42,9 @@
                 loading="lazy"
               />
             </a>
-            <div
+            <nav
               class="site-header__btn-box"
-              aria-label="메인 네비게이션 액션"
+              aria-label="메인 네비게이션"
             >
               <div class="site-header__nav">
                 <div class="site-header__nav-item">
@@ -62,13 +57,20 @@
                   </button>
                 </div>
                 <div class="site-header__nav-item">
-                  <span class="site-header__nav-title">인기포럼</span>
+                  <button
+                    class="site-header__nav-title"
+                    type="button"
+                    aria-label="인기 포럼 보기"
+                  >
+                    인기포럼
+                  </button>
                 </div>
                 <div class="site-header__auth-group">
                   <div class="site-header__nav-item">
                     <button
                       class="ds-button ds-button--ghost site-header__auth-button site-header__auth-button--login"
                       type="button"
+                      aria-label="로그인 페이지로 이동"
                     >
                       <img
                         class="site-header__auth-icon"
@@ -83,6 +85,7 @@
                     <button
                       class="ds-button ds-button--ghost site-header__auth-button site-header__auth-button--register"
                       type="button"
+                      aria-label="회원가입 페이지로 이동"
                     >
                       <span class="site-header__auth-label">회원가입</span>
                       <img
@@ -95,7 +98,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </nav>
           </div>
         </div>
       </header>
@@ -177,10 +180,11 @@
                 class="ds-button ds-button--ghost"
                 type="button"
                 data-all-tests-trigger
+                aria-label="전체 테스트 목록 보기"
               >
                 <img
                   src="../assets/images/Other.png"
-                  alt=""
+                  alt="더보기 아이콘"
                   width="24"
                   height="24"
                 />
@@ -208,6 +212,7 @@
                 <ul
                   class="mbti-grid mbti-grid--bottom"
                   data-mbti-grid-bottom
+                  aria-label="MBTI 목록 하단"
                 ></ul>
               </div>
               <div
@@ -219,8 +224,10 @@
                   type="button"
                   aria-label="이전 포럼 카드"
                   data-mbti-feed-prev
+                  aria-hidden="true"
+                  tabindex="-1"
                 >
-                  ‹
+                  <span aria-hidden="true">‹</span>
                 </button>
                 <div
                   class="slider-track"
@@ -233,14 +240,17 @@
                   type="button"
                   aria-label="다음 포럼 카드"
                   data-mbti-feed-next
+                  aria-hidden="true"
+                  tabindex="-1"
                 >
-                  ›
+                  <span aria-hidden="true">›</span>
                 </button>
               </div>
               <div class="forum-btn-wrapper">
                 <button
                   class="ds-button ds-button--secondary"
                   type="button"
+                  aria-label="오늘의 MBTI 포럼 보기"
                 >
                   오늘의 MBTI 포럼
                 </button>
