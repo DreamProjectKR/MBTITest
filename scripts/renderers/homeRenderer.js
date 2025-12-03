@@ -63,7 +63,7 @@ export function renderTests(container, tests, onTestClick) {
       card.tabIndex = 0;
       card.setAttribute(
         'aria-label',
-        `${test.title ?? 'MBTI 테스트'} 소개 페이지로 이동`
+        `${test.title ?? 'MBTI 테스트'} 소개 페이지로 이동`,
       );
       card.addEventListener('click', () => onTestClick(test.id));
       card.addEventListener('keydown', (event) => {
@@ -151,10 +151,14 @@ export function renderForum(track, highlights) {
     const title = createElement('h3', {}, item.title);
     body.appendChild(title);
 
-    const link = createElement('a', {
-      className: 'ds-link feed-card__link',
-      href: item.href ?? '#',
-    }, `${item.ctaLabel ?? '이글 보러가기'} >`);
+    const link = createElement(
+      'a',
+      {
+        className: 'ds-link feed-card__link',
+        href: item.href ?? '#',
+      },
+      `${item.ctaLabel ?? '이글 보러가기'} >`,
+    );
     body.appendChild(link);
 
     card.appendChild(body);
@@ -173,4 +177,3 @@ export function renderForum(track, highlights) {
     track.appendChild(card);
   });
 }
-

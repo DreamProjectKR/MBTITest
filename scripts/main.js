@@ -14,7 +14,10 @@ import {
 } from './renderers/homeRenderer.js';
 import { renderTestListPage } from './renderers/testListRenderer.js';
 import { renderTestIntroPage } from './renderers/testIntroRenderer.js';
-import { renderTestQuizPage, renderLoadingView } from './renderers/testQuizRenderer.js';
+import {
+  renderTestQuizPage,
+  renderLoadingView,
+} from './renderers/testQuizRenderer.js';
 import { renderTestResultPage } from './renderers/testResultRenderer.js';
 import { $, safeAddEventListener } from './utils/domUtils.js';
 import { createElement } from './utils/domUtils.js';
@@ -95,7 +98,7 @@ async function initHomepage() {
 
   try {
     const payload = await dataService.fetchData();
-    
+
     if (!dataService.validateData(payload)) {
       throw new Error('유효하지 않은 데이터 형식입니다.');
     }
@@ -112,15 +115,11 @@ async function initHomepage() {
       ? tests.slice(0, 3)
       : Array.from({ length: 3 }, (_, idx) => ({ title: `테스트 ${idx + 1}` }));
 
-    renderTests(
-      testsGrid,
-      testCards,
-      (testId) => {
-        if (testId) {
-          router.navigateTo(`#/test-intro/${testId}`);
-        }
+    renderTests(testsGrid, testCards, (testId) => {
+      if (testId) {
+        router.navigateTo(`#/test-intro/${testId}`);
       }
-    );
+    });
 
     if (mbtiGrid && mbtiGridBottom) {
       renderMbtiGrid(mbtiGrid, mbtiGridBottom);
@@ -136,9 +135,13 @@ async function initHomepage() {
     console.error('홈페이지 초기화 오류:', error);
     // 사용자에게 에러 메시지 표시
     if (testsGrid) {
-      const errorMsg = createElement('p', {
-        className: 'test-list__empty',
-      }, '데이터를 불러오는 중 오류가 발생했습니다. 페이지를 새로고침해주세요.');
+      const errorMsg = createElement(
+        'p',
+        {
+          className: 'test-list__empty',
+        },
+        '데이터를 불러오는 중 오류가 발생했습니다. 페이지를 새로고침해주세요.',
+      );
       testsGrid.innerHTML = '';
       testsGrid.appendChild(errorMsg);
     }
