@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="istjGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#228B22;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#006400;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#istjGrad)" rx="20"/>
+  <!-- 소나무 -->
+  <g transform="translate(200, 300)">
+    <!-- 줄기 -->
+    <rect x="-5" y="0" width="10" height="80" fill="#8B4513" opacity="0.9"/>
+    <!-- 가지 -->
+    <ellipse cx="-30" cy="20" rx="25" ry="15" fill="#228B22" opacity="0.9"/>
+    <ellipse cx="30" cy="20" rx="25" ry="15" fill="#228B22" opacity="0.9"/>
+    <ellipse cx="-25" cy="40" rx="20" ry="12" fill="#32CD32" opacity="0.9"/>
+    <ellipse cx="25" cy="40" rx="20" ry="12" fill="#32CD32" opacity="0.9"/>
+    <ellipse cx="0" cy="10" rx="30" ry="18" fill="#228B22" opacity="0.9"/>
+  </g>
+  <text x="200" y="50" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#FFFFFF" text-anchor="middle">ISTJ</text>
+  <text x="200" y="90" font-family="Arial, sans-serif" font-size="18" fill="#FFFFFF" text-anchor="middle">굳건한 소나무</text>
+</svg>
+

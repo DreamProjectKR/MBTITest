@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="snsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E1306C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#833AB4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#snsGrad)" rx="20"/>
+  <!-- SNS 일러스트 -->
+  <g transform="translate(200, 150)">
+    <!-- 스마트폰 -->
+    <rect x="-40" y="-50" width="50" height="80" fill="#FFFFFF" opacity="0.9" rx="5"/>
+    <rect x="-35" y="-45" width="40" height="60" fill="#1A1A1A" opacity="0.9" rx="3"/>
+    <circle cx="-15" cy="25" r="5" fill="#FFFFFF" opacity="0.9"/>
+    <!-- 하트 아이콘 -->
+    <path d="M 20,-30 Q 20,-40 30,-40 Q 40,-40 40,-30 Q 40,-20 30,-10 L 20,0 L 10,-10 Q 0,-20 0,-30 Q 0,-40 10,-40 Q 20,-40 20,-30" fill="#FFFFFF" opacity="0.9"/>
+    <!-- 카메라 아이콘 -->
+    <rect x="60" y="-20" width="30" height="25" fill="#FFFFFF" opacity="0.9" rx="3"/>
+    <circle cx="75" cy="-7" r="8" fill="#1A1A1A" opacity="0.9"/>
+    <circle cx="75" cy="-7" r="5" fill="#FFFFFF" opacity="0.9"/>
+    <!-- 해시태그 -->
+    <text x="-100" y="30" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" opacity="0.9">#SNS</text>
+    <text x="80" y="30" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" opacity="0.9">#인스타</text>
+  </g>
+  <!-- 텍스트 -->
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">SNS 사용 패턴 MBTI</text>
+</svg>
+

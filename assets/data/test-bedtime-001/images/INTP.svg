@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="intpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2C3E50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A252F;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#intpGrad)" rx="20"/>
+  <!-- Theme illustration -->
+  <g transform="translate(200, 250)">
+    <circle cx="0" cy="0" r="40" fill="#FFFFFF" opacity="0.3"/>
+    <circle cx="-20" cy="-10" r="25" fill="#FFFFFF" opacity="0.2"/>
+    <circle cx="20" cy="-10" r="25" fill="#FFFFFF" opacity="0.2"/>
+  </g>
+  <text x="200" y="50" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#FFFFFF" text-anchor="middle">INTP</text>
+  <text x="200" y="90" font-family="Arial, sans-serif" font-size="18" fill="#FFFFFF" text-anchor="middle">분석적 수면러, 수면의 원리를 연구하</text>
+</svg>

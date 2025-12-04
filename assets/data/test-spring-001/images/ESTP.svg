@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="estpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF1493;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DC143C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#estpGrad)" rx="20"/>
+  <!-- 장미 -->
+  <g transform="translate(200, 250)">
+    <!-- 줄기 -->
+    <rect x="-2" y="0" width="4" height="80" fill="#228B22" opacity="0.9"/>
+    <!-- 가시 -->
+    <line x1="0" y1="20" x2="5" y2="25" stroke="#8B4513" stroke-width="2" opacity="0.9"/>
+    <line x1="0" y1="40" x2="-5" y2="45" stroke="#8B4513" stroke-width="2" opacity="0.9"/>
+    <!-- 잎 -->
+    <ellipse cx="-10" cy="30" rx="8" ry="15" fill="#228B22" opacity="0.9"/>
+    <ellipse cx="10" cy="50" rx="8" ry="15" fill="#228B22" opacity="0.9"/>
+    <!-- 꽃 -->
+    <circle cx="0" cy="-20" r="20" fill="#FF1493" opacity="0.9"/>
+    <circle cx="-8" cy="-25" r="15" fill="#DC143C" opacity="0.9"/>
+    <circle cx="8" cy="-25" r="15" fill="#DC143C" opacity="0.9"/>
+    <circle cx="0" cy="-30" r="12" fill="#FF69B4" opacity="0.9"/>
+    <!-- 꽃잎 -->
+    <ellipse cx="-12" cy="-18" rx="8" ry="12" fill="#FF1493" opacity="0.9"/>
+    <ellipse cx="12" cy="-18" rx="8" ry="12" fill="#FF1493" opacity="0.9"/>
+  </g>
+  <text x="200" y="50" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#FFFFFF" text-anchor="middle">ESTP</text>
+  <text x="200" y="90" font-family="Arial, sans-serif" font-size="18" fill="#FFFFFF" text-anchor="middle">화려한 장미</text>
+</svg>
+

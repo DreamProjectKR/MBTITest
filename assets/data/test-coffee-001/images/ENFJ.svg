@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="coffeeEnfjGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#coffeeEnfjGrad)" rx="20"/>
+  <!-- 커피 세트 -->
+  <g transform="translate(200, 250)">
+    <ellipse cx="-25" cy="0" rx="30" ry="12" fill="#FFFFFF" opacity="0.9"/>
+    <ellipse cx="25" cy="0" rx="30" ry="12" fill="#FFFFFF" opacity="0.9"/>
+    <path d="M -55,0 Q -55,-25 -30,-25 Q -20,-25 -20,-12 Q -20,-25 -10,-25 Q 0,-25 0,-12 Q 0,-25 10,-25 Q 20,-25 20,-12 Q 20,-25 30,-25 Q 55,-25 55,0" stroke="#FFFFFF" stroke-width="4" fill="none" opacity="0.9"/>
+    <ellipse cx="-25" cy="-12" rx="25" ry="10" fill="#8B4513" opacity="0.9"/>
+    <ellipse cx="25" cy="-12" rx="25" ry="10" fill="#8B4513" opacity="0.9"/>
+    <rect x="-28" y="12" width="8" height="25" fill="#8B4513" opacity="0.9"/>
+    <rect x="20" y="12" width="8" height="25" fill="#8B4513" opacity="0.9"/>
+  </g>
+  <text x="200" y="50" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#FFFFFF" text-anchor="middle">ENFJ</text>
+  <text x="200" y="90" font-family="Arial, sans-serif" font-size="18" fill="#FFFFFF" text-anchor="middle">나눔의 커피 세트</text>
+</svg>
+

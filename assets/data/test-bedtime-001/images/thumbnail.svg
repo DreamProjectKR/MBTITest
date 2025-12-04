@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="bedtimeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2C3E50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A252F;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bedtimeGrad)" rx="20"/>
+  <!-- 취침 일러스트 -->
+  <g transform="translate(200, 150)">
+    <!-- 달 -->
+    <circle cx="-100" cy="-40" r="20" fill="#FFD700" opacity="0.9"/>
+    <circle cx="-95" cy="-45" r="15" fill="#2C3E50" opacity="0.9"/>
+    <!-- 별 -->
+    <path d="M -20,-30 L -22,-25 L -17,-25 L -20,-20 L -23,-25 L -18,-25 Z" fill="#FFFFFF" opacity="0.9"/>
+    <path d="M 20,-35 L 21,-30 L 16,-30 L 20,-25 L 24,-30 L 19,-30 Z" fill="#FFFFFF" opacity="0.9"/>
+    <!-- 침대 -->
+    <rect x="-40" y="10" width="60" height="30" fill="#8B4513" opacity="0.9" rx="5"/>
+    <rect x="-35" y="5" width="50" height="10" fill="#654321" opacity="0.9" rx="3"/>
+    <ellipse cx="-10" cy="15" rx="8" ry="5" fill="#FFFFFF" opacity="0.9"/>
+    <!-- 책 -->
+    <rect x="40" y="-20" width="25" height="30" fill="#FFFFFF" opacity="0.9" rx="2"/>
+    <line x1="52" y1="-20" x2="52" y2="10" stroke="#D2691E" stroke-width="2" opacity="0.7"/>
+    <!-- Zzz -->
+    <text x="70" y="0" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#FFFFFF" opacity="0.9">Zzz</text>
+  </g>
+  <!-- 텍스트 -->
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">취침 전 습관 MBTI</text>
+</svg>
+
