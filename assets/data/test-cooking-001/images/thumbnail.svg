@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="cookingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C92A2A;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#cookingGrad)" rx="20"/>
+  <!-- 요리 일러스트 -->
+  <g transform="translate(200, 150)">
+    <!-- 프라이팬 -->
+    <ellipse cx="0" cy="0" rx="50" ry="15" fill="#34495E" opacity="0.9"/>
+    <path d="M -50,0 Q -50,-10 -40,-10 L 40,-10 Q 50,-10 50,0" stroke="#34495E" stroke-width="4" fill="none" opacity="0.9"/>
+    <rect x="-5" y="-10" width="10" height="30" fill="#8B4513" opacity="0.9" rx="5"/>
+    <!-- 음식 -->
+    <circle cx="-20" cy="-5" r="8" fill="#FFD700" opacity="0.9"/>
+    <circle cx="20" cy="-5" r="8" fill="#FF6347" opacity="0.9"/>
+    <!-- 주걱 -->
+    <rect x="60" y="-30" width="5" height="40" fill="#FFFFFF" opacity="0.9" rx="2"/>
+    <ellipse cx="62.5" cy="-30" rx="8" ry="5" fill="#FFFFFF" opacity="0.9"/>
+    <!-- 후추통 -->
+    <rect x="-80" y="-20" width="20" height="30" fill="#FFFFFF" opacity="0.9" rx="3"/>
+    <circle cx="-70" cy="-15" r="5" fill="#34495E" opacity="0.9"/>
+    <!-- 불꽃 -->
+    <path d="M -30,15 Q -35,5 -30,-5 Q -25,5 -20,15 Q -25,10 -30,15" fill="#FF6B00" opacity="0.9"/>
+    <path d="M 30,15 Q 35,5 30,-5 Q 25,5 20,15 Q 25,10 30,15" fill="#FF6B00" opacity="0.9"/>
+  </g>
+  <!-- 텍스트 -->
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">요리 스타일</text>
+</svg>
+

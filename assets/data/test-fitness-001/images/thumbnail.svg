@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="fitnessGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#27AE60;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E8449;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#fitnessGrad)" rx="20"/>
+  <!-- 운동/헬스 일러스트 -->
+  <g transform="translate(200, 150)">
+    <!-- 덤벨 -->
+    <rect x="-80" y="-10" width="15" height="50" fill="#34495E" opacity="0.9" rx="7"/>
+    <rect x="-90" y="-5" width="35" height="15" fill="#34495E" opacity="0.9" rx="7"/>
+    <rect x="-80" y="40" width="15" height="10" fill="#34495E" opacity="0.9" rx="5"/>
+    <!-- 덤벨 2 -->
+    <rect x="65" y="-10" width="15" height="50" fill="#34495E" opacity="0.9" rx="7"/>
+    <rect x="55" y="-5" width="35" height="15" fill="#34495E" opacity="0.9" rx="7"/>
+    <rect x="65" y="40" width="15" height="10" fill="#34495E" opacity="0.9" rx="5"/>
+    <!-- 운동화 -->
+    <ellipse cx="-20" cy="30" rx="25" ry="15" fill="#FFFFFF" opacity="0.9"/>
+    <ellipse cx="-20" cy="30" rx="20" ry="12" fill="#E74C3C" opacity="0.9"/>
+    <path d="M -30,25 Q -20,20 -10,25" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.9"/>
+    <!-- 운동화 2 -->
+    <ellipse cx="20" cy="30" rx="25" ry="15" fill="#FFFFFF" opacity="0.9"/>
+    <ellipse cx="20" cy="30" rx="20" ry="12" fill="#E74C3C" opacity="0.9"/>
+    <path d="M 10,25 Q 20,20 30,25" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.9"/>
+    <!-- 번개 (에너지) -->
+    <path d="M 0,-50 L 5,-35 L -5,-35 L 0,-20 L 10,-20 L 5,-35 L 15,-35 L 10,-50 Z" fill="#FFD700" opacity="0.9"/>
+  </g>
+  <!-- 텍스트 -->
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">운동/헬스 스타일</text>
+</svg>
+

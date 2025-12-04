@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="coffeeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#coffeeGrad)" rx="20"/>
+  <!-- 커피 일러스트 -->
+  <g transform="translate(200, 150)">
+    <!-- 커피잔 -->
+    <ellipse cx="0" cy="-20" rx="40" ry="15" fill="#FFFFFF" opacity="0.9"/>
+    <path d="M -40,-20 Q -40,-10 -30,0 L -20,0 Q -10,-10 -10,-20" stroke="#FFFFFF" stroke-width="4" fill="none" opacity="0.9"/>
+    <path d="M 10,-20 Q 10,-10 20,0 L 30,0 Q 40,-10 40,-20" stroke="#FFFFFF" stroke-width="4" fill="none" opacity="0.9"/>
+    <rect x="-30" y="0" width="60" height="50" fill="#FFFFFF" opacity="0.9" rx="5"/>
+    <ellipse cx="0" cy="50" rx="30" ry="8" fill="#8B4513" opacity="0.9"/>
+    <!-- 손잡이 -->
+    <path d="M 30,10 Q 50,15 50,30 Q 50,45 30,40" stroke="#FFFFFF" stroke-width="8" fill="none" opacity="0.9" stroke-linecap="round"/>
+    <!-- 증기 -->
+    <path d="M -30,-35 Q -35,-45 -30,-55" stroke="#FFFFFF" stroke-width="4" fill="none" opacity="0.7"/>
+    <path d="M 0,-35 Q -5,-45 0,-55" stroke="#FFFFFF" stroke-width="4" fill="none" opacity="0.7"/>
+    <path d="M 30,-35 Q 35,-45 30,-55" stroke="#FFFFFF" stroke-width="4" fill="none" opacity="0.7"/>
+    <!-- 커피콩 -->
+    <ellipse cx="-80" cy="20" rx="12" ry="18" fill="#654321" opacity="0.9"/>
+    <path d="M -80,2 Q -75,10 -80,18 Q -85,10 -80,2" fill="#8B4513" opacity="0.7"/>
+    <!-- 시럽 -->
+    <path d="M 60,10 Q 70,5 80,10 Q 75,15 65,20 Q 60,15 60,10" fill="#FFD700" opacity="0.9"/>
+  </g>
+  <!-- 텍스트 -->
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">커피 스타일</text>
+</svg>
+

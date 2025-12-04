@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="travelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#travelGrad)" rx="20"/>
+  <!-- 여행 일러스트 -->
+  <g transform="translate(200, 150)">
+    <!-- 비행기 -->
+    <path d="M -100,-40 L -80,-30 L -60,-40 L -50,-20 L -40,-10 L -30,-20 L -20,-10 L -10,-20 L 0,-10 L 10,-20 L 20,-10 L 30,-20 L 40,-10 L 50,-20 L 60,-40 L 80,-30 L 100,-40 L 90,-50 L 70,-50 L 50,-60 L -50,-60 L -70,-50 L -90,-50 Z" fill="#FFFFFF" opacity="0.9"/>
+    <circle cx="0" cy="-40" r="8" fill="#FFA500" opacity="0.9"/>
+    <!-- 지도 -->
+    <rect x="50" y="-30" width="80" height="60" fill="#FFFFFF" opacity="0.9" rx="5"/>
+    <path d="M 60,-20 L 100,-20 L 110,-10 L 120,-20 L 120,20 L 60,20 Z" fill="#FFA500" opacity="0.7"/>
+    <circle cx="90" cy="0" r="5" fill="#FF0000" opacity="0.9"/>
+    <!-- 가방 -->
+    <rect x="-80" y="20" width="50" height="40" fill="#8B4513" opacity="0.9" rx="5"/>
+    <rect x="-75" y="25" width="40" height="30" fill="#654321" opacity="0.9" rx="3"/>
+    <circle cx="-55" cy="40" r="3" fill="#FFD700" opacity="0.9"/>
+    <!-- 나침반 -->
+    <circle cx="80" cy="40" r="20" fill="#FFFFFF" opacity="0.9"/>
+    <circle cx="80" cy="40" r="15" fill="none" stroke="#8B4513" stroke-width="2"/>
+    <path d="M 80,25 L 80,40 L 85,35" fill="#FF0000" opacity="0.9"/>
+    <path d="M 80,55 L 80,40 L 75,45" fill="#0000FF" opacity="0.9"/>
+  </g>
+  <!-- 텍스트 -->
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">여행 스타일</text>
+</svg>
+

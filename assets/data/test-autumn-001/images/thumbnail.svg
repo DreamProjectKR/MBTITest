@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="autumnGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D2691E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B4513;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#autumnGrad)" rx="20"/>
+  <!-- 가을 감성 독서 일러스트 -->
+  <g transform="translate(200, 150)">
+    <!-- 책 -->
+    <rect x="-60" y="-40" width="80" height="60" fill="#FFFFFF" opacity="0.9" rx="3"/>
+    <line x1="-20" y1="-40" x2="-20" y2="20" stroke="#D2691E" stroke-width="2"/>
+    <rect x="-55" y="-35" width="30" height="3" fill="#D2691E" opacity="0.7"/>
+    <rect x="-55" y="-25" width="30" height="3" fill="#D2691E" opacity="0.7"/>
+    <!-- 낙엽 -->
+    <ellipse cx="-100" cy="30" rx="15" ry="20" fill="#FF8C00" opacity="0.9" transform="rotate(-30)"/>
+    <ellipse cx="100" cy="20" rx="15" ry="20" fill="#FF6347" opacity="0.9" transform="rotate(45)"/>
+    <ellipse cx="0" cy="40" rx="12" ry="18" fill="#FFA500" opacity="0.9" transform="rotate(-45)"/>
+    <!-- 안경 -->
+    <circle cx="60" cy="-20" r="20" fill="none" stroke="#34495E" stroke-width="3" opacity="0.9"/>
+    <circle cx="100" cy="-20" r="20" fill="none" stroke="#34495E" stroke-width="3" opacity="0.9"/>
+    <line x1="80" y1="-20" x2="80" y2="-20" stroke="#34495E" stroke-width="3" opacity="0.9"/>
+    <line x1="60" y1="-20" x2="50" y2="-10" stroke="#34495E" stroke-width="3" opacity="0.9"/>
+    <line x1="100" y1="-20" x2="110" y2="-10" stroke="#34495E" stroke-width="3" opacity="0.9"/>
+    <!-- 찻잔 -->
+    <ellipse cx="80" cy="30" rx="15" ry="8" fill="#FFFFFF" opacity="0.9"/>
+    <path d="M 65,30 Q 65,40 75,40 Q 85,40 95,30" stroke="#FFFFFF" stroke-width="3" fill="none" opacity="0.9"/>
+    <path d="M 95,30 L 100,25" stroke="#FFFFFF" stroke-width="3" opacity="0.9"/>
+  </g>
+  <!-- 텍스트 -->
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF" text-anchor="middle">가을 감성 독서</text>
+</svg>
+
