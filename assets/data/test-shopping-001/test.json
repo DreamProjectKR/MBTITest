@@ -1,0 +1,293 @@
+{
+  "id": "test-shopping-001",
+  "title": "나의 쇼핑 스타일 MBTI 테스트",
+  "description": "온라인 쇼핑몰에서의 나는? 계획적 구매자? 즉흥 쇼핑러? 쇼핑 습관으로 알아보는 성격 유형!",
+  "tags": ["#쇼핑", "#온라인쇼핑", "#구매", "#스타일"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "sh_q1",
+      "prompt": "쇼핑몰에 갔을 때 나는?",
+      "answers": [
+        {
+          "id": "sh_q1_a",
+          "label": "친구들과 함께 가서 의견 나누며 쇼핑한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "sh_q1_b",
+          "label": "혼자 가서 조용히 골라본다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "sh_q2",
+      "prompt": "온라인 쇼핑 할 때 나는?",
+      "answers": [
+        {
+          "id": "sh_q2_a",
+          "label": "리뷰 보며 다른 사람들과 소통하고 정보 공유한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "sh_q2_b",
+          "label": "조용히 상품만 보고 결정한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "sh_q3",
+      "prompt": "쇼핑 후 나는?",
+      "answers": [
+        {
+          "id": "sh_q3_a",
+          "label": "SNS에 올려서 자랑하고 공유한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "sh_q3_b",
+          "label": "나만의 소중한 구매, 혼자 즐긴다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "sh_q4",
+      "prompt": "물건을 고를 때 나는?",
+      "answers": [
+        {
+          "id": "sh_q4_a",
+          "label": "실용성, 품질, 가격 비교를 꼼꼼히 확인한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "sh_q4_b",
+          "label": "느낌, 디자인, 감성이 먼저다!",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "sh_q5",
+      "prompt": "세일을 볼 때 나는?",
+      "answers": [
+        {
+          "id": "sh_q5_a",
+          "label": "할인율, 원가, 실제 절약 금액을 계산한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "sh_q5_b",
+          "label": "세일이면 일단 좋아! 기회를 놓치면 안 돼!",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "sh_q6",
+      "prompt": "쇼핑 리스트를 만들 때?",
+      "answers": [
+        {
+          "id": "sh_q6_a",
+          "label": "필요한 것, 구체적인 브랜드와 모델까지 정리한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "sh_q6_b",
+          "label": "대충 '옷' 정도만 적어두고 가서 본다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "sh_q7",
+      "prompt": "친구가 비싼 물건을 샀다고 한다.",
+      "answers": [
+        {
+          "id": "sh_q7_a",
+          "label": "가격 대비 성능, 가치를 분석해본다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "sh_q7_b",
+          "label": "축하해! 좋아하는 거 사서 기분 좋겠다~",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "sh_q8",
+      "prompt": "구매 후 후회가 들 때?",
+      "answers": [
+        {
+          "id": "sh_q8_a",
+          "label": "환불 정책 확인하고 바로 처리한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "sh_q8_b",
+          "label": "아까워서 못 버리고... 그냥 쓴다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "sh_q9",
+      "prompt": "쇼핑 중 의견이 갈릴 때?",
+      "answers": [
+        {
+          "id": "sh_q9_a",
+          "label": "로직적으로 비교해서 최적의 선택을 제안한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "sh_q9_b",
+          "label": "각자 좋아하는 거 사면 되지~",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "sh_q10",
+      "prompt": "쇼핑 계획을 세울 때?",
+      "answers": [
+        {
+          "id": "sh_q10_a",
+          "label": "예산, 목록, 시간까지 계획적으로 정한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "sh_q10_b",
+          "label": "그때그때 가고 싶을 때 간다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "sh_q11",
+      "prompt": "장바구니에 물건이 쌓일 때?",
+      "answers": [
+        {
+          "id": "sh_q11_a",
+          "label": "정기적으로 정리하고 필요한 것만 구매한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "sh_q11_b",
+          "label": "세일 때 한 번에 다 산다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "sh_q12",
+      "prompt": "쇼핑 후 정리는?",
+      "answers": [
+        {
+          "id": "sh_q12_a",
+          "label": "영수증 정리, 옷장 정리까지 완벽하게 한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "sh_q12_b",
+          "label": "일단 구매한 거 확인하고... 정리는 나중에.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "계획적 구매자, 예산과 목록을 정확히 관리하는 프로 쇼퍼."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "배려심 많은 쇼퍼, 선물 고르는 달인."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "의미 있는 구매자, 가치 있는 물건을 찾는 사람."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "전략적 쇼퍼, 최적의 가격과 품질을 찾는 마스터."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "실용적 구매자, 필요한 것만 사는 미니멀리스트."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "감성 쇼퍼, 예쁜 디자인에 반하는 감성파."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "몽환적 쇼퍼, 특별한 의미가 있는 물건을 찾는 사람."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "분석적 쇼퍼, 스펙과 성능을 꼼꼼히 비교하는 연구자."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "즉흥 쇼퍼, 눈에 보이면 바로 사는 액션러."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "즐거운 쇼퍼, 쇼핑 자체를 즐기는 파티피플."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "창의적 쇼퍼, 독특한 아이템을 찾아다니는 탐험가."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "혁신적 쇼퍼, 새로운 트렌드를 시도하는 도전자."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "프로페셔널 쇼퍼, 효율적으로 최고의 물건을 구매하는 리더."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "사교적 쇼퍼, 모두와 함께 쇼핑하는 인기인."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "영감을 주는 쇼퍼, 좋은 물건을 추천하는 인플루언서."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "프리미엄 쇼퍼, 최고의 품질을 선택하는 리더."
+    }
+  }
+}
+

@@ -1,0 +1,293 @@
+{
+  "id": "test-pet-001",
+  "title": "나의 반려동물 스타일 MBTI 테스트",
+  "description": "강아지파? 고양이파? 반려동물과의 관계로 알아보는 나의 성격 유형!",
+  "tags": ["#반려동물", "#강아지", "#고양이", "#펫"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "pt_q1",
+      "prompt": "반려동물과 산책할 때 나는?",
+      "answers": [
+        {
+          "id": "pt_q1_a",
+          "label": "다른 반려인들과 수다 떨며 친해진다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "pt_q1_b",
+          "label": "혼자만의 시간을 즐기며 조용히 걷는다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "pt_q2",
+      "prompt": "반려동물 카페에 갔을 때?",
+      "answers": [
+        {
+          "id": "pt_q2_a",
+          "label": "다른 반려동물들과 주인들과 활발히 소통한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "pt_q2_b",
+          "label": "우리 아이와만 집중해서 놀아준다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "pt_q3",
+      "prompt": "반려동물 사진을 올릴 때?",
+      "answers": [
+        {
+          "id": "pt_q3_a",
+          "label": "SNS에 올려서 모두와 공유한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "pt_q3_b",
+          "label": "나만의 앨범에 간직한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "pt_q4",
+      "prompt": "반려동물을 고를 때 나는?",
+      "answers": [
+        {
+          "id": "pt_q4_a",
+          "label": "실용적인 정보, 건강, 관리 방법을 먼저 확인한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "pt_q4_b",
+          "label": "첫 만남의 느낌, 눈빛 교감이 중요해!",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "pt_q5",
+      "prompt": "반려동물과 놀아줄 때?",
+      "answers": [
+        {
+          "id": "pt_q5_a",
+          "label": "검증된 장난감, 효과적인 놀이 방법을 사용한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "pt_q5_b",
+          "label": "즉흥적으로 새로운 놀이를 만들어낸다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "pt_q6",
+      "prompt": "반려동물을 보며 든 생각은?",
+      "answers": [
+        {
+          "id": "pt_q6_a",
+          "label": "오늘 밥 잘 먹었나? 건강한가? 확인한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "pt_q6_b",
+          "label": "이 아이는 무슨 생각을 하고 있을까? 상상한다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "pt_q7",
+      "prompt": "반려동물이 아플 때 나는?",
+      "answers": [
+        {
+          "id": "pt_q7_a",
+          "label": "증상 정확히 파악하고, 병원에 가서 진단받는다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "pt_q7_b",
+          "label": "너무 아파하는 것 같아... 내가 대신 아프고 싶다 ㅠㅠ",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "pt_q8",
+      "prompt": "반려동물이 잘못을 했을 때?",
+      "answers": [
+        {
+          "id": "pt_q8_a",
+          "label": "명확하게 훈련하고, 이유를 설명한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "pt_q8_b",
+          "label": "귀여워서 못 때리고... 그냥 안아준다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "pt_q9",
+      "prompt": "반려동물 관련 정보를 볼 때?",
+      "answers": [
+        {
+          "id": "pt_q9_a",
+          "label": "과학적 근거, 전문가 의견을 확인한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "pt_q9_b",
+          "label": "다른 반려인들의 경험담, 감동 스토리를 좋아한다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "pt_q10",
+      "prompt": "반려동물 관리 일정은?",
+      "answers": [
+        {
+          "id": "pt_q10_a",
+          "label": "밥 시간, 산책 시간, 목욕 시간까지 정해둔다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "pt_q10_b",
+          "label": "대충 때 되면 해주고, 기분에 따라 달라진다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "pt_q11",
+      "prompt": "반려동물 용품을 살 때?",
+      "answers": [
+        {
+          "id": "pt_q11_a",
+          "label": "리스트 만들어서 필요한 것만 계획적으로 산다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "pt_q11_b",
+          "label": "보고 싶은 거 있으면 그때그때 산다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "pt_q12",
+      "prompt": "반려동물과의 일상을 정리할 때?",
+      "answers": [
+        {
+          "id": "pt_q12_a",
+          "label": "사진 앨범, 건강 기록, 일기까지 체계적으로 정리한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "pt_q12_b",
+          "label": "기억 속에 간직하고, 가끔 사진만 본다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "책임감 강한 반려인, 체계적으로 관리하는 프로 펫파렌트."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따뜻한 돌봄러, 모든 것을 챙기는 헌신적인 반려인."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "깊이 있는 교감자, 반려동물의 마음을 이해하는 사람."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "전략적 반려인, 최적의 환경을 설계하는 펫 마스터."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "자유로운 반려인, 서로의 공간을 존중하는 파트너."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "감성 반려인, 예쁜 사진과 추억을 만드는 크리에이터."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "몽환적 반려인, 상상력 가득한 특별한 관계를 만든다."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "지적 탐구자, 반려동물의 행동을 연구하는 관찰자."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "액티브 반려인, 함께 운동하고 모험하는 파트너."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "즐거운 반려인, 함께 파티하고 즐기는 인싸 펫파렌트."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "창의적 반려인, 새로운 놀이와 경험을 만들어내는 사람."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "혁신적 반려인, 상상도 못한 아이디어로 특별한 경험을 만든다."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "리더 반려인, 완벽하게 관리하는 프로페셔널 펫파렌트."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "사교적 반려인, 모두와 친하게 지내는 인기 펫파렌트."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "영감을 주는 반려인, 긍정적인 에너지로 함께 성장한다."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "프리미엄 반려인, 최고의 환경을 제공하는 리더."
+    }
+  }
+}
+

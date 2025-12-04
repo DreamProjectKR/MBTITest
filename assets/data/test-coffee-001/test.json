@@ -1,0 +1,293 @@
+{
+  "id": "test-coffee-001",
+  "title": "나의 커피 스타일 MBTI 테스트",
+  "description": "아메리카노? 라떼? 당신의 커피 취향으로 알아보는 성격 유형! 카페에서의 나는 어떤 사람일까요?",
+  "tags": ["#커피", "#카페", "#카페인", "#성격유형"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "cf_q1",
+      "prompt": "카페에 혼자 갔을 때 나는?",
+      "answers": [
+        {
+          "id": "cf_q1_a",
+          "label": "바리스타와 수다 떨며 분위기 띄운다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "cf_q1_b",
+          "label": "조용히 주문하고 구석 자리에서 혼자 즐긴다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "cf_q2",
+      "prompt": "친구들과 카페에 갔다. 테이블이 꽉 찼다.",
+      "answers": [
+        {
+          "id": "cf_q2_a",
+          "label": "다른 테이블 사람들과 합석 제안한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "cf_q2_b",
+          "label": "다른 카페 찾아보자고 제안한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "cf_q3",
+      "prompt": "카페에서 일하는 사람이 보인다.",
+      "answers": [
+        {
+          "id": "cf_q3_a",
+          "label": "저 사람도 커피 마시고 싶을 텐데... 공감한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "cf_q3_b",
+          "label": "나만의 시간에 집중한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "cf_q4",
+      "prompt": "커피를 고를 때 나는?",
+      "answers": [
+        {
+          "id": "cf_q4_a",
+          "label": "항상 먹던 아메리카노, 검증된 맛이 최고.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "cf_q4_b",
+          "label": "오늘은 새로운 시그니처 메뉴를 시도해볼까?",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "cf_q5",
+      "prompt": "라떼 아트를 보며 든 생각은?",
+      "answers": [
+        {
+          "id": "cf_q5_a",
+          "label": "예쁘긴 한데... 맛은 똑같을 거야.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "cf_q5_b",
+          "label": "바리스타의 예술적 감각이 느껴진다!",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "cf_q6",
+      "prompt": "커피 원두를 고를 때?",
+      "answers": [
+        {
+          "id": "cf_q6_a",
+          "label": "산미, 쓴맛, 바디감 등 구체적인 맛 프로필을 확인한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "cf_q6_b",
+          "label": "원산지 이름이 멋있네! 에티오피아 예가체프... 상상만 해도 로맨틱해.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "cf_q7",
+      "prompt": "친구가 맛없는 커피를 샀다고 한다.",
+      "answers": [
+        {
+          "id": "cf_q7_a",
+          "label": "왜 맛없어? 원두 문제? 로스팅 문제? 분석해본다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "cf_q7_b",
+          "label": "아이고 아까워라... 내 커피 마셔볼래?",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "cf_q8",
+      "prompt": "카페에서 커피를 쏟았다.",
+      "answers": [
+        {
+          "id": "cf_q8_a",
+          "label": "빨리 닦아야겠다. 휴지통은 어디 있지?",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "cf_q8_b",
+          "label": "죄송해요... 사장님께 미안한 마음이 먼저 든다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "cf_q9",
+      "prompt": "아메리카노 vs 라떼 논쟁이 붙었다.",
+      "answers": [
+        {
+          "id": "cf_q9_a",
+          "label": "카페인 함량, 칼로리, 가격 비교로 객관적으로 분석한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "cf_q9_b",
+          "label": "취향이니까 각자 좋아하는 거 마시면 되지~",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "cf_q10",
+      "prompt": "카페 방문 계획을 세울 때?",
+      "answers": [
+        {
+          "id": "cf_q10_a",
+          "label": "시간, 장소, 메뉴까지 미리 정해둔다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "cf_q10_b",
+          "label": "지나가다 맘에 드는 카페 보이면 들어간다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "cf_q11",
+      "prompt": "커피를 마시는 시간은?",
+      "answers": [
+        {
+          "id": "cf_q11_a",
+          "label": "아침 9시, 오후 3시처럼 정해진 시간에 마신다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "cf_q11_b",
+          "label": "커피가 땡기는 순간이 곧 시간이다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "cf_q12",
+      "prompt": "카페에서 일할 때 나는?",
+      "answers": [
+        {
+          "id": "cf_q12_a",
+          "label": "할 일 목록 작성하고 하나씩 체크해가며 진행한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "cf_q12_b",
+          "label": "일단 앉고... 뭘 할지 생각해본다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "클래식 아메리카노, 변하지 않는 신뢰의 맛."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따뜻한 바닐라 라떼, 모두를 배려하는 달콤함."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "깊이 있는 콜드브루, 시간이 지날수록 진한 맛."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "에스프레소 더블샷, 강렬하고 확실한 카페인."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "심플한 롱블랙, 불필요한 건 제거한 효율의 맛."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "예쁜 라떼 아트, 보기만 해도 기분 좋아지는 감성."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "몽환적인 라벤더 라떼, 상상력이 가득한 특별함."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "실험적인 니트로 커피, 호기심 가득한 도전자."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "에너지 넘치는 에너지 드링크 커피, 스릴을 즐기는 액션러."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "화려한 프라푸치노, 언제나 파티 분위기의 인싸."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "알록달록 색깔의 시그니처 음료, 어디로 튈지 모르는 매력."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "퓨전 커피, 상상도 못한 조합을 만들어내는 혁신가."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "프리미엄 블렌드, 리더의 품격이 느껴지는 완벽함."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "따뜻한 카라멜 마키아토, 모두에게 사랑받는 달콤함."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "나눔의 커피 세트, 함께 마실 때 더 빛나는 당신."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "프리미엄 원두, 성공의 맛을 아는 리더."
+    }
+  }
+}
+

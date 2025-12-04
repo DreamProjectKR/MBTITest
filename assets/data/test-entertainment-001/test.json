@@ -1,0 +1,293 @@
+{
+  "id": "test-entertainment-001",
+  "title": "나의 드라마/영화 취향 MBTI 테스트",
+  "description": "넷플릭스에서 뭘 볼까? 장르 선호부터 감상 스타일까지! 당신의 엔터테인먼트 취향을 알아보세요.",
+  "tags": ["#드라마", "#영화", "#넷플릭스", "#OTT"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "en_q1",
+      "prompt": "드라마/영화를 볼 때 나는?",
+      "answers": [
+        {
+          "id": "en_q1_a",
+          "label": "친구들과 함께 보며 실시간으로 소통한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "en_q1_b",
+          "label": "혼자 보는 게 최고야. 집중도 잘 되고.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "en_q2",
+      "prompt": "드라마를 보다가 재밌는 장면이 나왔다.",
+      "answers": [
+        {
+          "id": "en_q2_a",
+          "label": "즉시 친구들에게 공유하고 이야기한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "en_q2_b",
+          "label": "혼자 감동하고, 마음속으로만 생각한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "en_q3",
+      "prompt": "드라마 커뮤니티에 참여할 때?",
+      "answers": [
+        {
+          "id": "en_q3_a",
+          "label": "적극적으로 댓글 달고 토론한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "en_q3_b",
+          "label": "조용히 글만 읽고, 가끔 좋아요만 누른다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "en_q4",
+      "prompt": "드라마/영화를 고를 때 나는?",
+      "answers": [
+        {
+          "id": "en_q4_a",
+          "label": "별점 높고, 인기 있는 작품부터 본다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "en_q4_b",
+          "label": "포스터나 제목이 끌리면 바로 본다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "en_q5",
+      "prompt": "드라마를 볼 때 나의 집중도는?",
+      "answers": [
+        {
+          "id": "en_q5_a",
+          "label": "스토리, 배우 연기, 촬영 기법을 구체적으로 본다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "en_q5_b",
+          "label": "분위기, 감성, 메시지에 빠져든다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "en_q6",
+      "prompt": "드라마를 추천받을 때?",
+      "answers": [
+        {
+          "id": "en_q6_a",
+          "label": "장르, 줄거리, 배우 등 구체적인 정보를 확인한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "en_q6_b",
+          "label": "느낌이 좋으면 바로 본다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "en_q7",
+      "prompt": "드라마를 평가할 때 나는?",
+      "answers": [
+        {
+          "id": "en_q7_a",
+          "label": "연기력, 스토리 구성, 작품성을 객관적으로 분석한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "en_q7_b",
+          "label": "감동받았어! 눈물 났어! 감정으로 표현한다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "en_q8",
+      "prompt": "슬픈 장면을 볼 때 나는?",
+      "answers": [
+        {
+          "id": "en_q8_a",
+          "label": "왜 이런 상황이 생겼나? 논리적으로 분석한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "en_q8_b",
+          "label": "주인공 너무 불쌍해... 함께 울어준다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "en_q9",
+      "prompt": "드라마 논쟁이 벌어졌을 때?",
+      "answers": [
+        {
+          "id": "en_q9_a",
+          "label": "팩트와 근거로 객관적으로 반박한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "en_q9_b",
+          "label": "각자 느끼는 게 다르니까 괜찮아~",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "en_q10",
+      "prompt": "드라마를 볼 시간을 정할 때?",
+      "answers": [
+        {
+          "id": "en_q10_a",
+          "label": "하루 2시간씩, 정해진 시간에 본다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "en_q10_b",
+          "label": "보고 싶을 때 밤새워서 다 본다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "en_q11",
+      "prompt": "볼 작품 리스트를 관리할 때?",
+      "answers": [
+        {
+          "id": "en_q11_a",
+          "label": "우선순위 정해서 하나씩 체크해가며 본다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "en_q11_b",
+          "label": "보고 싶은 거 있으면 그때그때 본다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "en_q12",
+      "prompt": "드라마를 다 본 후 나는?",
+      "answers": [
+        {
+          "id": "en_q12_a",
+          "label": "리뷰 정리하고, 다음 작품 계획을 세운다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "en_q12_b",
+          "label": "여운에 빠져있다가... 나중에 다음 작품 찾아본다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "체계적 시청자, 계획적으로 작품을 감상하는 프로."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따뜻한 감성러, 감동적인 작품을 좋아하는 사람."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "깊이 있는 시청자, 의미 있는 메시지를 찾는 사람."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "전략적 시청자, 완벽한 작품 리스트를 만드는 마스터."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "미니멀 시청자, 심플한 스토리를 좋아하는 사람."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "감성 시청자, 예쁜 영상미를 즐기는 감성파."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "몽환적 시청자, 상상력을 자극하는 판타지를 좋아한다."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "분석적 시청자, 스토리와 연출을 연구하는 비평가."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "액션러, 스릴 넘치는 작품을 즐기는 사람."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "즐거운 시청자, 로맨스와 코미디를 좋아하는 인싸."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "창의적 시청자, 다양한 장르를 즐기는 탐험가."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "혁신적 시청자, 독특한 작품을 찾아다니는 도전자."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "프로페셔널 시청자, 체계적으로 작품을 감상하는 리더."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "사교적 시청자, 모두와 함께 보는 인기인."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "영감을 주는 시청자, 좋은 작품을 추천하는 인플루언서."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "프리미엄 시청자, 최고의 작품을 선택하는 리더."
+    }
+  }
+}
+

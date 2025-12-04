@@ -1,0 +1,293 @@
+{
+  "id": "test-bedtime-001",
+  "title": "나의 취침 전 습관 MBTI 테스트",
+  "description": "폰 사용? 독서? 명상? 잠들기 전 루틴으로 알아보는 성격 유형!",
+  "tags": ["#취침", "#루틴", "#수면", "#습관"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "bd_q1",
+      "prompt": "잠들기 전 나는?",
+      "answers": [
+        {
+          "id": "bd_q1_a",
+          "label": "친구들과 채팅하며 하루 이야기를 나눈다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "bd_q1_b",
+          "label": "조용히 혼자만의 시간을 즐긴다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "bd_q2",
+      "prompt": "취침 전 SNS를 볼 때?",
+      "answers": [
+        {
+          "id": "bd_q2_a",
+          "label": "댓글 달고, 스토리에 반응하며 소통한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "bd_q2_b",
+          "label": "조용히 구경만 하고, 가끔 좋아요만 누른다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "bd_q3",
+      "prompt": "취침 전 생각을 정리할 때?",
+      "answers": [
+        {
+          "id": "bd_q3_a",
+          "label": "일기 쓰고, 친구들과 하루를 공유한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "bd_q3_b",
+          "label": "혼자 조용히 생각하며 마음속으로 정리한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "bd_q4",
+      "prompt": "취침 전 루틴을 정할 때 나는?",
+      "answers": [
+        {
+          "id": "bd_q4_a",
+          "label": "구체적인 순서와 시간을 정해둔다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "bd_q4_b",
+          "label": "대충 '편하게 쉬기' 정도만 정한다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "bd_q5",
+      "prompt": "취침 전 독서를 할 때?",
+      "answers": [
+        {
+          "id": "bd_q5_a",
+          "label": "구체적인 목표, 페이지 수를 정해둔다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "bd_q5_b",
+          "label": "느긋하게 읽다가 졸리면 잔다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "bd_q6",
+      "prompt": "취침 전 생각은?",
+      "answers": [
+        {
+          "id": "bd_q6_a",
+          "label": "내일 할 일, 구체적인 계획을 생각한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "bd_q6_b",
+          "label": "느긋하게... 자유롭게... 몽환적으로 흘러간다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "bd_q7",
+      "prompt": "수면 습관을 관리할 때 나는?",
+      "answers": [
+        {
+          "id": "bd_q7_a",
+          "label": "수면 시간, 효율성을 분석해서 최적화한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "bd_q7_b",
+          "label": "편안하게, 기분 좋게 잠들 수 있으면 된다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "bd_q8",
+      "prompt": "잠을 못 잘 때 나는?",
+      "answers": [
+        {
+          "id": "bd_q8_a",
+          "label": "왜 못 자는지 분석하고, 해결 방법을 찾는다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "bd_q8_b",
+          "label": "괜찮아, 내일도 하루야. 스트레스 받지 않는다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "bd_q9",
+      "prompt": "수면 정보를 볼 때 나는?",
+      "answers": [
+        {
+          "id": "bd_q9_a",
+          "label": "과학적 근거, 연구 결과를 확인한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "bd_q9_b",
+          "label": "다른 사람들의 경험담, 감동 스토리를 좋아한다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "bd_q10",
+      "prompt": "취침 시간을 정할 때?",
+      "answers": [
+        {
+          "id": "bd_q10_a",
+          "label": "매일 정해진 시간에 잠든다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "bd_q10_b",
+          "label": "그때그때 다르다. 졸리면 잔다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "bd_q11",
+      "prompt": "취침 전 준비를 할 때?",
+      "answers": [
+        {
+          "id": "bd_q11_a",
+          "label": "세수, 양치, 옷 갈아입기 등 순서대로 정리한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "bd_q11_b",
+          "label": "대충 하고, 편하게 누워있다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "bd_q12",
+      "prompt": "취침 전 정리는?",
+      "answers": [
+        {
+          "id": "bd_q12_a",
+          "label": "오늘 한 일 정리하고, 내일 준비까지 완벽하게 한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "bd_q12_b",
+          "label": "일단 누워서 쉬고... 정리는 내일.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "완벽한 수면러, 체계적으로 관리하는 프로."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따뜻한 수면러, 편안하게 잠드는 사람."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "의미 있는 수면러, 몸과 마음을 함께 쉬는 사람."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "전략적 수면러, 최적의 수면을 설계하는 마스터."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "자유로운 수면러, 효율적으로 쉬는 미니멀리스트."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "감성 수면러, 예쁜 분위기로 잠드는 아티스트."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "몽환적 수면러, 상상력 가득한 특별한 꿈."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "분석적 수면러, 수면의 원리를 연구하는 과학자."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "액티브 수면러, 에너지 넘치게 하루를 마무리하는 사람."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "즐거운 수면러, 함께 즐기며 하루를 마무리하는 파티피플."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "창의적 수면러, 새로운 루틴을 만들어내는 혁신가."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "혁신적 수면러, 상상도 못한 루틴을 만드는 도전자."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "프로페셔널 수면러, 목표 달성을 위한 완벽한 수면."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "사교적 수면러, 모두와 함께 하루를 마무리하는 인기인."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "영감을 주는 수면러, 좋은 루틴을 공유하는 인플루언서."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "프리미엄 수면러, 최고의 수면을 만드는 리더."
+    }
+  }
+}
+

@@ -24,6 +24,66 @@
       "id": "test-travel-001",
       "title": "나의 여행 스타일 MBTI 테스트",
       "path": "test-travel-001/test.json"
+    },
+    {
+      "id": "test-coffee-001",
+      "title": "나의 커피 스타일 MBTI 테스트",
+      "path": "test-coffee-001/test.json"
+    },
+    {
+      "id": "test-sns-001",
+      "title": "나의 SNS 사용 패턴 MBTI 테스트",
+      "path": "test-sns-001/test.json"
+    },
+    {
+      "id": "test-homebody-001",
+      "title": "나의 집순이/집돌이 스타일 MBTI 테스트",
+      "path": "test-homebody-001/test.json"
+    },
+    {
+      "id": "test-pet-001",
+      "title": "나의 반려동물 스타일 MBTI 테스트",
+      "path": "test-pet-001/test.json"
+    },
+    {
+      "id": "test-shopping-001",
+      "title": "나의 쇼핑 스타일 MBTI 테스트",
+      "path": "test-shopping-001/test.json"
+    },
+    {
+      "id": "test-fitness-001",
+      "title": "나의 운동/헬스 스타일 MBTI 테스트",
+      "path": "test-fitness-001/test.json"
+    },
+    {
+      "id": "test-music-001",
+      "title": "나의 음악 취향 MBTI 테스트",
+      "path": "test-music-001/test.json"
+    },
+    {
+      "id": "test-entertainment-001",
+      "title": "나의 드라마/영화 취향 MBTI 테스트",
+      "path": "test-entertainment-001/test.json"
+    },
+    {
+      "id": "test-cooking-001",
+      "title": "나의 요리 스타일 MBTI 테스트",
+      "path": "test-cooking-001/test.json"
+    },
+    {
+      "id": "test-routine-001",
+      "title": "나의 데일리 루틴 MBTI 테스트",
+      "path": "test-routine-001/test.json"
+    },
+    {
+      "id": "test-fashion-001",
+      "title": "나의 패션 스타일 MBTI 테스트",
+      "path": "test-fashion-001/test.json"
+    },
+    {
+      "id": "test-bedtime-001",
+      "title": "나의 취침 전 습관 MBTI 테스트",
+      "path": "test-bedtime-001/test.json"
     }
   ]
 }

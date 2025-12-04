@@ -1,0 +1,293 @@
+{
+  "id": "test-homebody-001",
+  "title": "나의 집순이/집돌이 스타일 MBTI 테스트",
+  "description": "집이 최고의 안식처! 넷플릭스와 홈카페로 보내는 나의 집 시간, 어떤 스타일일까요?",
+  "tags": ["#집순이", "#집돌이", "#홈카페", "#넷플릭스"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "hb_q1",
+      "prompt": "주말에 집에서 보낼 때 나는?",
+      "answers": [
+        {
+          "id": "hb_q1_a",
+          "label": "친구들 불러서 집에서 파티! 집콕 파티가 최고지.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "hb_q1_b",
+          "label": "완전 혼자만의 시간! 아무도 방해하지 마.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "hb_q2",
+      "prompt": "집에서 영화 볼 때?",
+      "answers": [
+        {
+          "id": "hb_q2_a",
+          "label": "같이 볼 사람 찾아서 함께 본다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "hb_q2_b",
+          "label": "혼자 보는 게 최고야. 집중도 잘 되고.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "hb_q3",
+      "prompt": "집에서 요리할 때 나는?",
+      "answers": [
+        {
+          "id": "hb_q3_a",
+          "label": "요리 영상 보며 친구들과 실시간으로 소통한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "hb_q3_b",
+          "label": "조용히 혼자 요리하며 나만의 시간을 즐긴다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "hb_q4",
+      "prompt": "집 꾸미기를 할 때 나는?",
+      "answers": [
+        {
+          "id": "hb_q4_a",
+          "label": "실용적인 가구, 편리한 수납부터 생각한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "hb_q4_b",
+          "label": "분위기, 감성, 테마부터 정한다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "hb_q5",
+      "prompt": "넷플릭스에서 뭘 볼지 고를 때?",
+      "answers": [
+        {
+          "id": "hb_q5_a",
+          "label": "별점 높고 인기 있는 작품부터 본다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "hb_q5_b",
+          "label": "장르는 모르겠지만 포스터가 끌려!",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "hb_q6",
+      "prompt": "집에서 보내는 하루를 상상할 때?",
+      "answers": [
+        {
+          "id": "hb_q6_a",
+          "label": "아침 식사, 운동, 독서... 구체적인 루틴을 생각한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "hb_q6_b",
+          "label": "느긋하게... 자유롭게... 몽환적인 하루.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "hb_q7",
+      "prompt": "집이 지저분해졌을 때 나는?",
+      "answers": [
+        {
+          "id": "hb_q7_a",
+          "label": "체계적으로 정리 계획 세우고 실행한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "hb_q7_b",
+          "label": "기분이 안 좋아... 일단 쉬고 나중에 정리하자.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "hb_q8",
+      "prompt": "이웃이 시끄럽게 떠들고 있다.",
+      "answers": [
+        {
+          "id": "hb_q8_a",
+          "label": "직접 가서 조용히 해달라고 말한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "hb_q8_b",
+          "label": "상대방 기분 상할까 봐 참는다...",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "hb_q9",
+      "prompt": "집에서 일할 때 방해받으면?",
+      "answers": [
+        {
+          "id": "hb_q9_a",
+          "label": "명확하게 집중 시간을 정하고 알린다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "hb_q9_b",
+          "label": "상대방 기분 생각해서 조용히 참는다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "hb_q10",
+      "prompt": "집에서 보내는 하루 계획은?",
+      "answers": [
+        {
+          "id": "hb_q10_a",
+          "label": "시간표 작성해서 하나씩 체크해가며 진행한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "hb_q10_b",
+          "label": "그때그때 기분에 따라 움직인다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "hb_q11",
+      "prompt": "집에 필요한 물건을 살 때?",
+      "answers": [
+        {
+          "id": "hb_q11_a",
+          "label": "리스트 만들어서 계획적으로 구매한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "hb_q11_b",
+          "label": "보고 싶은 거 있으면 그때그때 산다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "hb_q12",
+      "prompt": "집 정리할 때 나는?",
+      "answers": [
+        {
+          "id": "hb_q12_a",
+          "label": "장소별, 종류별로 체계적으로 정리한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "hb_q12_b",
+          "label": "보이는 대로 정리하다가 중간에 다른 일 하러 간다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "완벽한 집 관리자, 체계적으로 정리된 안락한 공간."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따뜻한 홈 메이커, 모두를 위한 편안한 공간을 만든다."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "감성 인테리어러, 깊이 있는 분위기로 공간을 채운다."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "전략적 홈 오피스, 효율적인 공간 설계의 달인."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "미니멀리스트, 필요한 것만 있는 심플한 공간."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "예술적 공간 크리에이터, 감성 가득한 나만의 공간."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "몽환적 홈, 상상력이 가득한 아늑한 보금자리."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "지적 탐구자, 책과 아이디어로 가득한 연구실 같은 공간."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "액티브 홈, 집에서도 운동하고 활동하는 에너지 넘치는 공간."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "파티 홈, 언제나 사람들이 모이는 즐거운 공간."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "창의적 공간, 아이디어가 넘치는 다채로운 홈."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "실험적 인테리어, 상상도 못한 아이템으로 꾸민 독특한 공간."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "프로페셔널 홈, 완벽하게 정리된 효율적인 공간."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "따뜻한 모임 공간, 모두가 편안하게 모일 수 있는 홈."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "영감을 주는 공간, 긍정적인 에너지가 가득한 홈."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "프리미엄 홈, 목표 지향적으로 설계된 완벽한 공간."
+    }
+  }
+}
+

@@ -1,0 +1,292 @@
+{
+  "id": "test-music-001",
+  "title": "나의 음악 취향 MBTI 테스트",
+  "description": "K-pop? 인디? 발라드? 당신의 음악 취향으로 알아보는 성격 유형!",
+  "tags": ["#음악", "#K-pop", "#인디", "#취향"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "mu_q1",
+      "prompt": "음악을 들을 때 나는?",
+      "answers": [
+        {
+          "id": "mu_q1_a",
+          "label": "친구들과 함께 듣고, 공유하며 즐긴다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "mu_q1_b",
+          "label": "혼자서 이어폰 끼고 깊이 있게 감상한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "mu_q2",
+      "prompt": "콘서트에 갔을 때 나는?",
+      "answers": [
+        {
+          "id": "mu_q2_a",
+          "label": "주변 사람들과 함께 떠들고, 분위기를 띄운다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "mu_q2_b",
+          "label": "조용히 음악에 집중하며 감상한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "mu_q3",
+      "prompt": "좋아하는 음악을 발견했을 때?",
+      "answers": [
+        {
+          "id": "mu_q3_a",
+          "label": "즉시 친구들에게 공유하고 추천한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "mu_q3_b",
+          "label": "나만의 보물, 혼자 간직한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "mu_q4",
+      "prompt": "음악을 고를 때 나는?",
+      "answers": [
+        {
+          "id": "mu_q4_a",
+          "label": "인기 차트, 검증된 명곡부터 듣는다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "mu_q4_b",
+          "label": "숨겨진 보석 같은 곡을 찾아다닌다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "mu_q5",
+      "prompt": "음악을 들을 때 나의 생각은?",
+      "answers": [
+        {
+          "id": "mu_q5_a",
+          "label": "멜로디, 리듬, 가사를 구체적으로 분석한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "mu_q5_b",
+          "label": "음악이 주는 느낌, 분위기에 빠진다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "mu_q6",
+      "prompt": "플레이리스트를 만들 때?",
+      "answers": [
+        {
+          "id": "mu_q6_a",
+          "label": "장르별, 분위기별로 체계적으로 정리한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "mu_q6_b",
+          "label": "느낌대로, 기분에 따라 자유롭게 만든다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "mu_q7",
+      "prompt": "음악에 대한 평가를 할 때 나는?",
+      "answers": [
+        {
+          "id": "mu_q7_a",
+          "label": "작곡, 편곡, 가사 등 객관적으로 분석한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "mu_q7_b",
+          "label": "좋아하는 느낌, 감동받는 마음을 표현한다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "mu_q8",
+      "prompt": "친구가 내가 싫어하는 음악을 좋아한다고 한다.",
+      "answers": [
+        {
+          "id": "mu_q8_a",
+          "label": "왜 그 음악이 좋은지 논리적으로 설명해달라고 한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "mu_q8_b",
+          "label": "취향이니까 존중해준다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "mu_q9",
+      "prompt": "음악 논쟁이 벌어졌을 때?",
+      "answers": [
+        {
+          "id": "mu_q9_a",
+          "label": "팩트와 데이터로 객관적으로 비교한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "mu_q9_b",
+          "label": "각자 좋아하는 거 다르니까 괜찮아~",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "mu_q10",
+      "prompt": "음악을 듣는 시간은?",
+      "answers": [
+        {
+          "id": "mu_q10_a",
+          "label": "아침, 출퇴근, 운동 시간 등 정해진 시간에 듣는다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "mu_q10_b",
+          "label": "음악이 땡기는 순간이 곧 시간이다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "mu_q11",
+      "prompt": "음악 파일을 관리할 때?",
+      "answers": [
+        {
+          "id": "mu_q11_a",
+          "label": "장르별, 아티스트별로 체계적으로 정리한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "mu_q11_b",
+          "label": "대충 저장하고, 찾을 때 검색한다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "mu_q12",
+      "prompt": "새로운 음악을 찾을 때?",
+      "answers": [
+        {
+          "id": "mu_q12_a",
+          "label": "추천 알고리즘, 차트를 체계적으로 확인한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "mu_q12_b",
+          "label": "우연히 발견하거나, 친구 추천으로 듣는다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "클래식 러버, 검증된 명곡을 즐기는 전통주의자."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따뜻한 발라드러, 감성 가득한 음악을 좋아하는 사람."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "깊이 있는 음악러, 의미 있는 가사를 찾는 사람."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "전략적 음악러, 완벽한 플레이리스트를 만드는 마스터."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "미니멀 음악러, 심플한 멜로디를 좋아하는 사람."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "감성 인디러, 독특한 음악을 찾아다니는 탐험가."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "몽환적 음악러, 상상력을 자극하는 음악을 좋아한다."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "분석적 음악러, 작곡과 편곡을 연구하는 음악학자."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "에너지 넘치는 댄스러, 신나는 음악을 즐기는 파티피플."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "즐거운 K-pop러, 최신 트렌드를 따라가는 인싸."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "창의적 음악러, 다양한 장르를 즐기는 탐험가."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "혁신적 음악러, 새로운 사운드를 찾아다니는 도전자."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "프로페셔널 음악러, 체계적으로 음악을 즐기는 리더."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "사교적 음악러, 모두와 함께 즐기는 인기인."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "영감을 주는 음악러, 좋은 음악을 추천하는 인플루언서."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "프리미엄 음악러, 최고의 음악을 선택하는 리더."
+    }
+  }
+}

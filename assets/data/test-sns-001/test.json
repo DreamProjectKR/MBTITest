@@ -1,0 +1,293 @@
+{
+  "id": "test-sns-001",
+  "title": "나의 SNS 사용 패턴 MBTI 테스트",
+  "description": "인스타 스토리 올리는 빈도부터 댓글 스타일까지! 당신의 SNS 사용법으로 알아보는 성격 유형.",
+  "tags": ["#SNS", "#인스타그램", "#소셜미디어", "#성격유형"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "sn_q1",
+      "prompt": "인스타 스토리를 올릴 때 나는?",
+      "answers": [
+        {
+          "id": "sn_q1_a",
+          "label": "하루 종일 여러 개 올리고, 친구들과 실시간 소통한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "sn_q1_b",
+          "label": "가끔씩만 올리고, 조용히 반응만 확인한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "sn_q2",
+      "prompt": "댓글이 달렸을 때 나는?",
+      "answers": [
+        {
+          "id": "sn_q2_a",
+          "label": "즉시 답글 달고, 대화를 이어간다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "sn_q2_b",
+          "label": "하트만 누르거나 간단히 답한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "sn_q3",
+      "prompt": "SNS에서 처음 보는 사람과 친구가 되었다.",
+      "answers": [
+        {
+          "id": "sn_q3_a",
+          "label": "DM 보내서 자연스럽게 대화를 시작한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "sn_q3_b",
+          "label": "팔로우만 하고 조용히 지켜본다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "sn_q4",
+      "prompt": "사진을 올릴 때 나는?",
+      "answers": [
+        {
+          "id": "sn_q4_a",
+          "label": "그날 찍은 사진 그대로 올린다. 자연스러운 게 최고.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "sn_q4_b",
+          "label": "필터, 보정, 레이아웃까지 완벽하게 꾸민다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "sn_q5",
+      "prompt": "인기 있는 트렌드 챌린지를 보면?",
+      "answers": [
+        {
+          "id": "sn_q5_a",
+          "label": "재밌네~ 구경만 한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "sn_q5_b",
+          "label": "나도 해볼까? 내 스타일로 재해석해본다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "sn_q6",
+      "prompt": "SNS 피드를 볼 때 나는?",
+      "answers": [
+        {
+          "id": "sn_q6_a",
+          "label": "친구들이 뭐 했는지, 오늘 뭐 먹었는지 확인한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "sn_q6_b",
+          "label": "인스피레이션 받을 만한 콘텐츠를 찾아본다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "sn_q7",
+      "prompt": "친구가 내 사진에 이상한 댓글을 달았다.",
+      "answers": [
+        {
+          "id": "sn_q7_a",
+          "label": "댓글 삭제하고, 왜 그런 댓글 달았는지 물어본다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "sn_q7_b",
+          "label": "상처받지만... 그냥 넘어간다. 관계가 중요하니까.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "sn_q8",
+      "prompt": "친구가 슬픈 스토리를 올렸다.",
+      "answers": [
+        {
+          "id": "sn_q8_a",
+          "label": "무슨 일 있어? 구체적으로 어떤 문제인지 물어본다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "sn_q8_b",
+          "label": "위로 이모지 보내고, DM으로 따뜻한 말을 건넨다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "sn_q9",
+      "prompt": "SNS에서 논쟁이 벌어졌다.",
+      "answers": [
+        {
+          "id": "sn_q9_a",
+          "label": "팩트를 제시하며 논리적으로 반박한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "sn_q9_b",
+          "label": "분위기 싸해지니까 그만하자고 중재한다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "sn_q10",
+      "prompt": "SNS 사용 시간을 관리할 때?",
+      "answers": [
+        {
+          "id": "sn_q10_a",
+          "label": "하루 1시간씩만 보기로 정하고 지킨다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "sn_q10_b",
+          "label": "시간 가는 줄 모르고 계속 스크롤한다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "sn_q11",
+      "prompt": "게시글을 올릴 때?",
+      "answers": [
+        {
+          "id": "sn_q11_a",
+          "label": "사진, 캡션, 해시태그까지 계획해서 올린다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "sn_q11_b",
+          "label": "그냥 올리고 싶을 때 올린다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "sn_q12",
+      "prompt": "SNS 알림이 쌓였을 때?",
+      "answers": [
+        {
+          "id": "sn_q12_a",
+          "label": "하루에 한 번씩 정리해서 다 확인한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "sn_q12_b",
+          "label": "중요한 것만 보고 나머지는 나중에...",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "체계적인 SNS 사용자, 계획적으로 관리하는 프로."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따뜻한 댓글러, 모두의 게시글에 응원을 보내는 사람."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "의미 있는 콘텐츠 제작자, 깊이 있는 이야기를 전하는 사람."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "전략적 인플루언서, 목적 있는 콘텐츠로 영향력을 만든다."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "미니멀 포스터, 필요한 것만 올리는 효율주의자."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "예술적 피드, 감성 가득한 사진으로 감동을 전한다."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "몽환적 스토리텔러, 상상력 넘치는 콘텐츠 크리에이터."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "지적 호기심러, 흥미로운 정보를 공유하는 지식인."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "실시간 스토리 마스터, 지금 당장의 순간을 공유한다."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "파티 피드, 언제나 즐거운 분위기를 만드는 인싸."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "창의적 챌린저, 새로운 트렌드를 만들어가는 트렌드세터."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "논쟁의 달인, 자극적인 주제로 토론을 이끄는 사람."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "프로페셔널 계정, 목표 지향적인 콘텐츠로 성장한다."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "소통의 달인, 모두와 친하게 지내는 SNS 인기인."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "영감을 주는 인플루언서, 긍정적인 메시지로 세상을 밝힌다."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "브랜드 빌더, 전략적으로 영향력을 키우는 리더."
+    }
+  }
+}
+

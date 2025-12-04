@@ -1,0 +1,293 @@
+{
+  "id": "test-fitness-001",
+  "title": "나의 운동/헬스 스타일 MBTI 테스트",
+  "description": "홈트? 헬스장? 요가? 당신의 운동 스타일로 알아보는 성격 유형!",
+  "tags": ["#운동", "#헬스", "#홈트", "#피트니스"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "ft_q1",
+      "prompt": "운동할 때 나는?",
+      "answers": [
+        {
+          "id": "ft_q1_a",
+          "label": "친구들과 함께 가서 서로 응원하며 운동한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "ft_q1_b",
+          "label": "혼자 운동하는 게 편해. 집중도 잘 되고.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "ft_q2",
+      "prompt": "헬스장에 갔을 때?",
+      "answers": [
+        {
+          "id": "ft_q2_a",
+          "label": "다른 사람들과 인사하고, 운동 팁을 나눈다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "ft_q2_b",
+          "label": "조용히 내 운동만 한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "ft_q3",
+      "prompt": "운동 후 나는?",
+      "answers": [
+        {
+          "id": "ft_q3_a",
+          "label": "SNS에 인증샷 올리고, 친구들과 공유한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "ft_q3_b",
+          "label": "나만의 성취감, 혼자 즐긴다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "ft_q4",
+      "prompt": "운동 계획을 세울 때 나는?",
+      "answers": [
+        {
+          "id": "ft_q4_a",
+          "label": "구체적인 루틴, 세트 수, 횟수를 정한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "ft_q4_b",
+          "label": "대충 '오늘은 다리 운동' 정도만 정한다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "ft_q5",
+      "prompt": "새로운 운동을 시작할 때?",
+      "answers": [
+        {
+          "id": "ft_q5_a",
+          "label": "검증된 방법, 전문가 영상을 보고 따라한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "ft_q5_b",
+          "label": "직접 시도해보고, 내 방식으로 만들어본다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "ft_q6",
+      "prompt": "운동 중 나의 생각은?",
+      "answers": [
+        {
+          "id": "ft_q6_a",
+          "label": "몇 세트 남았나? 시간 얼마나 지났나? 확인한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "ft_q6_b",
+          "label": "운동하면서 상상의 나래를 펼친다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "ft_q7",
+      "prompt": "운동 목표를 세울 때 나는?",
+      "answers": [
+        {
+          "id": "ft_q7_a",
+          "label": "구체적인 수치, 기간, 방법을 정한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "ft_q7_b",
+          "label": "건강해지고 싶어! 기분 좋아지고 싶어! 느낌으로 정한다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "ft_q8",
+      "prompt": "운동하다가 포기하고 싶을 때?",
+      "answers": [
+        {
+          "id": "ft_q8_a",
+          "label": "왜 포기해야 해? 목표 달성을 위해 계속한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "ft_q8_b",
+          "label": "오늘은 힘들구나... 내일 다시 해보자.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "ft_q9",
+      "prompt": "운동 정보를 볼 때 나는?",
+      "answers": [
+        {
+          "id": "ft_q9_a",
+          "label": "과학적 근거, 연구 결과를 확인한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "ft_q9_b",
+          "label": "다른 사람들의 변화 스토리를 좋아한다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "ft_q10",
+      "prompt": "운동 일정을 관리할 때?",
+      "answers": [
+        {
+          "id": "ft_q10_a",
+          "label": "요일별, 시간별로 정해진 루틴을 따른다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "ft_q10_b",
+          "label": "기분에 따라 오늘은 운동, 내일은 쉬기.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "ft_q11",
+      "prompt": "운동 기록을 할 때?",
+      "answers": [
+        {
+          "id": "ft_q11_a",
+          "label": "앱에 정확하게 기록하고, 분석한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "ft_q11_b",
+          "label": "대충 기억만 해두고, 가끔 기록한다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "ft_q12",
+      "prompt": "운동 장비를 준비할 때?",
+      "answers": [
+        {
+          "id": "ft_q12_a",
+          "label": "미리미리 준비하고, 체크리스트를 만든다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "ft_q12_b",
+          "label": "가는 길에 생각나면 사고, 없으면 그냥 간다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "철저한 운동러, 계획대로 꾸준히 하는 프로."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따뜻한 운동 파트너, 모두를 응원하는 사람."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "의미 있는 운동러, 몸과 마음을 함께 가꾸는 사람."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "전략적 운동러, 최적의 루틴을 설계하는 마스터."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "실용적 운동러, 효율적으로 운동하는 미니멀리스트."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "감성 운동러, 예쁜 운동복과 분위기를 즐기는 사람."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "몽환적 운동러, 상상력 가득한 특별한 루틴."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "분석적 운동러, 운동 원리를 연구하는 과학자."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "액티브 운동러, 스릴 넘치는 운동을 즐기는 액션러."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "즐거운 운동러, 함께 즐기는 파티피플."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "창의적 운동러, 새로운 운동을 시도하는 탐험가."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "혁신적 운동러, 상상도 못한 운동법을 만드는 도전자."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "프로페셔널 운동러, 목표 달성을 위한 완벽한 루틴."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "사교적 운동러, 모두와 함께 운동하는 인기인."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "영감을 주는 운동러, 다른 사람들에게 동기를 부여하는 코치."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "프리미엄 운동러, 최고의 성과를 내는 리더."
+    }
+  }
+}
+
