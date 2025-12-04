@@ -19,6 +19,11 @@
       "id": "test-winter-001",
       "title": "겨울 붕어빵 테스트",
       "path": "test-winter-001/test.json"
+    },
+    {
+      "id": "test-travel-001",
+      "title": "나의 여행 스타일 MBTI 테스트",
+      "path": "test-travel-001/test.json"
     }
   ]
 }
