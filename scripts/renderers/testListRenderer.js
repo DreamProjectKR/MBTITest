@@ -6,6 +6,8 @@
 import { createElement } from '../utils/domUtils.js';
 import { renderTests } from './homeRenderer.js';
 
+const TESTS_PER_PAGE = 8;
+
 /**
  * 테스트 목록 페이지 렌더링
  * @param {Array} tests - 테스트 배열
@@ -35,10 +37,14 @@ export function renderTestListPage(tests = [], onTestClick, onHomeClick) {
     className: 'test-list__actions',
   });
 
-  const homeBtn = createElement('button', {
-    type: 'button',
-    className: 'ds-button ds-button--ghost',
-  }, '홈으로 돌아가기');
+  const homeBtn = createElement(
+    'button',
+    {
+      type: 'button',
+      className: 'ds-button ds-button--ghost',
+    },
+    '홈으로 돌아가기',
+  );
   if (onHomeClick) {
     homeBtn.addEventListener('click', onHomeClick);
   }
@@ -50,16 +56,61 @@ export function renderTestListPage(tests = [], onTestClick, onHomeClick) {
     className: 'test-grid test-list__grid',
   });
 
+  // 더 보기 버튼 컨테이너
+  const loadMoreContainer = createElement('div', {
+    className: 'test-list__load-more',
+  });
+
   if (tests.length) {
-    renderTests(grid, tests, onTestClick);
+    // 초기에는 8개만 표시
+    const initialTests = tests.slice(0, TESTS_PER_PAGE);
+    renderTests(grid, initialTests, onTestClick);
+
+    // 더 많은 테스트가 있으면 "더 보기" 버튼 표시
+    if (tests.length > TESTS_PER_PAGE) {
+      let displayedCount = TESTS_PER_PAGE;
+
+      const loadMoreBtn = createElement(
+        'button',
+        {
+          type: 'button',
+          className: 'ds-button ds-button--ghost test-list__load-more-btn',
+        },
+        '더 보기',
+      );
+
+      loadMoreBtn.addEventListener('click', () => {
+        const nextTests = tests.slice(
+          displayedCount,
+          displayedCount + TESTS_PER_PAGE,
+        );
+        if (nextTests.length > 0) {
+          renderTests(grid, nextTests, onTestClick, false); // false = append mode
+          displayedCount += nextTests.length;
+
+          // 모든 테스트를 표시했으면 버튼 숨기기
+          if (displayedCount >= tests.length) {
+            loadMoreBtn.style.display = 'none';
+          }
+        }
+      });
+
+      loadMoreContainer.appendChild(loadMoreBtn);
+      wrapper.append(header, grid, loadMoreContainer);
+    } else {
+      wrapper.append(header, grid);
+    }
   } else {
-    const emptyState = createElement('p', {
-      className: 'test-list__empty',
-    }, 'MBTI 테스트 목록이 비어 있습니다. 나중에 다시 확인해주세요.');
+    const emptyState = createElement(
+      'p',
+      {
+        className: 'test-list__empty',
+      },
+      'MBTI 테스트 목록이 비어 있습니다. 나중에 다시 확인해주세요.',
+    );
     grid.appendChild(emptyState);
+    wrapper.append(header, grid);
   }
 
-  wrapper.append(header, grid);
   return wrapper;
 }
-

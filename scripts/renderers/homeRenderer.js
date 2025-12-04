@@ -11,9 +11,12 @@ import { MBTI_ORDER } from '../utils/constants.js';
  * @param {Element} container - 컨테이너 요소
  * @param {Array} tests - 테스트 배열
  * @param {Function} onTestClick - 테스트 클릭 핸들러
+ * @param {boolean} clearFirst - 컨테이너를 먼저 비울지 여부 (기본값: true)
  */
-export function renderTests(container, tests, onTestClick) {
-  clearContainer(container);
+export function renderTests(container, tests, onTestClick, clearFirst = true) {
+  if (clearFirst) {
+    clearContainer(container);
+  }
 
   tests.forEach((test, idx) => {
     const card = createElement('article', {
