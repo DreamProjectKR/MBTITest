@@ -1,137 +1,62 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MBTI 테스트 관리자</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
-      rel="stylesheet"
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
     />
-    <link rel="stylesheet" href="./styles/global.css" />
+    <title>MBTI ZOO Admin Page</title>
+    <link
+      rel="stylesheet"
+      href="styles/reset.css"
+    />
+    <link
+      rel="stylesheet"
+      href="styles/admin.css"
+    />
   </head>
   <body>
-    <div class="page-shell admin-shell">
-      <header class="site-header admin-header">
-        <div class="admin-header__group">
-          <a class="brand" href="./index.html">MBTI Zoo</a>
-          <div class="admin-header__controls">
-            <label class="form-field form-field--inline">
-              <span>테스트 선택</span>
-              <select data-test-select aria-label="현재 편집할 테스트 선택"></select>
-            </label>
-            <button class="ds-button ds-button--secondary" type="button" data-create-test>
-              새 테스트
-            </button>
-          </div>
+    <div class="head">
+      <div class="MainLogo">
+        <div class="LogoBox">
+          <img
+            src="../assets/images/Logo.png"
+            alt="바로가기"
+          />
         </div>
-        <div class="admin-header__actions">
-          <label class="ds-button ds-button--ghost" aria-label="JSON 불러오기">
-            <input type="file" accept="application/json" hidden data-json-input />
-            JSON 불러오기
-          </label>
-          <button class="ds-button ds-button--primary" type="button" data-export-json>
-            JSON 내보내기
-          </button>
+      </div>
+      <div class="GlobalNav">
+        <div class="DashboardBox">
+          <img
+            src="../assets/images/folder.png"
+            alt="대시보드"
+          />
+          <p>Dashboard</p>
         </div>
-      </header>
-
-      <main class="admin-main">
-        <section class="admin-panel" aria-labelledby="test-meta-heading">
-          <div class="section__header">
-            <h2 id="test-meta-heading">테스트 기본 정보</h2>
-          </div>
-          <form class="form-grid" data-test-meta-form>
-            <label class="form-field">
-              <span>테스트 제목</span>
-              <input type="text" name="title" required />
-            </label>
-            <label class="form-field">
-              <span>설명</span>
-              <textarea name="description" rows="3"></textarea>
-            </label>
-            <label class="form-field">
-              <span>해시태그 (쉼표 구분)</span>
-              <input type="text" name="tags" />
-            </label>
-            <label class="form-field">
-              <span>썸네일 URL</span>
-              <input type="url" name="thumbnail" />
-            </label>
-          </form>
-        </section>
-
-        <section class="admin-panel" aria-labelledby="question-builder-heading">
-          <div class="section__header">
-            <h2 id="question-builder-heading">문항 작성 (2지선다)</h2>
-          </div>
-          <form class="question-form" data-question-form>
-            <div class="form-field">
-              <label>질문 내용 <input type="text" name="prompt" required /></label>
-            </div>
-            <div class="answer-grid">
-              <fieldset>
-                <legend>답변 A</legend>
-                <input type="text" name="answerAText" placeholder="답변 텍스트" required />
-                <select name="answerAMbti" aria-label="MBTI 요소">
-                  <option value="EI">E / I</option>
-                  <option value="SN">S / N</option>
-                  <option value="TF">T / F</option>
-                  <option value="JP">J / P</option>
-                </select>
-                <select name="answerAPole" aria-label="MBTI 극">
-                  <option value="positive">앞 글자</option>
-                  <option value="negative">뒷 글자</option>
-                </select>
-              </fieldset>
-              <fieldset>
-                <legend>답변 B</legend>
-                <input type="text" name="answerBText" placeholder="답변 텍스트" required />
-                <select name="answerBMbti" aria-label="MBTI 요소">
-                  <option value="EI">E / I</option>
-                  <option value="SN">S / N</option>
-                  <option value="TF">T / F</option>
-                  <option value="JP">J / P</option>
-                </select>
-                <select name="answerBPole" aria-label="MBTI 극">
-                  <option value="positive">앞 글자</option>
-                  <option value="negative">뒷 글자</option>
-                </select>
-              </fieldset>
-            </div>
-            <button class="ds-button ds-button--primary" type="submit">문항 추가</button>
-          </form>
-          <ul class="question-list" data-question-list aria-live="polite"></ul>
-        </section>
-
-        <section class="admin-panel" aria-labelledby="result-heading">
-          <div class="section__header">
-            <h2 id="result-heading">MBTI 결과 콘텐츠</h2>
-          </div>
-          <form class="form-grid" data-result-form>
-            <label class="form-field">
-              <span>MBTI 유형 (예: ENFP)</span>
-              <input type="text" name="code" pattern="[EI][NS][FT][JP]" required />
-            </label>
-            <label class="form-field">
-              <span>대표 이미지 URL</span>
-              <input type="url" name="image" />
-            </label>
-            <label class="form-field">
-              <span>설명</span>
-              <textarea name="summary" rows="3" required></textarea>
-            </label>
-            <div class="form-field">
-              <button class="ds-button ds-button--secondary" type="submit">결과 저장/업데이트</button>
-            </div>
-          </form>
-          <ul class="result-list" data-result-list></ul>
-        </section>
-      </main>
+      </div>
     </div>
-
-    <script type="module" src="../scripts/admin.js"></script>
+    <div class="MainContents">
+      <div class="Status">
+        <div class="Dir">
+          <p>Dashboard > A1 > img</p>
+        </div>
+        <div class="User">
+          <div class="UserProfile"></div>
+          <div class="UserStatus">
+            <span id="Admin"> Adminstrator </span>
+            <span id="Name"> Park ChanHo </span>
+          </div>
+        </div>
+      </div>
+      <div class="StatusBoard">
+        <div class="MakeTest StBoardCss"></div>
+        <div class="PreView StBoardCss"></div>
+      </div>
+    </div>
   </body>
 </html>
+
+<!-- #Admin : 어드민 현재상태표 -->
+<!-- #Name : 어드민 이름 -->
+<!-- .StBoardCss 공통CSS -->
