@@ -692,6 +692,43 @@ select {
   font-weight: 700;
 }
 
+.test-list__load-more {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+}
+
+.test-list__load-more-btn {
+  width: auto;
+  height: 56px;
+  padding: 0 32px;
+  border-radius: 100px;
+  background: #00ffff;
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+  --btn-border: transparent;
+}
+
+.test-list__load-more-btn:hover {
+  background: #00e6e6;
+  transform: translateY(-2px);
+}
+
+.test-list__load-more-btn:active {
+  transform: translateY(0);
+}
+
 .route-section--loading {
   align-items: center;
   text-align: center;
