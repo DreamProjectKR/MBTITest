@@ -1,4 +1,4 @@
-const DATA_URL = '../assets/data/mbti-tests.json';
+const DATA_URL = '../assets/data/index.json';
 const AXIS_MAP = {
   EI: ['E', 'I'],
   SN: ['S', 'N'],
@@ -53,7 +53,28 @@ async function initAdmin() {
   setupForms();
 
   try {
-    const payload = await fetchJson(DATA_URL);
+    // 인덱스 파일 로드
+    const indexData = await fetchJson(DATA_URL);
+    
+    if (!indexData.tests || !Array.isArray(indexData.tests)) {
+      throw new Error('인덱스 파일 형식이 올바르지 않습니다.');
+    }
+
+    // 각 테스트 파일 로드
+    const baseUrl = DATA_URL.substring(0, DATA_URL.lastIndexOf('/') + 1);
+    const testPromises = indexData.tests.map(async (testIndex) => {
+      const testPath = `${baseUrl}${testIndex.path}`;
+      const testData = await fetchJson(testPath);
+      return testData;
+    });
+
+    const tests = await Promise.all(testPromises);
+    
+    const payload = {
+      ...indexData,
+      tests: tests
+    };
+    
     applyPayload(payload);
   } catch (error) {
     console.warn('초기 데이터 로딩 실패', error);

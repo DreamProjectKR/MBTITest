@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "id": "test-spring-001",
+      "title": "나의 봄꽃 MBTI 테스트",
+      "path": "test-spring-001/test.json"
+    },
+    {
+      "id": "test-summer-001",
+      "title": "여름 바캉스 스타일 테스트",
+      "path": "test-summer-001/test.json"
+    },
+    {
+      "id": "test-autumn-001",
+      "title": "가을 감성 독서 테스트",
+      "path": "test-autumn-001/test.json"
+    },
+    {
+      "id": "test-winter-001",
+      "title": "겨울 붕어빵 테스트",
+      "path": "test-winter-001/test.json"
+    }
+  ]
+}

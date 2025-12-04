@@ -1,0 +1,293 @@
+{
+  "id": "test-winter-001",
+  "title": "겨울 붕어빵 테스트",
+  "description": "찬 바람이 불면 생각나는 붕어빵! 나는 어떤 맛 붕어빵일까?",
+  "tags": ["#겨울", "#간식", "#붕어빵", "#성격"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "wi_q1",
+      "prompt": "붕어빵을 사러 가는 길, 친구를 만났다.",
+      "answers": [
+        {
+          "id": "wi_q1_a",
+          "label": "반갑게 인사하고 같이 사러 가자고 한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "wi_q1_b",
+          "label": "눈 마주치기 전에 모른 척 지나간다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "wi_q2",
+      "prompt": "붕어빵 사장님이 말을 건다.",
+      "answers": [
+        {
+          "id": "wi_q2_a",
+          "label": "사장님과 날씨 얘기부터 시시콜콜 수다 떤다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "wi_q2_b",
+          "label": "네... (빨리 주세요 현기증 난단 말이에요)",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "wi_q3",
+      "prompt": "친구들과 붕어빵 파티를 한다면?",
+      "answers": [
+        {
+          "id": "wi_q3_a",
+          "label": "내가 분위기 메이커! 게임하고 떠든다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "wi_q3_b",
+          "label": "조용히 붕어빵 먹으며 친구들 노는 거 구경한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "wi_q4",
+      "prompt": "붕어빵을 먹을 때 나는?",
+      "answers": [
+        {
+          "id": "wi_q4_a",
+          "label": "머리부터? 꼬리부터? 그냥 맛만 있으면 됨.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "wi_q4_b",
+          "label": "붕어빵도 감정이 있을까? 어디부터 먹어야 덜 아플까?",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "wi_q5",
+      "prompt": "슈크림 붕어빵을 보며 든 생각은?",
+      "answers": [
+        {
+          "id": "wi_q5_a",
+          "label": "노란색 크림이 들어있군. 달콤하겠다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "wi_q5_b",
+          "label": "황금 잉어가 생각나네. 먹으면 행운이 올까?",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "wi_q6",
+      "prompt": "눈이 오는 풍경을 보며?",
+      "answers": [
+        {
+          "id": "wi_q6_a",
+          "label": "길 미끄럽겠다. 내일 출근 어떡하지.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "wi_q6_b",
+          "label": "세상이 하얗게 덮였어... 겨울왕국 같아.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "wi_q7",
+      "prompt": "친구가 붕어빵을 태웠다.",
+      "answers": [
+        {
+          "id": "wi_q7_a",
+          "label": "탄 부분 떼고 먹어. 다음엔 불 조절 잘 해봐.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "wi_q7_b",
+          "label": "아이고 아까워라... 그래도 네가 구워줘서 맛있어!",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "wi_q8",
+      "prompt": "맛없는 붕어빵 가게를 발견했다.",
+      "answers": [
+        {
+          "id": "wi_q8_a",
+          "label": "여기 반죽 비율이 별로네. 다신 안 옴.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "wi_q8_b",
+          "label": "사장님이 추운데 고생하시는데... 마음이 아파.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "wi_q9",
+      "prompt": "팥 vs 슈크림 논쟁이 붙었다.",
+      "answers": [
+        {
+          "id": "wi_q9_a",
+          "label": "원조는 팥이지. 데이터가 증명함.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "wi_q9_b",
+          "label": "취향 존중해주자. 둘 다 맛있잖아~",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "wi_q10",
+      "prompt": "붕어빵 사러 갈 때?",
+      "answers": [
+        {
+          "id": "wi_q10_a",
+          "label": "지갑, 현금, 계좌이체 가능 여부 확인 후 출발.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "wi_q10_b",
+          "label": "냄새 맡고 홀린 듯이 따라간다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "wi_q11",
+      "prompt": "붕어빵을 먹고 남았다.",
+      "answers": [
+        {
+          "id": "wi_q11_a",
+          "label": "밀폐 용기에 담아 냉동 보관 후 에어프라이어.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "wi_q11_b",
+          "label": "식탁 위에 둠. 누군가 먹겠지.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "wi_q12",
+      "prompt": "겨울 간식 예산을 짠다면?",
+      "answers": [
+        {
+          "id": "wi_q12_a",
+          "label": "일주일치 간식비 딱 정해두고 쓴다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "wi_q12_b",
+          "label": "주머니에 있는 대로 다 사 먹는다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "근본 있는 원조 팥 붕어빵, 변하지 않는 클래식."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따끈한 고구마 붕어빵, 부드럽고 달콤한 배려."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "신비로운 흑임자 붕어빵, 알수록 깊은 맛."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "차가운 아이스크림 붕어빵, 냉철하지만 속은 꽉 참."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "심플한 미니 붕어빵, 효율적으로 한 입에 쏙."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "예쁜 딸기 붕어빵, 보기만 해도 기분 좋아짐."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "폭신한 계란빵, 몽글몽글한 감성."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "실험적인 민트초코 붕어빵, 호불호 확실한 개성."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "매콤한 김치 붕어빵, 자극적이고 화끈한 맛."
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "바삭한 페스츄리 붕어빵, 언제나 파티 분위기."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "알록달록 레인보우 붕어빵, 어디로 튈지 모르는 매력."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "피자 붕어빵, 퓨전 그 자체인 아이디어 뱅크."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "속이 꽉 찬 왕붕어빵, 리더의 품격."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "달달한 슈크림 붕어빵, 누구에게나 사랑받는 맛."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "나눠 먹는 붕어빵 세트, 함께일 때 더 빛나는 당신."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "프리미엄 붕어빵, 성공의 맛."
+    }
+  }
+}
+

@@ -34,16 +34,47 @@ export class DataService {
    */
   async fetchData() {
     try {
-      const response = await fetch(this.dataUrl);
+      // 인덱스 파일 로드
+      const indexResponse = await fetch(this.dataUrl);
       
-      if (!response.ok) {
+      if (!indexResponse.ok) {
         throw new DataFetchError(
-          `데이터를 불러오지 못했습니다. (상태 코드: ${response.status})`,
-          response.status
+          `인덱스 파일을 불러오지 못했습니다. (상태 코드: ${indexResponse.status})`,
+          indexResponse.status
         );
       }
 
-      const data = await response.json();
+      const indexData = await indexResponse.json();
+      
+      if (!indexData.tests || !Array.isArray(indexData.tests)) {
+        throw new DataFetchError('인덱스 파일 형식이 올바르지 않습니다.');
+      }
+
+      // 각 테스트 파일 로드
+      const baseUrl = this.dataUrl.substring(0, this.dataUrl.lastIndexOf('/') + 1);
+      const testPromises = indexData.tests.map(async (testIndex) => {
+        const testPath = `${baseUrl}${testIndex.path}`;
+        const testResponse = await fetch(testPath);
+        
+        if (!testResponse.ok) {
+          throw new DataFetchError(
+            `테스트 파일을 불러오지 못했습니다: ${testIndex.id} (상태 코드: ${testResponse.status})`,
+            testResponse.status
+          );
+        }
+
+        const testData = await testResponse.json();
+        // 이미지 경로를 절대 경로로 변환
+        return this.normalizeTestPaths(testData, testIndex.path);
+      });
+
+      const tests = await Promise.all(testPromises);
+      
+      const data = {
+        ...indexData,
+        tests: tests
+      };
+      
       this.cache = data;
       return data;
     } catch (error) {
@@ -54,6 +85,40 @@ export class DataService {
         `네트워크 오류가 발생했습니다: ${error.message}`
       );
     }
+  }
+
+  /**
+   * 테스트 데이터의 이미지 경로를 절대 경로로 변환
+   * @param {Object} testData - 테스트 데이터
+   * @param {string} testPath - 테스트 파일 경로 (예: "test-spring-001/test.json")
+   * @returns {Object} 경로가 정규화된 테스트 데이터
+   */
+  normalizeTestPaths(testData, testPath) {
+    const testDir = testPath.substring(0, testPath.lastIndexOf('/'));
+    const baseUrl = this.dataUrl.substring(0, this.dataUrl.lastIndexOf('/') + 1);
+    
+    const normalized = { ...testData };
+    
+    // 썸네일 경로 변환
+    if (normalized.thumbnail && normalized.thumbnail.startsWith('images/')) {
+      normalized.thumbnail = `${baseUrl}${testDir}/${normalized.thumbnail}`;
+    }
+    
+    // 결과 이미지 경로 변환
+    if (normalized.results) {
+      const normalizedResults = {};
+      for (const [mbtiType, result] of Object.entries(normalized.results)) {
+        normalizedResults[mbtiType] = {
+          ...result,
+          image: result.image && result.image.startsWith('images/')
+            ? `${baseUrl}${testDir}/${result.image}`
+            : result.image
+        };
+      }
+      normalized.results = normalizedResults;
+    }
+    
+    return normalized;
   }
 
   /**

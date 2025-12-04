@@ -1,0 +1,293 @@
+{
+  "id": "test-autumn-001",
+  "title": "가을 감성 독서 테스트",
+  "description": "책 읽기 좋은 계절 가을, 당신의 영혼을 채워줄 책 장르는 무엇일까요?",
+  "tags": ["#가을", "#독서", "#감성", "#책추천"],
+  "thumbnail": "images/thumbnail.svg",
+  "heroAnimation": "pan",
+  "questions": [
+    {
+      "id": "au_q1",
+      "prompt": "서점에 갔을 때 나는?",
+      "answers": [
+        {
+          "id": "au_q1_a",
+          "label": "베스트셀러 코너에서 사람들 틈에 섞여 구경한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "au_q1_b",
+          "label": "구석진 자리에서 조용히 책 제목을 훑어본다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "au_q2",
+      "prompt": "북토크 행사에 참여했다.",
+      "answers": [
+        {
+          "id": "au_q2_a",
+          "label": "손 들고 작가님께 질문한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "au_q2_b",
+          "label": "조용히 경청하고 마음속으로만 생각한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "au_q3",
+      "prompt": "친구들과 독서 모임을 한다면?",
+      "answers": [
+        {
+          "id": "au_q3_a",
+          "label": "활발하게 토론하고 내 의견을 피력한다.",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "au_q3_b",
+          "label": "주로 듣는 편이고 꼭 필요할 때만 말한다.",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "au_q4",
+      "prompt": "책을 고르는 기준은?",
+      "answers": [
+        {
+          "id": "au_q4_a",
+          "label": "실용적인 정보, 자기계발, 팩트 위주의 책.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "au_q4_b",
+          "label": "상상력을 자극하는 소설, 판타지, 시집.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "au_q5",
+      "prompt": "책 속 묘사를 읽을 때?",
+      "answers": [
+        {
+          "id": "au_q5_a",
+          "label": "글자 그대로 상황을 이해한다.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "au_q5_b",
+          "label": "장면이 머릿속에 영화처럼 그려진다.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "au_q6",
+      "prompt": "미래에 대해 생각할 때?",
+      "answers": [
+        {
+          "id": "au_q6_a",
+          "label": "당장 내일 뭐 먹을지, 현실적인 고민.",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "au_q6_b",
+          "label": "먼 미래의 인류나 우주에 대한 몽상.",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "au_q7",
+      "prompt": "슬픈 소설을 읽었을 때?",
+      "answers": [
+        {
+          "id": "au_q7_a",
+          "label": "주인공이 왜 이런 선택을 했지? 분석한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "au_q7_b",
+          "label": "주인공 너무 불쌍해 ㅠㅠ 눈물 콧물 쏟는다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "au_q8",
+      "prompt": "친구가 책 추천을 부탁한다.",
+      "answers": [
+        {
+          "id": "au_q8_a",
+          "label": "네 상황에 도움 될 만한 정보가 담긴 책이야.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "au_q8_b",
+          "label": "이거 읽으면 위로받는 느낌이 들 거야.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "au_q9",
+      "prompt": "토론 중 의견이 충돌했다.",
+      "answers": [
+        {
+          "id": "au_q9_a",
+          "label": "논리적 허점을 지적하며 반박한다.",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "au_q9_b",
+          "label": "상대방 기분 상하지 않게 돌려 말한다.",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "au_q10",
+      "prompt": "독서 계획을 세울 때?",
+      "answers": [
+        {
+          "id": "au_q10_a",
+          "label": "하루 30페이지, 한 달 4권 목표 달성!",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "au_q10_b",
+          "label": "삘 꽂히는 날 밤새워서 다 읽는다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "au_q11",
+      "prompt": "빌린 책 반납일이 다가온다.",
+      "answers": [
+        {
+          "id": "au_q11_a",
+          "label": "미리미리 읽고 여유 있게 반납한다.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "au_q11_b",
+          "label": "반납 당일에 부랴부랴 뛰어가거나 연체료 낸다.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "au_q12",
+      "prompt": "책장 정리를 할 때?",
+      "answers": [
+        {
+          "id": "au_q12_a",
+          "label": "장르별, 작가별, 색깔별로 칼각 정리.",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "au_q12_b",
+          "label": "일단 꽂아둔다. 빈 공간 있으면 다행.",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ISTJ": {
+      "image": "images/ISTJ.svg",
+      "summary": "논리정연한 역사서, 팩트 체크는 필수."
+    },
+    "ISFJ": {
+      "image": "images/ISFJ.svg",
+      "summary": "따뜻한 에세이, 마음의 평화를 주는 글."
+    },
+    "INFJ": {
+      "image": "images/INFJ.svg",
+      "summary": "심오한 철학책, 인간 본연을 탐구하다."
+    },
+    "INTJ": {
+      "image": "images/INTJ.svg",
+      "summary": "미래 전략서, 세상을 꿰뚫어 보는 통찰."
+    },
+    "ISTP": {
+      "image": "images/ISTP.svg",
+      "summary": "추리 소설, 범인을 찾는 짜릿한 두뇌 게임."
+    },
+    "ISFP": {
+      "image": "images/ISFP.svg",
+      "summary": "아름다운 화보집, 글보다는 그림과 감성."
+    },
+    "INFP": {
+      "image": "images/INFP.svg",
+      "summary": "판타지 소설, 현실을 잊고 떠나는 모험."
+    },
+    "INTP": {
+      "image": "images/INTP.svg",
+      "summary": "과학 잡지, 우주의 원리가 궁금해."
+    },
+    "ESTP": {
+      "image": "images/ESTP.svg",
+      "summary": "액션 만화, 지루한 글보다는 시각적 자극!"
+    },
+    "ESFP": {
+      "image": "images/ESFP.svg",
+      "summary": "연예 가십 잡지, 핫한 트렌드는 다 내 거."
+    },
+    "ENFP": {
+      "image": "images/ENFP.svg",
+      "summary": "동화책, 어른이 되어도 꿈을 잃지 않아."
+    },
+    "ENTP": {
+      "image": "images/ENTP.svg",
+      "summary": "사회 비평서, 논쟁적인 주제를 즐기는 토론가."
+    },
+    "ESTJ": {
+      "image": "images/ESTJ.svg",
+      "summary": "리더십 관련 서적, 성공하는 사람들의 습관."
+    },
+    "ESFJ": {
+      "image": "images/ESFJ.svg",
+      "summary": "요리책/육아책, 실생활에 도움 되는 정보."
+    },
+    "ENFJ": {
+      "image": "images/ENFJ.svg",
+      "summary": "인문학 베스트셀러, 사람을 이해하고 이끄는 힘."
+    },
+    "ENTJ": {
+      "image": "images/ENTJ.svg",
+      "summary": "경영/경제서, 세상을 움직이는 원리 파악."
+    }
+  }
+}
+
