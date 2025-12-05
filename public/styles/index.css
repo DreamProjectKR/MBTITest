@@ -1,5 +1,5 @@
-@import url('../path_to_your_design_system/tokens.css');
-@import url('../path_to_your_design_system/components.css');
+@import url('../../styles/tokens.css');
+@import url('../../styles/components.css');
 
 *,
 *::before,
@@ -457,174 +457,6 @@ select {
   --btn-border: transparent;
 }
 
-/* Section Forum */
-
-.mbti-panel {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 36px;
-  align-items: start;
-}
-
-.mbti-grid-wrapper {
-  border-radius: 20px;
-  padding: 24px 16px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.mbti-grid-wrapper p {
-  margin: 0;
-}
-
-.mbti-grid {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(50px, 1fr));
-  gap: 16px 12px;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-  justify-items: center;
-}
-
-.ds-badge {
-  width: 100%;
-  max-width: 70px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: transparent;
-  padding: 0;
-}
-
-.ds-badge__media {
-  width: 65px;
-  height: 65px;
-  border-radius: 15px;
-  background: #f6fbff;
-}
-
-.ds-badge__label {
-  font-size: 14px;
-  font-weight: 700;
-  margin-top: 6px;
-  text-align: center;
-}
-
-.mbti-grid--bottom {
-  margin-top: 6px;
-}
-
-.mbti-feed-slider {
-  border-radius: 24px;
-  padding: 28px 24px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-height: 280px;
-  background: #ffffff;
-  position: relative;
-  overflow: hidden;
-}
-
-.mbti-feed-slider .slider-track {
-  display: flex;
-  gap: 24px;
-  width: max-content;
-  animation: marquee 20s linear infinite;
-}
-
-.mbti-feed-slider .slider-track:hover {
-  animation-play-state: paused;
-}
-
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.slider-button--feed {
-  display: none;
-}
-
-.ds-card--feed {
-  min-width: 260px;
-  height: 180px;
-  border-radius: 18px;
-  padding: 16px;
-  background: #ffffff;
-  box-shadow: none;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.feed-card__media {
-  width: 100%;
-  height: calc(100% - 4px);
-  flex-shrink: 0;
-  border-radius: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-}
-
-.ds-card--feed .ds-card__body {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: transparent;
-  height: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-end;
-  flex-grow: 0;
-  z-index: 2;
-}
-
-.ds-card--feed h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  margin-top: 4px;
-}
-
-.ds-card--feed .ds-link {
-  align-self: flex-end;
-  font-size: 12px;
-  color: #a1a1a1;
-  text-decoration: none;
-  font-weight: 400;
-}
-
-.forum-btn-wrapper {
-  grid-column: 2;
-  justify-self: end;
-}
-
-.forum-btn-wrapper .ds-button--secondary {
-  width: 220px;
-  height: 42px;
-  border-radius: 30px;
-  background: #ffdede;
-  font-size: 16px;
-  font-weight: 700;
-  color: #000;
-  border: none;
-  --btn-border: transparent;
-}
-
 /* Route pages */
 .route-outlet {
   width: 100%;
@@ -942,7 +774,7 @@ select {
   font-weight: 700;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1230px) {
   .test-intro-page {
     grid-template-columns: 1fr;
   }

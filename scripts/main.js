@@ -91,8 +91,9 @@ async function initHomepage() {
     router.navigateTo('#');
   });
 
-  if (!testsGrid || !mbtiGrid || !mbtiFeedTrack || !feedSlider) {
-    console.warn('필수 DOM 요소를 찾을 수 없습니다.');
+  // testsGrid는 필수, 나머지는 선택사항
+  if (!testsGrid) {
+    console.warn('테스트 그리드 요소를 찾을 수 없습니다.');
     return;
   }
 
@@ -121,10 +122,12 @@ async function initHomepage() {
       }
     });
 
+    // MBTI 그리드가 존재하면 렌더링
     if (mbtiGrid && mbtiGridBottom) {
       renderMbtiGrid(mbtiGrid, mbtiGridBottom);
     }
 
+    // 포럼 피드가 존재하면 렌더링
     const forumHighlights = dataService.getForumHighlights(payload);
     if (mbtiFeedTrack) {
       renderForum(mbtiFeedTrack, forumHighlights);
