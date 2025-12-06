@@ -2,7 +2,8 @@
  * 애플리케이션 상수 정의
  */
 
-export const DATA_URL = '/api/tests';
+// Pages에서 정적 JSON을 기본으로 사용 (API가 없을 때도 로드 가능)
+export const DATA_URL = './assets/data/index.json';
 
 export const ROUTE_SEGMENTS = {
   HOME: '',
@@ -48,4 +49,3 @@ export const MBTI_DIRECTIONS = {
   J: 'J',
   P: 'P',
 };
-
