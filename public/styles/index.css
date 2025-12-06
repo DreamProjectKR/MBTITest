@@ -290,6 +290,7 @@ select {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 100px;
 }
 
 .site-main[data-view='route'] > :not(.route-outlet) {
