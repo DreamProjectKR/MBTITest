@@ -75,10 +75,14 @@ export function renderTestResultPage(
   });
   const resolvedImage = resolveResultImage(resultInfo?.image, test);
   if (resolvedImage) {
-    const img = createElement('img', {
-      src: resolvedImage,
-      alt: `${normalizedType} 결과 이미지`,
-    });
+    const img = createElement(
+      'img',
+      {
+        src: resolvedImage,
+        alt: `${normalizedType} 결과 이미지`,
+        loading: 'lazy',
+      },
+    );
     media.appendChild(img);
   } else {
     media.setAttribute('data-placeholder', 'true');

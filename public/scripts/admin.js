@@ -1,3 +1,5 @@
+import { createElement } from './utils/domUtils.js';
+
 const API_URL = '/api/tests';
 const DATA_URL = API_URL;
 const AXIS_MAP = {
@@ -433,35 +435,35 @@ function renderResults(results = {}) {
 
   elements.resultList.innerHTML = '';
   entries.forEach(([code, detail]) => {
-    const item = document.createElement('li');
-    item.className = 'ds-card ds-card--compact';
+    const item = createElement('li', { className: 'ds-card ds-card--compact' });
 
-    const badge = document.createElement('div');
-    badge.className = 'ds-badge';
-    const media = document.createElement('div');
-    media.className = 'ds-badge__media';
-    const img = document.createElement('img');
-    img.src = detail.image || detail.imageUrl || '';
-    img.alt = `${code} 이미지`;
-    img.loading = 'lazy';
+    const badge = createElement('div', { className: 'ds-badge' });
+    const media = createElement('div', { className: 'ds-badge__media' });
+    const img = createElement('img', {
+      src: detail.image || detail.imageUrl || '',
+      alt: `${code} 이미지`,
+      loading: 'lazy',
+    });
     media.append(img);
     badge.append(media);
 
-    const textWrap = document.createElement('div');
-    const strong = document.createElement('strong');
+    const textWrap = createElement('div');
+    const strong = createElement('strong');
     strong.textContent = code;
-    const summary = document.createElement('p');
+    const summary = createElement('p');
     summary.textContent = detail.summary ?? '';
     textWrap.append(strong, summary);
     badge.append(textWrap);
 
-    const controls = document.createElement('div');
-    controls.className = 'result-item__controls';
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'ds-button ds-button--ghost ds-button--small';
-    removeBtn.type = 'button';
+    const controls = createElement('div', {
+      className: 'result-item__controls',
+    });
+    const removeBtn = createElement('button', {
+      className: 'ds-button ds-button--ghost ds-button--small',
+      type: 'button',
+      dataset: { removeResult: code },
+    });
     removeBtn.textContent = '삭제';
-    removeBtn.dataset.removeResult = code;
     controls.append(removeBtn);
 
     item.append(badge, controls);
@@ -672,9 +674,11 @@ function renderPreview(test) {
     elements.preview.thumb.innerHTML = '';
     const thumbUrl = test?.thumbnail;
     if (thumbUrl) {
-      const img = document.createElement('img');
-      img.src = thumbUrl;
-      img.alt = '썸네일';
+      const img = createElement('img', {
+        src: thumbUrl,
+        alt: '썸네일',
+        loading: 'lazy',
+      });
       elements.preview.thumb.append(img);
     } else {
       elements.preview.thumb.textContent = '썸네일 미등록';
