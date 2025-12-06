@@ -392,10 +392,11 @@ select {
   overflow: hidden;
   padding: var(--space-md);
   box-sizing: border-box;
-  margin: var(--space-sm) 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  align-items: center;
   gap: 0;
   --thumbnail-body-height: 96px;
 }
