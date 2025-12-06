@@ -528,8 +528,11 @@ select {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: var(--space-xl);
   padding-top: var(--space-lg);
+}
+
+.test-list-page .ds-card--test {
+  margin: 0;
 }
 
 .test-list__load-more-btn {
