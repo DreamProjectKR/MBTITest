@@ -25,6 +25,7 @@ export class DataService {
   constructor(dataUrl = DATA_URL) {
     this.dataUrl = dataUrl;
     this.cache = null;
+    this.staticIndexUrl = './assets/data/index.json';
   }
 
   /**
@@ -34,12 +35,13 @@ export class DataService {
    */
   async fetchData() {
     try {
+      // 1순위: API(/api/tests) 호출
       const indexResponse = await fetch(this.dataUrl);
 
       if (!indexResponse.ok) {
         throw new DataFetchError(
           `인덱스 파일을 불러오지 못했습니다. (상태 코드: ${indexResponse.status})`,
-          indexResponse.status
+          indexResponse.status,
         );
       }
 
@@ -49,12 +51,12 @@ export class DataService {
       // Cloudflare Pages Functions에서 이미 병합된 형태로 내려줄 때
       if (this.isAggregatedPayload(indexData)) {
         const normalizedTests = (indexData.tests ?? []).map((test) =>
-          this.normalizeTestPaths(test, test.path ?? test.id, assetBaseUrl)
+          this.normalizeTestPaths(test, test.path ?? test.id, assetBaseUrl),
         );
 
         const data = {
           ...indexData,
-          tests: normalizedTests
+          tests: normalizedTests,
         };
 
         this.cache = data;
@@ -74,7 +76,7 @@ export class DataService {
         if (!testResponse.ok) {
           throw new DataFetchError(
             `테스트 파일을 불러오지 못했습니다: ${testIndex.id} (상태 코드: ${testResponse.status})`,
-            testResponse.status
+            testResponse.status,
           );
         }
 
@@ -86,19 +88,54 @@ export class DataService {
 
       const data = {
         ...indexData,
-        tests: tests
+        tests: tests,
       };
 
       this.cache = data;
       return data;
     } catch (error) {
-      if (error instanceof DataFetchError) {
-        throw error;
-      }
+      console.warn('API 로딩 실패, 정적 JSON으로 재시도', error);
+      return this.fetchStaticFallback();
+    }
+  }
+
+  async fetchStaticFallback() {
+    const indexResponse = await fetch(this.staticIndexUrl);
+    if (!indexResponse.ok) {
       throw new DataFetchError(
-        `네트워크 오류가 발생했습니다: ${error.message}`
+        `정적 인덱스 파일을 불러오지 못했습니다. (상태 코드: ${indexResponse.status})`,
+        indexResponse.status,
       );
     }
+    const indexData = await indexResponse.json();
+    if (!indexData.tests || !Array.isArray(indexData.tests)) {
+      throw new DataFetchError('정적 인덱스 파일 형식이 올바르지 않습니다.');
+    }
+
+    const baseUrl = this.staticIndexUrl.substring(
+      0,
+      this.staticIndexUrl.lastIndexOf('/'),
+    );
+    const testPromises = indexData.tests.map(async (testIndex) => {
+      const testPath = `${baseUrl}/${testIndex.path}`;
+      const testResponse = await fetch(testPath);
+      if (!testResponse.ok) {
+        throw new DataFetchError(
+          `정적 테스트 파일을 불러오지 못했습니다: ${testIndex.id} (상태 코드: ${testResponse.status})`,
+          testResponse.status,
+        );
+      }
+      const testData = await testResponse.json();
+      return this.normalizeTestPaths(testData, testIndex.path, baseUrl);
+    });
+
+    const tests = await Promise.all(testPromises);
+    const data = {
+      ...indexData,
+      tests,
+    };
+    this.cache = data;
+    return data;
   }
 
   /**
@@ -112,13 +149,22 @@ export class DataService {
     const testDir = testPath?.includes('/')
       ? testPath.substring(0, testPath.lastIndexOf('/'))
       : testData.id ?? '';
-    const resolvedBase = assetBaseUrl?.replace(/\/$/, '') ?? this.computeLegacyBase();
-    const prefix = resolvedBase && testDir ? `${resolvedBase}/${testDir}/` : null;
+    const resolvedBase =
+      assetBaseUrl?.replace(/\/$/, '') ?? this.computeLegacyBase();
+    const prefix =
+      resolvedBase && testDir ? `${resolvedBase}/${testDir}/` : null;
 
     const normalized = { ...testData };
 
-    if (prefix && normalized.thumbnail && normalized.thumbnail.startsWith('images/')) {
-      normalized.thumbnail = `${prefix}${normalized.thumbnail.replace(/^images\\//, '')}`;
+    if (
+      prefix &&
+      normalized.thumbnail &&
+      normalized.thumbnail.startsWith('images/')
+    ) {
+      normalized.thumbnail = `${prefix}${normalized.thumbnail.replace(
+        /^images\//,
+        '',
+      )}`;
     }
 
     if (prefix && normalized.results) {
@@ -128,8 +174,8 @@ export class DataService {
           ...result,
           image:
             result.image && result.image.startsWith('images/')
-              ? `${prefix}${result.image.replace(/^images\\//, '')}`
-              : result.image
+              ? `${prefix}${result.image.replace(/^images\//, '')}`
+              : result.image,
         };
       }
       normalized.results = normalizedResults;
@@ -139,7 +185,10 @@ export class DataService {
   }
 
   isAggregatedPayload(payload) {
-    return Array.isArray(payload?.tests) && payload.tests.some((test) => Array.isArray(test?.questions));
+    return (
+      Array.isArray(payload?.tests) &&
+      payload.tests.some((test) => Array.isArray(test?.questions))
+    );
   }
 
   computeLegacyBase() {
@@ -198,4 +247,3 @@ export class DataService {
 
 // 싱글톤 인스턴스 생성 및 export
 export const dataService = new DataService();
-
