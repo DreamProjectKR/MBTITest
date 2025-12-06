@@ -13,6 +13,14 @@
     />
     <link
       rel="stylesheet"
+      href="styles/tokens.css"
+    />
+    <link
+      rel="stylesheet"
+      href="styles/components.css"
+    />
+    <link
+      rel="stylesheet"
       href="styles/admin.css"
     />
   </head>
@@ -45,15 +53,333 @@
           <div class="UserProfile"></div>
           <div class="UserStatus">
             <span id="Admin"> Adminstrator </span>
-            <span id="Name"> Park ChanHo </span>
+            <span id="Name"> DreamP </span>
           </div>
         </div>
       </div>
       <div class="StatusBoard">
-        <div class="MakeTest StBoardCss"></div>
-        <div class="PreView StBoardCss"></div>
+        <div class="MakeTest StBoardCss">
+          <section class="panel panel--meta">
+            <div class="panel__header">
+              <h2>테스트 메타</h2>
+              <div class="panel__actions">
+                <select data-test-select>
+                  <option value="">불러오는 중...</option>
+                </select>
+                <button
+                  type="button"
+                  class="ds-button ds-button--secondary ds-button--small"
+                  data-create-test
+                >
+                  새 테스트
+                </button>
+              </div>
+            </div>
+            <form
+              class="panel__grid"
+              data-test-meta-form
+            >
+              <label class="form-field">
+                <span>테스트 ID</span>
+                <input
+                  name="testId"
+                  type="text"
+                  placeholder="test-spring-001"
+                />
+                <small>미입력 시 제목 기반으로 자동 생성됩니다.</small>
+              </label>
+              <label class="form-field">
+                <span>테스트 제목</span>
+                <input
+                  name="title"
+                  type="text"
+                  placeholder="나의 테스트"
+                  required
+                />
+              </label>
+              <label class="form-field">
+                <span>설명</span>
+                <textarea
+                  name="description"
+                  rows="2"
+                  placeholder="설명을 입력하세요."
+                ></textarea>
+              </label>
+              <label class="form-field">
+                <span>태그(쉼표 구분)</span>
+                <input
+                  name="tags"
+                  type="text"
+                  placeholder="#여행, #테스트"
+                />
+              </label>
+              <label class="form-field">
+                <span>썸네일 이미지</span>
+                <input
+                  name="thumbnail"
+                  type="file"
+                  accept="image/*"
+                  data-thumbnail-input
+                />
+                <small>images/thumbnail.(png|svg)로 저장됩니다.</small>
+              </label>
+            </form>
+          </section>
+
+          <section class="panel panel--questions">
+            <div class="panel__header">
+              <h2>문항 작성</h2>
+              <p class="hint">
+                2지선다 문항을 추가하고 순서를 이동할 수 있습니다.
+              </p>
+            </div>
+            <form
+              class="question-form"
+              data-question-form
+            >
+              <label class="form-field">
+                <span>질문</span>
+                <input
+                  name="prompt"
+                  type="text"
+                  placeholder="질문을 입력하세요."
+                  required
+                />
+              </label>
+              <div class="answer-grid">
+                <div class="answer-col">
+                  <p class="answer-label">답변 A</p>
+                  <input
+                    name="answerAText"
+                    type="text"
+                    placeholder="보기 텍스트"
+                    required
+                  />
+                  <div class="answer-row">
+                    <select name="answerAMbti">
+                      <option value="EI">EI</option>
+                      <option value="SN">SN</option>
+                      <option value="TF">TF</option>
+                      <option value="JP">JP</option>
+                    </select>
+                    <select name="answerAPole">
+                      <option value="positive">앞 글자</option>
+                      <option value="negative">뒷 글자</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="answer-col">
+                  <p class="answer-label">답변 B</p>
+                  <input
+                    name="answerBText"
+                    type="text"
+                    placeholder="보기 텍스트"
+                    required
+                  />
+                  <div class="answer-row">
+                    <select name="answerBMbti">
+                      <option value="EI">EI</option>
+                      <option value="SN">SN</option>
+                      <option value="TF">TF</option>
+                      <option value="JP">JP</option>
+                    </select>
+                    <select name="answerBPole">
+                      <option value="negative">앞 글자</option>
+                      <option value="positive">뒷 글자</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <button
+                class="ds-button ds-button--primary"
+                type="submit"
+              >
+                문항 추가
+              </button>
+            </form>
+            <ul
+              class="stacked-list"
+              data-question-list
+            ></ul>
+          </section>
+
+          <section class="panel panel--results">
+            <div class="panel__header">
+              <h2>MBTI 결과 콘텐츠</h2>
+              <p class="hint">16개 MBTI별 요약과 이미지를 등록하세요.</p>
+            </div>
+            <form
+              class="result-form"
+              data-result-form
+            >
+              <div class="result-grid">
+                <label class="form-field">
+                  <span>MBTI 코드</span>
+                  <select
+                    name="code"
+                    required
+                  >
+                    <option value="">선택하세요</option>
+                    <option value="thumbnail">썸네일</option>
+                    <option value="INTJ">INTJ</option>
+                    <option value="INTP">INTP</option>
+                    <option value="ENTJ">ENTJ</option>
+                    <option value="ENTP">ENTP</option>
+                    <option value="INFJ">INFJ</option>
+                    <option value="INFP">INFP</option>
+                    <option value="ENFJ">ENFJ</option>
+                    <option value="ENFP">ENFP</option>
+                    <option value="ISTJ">ISTJ</option>
+                    <option value="ISFJ">ISFJ</option>
+                    <option value="ESTJ">ESTJ</option>
+                    <option value="ESFJ">ESFJ</option>
+                    <option value="ISTP">ISTP</option>
+                    <option value="ISFP">ISFP</option>
+                    <option value="ESTP">ESTP</option>
+                    <option value="ESFP">ESFP</option>
+                  </select>
+                </label>
+                <label class="form-field">
+                  <span>요약</span>
+                  <textarea
+                    name="summary"
+                    rows="2"
+                    placeholder="설명 텍스트"
+                  ></textarea>
+                </label>
+                <label class="form-field">
+                  <span>이미지 업로드</span>
+                  <input
+                    name="resultImageFile"
+                    type="file"
+                    accept="image/*"
+                    data-result-image
+                  />
+                  <small>images/MBTI.(png|svg)로 저장됩니다.</small>
+                </label>
+                <label class="form-field">
+                  <span>이미지 URL(선택)</span>
+                  <input
+                    name="image"
+                    type="url"
+                    placeholder="업로드 대신 URL을 사용할 수도 있습니다."
+                  />
+                </label>
+              </div>
+              <button
+                class="ds-button ds-button--secondary"
+                type="submit"
+              >
+                결과 추가
+              </button>
+            </form>
+            <ul
+              class="stacked-list"
+              data-result-list
+            ></ul>
+          </section>
+
+          <section class="panel panel--actions">
+            <div class="panel__actions">
+              <label class="file-button">
+                <input
+                  type="file"
+                  accept="application/json"
+                  data-json-input
+                />
+                <span>JSON 불러오기</span>
+              </label>
+              <button
+                class="ds-button ds-button--ghost ds-button--small"
+                type="button"
+                data-export-json
+              >
+                JSON 내보내기
+              </button>
+              <button
+                class="ds-button ds-button--primary"
+                type="button"
+                data-upload-test
+              >
+                임시저장/업로드
+              </button>
+            </div>
+            <p
+              class="status-text"
+              data-admin-status
+            >
+              준비됨
+            </p>
+          </section>
+        </div>
+        <div
+          class="PreView StBoardCss"
+          data-preview-panel
+        >
+          <div class="preview-header">
+            <div>
+              <p class="eyebrow">Preview</p>
+              <h3 data-preview-title>테스트를 선택하세요</h3>
+              <p
+                class="muted"
+                data-preview-desc
+              >
+                메타 정보를 입력하면 프리뷰가 갱신됩니다.
+              </p>
+              <div
+                class="preview-tags"
+                data-preview-tags
+              ></div>
+            </div>
+            <div class="preview-meta">
+              <div>
+                <p class="label">문항 수</p>
+                <strong data-preview-question-count>0</strong>
+              </div>
+              <div>
+                <p class="label">MBTI 결과</p>
+                <strong data-preview-result-count>0/16</strong>
+              </div>
+            </div>
+          </div>
+          <div class="preview-body preview-body--device">
+            <div class="preview-device">
+              <div class="preview-device__topbar">
+                <span class="preview-device__dot"></span>
+                <span class="preview-device__dot"></span>
+                <span class="preview-device__dot"></span>
+                <button
+                  type="button"
+                  class="ds-button ds-button--ghost ds-button--small"
+                  data-preview-reload
+                >
+                  새로고침
+                </button>
+              </div>
+              <div class="preview-device__viewport">
+                <iframe
+                  title="모바일 미리보기"
+                  data-preview-iframe
+                  src="index.html"
+                  loading="lazy"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-pointer-lock allow-modals allow-popups allow-downloads"
+                ></iframe>
+              </div>
+              <div
+                class="preview-device__thumb"
+                data-preview-thumb
+              >
+                썸네일 미등록
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+    <script
+      type="module"
+      src="../scripts/admin.js"
+    ></script>
   </body>
 </html>
 

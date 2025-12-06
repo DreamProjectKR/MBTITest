@@ -91,12 +91,67 @@ assets/data/mbti-tests.json # 샘플 테스트 및 결과 데이터
 
 ## Cloudflare Pages 배포 가이드
 
-1. Git 저장소를 연동한 뒤 **Project name**을 만들고, Build command는 비워둔 채
-   Output directory를 `public`으로 설정합니다.
-2. `assets/data/mbti-tests.json`과 `scripts/`, `path_to_your_design_system/` 등
-   나머지 폴더는 루트에 그대로 둡니다. Pages는 `public` 이외의 경로를 그대로 복
-   사하므로 JSON을 업데이트하면 다음 배포에 포함됩니다.
-3. 환경 변수나 서버 코드가 필요 없으므로 무료 플랜에서도 동작합니다.
+### Pages + R2(Functions) 설정
+
+> **중요:** Admin에서 테스트를 생성/업로드하려면 반드시 Functions(또는 Workers)
+> 이 켜져 있어야 합니다. 정적 배포만으로는 R2에 쓰기가 되지 않습니다.
+
+관리자 페이지에서 업로드하면 R2에 `assets/data/{testId}/test.json`과 `images/*`
+가 생성됩니다. 다음을 설정하세요.
+
+1. **Functions 활성화**: 루트 `functions/api/tests.js`가 Pages Functions로 배포
+   됩니다.
+2. **R2 바인딩**: Pages > Settings > Functions > R2 bindings에서 버킷을 만들고바
+   인딩 이름을 `MBTI_BUCKET`으로 지정합니다.
+3. **공개 URL 환경변수**: `R2_PUBLIC_BASE_URL`을
+   `https://<r2-public-domain>/assets/data` 형태로 설정해야 프런트가 이미지에 접
+   근할 수 있습니다. (custom domain을 R2에연결했다면 해당 도메인을 사용)
+4. 로컬 테스트: `npm install wrangler -g` 후 `npx wrangler pages dev public` 로
+   실행. `.dev.vars`에 `R2_PUBLIC_BASE_URL`, `MBTI_BUCKET` 바인딩을 설정하거나
+   wrangler 대시보드에서 로컬 R2를 연결하세요.
+
+이전처럼 정적 JSON만 사용할 경우 `scripts/utils/constants.js`의 `DATA_URL`을
+`../assets/data/index.json`으로 되돌리면 기존 동작을 유지할 수 있습니다.
+
+### 필수 환경 변수
+
+- `MBTI_BUCKET`: R2 버킷 바인딩 이름 (Pages Functions에서 R2 객체로 주입됨)
+- `R2_PUBLIC_BASE_URL`: R2에 정적 공개 경로(`https://<도메인>/assets/data`)를 가
+  리키는 URL
+
+로컬 개발 시 `.dev.vars`를 사용하세요. 샘플: `.dev.vars.example` → `.dev.vars`로
+복사 후 값 채우기.
+
+### Workers + R2 + D1/D2로 배포하기 (선택)
+
+Admin 업로드를 Workers로 운영하려면:
+
+1. `wrangler.toml`에 바인딩 선언
+
+```toml
+name = "mbti-admin"
+main = "functions/api/tests.js"
+compatibility_date = "2024-12-01"
+
+r2_buckets = [{ binding = "MBTI_BUCKET", bucket_name = "mbti-data" }]
+
+# D1 (선택: 테스트 메타/로그 저장용)
+d1_databases = [{ binding = "MBTI_DB", database_name = "mbti-db", database_id = "<your-d1-id>" }]
+
+# D2(베타)/서드파티 SQL을 쓸 경우 별도 Worker에서 API를 노출하고 여기서는 fetch로 연동하세요.
+```
+
+1. 변수 설정: `R2_PUBLIC_BASE_URL`를 `vars`에 추가하거나 dash에서 환경 변수로 설
+   정.
+
+2. 배포: `npx wrangler deploy` (Pages가 아닌 Workers 모드).
+
+3. 로컬:
+   `npx wrangler dev --local --var R2_PUBLIC_BASE_URL=https://<r2-public>/assets/data`.
+
+**참고**: 현재 Functions는 R2만 사용합니다. D1/D2를 쓰려면
+`functions/api/tests.js`에 추가 로직을 넣어야 하며, 바인딩 이름은 위 예시
+(`MBTI_DB`)로 맞추면 됩니다.
 
 ## GitHub Pages 배포 가이드
 

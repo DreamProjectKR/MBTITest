@@ -2,7 +2,7 @@
  * 애플리케이션 상수 정의
  */
 
-export const DATA_URL = '../assets/data/index.json';
+export const DATA_URL = '/api/tests';
 
 export const ROUTE_SEGMENTS = {
   HOME: '',

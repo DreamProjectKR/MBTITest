@@ -1,122 +1,413 @@
 body {
-    display: flex;
-    flex-flow: row;
-    background-color: #EDF5FF;
+  display: flex;
+  flex-flow: row;
+  background-color: #edf5ff;
 }
 
 .head {
-    display: flex;
-    flex-flow: column;
-    justify-content: flex-start;
-    width: 358px;
-    background-color: #1B2736;
+  display: flex;
+  flex-flow: column;
+  justify-content: flex-start;
+  width: 358px;
+  background-color: #1b2736;
 }
 
 /* 헤더 */
 
 .head .MainLogo {
-    display: flex;
-    justify-content: center;
-    justify-items: center;
-    width: 100%;
-    height: 60px;
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+  width: 100%;
+  height: 60px;
 }
 .head .MainLogo .LogoBox {
-    display: flex;
-    justify-content: center;
-    justify-items: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    border-bottom: 1px solid #394047;
+  display: flex;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border-bottom: 1px solid #394047;
 }
-.head .MainLogo .LogoBox img{
-    width: 60%;
-    height: 75%;
+.head .MainLogo .LogoBox img {
+  width: 60%;
+  height: 75%;
 }
 
 /* 메인 헤더 */
 
-.head .GlobalNav {}
+.head .GlobalNav {
+  display: flex;
+}
 .head .GlobalNav .DashboardBox {
-    display: flex;
-    flex-flow: row;
-    justify-items: center;
-    align-items: center;
-    height: 60px;
-    padding: 32px;
+  display: flex;
+  flex-flow: row;
+  justify-items: center;
+  align-items: center;
+  height: 60px;
+  padding: 32px;
 }
 .head .GlobalNav .DashboardBox img {
-    display: block;
-    width: 32px;
-    height: 32px;
+  display: block;
+  width: 32px;
+  height: 32px;
 }
 .head .GlobalNav .DashboardBox p {
-    margin-left: 16px;
-    color: #8094AE;
+  margin-left: 16px;
+  color: #8094ae;
 }
 
 /* 글로벌네비게이션 - > 대시보드박스 */
 
 .MainContents {
-    width: 1562px;
-    height: 100%;
+  width: 1562px;
+  height: 100%;
 }
 .MainContents .Status {
-    display: flex;
-    flex-flow: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 32px;
-    height: 60px;
-    background-color: #FFF;
-    box-shadow:  0px 8px 6px -6px rgb(0,0,0,0.4);
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  height: 60px;
+  background-color: #fff;
+  box-shadow: 0px 8px 6px -6px rgb(0, 0, 0, 0.4);
 }
-.MainContents .Status .Dir {}
-.MainContents .Status .Dir p {}
+.MainContents .Status .Dir {
+  display: flex;
+  align-items: center;
+}
+.MainContents .Status .Dir p {
+  margin: 0;
+  color: #585858;
+}
 .MainContents .Status .User {
-    display: flex;
-    flex-flow: row;
-    align-items: center;
+  display: flex;
+  flex-flow: row;
+  align-items: center;
 }
-.MainContents .Status .User .UserProfile{
-    width: 32px;
-    height: 32px;
-    background-color: #A6DDFF;
-    border-radius: 32px;
-    margin-right: 16px ;
+.MainContents .Status .User .UserProfile {
+  width: 32px;
+  height: 32px;
+  background-color: #a6ddff;
+  border-radius: 32px;
+  margin-right: 16px;
 }
-.MainContents .Status .User .UserStatus{
-    display: flex;
-    flex-flow: column;
+.MainContents .Status .User .UserStatus {
+  display: flex;
+  flex-flow: column;
 }
-.MainContents .Status .User .UserStatus #Admin{
-    color: #A6DDFF;
+.MainContents .Status .User .UserStatus #Admin {
+  color: #a6ddff;
 }
-.MainContents .Status .User .UserStatus #Name{
-    color: #585858;
+.MainContents .Status .User .UserStatus #Name {
+  color: #585858;
 }
 
 /* Status */
 
-.MainContents .StatusBoard{
-    display: flex;
-    flex-flow: row;
-    justify-content: space-between;
-    padding: 16px 28px;
+.MainContents .StatusBoard {
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+  padding: 16px 28px;
 }
-.MainContents .StatusBoard .MakeTest{
-    width: 980px;
+.MainContents .StatusBoard .MakeTest {
+  width: 980px;
 }
-.MainContents .StatusBoard .PreView{
-    width: 500px;
+.MainContents .StatusBoard .PreView {
+  width: 500px;
 }
 
-.MainContents .StatusBoard .StBoardCss{
-    height: 800px;
-    border: 1px solid #CAC6C6;
-    border-radius: 5px;
-    background-color: #fff;
+.MainContents .StatusBoard .StBoardCss {
+  height: 800px;
+  border: 1px solid #cac6c6;
+  border-radius: 5px;
+  background-color: #fff;
+  overflow-y: auto;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 /* StatusBoard */
+
+/* Panels */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.panel + .panel {
+  border-top: 1px solid #e4e7ec;
+}
+
+.panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel__header h2 {
+  margin: 0;
+  color: #000;
+  font-size: 18px;
+}
+
+.panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field span {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-field input,
+.form-field textarea,
+.form-field select {
+  border: 1px solid #d6dce5;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #1a1a1a;
+  background-color: #ffffff;
+}
+
+.form-field small {
+  color: #718096;
+}
+
+.question-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.answer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.answer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #eef2f8;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.answer-label {
+  margin: 0;
+  font-weight: 700;
+}
+
+.answer-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.result-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stacked-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.question-item__controls,
+.result-item__controls {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.file-button {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #d6dce5;
+  cursor: pointer;
+}
+
+.file-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.panel--actions {
+  border-top: 1px dashed #e4e7ec;
+}
+
+.status-text {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #4a5568;
+}
+
+.hint {
+  margin: 0;
+  color: #718096;
+  font-size: 13px;
+}
+
+.preview-header {
+  padding: 16px;
+  border-bottom: 1px solid #e4e7ec;
+}
+
+.eyebrow {
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  margin: 0 0 4px;
+}
+
+.muted {
+  color: #718096;
+  margin: 4px 0 0;
+}
+
+.preview-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-body--device {
+  height: 100%;
+}
+
+.preview-device {
+  position: relative;
+  width: 430px;
+  max-width: 100%;
+  margin: 0 auto;
+  background: #0f172a;
+  border-radius: 24px;
+  padding: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-device__topbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: space-between;
+}
+
+.preview-device__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  background: #cbd5e1;
+}
+
+.preview-device__viewport {
+  background: #111827;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #1f2937;
+  height: 760px;
+}
+
+.preview-device__viewport iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+.preview-device__thumb {
+  border: 1px dashed #d6dce5;
+  border-radius: 12px;
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  color: #4a5568;
+  background: #f7fafc;
+  overflow: hidden;
+}
+
+.preview-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.preview-meta .label {
+  margin: 0;
+  color: #718096;
+  font-size: 13px;
+}
+
+.preview-thumbnail {
+  display: none;
+}
+
+.preview-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.preview-tags span {
+  background: #edf2f7;
+  color: #4a5568;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}

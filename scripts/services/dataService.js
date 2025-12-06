@@ -34,9 +34,8 @@ export class DataService {
    */
   async fetchData() {
     try {
-      // 인덱스 파일 로드
       const indexResponse = await fetch(this.dataUrl);
-      
+
       if (!indexResponse.ok) {
         throw new DataFetchError(
           `인덱스 파일을 불러오지 못했습니다. (상태 코드: ${indexResponse.status})`,
@@ -45,17 +44,33 @@ export class DataService {
       }
 
       const indexData = await indexResponse.json();
-      
+      const assetBaseUrl = indexData.assetBaseUrl;
+
+      // Cloudflare Pages Functions에서 이미 병합된 형태로 내려줄 때
+      if (this.isAggregatedPayload(indexData)) {
+        const normalizedTests = (indexData.tests ?? []).map((test) =>
+          this.normalizeTestPaths(test, test.path ?? test.id, assetBaseUrl)
+        );
+
+        const data = {
+          ...indexData,
+          tests: normalizedTests
+        };
+
+        this.cache = data;
+        return data;
+      }
+
       if (!indexData.tests || !Array.isArray(indexData.tests)) {
         throw new DataFetchError('인덱스 파일 형식이 올바르지 않습니다.');
       }
 
-      // 각 테스트 파일 로드
-      const baseUrl = this.dataUrl.substring(0, this.dataUrl.lastIndexOf('/') + 1);
+      // 정적 JSON을 그대로 읽어오는 기존 동작 (개발/로컬 대응)
+      const baseUrl = this.computeLegacyBase();
       const testPromises = indexData.tests.map(async (testIndex) => {
-        const testPath = `${baseUrl}${testIndex.path}`;
+        const testPath = `${baseUrl}/${testIndex.path}`;
         const testResponse = await fetch(testPath);
-        
+
         if (!testResponse.ok) {
           throw new DataFetchError(
             `테스트 파일을 불러오지 못했습니다: ${testIndex.id} (상태 코드: ${testResponse.status})`,
@@ -64,17 +79,16 @@ export class DataService {
         }
 
         const testData = await testResponse.json();
-        // 이미지 경로를 절대 경로로 변환
-        return this.normalizeTestPaths(testData, testIndex.path);
+        return this.normalizeTestPaths(testData, testIndex.path, baseUrl);
       });
 
       const tests = await Promise.all(testPromises);
-      
+
       const data = {
         ...indexData,
         tests: tests
       };
-      
+
       this.cache = data;
       return data;
     } catch (error) {
@@ -91,34 +105,47 @@ export class DataService {
    * 테스트 데이터의 이미지 경로를 절대 경로로 변환
    * @param {Object} testData - 테스트 데이터
    * @param {string} testPath - 테스트 파일 경로 (예: "test-spring-001/test.json")
+   * @param {string} assetBaseUrl - R2 public base URL (옵션)
    * @returns {Object} 경로가 정규화된 테스트 데이터
    */
-  normalizeTestPaths(testData, testPath) {
-    const testDir = testPath.substring(0, testPath.lastIndexOf('/'));
-    const baseUrl = this.dataUrl.substring(0, this.dataUrl.lastIndexOf('/') + 1);
-    
+  normalizeTestPaths(testData, testPath, assetBaseUrl = null) {
+    const testDir = testPath?.includes('/')
+      ? testPath.substring(0, testPath.lastIndexOf('/'))
+      : testData.id ?? '';
+    const resolvedBase = assetBaseUrl?.replace(/\/$/, '') ?? this.computeLegacyBase();
+    const prefix = resolvedBase && testDir ? `${resolvedBase}/${testDir}/` : null;
+
     const normalized = { ...testData };
-    
-    // 썸네일 경로 변환
-    if (normalized.thumbnail && normalized.thumbnail.startsWith('images/')) {
-      normalized.thumbnail = `${baseUrl}${testDir}/${normalized.thumbnail}`;
+
+    if (prefix && normalized.thumbnail && normalized.thumbnail.startsWith('images/')) {
+      normalized.thumbnail = `${prefix}${normalized.thumbnail.replace(/^images\\//, '')}`;
     }
-    
-    // 결과 이미지 경로 변환
-    if (normalized.results) {
+
+    if (prefix && normalized.results) {
       const normalizedResults = {};
       for (const [mbtiType, result] of Object.entries(normalized.results)) {
         normalizedResults[mbtiType] = {
           ...result,
-          image: result.image && result.image.startsWith('images/')
-            ? `${baseUrl}${testDir}/${result.image}`
-            : result.image
+          image:
+            result.image && result.image.startsWith('images/')
+              ? `${prefix}${result.image.replace(/^images\\//, '')}`
+              : result.image
         };
       }
       normalized.results = normalizedResults;
     }
-    
+
     return normalized;
+  }
+
+  isAggregatedPayload(payload) {
+    return Array.isArray(payload?.tests) && payload.tests.some((test) => Array.isArray(test?.questions));
+  }
+
+  computeLegacyBase() {
+    if (!this.dataUrl || !this.dataUrl.includes('/')) return '';
+    if (this.dataUrl.endsWith('/')) return this.dataUrl.slice(0, -1);
+    return this.dataUrl.substring(0, this.dataUrl.lastIndexOf('/'));
   }
 
   /**

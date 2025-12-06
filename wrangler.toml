@@ -1,0 +1,7 @@
+name = "mbti-admin"
+main = "functions/api/tests.js"
+compatibility_date = "2024-12-01"
+
+r2_buckets = [{ binding = "MBTI_BUCKET", bucket_name = "mbti-data" }]
+
+# D2(베타)/서드파티 SQL을 쓸 경우 별도 Worker에서 API를 노출하고 여기서는 fetch로 연동하세요.
