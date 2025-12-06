@@ -286,9 +286,10 @@ select {
 
 /* Main */
 .site-main {
+  max-width: 1230px;
   width: 100%;
   display: flex;
-  flex-direction: column;
+  flex-flow: column flex-start;
   align-items: center;
   margin-top: 100px;
 }
