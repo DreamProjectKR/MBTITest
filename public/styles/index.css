@@ -384,10 +384,6 @@ select {
   cursor: pointer;
 }
 
-.ds-card--test * {
-  cursor: inherit;
-}
-
 .ds-card__thumbnail {
   width: 100%;
   min-height: 260px;
@@ -465,9 +461,6 @@ select {
 
 .test-list-page {
   gap: var(--space-xl);
-  width: 1230px;
-  max-width: calc(100% - 32px);
-  margin: 100px auto 0;
 }
 
 .test-list__header {
@@ -498,20 +491,8 @@ select {
 .test-list__grid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: var(--space-lg);
-}
-
-@media (max-width: 1024px) {
-  .test-list__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 640px) {
-  .test-list__grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .test-list__empty {
