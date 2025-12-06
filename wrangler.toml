@@ -1,4 +1,4 @@
-name = "mbti-admin"
+name = "mbtitest"
 main = "functions/api/tests.js"
 compatibility_date = "2024-12-01"
 
