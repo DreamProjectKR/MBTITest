@@ -14,6 +14,7 @@ import { MBTI_ORDER } from '../utils/constants.js';
  * @param {boolean} clearFirst - 컨테이너를 먼저 비울지 여부 (기본값: true)
  */
 export function renderTests(container, tests, onTestClick, clearFirst = true) {
+  if (!container) return;
   if (clearFirst) {
     clearContainer(container);
   }
@@ -81,14 +82,20 @@ export function renderTests(container, tests, onTestClick, clearFirst = true) {
   });
 }
 
-// 원본 아이템 추가
-items.forEach((item) => {
-  track.appendChild(createCard(item));
-});
-
-// 무한 스크롤을 위한 중복 아이템 추가
-items.forEach((item) => {
-  const card = createCard(item);
-  card.setAttribute('aria-hidden', 'true');
-  track.appendChild(card);
-});
+/**
+ * MBTI 그리드 렌더링 (상/하단)
+ * @param {Element} topContainer
+ * @param {Element} bottomContainer
+ */
+export function renderMbtiGrid(topContainer, bottomContainer) {
+  const render = (container) => {
+    if (!container) return;
+    clearContainer(container);
+    MBTI_ORDER.forEach((code) => {
+      const chip = createElement('div', { className: 'mbti-chip' }, code);
+      container.appendChild(chip);
+    });
+  };
+  render(topContainer);
+  render(bottomContainer);
+}

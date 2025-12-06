@@ -7,11 +7,7 @@ import { appState } from './core/state.js';
 import { dataService } from './services/dataService.js';
 import { quizEngine } from './core/quizEngine.js';
 import { Router } from './core/router.js';
-import {
-  renderTests,
-  renderMbtiGrid,
-  renderForum,
-} from './renderers/homeRenderer.js';
+import { renderTests, renderMbtiGrid } from './renderers/homeRenderer.js';
 import { renderTestListPage } from './renderers/testListRenderer.js';
 import { renderTestIntroPage } from './renderers/testIntroRenderer.js';
 import {
@@ -84,8 +80,6 @@ async function initHomepage() {
   const testsGrid = $('[data-tests-grid]');
   const mbtiGrid = $('[data-mbti-grid]');
   const mbtiGridBottom = $('[data-mbti-grid-bottom]');
-  const mbtiFeedTrack = $('[data-mbti-feed-track]');
-  const feedSlider = $('[data-mbti-feed-slider]');
   const primaryTestTrigger = $('[data-primary-test-trigger]');
 
   const allTestsTrigger = $('[data-all-tests-trigger]');
@@ -139,11 +133,6 @@ async function initHomepage() {
     }
 
     // 포럼 피드가 존재하면 렌더링
-    const forumHighlights = dataService.getForumHighlights(payload);
-    if (mbtiFeedTrack) {
-      renderForum(mbtiFeedTrack, forumHighlights);
-    }
-
     router.handleRouteChange();
   } catch (error) {
     console.error('홈페이지 초기화 오류:', error);
