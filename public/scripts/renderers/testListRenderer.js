@@ -19,6 +19,9 @@ export function renderTestListPage(tests = [], onTestClick, onHomeClick) {
   const wrapper = createElement('section', {
     className: 'route-section test-list-page',
   });
+  // 컨테이너 폭 제한 (리스트 전용)
+  wrapper.style.maxWidth = '1230px';
+  wrapper.style.margin = '0 auto';
 
   const header = createElement('div', {
     className: 'test-list__header',
@@ -55,6 +58,8 @@ export function renderTestListPage(tests = [], onTestClick, onHomeClick) {
   const grid = createElement('div', {
     className: 'test-grid test-list__grid',
   });
+  // 리스트 페이지에서는 최대 4열로 고정
+  grid.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))';
 
   // 더 보기 버튼 컨테이너
   const loadMoreContainer = createElement('div', {
