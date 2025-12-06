@@ -372,6 +372,68 @@ select {
   width: 100%;
 }
 
+.SectionTestList .section__inner {
+  gap: 32px;
+}
+
+.TestListTittle h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.TestListArticle {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.TestListArticle .Article {
+  padding: 15px;
+  border: 1px solid #000;
+  border-radius: 15px;
+  width: 30%;
+  background-color: #fff;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.TestListArticle .Article .TestListAricleImg {
+  border-radius: 15px;
+  height: 160px;
+  background-color: #f6fbff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.TestListArticle .Article .TestListAricleImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.TestListArticle .Article .TestTittle {
+  padding: 16px 0 12px;
+  font-size: 1rem;
+}
+
+.TestListArticle .Article .TestListHashTag {
+  display: flex;
+}
+
+.TestListArticle .Article .TestListHashTag .HashTag {
+  font-size: 12px;
+  color: #9d9d9d;
+  margin-right: 5px;
+}
+
+.TestListArticle .Article .TestListHashTag .HashTag:last-child {
+  margin-right: 0;
+}
+
 .ds-card--test {
   border-radius: 24px;
   min-height: 260px;

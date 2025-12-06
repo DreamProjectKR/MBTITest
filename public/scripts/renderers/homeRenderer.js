@@ -3,7 +3,7 @@
  * Single Responsibility: 홈페이지 렌더링만 담당
  */
 
-import { createElement, clearContainer, setStyles } from '../utils/domUtils.js';
+import { createElement, clearContainer } from '../utils/domUtils.js';
 import { MBTI_ORDER } from '../utils/constants.js';
 
 /**
@@ -20,57 +20,50 @@ export function renderTests(container, tests, onTestClick, clearFirst = true) {
   }
 
   tests.forEach((test, idx) => {
-    const card = createElement('article', {
-      className: 'ds-card ds-card--test',
+    const article = createElement('article', {
+      className: 'Article',
     });
 
-    const thumb = createElement('div', {
-      className: 'ds-card__thumbnail',
+    const imgWrapper = createElement('div', {
+      className: 'TestListAricleImg',
     });
 
-    const thumbInner = createElement('div', {
-      className: 'ds-card__thumbnail-inner',
+    const thumbnail = createElement('img', {
+      src: test.thumbnail ?? '',
+      alt: test.title ? `${test.title} 썸네일` : '#',
     });
 
-    if (test.thumbnail) {
-      setStyles(thumbInner, {
-        backgroundImage: `url(${test.thumbnail})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      });
-    }
-    thumb.appendChild(thumbInner);
+    imgWrapper.appendChild(thumbnail);
 
-    const body = createElement('div', {
-      className: 'ds-card__body',
+    const title = createElement(
+      'div',
+      { className: 'TestTittle' },
+      test.title ?? `테스트 ${idx + 1}`,
+    );
+
+    const tagContainer = createElement('div', {
+      className: 'TestListHashTag',
     });
 
-    const title = createElement('h3', {}, test.title ?? `테스트 ${idx + 1}`);
-    body.appendChild(title);
+    const tags =
+      Array.isArray(test.tags) && test.tags.length
+        ? test.tags
+        : ['#해시태그1', '#해시태그2', '#해시태그3', '#해시태그4'];
 
-    const tagLine = createElement('p', {
-      className: 'ds-card__tags',
+    tags.forEach((tag) => {
+      const tagEl = createElement('div', { className: 'HashTag' }, tag);
+      tagContainer.appendChild(tagEl);
     });
-
-    if (Array.isArray(test.tags) && test.tags.length) {
-      tagLine.textContent = test.tags.join(' ');
-    } else {
-      tagLine.textContent = '#해시태그 #테스트';
-    }
-    body.appendChild(tagLine);
-
-    thumb.appendChild(body);
-    card.appendChild(thumb);
 
     if (test.id && onTestClick) {
-      card.setAttribute('role', 'button');
-      card.tabIndex = 0;
-      card.setAttribute(
+      article.setAttribute('role', 'button');
+      article.tabIndex = 0;
+      article.setAttribute(
         'aria-label',
         `${test.title ?? 'MBTI 테스트'} 소개 페이지로 이동`,
       );
-      card.addEventListener('click', () => onTestClick(test.id));
-      card.addEventListener('keydown', (event) => {
+      article.addEventListener('click', () => onTestClick(test.id));
+      article.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           onTestClick(test.id);
@@ -78,7 +71,8 @@ export function renderTests(container, tests, onTestClick, clearFirst = true) {
       });
     }
 
-    container.appendChild(card);
+    article.append(imgWrapper, title, tagContainer);
+    container.appendChild(article);
   });
 }
 
