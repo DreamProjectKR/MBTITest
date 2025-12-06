@@ -305,8 +305,19 @@ function parseJsonSafely(raw, fallback) {
 }
 
 function buildAssetBaseUrl(env) {
+  // R2 퍼블릭 URL이나 ASSETS_BASE가 버킷 루트를 가리키도록 설정되어 있어도
+  // 실제 정적 자산은 assets/data 하위에 존재하므로 여기서 접두어를 보강한다.
   const base = env.R2_PUBLIC_BASE_URL || env.ASSETS_BASE || '';
-  return base ? base.replace(/\/$/, '') : '';
+  if (!base) return '';
+
+  const trimmed = base.replace(/\/+$/, '');
+  const needsDataPrefix = !trimmed.endsWith(DATA_PREFIX);
+  const withPrefix = needsDataPrefix
+    ? `${trimmed}/${DATA_PREFIX}`
+    : trimmed;
+
+  // 프로토콜 구문은 유지하면서 중복 슬래시를 정리
+  return withPrefix.replace(/([^:]\/)\/+/g, '$1');
 }
 
 function jsonResponse(body, request, status = 200) {
