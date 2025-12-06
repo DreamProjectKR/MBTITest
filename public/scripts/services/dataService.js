@@ -25,7 +25,8 @@ export class DataService {
   constructor(dataUrl = DATA_URL) {
     this.dataUrl = dataUrl;
     this.cache = null;
-    this.staticIndexUrl = './assets/data/index.json';
+    const assetsBase = getAssetsBase();
+    this.staticIndexUrl = `${assetsBase}/assets/data/index.json`;
   }
 
   /**
@@ -248,3 +249,22 @@ export class DataService {
 
 // 싱글톤 인스턴스 생성 및 export
 export const dataService = new DataService();
+
+/**
+ * 런타임에서 자산 기본 경로를 가져옵니다.
+ * - window.__ASSETS_BASE가 설정되어 있으면 우선 사용
+ * - <meta name="assets-base" content="..."> 값이 있으면 사용
+ * - 둘 다 없으면 상대 경로(빈 문자열)를 사용하여 /assets/... 로 요청
+ */
+function getAssetsBase() {
+  if (typeof window !== 'undefined') {
+    if (window.__ASSETS_BASE) {
+      return window.__ASSETS_BASE.replace(/\/+$/, '');
+    }
+    const meta = document.querySelector('meta[name="assets-base"]');
+    if (meta?.content) {
+      return meta.content.replace(/\/+$/, '');
+    }
+  }
+  return '';
+}

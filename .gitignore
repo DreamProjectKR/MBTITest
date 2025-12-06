@@ -11,3 +11,4 @@ dist/
 build/
 public/assets/data/
 !public/assets/data/index.json
+assets/
