@@ -617,6 +617,7 @@ select {
   display: flex;
   gap: var(--space-sm);
   flex-wrap: wrap;
+  justify-content: space-around;
 }
 
 .test-meta {
@@ -757,6 +758,7 @@ select {
   font-size: var(--text-size-lg);
   font-weight: 700;
   color: var(--color-text-primary);
+  margin-bottom: 10px;
 }
 
 .test-result__media {

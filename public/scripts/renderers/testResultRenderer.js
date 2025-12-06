@@ -57,11 +57,17 @@ export function renderTestResultPage(
 
   const summary = createElement('p', {
     className: 'test-result__summary',
+    style: {
+      marginBottom: '10px',
+    },
   });
   summary.textContent = summaryCopy;
 
   const detail = createElement('p', {
     className: 'test-result__description',
+    style: {
+      marginBottom: '10px',
+    },
   });
   detail.textContent = isProfessionalTest
     ? `${
@@ -79,14 +85,14 @@ export function renderTestResultPage(
   });
   const resolvedImage = resolveResultImage(resultInfo?.image, test);
   if (resolvedImage) {
-    const img = createElement(
-      'img',
-      {
-        src: resolvedImage,
-        alt: `${normalizedType} 결과 이미지`,
-        loading: 'lazy',
+    const img = createElement('img', {
+      src: resolvedImage,
+      alt: `${normalizedType} 결과 이미지`,
+      loading: 'lazy',
+      style: {
+        marginBottom: '10px',
       },
-    );
+    });
     media.appendChild(img);
   } else {
     media.setAttribute('data-placeholder', 'true');
