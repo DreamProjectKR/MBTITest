@@ -465,6 +465,9 @@ select {
 
 .test-list-page {
   gap: var(--space-xl);
+  width: 1230px;
+  max-width: calc(100% - 32px);
+  margin: 100px auto 0;
 }
 
 .test-list__header {
