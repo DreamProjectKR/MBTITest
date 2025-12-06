@@ -8,6 +8,7 @@ export class AppState {
     this.data = null;
     this.testsById = {};
     this.quizSession = null;
+    this.latestResults = {};
     this.main = null;
     this.homeSections = [];
     this.routeOutlet = null;
@@ -69,6 +70,44 @@ export class AppState {
   resetQuizSession(testId = null) {
     if (!testId || (this.quizSession && this.quizSession.testId === testId)) {
       this.quizSession = null;
+    }
+  }
+
+  /**
+   * 최근 결과 저장
+   * @param {string} testId - 테스트 ID
+   * @param {Object} result - 결과 객체
+   */
+  setLastResult(testId, result) {
+    if (!testId || !result) {
+      return;
+    }
+    this.latestResults[testId] = result;
+  }
+
+  /**
+   * 최근 결과 가져오기
+   * @param {string} testId - 테스트 ID
+   * @returns {Object|undefined} 결과 객체
+   */
+  getLastResult(testId) {
+    if (!testId) {
+      return undefined;
+    }
+    return this.latestResults[testId];
+  }
+
+  /**
+   * 최근 결과 초기화
+   * @param {string|null} testId - 특정 테스트 ID를 초기화하거나 전체 초기화
+   */
+  resetLastResult(testId = null) {
+    if (!testId) {
+      this.latestResults = {};
+      return;
+    }
+    if (this.latestResults[testId]) {
+      delete this.latestResults[testId];
     }
   }
 

@@ -62,8 +62,14 @@ const renderers = {
     renderTestIntroPage(test, onStartClick, onHomeClick),
   testQuiz: (test, session, onAnswerSelect) =>
     renderTestQuizPage(test, session, onAnswerSelect),
-  testResult: (test, mbtiType, onRetryClick, onHomeClick) =>
-    renderTestResultPage(test, mbtiType, onRetryClick, onHomeClick),
+  testResult: (test, mbtiType, resultDetail, onRetryClick, onHomeClick) =>
+    renderTestResultPage(
+      test,
+      mbtiType,
+      resultDetail,
+      onRetryClick,
+      onHomeClick,
+    ),
 };
 
 /**
@@ -80,10 +86,15 @@ async function initHomepage() {
   const mbtiGridBottom = $('[data-mbti-grid-bottom]');
   const mbtiFeedTrack = $('[data-mbti-feed-track]');
   const feedSlider = $('[data-mbti-feed-slider]');
+  const primaryTestTrigger = $('[data-primary-test-trigger]');
 
   const allTestsTrigger = $('[data-all-tests-trigger]');
   safeAddEventListener(allTestsTrigger, 'click', () => {
     router.navigateTo('#/tests');
+  });
+
+  safeAddEventListener(primaryTestTrigger, 'click', () => {
+    router.navigateTo('#/test-intro/test-mbti-100');
   });
 
   const footerLogoButton = $('.site-footer__logo-button');

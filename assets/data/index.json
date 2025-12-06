@@ -84,6 +84,11 @@
       "id": "test-bedtime-001",
       "title": "나의 취침 전 습관 MBTI 테스트",
       "path": "test-bedtime-001/test.json"
+    },
+    {
+      "id": "test-mbti-100",
+      "title": "정밀 MBTI 100문항 검사",
+      "path": "test-mbti-100/test.json"
     }
   ]
 }

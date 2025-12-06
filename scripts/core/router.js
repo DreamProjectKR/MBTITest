@@ -122,12 +122,15 @@ export class Router {
           this.showHomeView();
           return;
         }
+        const resultDetail = appState.getLastResult(test.id);
         this.setRouteContent(
           this.renderers.testResult(
             test,
             extraParam,
+            resultDetail,
             (id) => {
               appState.resetQuizSession(id);
+              appState.resetLastResult(id);
               this.navigateTo(`#/test-quiz/${id}`);
             },
             () => this.navigateTo('#')
@@ -239,12 +242,14 @@ export class Router {
     quizEngine.addAnswer(session, answer);
 
     if (!quizEngine.hasNextQuestion(session)) {
-      const mbtiCode = quizEngine.calculateMbtiFromAnswers(session.answers);
+      const resultDetail = quizEngine.calculateMbtiResult(session.answers);
+      const mbtiCode = resultDetail?.type;
       if (!mbtiCode || mbtiCode.length !== 4) {
         console.error('MBTI 코드 계산 실패:', session.answers);
         this.showHomeView();
         return;
       }
+      appState.setLastResult(test.id, resultDetail);
       appState.resetQuizSession(test.id);
       this.navigateTo(`#/test-result/${test.id}/${mbtiCode}`);
       return;

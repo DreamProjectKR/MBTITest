@@ -55,8 +55,12 @@ export function renderTestQuizPage(test, session, onAnswerSelect) {
   const percent =
     session.totalQuestions === 0
       ? 0
-      : Math.round((session.currentIndex / session.totalQuestions) * 100);
+      : Math.min(
+          100,
+          Math.round(((session.currentIndex + 1) / session.totalQuestions) * 100)
+        );
   progressFill.style.setProperty('--quiz-progress', `${percent}%`);
+  progressFill.style.width = `${percent}%`;
   progressTrack.appendChild(progressFill);
   progress.append(progressMeta, progressTrack);
 
@@ -66,7 +70,7 @@ export function renderTestQuizPage(test, session, onAnswerSelect) {
   prompt.textContent = question.prompt ?? '질문을 불러올 수 없습니다.';
 
   const options = createElement('div', {
-    className: 'test-quiz__options',
+    className: `test-quiz__options${isLikert(question) ? ' test-quiz__options--likert' : ''}`,
   });
 
   question.answers?.forEach((answer) => {
@@ -89,5 +93,20 @@ export function renderTestQuizPage(test, session, onAnswerSelect) {
 
   wrapper.append(progress, prompt, options);
   return wrapper;
+}
+
+/**
+ * 7점 리커트 여부를 판단
+ * @param {Object} question - 질문 객체
+ * @returns {boolean}
+ */
+function isLikert(question) {
+  if (!question || !Array.isArray(question.answers)) {
+    return false;
+  }
+  return (
+    question.answers.length >= 7 &&
+    question.answers.every((ans) => Object.prototype.hasOwnProperty.call(ans, 'weight'))
+  );
 }
 

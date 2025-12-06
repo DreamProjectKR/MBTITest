@@ -4,6 +4,7 @@
  */
 
 import { MBTI_AXES } from '../utils/constants.js';
+import { normalizeMbtiType } from '../utils/helpers.js';
 
 /**
  * 퀴즈 엔진 클래스
@@ -55,17 +56,31 @@ export class QuizEngine {
    * @returns {string} MBTI 타입 코드
    */
   calculateMbtiFromAnswers(answers = []) {
-    if (!Array.isArray(answers) || answers.length === 0) {
-      console.warn('답변이 없거나 유효하지 않습니다.');
-      return 'XXXX'; // 기본값
-    }
+    const detail = this.calculateMbtiResult(answers);
+    return detail.type;
+  }
 
+  /**
+   * 답변 배열로부터 MBTI 타입과 축별 퍼센트 계산
+   * @param {Array} answers - 답변 배열
+   * @returns {{type: string, percentages: Object, scores: Object}} 세부 결과
+   */
+  calculateMbtiResult(answers = []) {
     const axes = {
       [MBTI_AXES.EI]: { E: 0, I: 0 },
       [MBTI_AXES.SN]: { S: 0, N: 0 },
       [MBTI_AXES.TF]: { T: 0, F: 0 },
       [MBTI_AXES.JP]: { J: 0, P: 0 },
     };
+
+    if (!Array.isArray(answers) || answers.length === 0) {
+      console.warn('답변이 없거나 유효하지 않습니다.');
+      return {
+        type: 'XXXX',
+        percentages: this.#createEmptyPercentages(),
+        scores: axes,
+      };
+    }
 
     answers.forEach((answer) => {
       if (!answer?.mbtiAxis || !answer?.direction) {
@@ -75,16 +90,52 @@ export class QuizEngine {
       if (!axis || axis[answer.direction] === undefined) {
         return;
       }
-      axis[answer.direction] += 1;
+      const weight = Number.isFinite(answer.weight)
+        ? Math.max(0, Number(answer.weight))
+        : 1;
+      axis[answer.direction] += weight;
     });
 
-    const result =
-      (axes[MBTI_AXES.EI].E >= axes[MBTI_AXES.EI].I ? 'E' : 'I') +
-      (axes[MBTI_AXES.SN].S >= axes[MBTI_AXES.SN].N ? 'S' : 'N') +
-      (axes[MBTI_AXES.TF].T >= axes[MBTI_AXES.TF].F ? 'T' : 'F') +
-      (axes[MBTI_AXES.JP].J >= axes[MBTI_AXES.JP].P ? 'J' : 'P');
+    const typeChars = [];
+    const percentages = {};
 
-    return result;
+    const axisPairs = {
+      [MBTI_AXES.EI]: ['E', 'I'],
+      [MBTI_AXES.SN]: ['S', 'N'],
+      [MBTI_AXES.TF]: ['T', 'F'],
+      [MBTI_AXES.JP]: ['J', 'P'],
+    };
+
+    Object.entries(axisPairs).forEach(([axisKey, [dirA, dirB]]) => {
+      const axisScore = axes[axisKey];
+      const total = axisScore[dirA] + axisScore[dirB];
+      const percentA = total === 0 ? 50 : Math.round((axisScore[dirA] / total) * 100);
+      const percentB = 100 - percentA;
+      percentages[axisKey] = {
+        [dirA]: percentA,
+        [dirB]: percentB,
+      };
+      typeChars.push(percentA >= percentB ? dirA : dirB);
+    });
+
+    return {
+      type: normalizeMbtiType(typeChars.join('')),
+      percentages,
+      scores: axes,
+    };
+  }
+
+  /**
+   * 빈 퍼센트 객체 생성
+   * @returns {Object}
+   */
+  #createEmptyPercentages() {
+    return {
+      [MBTI_AXES.EI]: { E: 50, I: 50 },
+      [MBTI_AXES.SN]: { S: 50, N: 50 },
+      [MBTI_AXES.TF]: { T: 50, F: 50 },
+      [MBTI_AXES.JP]: { J: 50, P: 50 },
+    };
   }
 
   /**

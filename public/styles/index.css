@@ -1,5 +1,5 @@
-@import url('../../styles/tokens.css');
-@import url('../../styles/components.css');
+@import url('./tokens.css');
+@import url('./components.css');
 
 *,
 *::before,
@@ -676,7 +676,8 @@ select {
 .test-quiz__progress-track {
   width: 100%;
   height: 8px;
-  background: var(--color-border);
+  background: transparent;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
   overflow: hidden;
 }
@@ -699,6 +700,20 @@ select {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+}
+
+.test-quiz__options--likert {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-xs);
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.test-quiz__options--likert .test-option {
+  min-width: 0;
+  text-align: center;
+  justify-content: center;
 }
 
 .test-option {
@@ -772,6 +787,59 @@ select {
 .test-result__media[data-placeholder] {
   color: var(--color-text-secondary);
   font-weight: 700;
+}
+
+.result-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md);
+}
+
+.result-axis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-hero);
+}
+
+.result-axis__header {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.result-axis__bar {
+  display: flex;
+  width: 100%;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--color-border);
+}
+
+.result-axis__fill {
+  height: 100%;
+}
+
+.result-axis__fill--left {
+  background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+}
+
+.result-axis__fill--right {
+  background: linear-gradient(90deg, #ff7ec7 0%, #ff4d79 100%);
+}
+
+.result-axis__footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.result-axis__value {
+  font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 @media (max-width: 1230px) {

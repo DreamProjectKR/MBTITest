@@ -10,6 +10,7 @@ import { normalizeMbtiType } from '../utils/helpers.js';
  * 테스트 결과 페이지 렌더링
  * @param {Object} test - 테스트 객체
  * @param {string} mbtiType - MBTI 타입 코드
+ * @param {Object} resultDetail - 퍼센트/점수 정보
  * @param {Function} onRetryClick - 재시도 버튼 클릭 핸들러
  * @param {Function} onHomeClick - 홈 클릭 핸들러
  * @returns {Element} 렌더링된 페이지 요소
@@ -17,9 +18,11 @@ import { normalizeMbtiType } from '../utils/helpers.js';
 export function renderTestResultPage(
   test,
   mbtiType = '',
+  resultDetail = null,
   onRetryClick,
   onHomeClick
 ) {
+  const isProfessionalTest = test?.id === 'test-mbti-100';
   const normalizedType = normalizeMbtiType(mbtiType);
   const resultInfo = test.results?.[normalizedType] ?? null;
   const summaryCopy =
@@ -56,7 +59,14 @@ export function renderTestResultPage(
   const detail = createElement('p', {
     className: 'test-result__description',
   });
-  detail.textContent = `${normalizedType || 'MBTI'} 타입의 특징이에요.`;
+  detail.textContent = isProfessionalTest
+    ? `${normalizedType || 'MBTI'} 타입의 특징이에요. 아래에서 4개 축의 비율을 확인해 보세요.`
+    : `${normalizedType || 'MBTI'} 타입의 특징이에요.`;
+
+  const metrics =
+    isProfessionalTest && resultDetail
+      ? createResultMetrics(resultDetail)
+      : null;
 
   const media = createElement('div', {
     className: 'test-result__media',
@@ -94,7 +104,88 @@ export function renderTestResultPage(
 
   actions.append(retryBtn, homeBtn);
 
-  wrapper.append(header, summary, detail, media, actions);
+  if (metrics) {
+    wrapper.append(header, summary, detail, metrics, media, actions);
+  } else {
+    wrapper.append(header, summary, detail, media, actions);
+  }
   return wrapper;
+}
+
+/**
+ * 축별 퍼센트 블록 생성
+ * @param {Object|null} resultDetail - 퍼센트/점수 정보
+ * @returns {Element} 생성된 노드
+ */
+function createResultMetrics(resultDetail) {
+  const defaultPercentages = {
+    EI: { E: 50, I: 50 },
+    SN: { S: 50, N: 50 },
+    TF: { T: 50, F: 50 },
+    JP: { J: 50, P: 50 },
+  };
+
+  const percentages = resultDetail?.percentages ?? defaultPercentages;
+
+  const container = createElement('div', {
+    className: 'result-metrics',
+  });
+
+  const rows = [
+    { axis: 'EI', left: 'E', right: 'I', label: '외향(E) vs 내향(I)' },
+    { axis: 'SN', left: 'S', right: 'N', label: '감각(S) vs 직관(N)' },
+    { axis: 'TF', left: 'T', right: 'F', label: '사고(T) vs 감정(F)' },
+    { axis: 'JP', left: 'J', right: 'P', label: '판단(J) vs 인식(P)' },
+  ];
+
+  rows.forEach((row) => {
+    const rowEl = createElement('div', {
+      className: 'result-axis',
+    });
+
+    const header = createElement('div', {
+      className: 'result-axis__header',
+    });
+    header.textContent = row.label;
+
+    const bar = createElement('div', {
+      className: 'result-axis__bar',
+    });
+
+    const leftPct = percentages?.[row.axis]?.[row.left] ?? 50;
+    const rightPct = percentages?.[row.axis]?.[row.right] ?? 50;
+
+    const leftFill = createElement('div', {
+      className: 'result-axis__fill result-axis__fill--left',
+    });
+    leftFill.style.width = `${leftPct}%`;
+
+    const rightFill = createElement('div', {
+      className: 'result-axis__fill result-axis__fill--right',
+    });
+    rightFill.style.width = `${rightPct}%`;
+
+    bar.append(leftFill, rightFill);
+
+    const footer = createElement('div', {
+      className: 'result-axis__footer',
+    });
+    const leftLabel = createElement('span', {
+      className: 'result-axis__value',
+    });
+    leftLabel.textContent = `${row.left} ${leftPct}%`;
+
+    const rightLabel = createElement('span', {
+      className: 'result-axis__value',
+    });
+    rightLabel.textContent = `${row.right} ${rightPct}%`;
+
+    footer.append(leftLabel, rightLabel);
+
+    rowEl.append(header, bar, footer);
+    container.appendChild(rowEl);
+  });
+
+  return container;
 }
 
