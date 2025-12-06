@@ -34,6 +34,10 @@ export function renderTestResultPage(
   const wrapper = createElement('section', {
     className: 'route-section test-result-page',
   });
+  // 페이지 폭 제한 및 좌측 정렬
+  wrapper.style.maxWidth = '1230px';
+  wrapper.style.margin = '0 auto';
+  wrapper.style.textAlign = 'left';
 
   const header = createElement('div', {
     className: 'test-result__header',
