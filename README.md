@@ -153,6 +153,22 @@ d1_databases = [{ binding = "MBTI_DB", database_name = "mbti-db", database_id = 
 `functions/api/tests.js`에 추가 로직을 넣어야 하며, 바인딩 이름은 위 예시
 (`MBTI_DB`)로 맞추면 됩니다.
 
+### Cloudflare Pages에서 “Missing entry-point to Worker script” 오류가 날 때
+
+이 메시지는 Pages 빌드 명령을 `npx wrangler deploy`로 설정했을 때 발생합니다. Pages는
+정적 파일을 복사하고 Functions 폴더(`functions/`)를 자동 인식하므로, 별도 Worker
+엔트리(main)가 없어도 됩니다. 해결:
+
+1) Cloudflare Pages 대시보드 > Project > Settings > Build & Deploy  
+   - Build command: (비움)  
+   - Output directory: `public`  
+   - Functions directory: `functions`  
+   - Env vars: `MBTI_BUCKET`, `R2_PUBLIC_BASE_URL`
+
+2) Worker 모드로 직접 배포하려면 `wrangler pages deploy ./public`(정적) 또는
+   `npx wrangler deploy --config wrangler.toml`처럼 목적에 맞는 명령을 사용하세요.
+   `wrangler deploy`를 Pages 빌드 명령으로 넣으면 동일 오류가 재발합니다.
+
 ## GitHub Pages 배포 가이드
 
 1. `.github/workflows/deploy.yml`에서 정의된 workflow가 `public` 폴더를
