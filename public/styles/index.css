@@ -748,7 +748,7 @@ select {
 
 .test-result__summary,
 .test-result__description {
-  margin: 0;
+  margin-bottom: 10px;
   font-size: var(--text-size-md);
   line-height: 1.6;
   color: var(--color-text-secondary);
@@ -769,6 +769,7 @@ select {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  margin-bottom: 10px;
 }
 
 .test-result__media img {
