@@ -10,7 +10,7 @@ binding = "MBTI_BUCKET"       # used inside Functions (env.MBTI_BUCKET)
 bucket_name = "mbtitest"
 
 [vars]
-ASSETS_BASE = "https://<accountid>.r2.cloudflarestorage.com/mbtitest"
+ASSETS_BASE = "https://01d6807196c93a4774c1bb50ee8f4ebb.r2.cloudflarestorage.com/mbtitest"
 # Optional: FRONTEND_API_BASE = "https://<pages-domain>/api"
 # Optional: LOG_LEVEL = "info"
 

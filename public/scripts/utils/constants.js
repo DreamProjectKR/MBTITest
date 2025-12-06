@@ -2,8 +2,8 @@
  * 애플리케이션 상수 정의
  */
 
-// Pages에서 정적 JSON을 기본으로 사용 (API가 없을 때도 로드 가능)
-export const DATA_URL = './assets/data/index.json';
+// 기본 데이터 소스: Pages Functions API (R2에서 집계된 JSON 제공)
+export const DATA_URL = '/api/tests';
 
 export const ROUTE_SEGMENTS = {
   HOME: '',

@@ -36,7 +36,11 @@ export class DataService {
   async fetchData() {
     try {
       // 1순위: API(/api/tests) 호출
-      const indexResponse = await fetch(this.dataUrl);
+      const indexResponse = await fetch(this.dataUrl, { cache: 'no-store' });
+
+      if (indexResponse.status === 304 && this.cache) {
+        return this.cache;
+      }
 
       if (!indexResponse.ok) {
         throw new DataFetchError(

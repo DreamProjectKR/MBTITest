@@ -122,6 +122,18 @@ assets/data/mbti-tests.json # 샘플 테스트 및 결과 데이터
 로컬 개발 시 `.dev.vars`를 사용하세요. 샘플: `.dev.vars.example` → `.dev.vars`로
 복사 후 값 채우기.
 
+### npm 스크립트(최신 wrangler)
+
+- `npm run pages:dev`: `wrangler pages dev public`로 Pages+Functions 로컬 프리뷰
+  .
+- `npm run pages:publish`: `wrangler pages publish public`로 Pages 배포.
+- `npm run r2:put-all`: 최신 wrangler에는 `r2 object sync`가 없어
+  `find+xargs+put`로 `assets/` 내 모든 파일을 업로드합니다. 실행 전
+  `R2_ACCESS_KEY_ID`/`R2_SECRET_ACCESS_KEY`(CLI 업로드용)와 `MBTI_BUCKET` 바인딩
+  이 설정되어 있어야 합니다. 원격 삭제/동기화는 수행하지 않으므로 필요 시 AWS
+  CLI `s3 sync --endpoint-url https://<account>.r2.cloudflarestorage.com`을 사용
+  하세요.
+
 ### Workers + R2 + D1/D2로 배포하기 (선택)
 
 Admin 업로드를 Workers로 운영하려면:

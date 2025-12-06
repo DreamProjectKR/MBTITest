@@ -305,7 +305,7 @@ function parseJsonSafely(raw, fallback) {
 }
 
 function buildAssetBaseUrl(env) {
-  const base = env.R2_PUBLIC_BASE_URL || '';
+  const base = env.R2_PUBLIC_BASE_URL || env.ASSETS_BASE || '';
   return base ? base.replace(/\/$/, '') : '';
 }
 

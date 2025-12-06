@@ -4,3 +4,10 @@
 .github/*
 .cursor/*
 .env*
+.dev.vars
+.wrangler/
+node_modules/
+dist/
+build/
+public/assets/data/
+!public/assets/data/index.json
