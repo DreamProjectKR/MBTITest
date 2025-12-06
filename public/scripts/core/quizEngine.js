@@ -55,30 +55,83 @@ export class QuizEngine {
    * @param {Array} answers - 답변 배열
    * @returns {string} MBTI 타입 코드
    */
-  calculateMbtiFromAnswers(answers = []) {
-    const detail = this.calculateMbtiResult(answers);
+  calculateMbtiFromAnswers(answers = [], options = {}) {
+    const detail = this.calculateMbtiResult(answers, options);
     return detail.type;
   }
 
   /**
    * 답변 배열로부터 MBTI 타입과 축별 퍼센트 계산
    * @param {Array} answers - 답변 배열
+   * @param {Object} options - 옵션 (questions, maxWeight)
    * @returns {{type: string, percentages: Object, scores: Object}} 세부 결과
    */
-  calculateMbtiResult(answers = []) {
-    const axes = {
+  calculateMbtiResult(answers = [], options = {}) {
+    const DEFAULT_MAX_WEIGHT = 3;
+    const questions = Array.isArray(options?.questions)
+      ? options.questions
+      : [];
+    const fallbackMaxWeight = Number.isFinite(options?.maxWeight)
+      ? Math.max(1, Number(options.maxWeight))
+      : DEFAULT_MAX_WEIGHT;
+
+    const axesScores = {
       [MBTI_AXES.EI]: { E: 0, I: 0 },
       [MBTI_AXES.SN]: { S: 0, N: 0 },
       [MBTI_AXES.TF]: { T: 0, F: 0 },
       [MBTI_AXES.JP]: { J: 0, P: 0 },
     };
 
+    const axisMeta = {
+      [MBTI_AXES.EI]: {
+        questionCount: 0,
+        answeredCount: 0,
+        maxWeight: fallbackMaxWeight,
+      },
+      [MBTI_AXES.SN]: {
+        questionCount: 0,
+        answeredCount: 0,
+        maxWeight: fallbackMaxWeight,
+      },
+      [MBTI_AXES.TF]: {
+        questionCount: 0,
+        answeredCount: 0,
+        maxWeight: fallbackMaxWeight,
+      },
+      [MBTI_AXES.JP]: {
+        questionCount: 0,
+        answeredCount: 0,
+        maxWeight: fallbackMaxWeight,
+      },
+    };
+
+    // 사전 질문 메타로 축별 문항 수/최대 가중치 추론
+    questions.forEach((q) => {
+      const axisKey = q?.mbtiAxis ?? q?.answers?.[0]?.mbtiAxis;
+      if (!axisMeta[axisKey]) {
+        return;
+      }
+      axisMeta[axisKey].questionCount += 1;
+      const localMax = Array.isArray(q.answers)
+        ? q.answers.reduce((max, ans) => {
+            const w = Number.isFinite(ans?.weight) ? Number(ans.weight) : 0;
+            return Math.max(max, w);
+          }, 0)
+        : 0;
+      if (localMax > 0) {
+        axisMeta[axisKey].maxWeight = Math.max(
+          axisMeta[axisKey].maxWeight,
+          localMax,
+        );
+      }
+    });
+
     if (!Array.isArray(answers) || answers.length === 0) {
       console.warn('답변이 없거나 유효하지 않습니다.');
       return {
         type: 'XXXX',
         percentages: this.#createEmptyPercentages(),
-        scores: axes,
+        scores: axesScores,
       };
     }
 
@@ -86,14 +139,17 @@ export class QuizEngine {
       if (!answer?.mbtiAxis || !answer?.direction) {
         return;
       }
-      const axis = axes[answer.mbtiAxis];
-      if (!axis || axis[answer.direction] === undefined) {
+      const axisScore = axesScores[answer.mbtiAxis];
+      if (!axisScore || axisScore[answer.direction] === undefined) {
         return;
       }
       const weight = Number.isFinite(answer.weight)
         ? Math.max(0, Number(answer.weight))
         : 1;
-      axis[answer.direction] += weight;
+      axisScore[answer.direction] += weight;
+      if (axisMeta[answer.mbtiAxis]) {
+        axisMeta[answer.mbtiAxis].answeredCount += 1;
+      }
     });
 
     const typeChars = [];
@@ -107,21 +163,28 @@ export class QuizEngine {
     };
 
     Object.entries(axisPairs).forEach(([axisKey, [dirA, dirB]]) => {
-      const axisScore = axes[axisKey];
-      const total = axisScore[dirA] + axisScore[dirB];
-      const percentA = total === 0 ? 50 : Math.round((axisScore[dirA] / total) * 100);
-      const percentB = 100 - percentA;
+      const axisScore = axesScores[axisKey];
+      const meta = axisMeta[axisKey];
+      const questionCount = meta.questionCount || meta.answeredCount;
+      const maxWeight = meta.maxWeight || fallbackMaxWeight;
+      const totalPossible = Math.max(1, questionCount * maxWeight);
+      const percentA = this.#clampPercent(
+        totalPossible === 0
+          ? 50
+          : Math.round((axisScore[dirA] / totalPossible) * 100),
+      );
+      const percentB = this.#clampPercent(100 - percentA);
       percentages[axisKey] = {
         [dirA]: percentA,
         [dirB]: percentB,
       };
-      typeChars.push(percentA >= percentB ? dirA : dirB);
+      typeChars.push(axisScore[dirA] >= axisScore[dirB] ? dirA : dirB);
     });
 
     return {
       type: normalizeMbtiType(typeChars.join('')),
       percentages,
-      scores: axes,
+      scores: axesScores,
     };
   }
 
@@ -136,6 +199,16 @@ export class QuizEngine {
       [MBTI_AXES.TF]: { T: 50, F: 50 },
       [MBTI_AXES.JP]: { J: 50, P: 50 },
     };
+  }
+
+  /**
+   * 퍼센트 값 클램프
+   * @param {number} value
+   * @returns {number}
+   */
+  #clampPercent(value) {
+    if (!Number.isFinite(value)) return 0;
+    return Math.min(100, Math.max(0, Math.round(value)));
   }
 
   /**
@@ -166,4 +239,3 @@ export class QuizEngine {
 
 // 싱글톤 인스턴스 생성 및 export
 export const quizEngine = new QuizEngine();
-

@@ -1,5576 +1,1071 @@
 {
   "id": "test-mbti-100",
-  "title": "정밀 MBTI 100문항 검사",
-  "description": "100개 이상의 정밀 문항과 7점 리커트 척도로 당신의 MBTI 성향을 세밀하게 측정합니다.",
-  "tags": ["#정밀검사", "#100문항", "#7점척도", "#MBTI"],
+  "title": "정밀 MBTI 80문항 검사",
+  "description": "업무/생활 상황에 맞춘 80개 문항과 7점 리커트 척도로 MBTI 성향을 정밀 측정합니다.",
+  "tags": ["#정밀검사", "#80문항", "#7점척도", "#MBTI"],
   "heroAnimation": "pan",
   "thumbnail": "images/thumbnail.svg",
   "questions": [
     {
       "id": "m_q1",
-      "prompt": "사람 많은 행사에서 에너지가 생긴다.",
+      "prompt": "회의나 워크숍에서 발언을 먼저 시작한다.",
       "answers": [
-        {
-          "id": "m_q1_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q1_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q1_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q1_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q1_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q1_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q1_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q1_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q1_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q1_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q1_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q1_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q1_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q1_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q2",
-      "prompt": "새로운 사람을 만나면 금방 대화를 시작한다.",
+      "prompt": "대규모 네트워킹 자리에서 에너지가 충전된다.",
       "answers": [
-        {
-          "id": "m_q2_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q2_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q2_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q2_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q2_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q2_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q2_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q2_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q2_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q2_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q2_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q2_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q2_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q2_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q3",
-      "prompt": "주말엔 사람들과 약속을 잡고 싶다.",
+      "prompt": "낯선 사람에게도 업무 아이디어를 편하게 제안한다.",
       "answers": [
-        {
-          "id": "m_q3_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q3_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q3_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q3_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q3_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q3_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q3_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q3_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q3_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q3_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q3_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q3_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q3_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q3_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q4",
-      "prompt": "모임에서 먼저 분위기를 띄우는 편이다.",
+      "prompt": "새로운 팀에 합류하면 먼저 인사를 돌며 관계를 만든다.",
       "answers": [
-        {
-          "id": "m_q4_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q4_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q4_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q4_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q4_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q4_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q4_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q4_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q4_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q4_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q4_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q4_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q4_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q4_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q5",
-      "prompt": "오랜 시간 혼자 있으면 답답하다.",
+      "prompt": "즉흥적인 모임 제안이 오면 즐겁게 응한다.",
       "answers": [
-        {
-          "id": "m_q5_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q5_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q5_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q5_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q5_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q5_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q5_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q5_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q5_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q5_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q5_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q5_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q5_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q5_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q6",
-      "prompt": "그룹 프로젝트에서 발표를 맡는 것이 편하다.",
+      "prompt": "여러 사람 앞에서 발표할 때 긴장보다는 기대가 크다.",
       "answers": [
-        {
-          "id": "m_q6_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q6_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q6_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q6_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q6_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q6_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q6_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q6_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q6_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q6_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q6_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q6_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q6_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q6_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q7",
-      "prompt": "낯선 파티에서도 금세 적응한다.",
+      "prompt": "팀 브레인스토밍을 진행하며 흐름을 잡는 역할을 한다.",
       "answers": [
-        {
-          "id": "m_q7_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q7_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q7_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q7_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q7_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q7_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q7_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q7_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q7_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q7_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q7_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q7_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q7_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q7_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q8",
-      "prompt": "즉흥적인 만남도 즐겁다.",
+      "prompt": "주말에도 사람들과 계획을 잡아야 에너지가 유지된다.",
       "answers": [
-        {
-          "id": "m_q8_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q8_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q8_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q8_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q8_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q8_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q8_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q8_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q8_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q8_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q8_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q8_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q8_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q8_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q9",
-      "prompt": "여행할 때 현지 사람과 쉽게 어울린다.",
+      "prompt": "여행지에서도 현지인과 자연스럽게 대화한다.",
       "answers": [
-        {
-          "id": "m_q9_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q9_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q9_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q9_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q9_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q9_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q9_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q9_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q9_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q9_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q9_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q9_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q9_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q9_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q10",
-      "prompt": "SNS에 내 일상을 자주 공유한다.",
+      "prompt": "온라인 커뮤니티에서도 적극적으로 댓글과 대화를 이어간다.",
       "answers": [
-        {
-          "id": "m_q10_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q10_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q10_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q10_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q10_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q10_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q10_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q10_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q10_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q10_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q10_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q10_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q10_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q10_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q11",
-      "prompt": "침묵이 길어지면 내가 먼저 말을 건다.",
+      "prompt": "침묵이 길어지면 내가 먼저 화제를 전환한다.",
       "answers": [
-        {
-          "id": "m_q11_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q11_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q11_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q11_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q11_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q11_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q11_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q11_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q11_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q11_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q11_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q11_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q11_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q11_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q12",
-      "prompt": "네트워킹 행사에서 명함을 많이 모은다.",
+      "prompt": "새 프로젝트 이해를 위해 관련자들에게 먼저 연락해 묻는다.",
       "answers": [
-        {
-          "id": "m_q12_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q12_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q12_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q12_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q12_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q12_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q12_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q12_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q12_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q12_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q12_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q12_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q12_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q12_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q13",
-      "prompt": "친구가 새로운 모임에 데려가면 설렌다.",
+      "prompt": "합숙이나 워크숍 형태의 교육을 선호한다.",
       "answers": [
-        {
-          "id": "m_q13_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q13_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q13_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q13_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q13_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q13_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q13_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q13_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q13_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q13_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q13_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q13_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q13_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q13_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q14",
-      "prompt": "사람들과 있을 때 아이디어가 더 잘 나온다.",
+      "prompt": "팀 회의가 길어져도 사람들과 논의하는 과정이 즐겁다.",
       "answers": [
-        {
-          "id": "m_q14_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q14_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q14_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q14_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q14_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q14_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q14_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q14_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q14_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q14_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q14_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q14_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q14_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q14_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q15",
-      "prompt": "전화 통화가 문자보다 편하다.",
+      "prompt": "SNS나 사내 메신저에 근황을 자주 공유한다.",
       "answers": [
-        {
-          "id": "m_q15_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q15_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q15_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q15_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q15_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q15_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q15_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q15_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q15_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q15_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q15_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q15_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q15_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q15_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q16",
-      "prompt": "단체 활동 후 에너지가 올라간다.",
+      "prompt": "복잡한 문제도 동료와 토론하면 생각이 더 정리된다.",
       "answers": [
-        {
-          "id": "m_q16_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q16_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q16_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q16_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q16_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q16_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q16_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q16_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q16_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q16_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q16_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q16_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q16_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q16_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q17",
-      "prompt": "처음 보는 사람에게 먼저 인사한다.",
+      "prompt": "큰 행사에서 새로운 파트너를 찾는 일이 흥미롭다.",
       "answers": [
-        {
-          "id": "m_q17_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q17_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q17_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q17_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q17_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q17_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q17_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q17_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q17_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q17_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q17_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q17_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q17_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q17_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q18",
-      "prompt": "새로운 커뮤니티에 가입하는 걸 좋아한다.",
+      "prompt": "조용한 공간보다 적당히 북적이는 환경에서 일할 때 집중된다.",
       "answers": [
-        {
-          "id": "m_q18_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q18_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q18_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q18_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q18_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q18_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q18_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q18_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q18_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q18_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q18_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q18_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q18_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q18_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q19",
-      "prompt": "여러 사람과 동시에 대화하는 게 자연스럽다.",
+      "prompt": "업무 외 자리에서도 네트워킹을 시도한다.",
       "answers": [
-        {
-          "id": "m_q19_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q19_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q19_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q19_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q19_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q19_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q19_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q19_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q19_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q19_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q19_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q19_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q19_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q19_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
     {
       "id": "m_q20",
-      "prompt": "회식이나 번개 공지를 보면 참여하고 싶다.",
+      "prompt": "팀원이 조용하면 말을 건네어 분위기를 풀어준다.",
       "answers": [
-        {
-          "id": "m_q20_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q20_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q20_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q20_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q20_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q20_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q20_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q20_a1", "label": "매우 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 3},
+        {"id": "m_q20_a2", "label": "그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 2},
+        {"id": "m_q20_a3", "label": "약간 그렇다", "mbtiAxis": "EI", "direction": "E", "weight": 1},
+        {"id": "m_q20_a4", "label": "보통이다", "mbtiAxis": "EI", "direction": "E", "weight": 0},
+        {"id": "m_q20_a5", "label": "약간 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 1},
+        {"id": "m_q20_a6", "label": "그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 2},
+        {"id": "m_q20_a7", "label": "매우 그렇지 않다", "mbtiAxis": "EI", "direction": "I", "weight": 3}
       ]
     },
+
     {
       "id": "m_q21",
-      "prompt": "연말 파티 일정을 빽빽이 채우는 편이다.",
+      "prompt": "의사결정 전에 현재 데이터를 먼저 검토한다.",
       "answers": [
-        {
-          "id": "m_q21_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q21_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q21_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q21_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q21_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q21_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q21_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q21_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q21_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q21_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q21_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q21_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q21_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q21_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q22",
-      "prompt": "회사나 학교에서 사람을 연결해 주는 역할을 한다.",
+      "prompt": "추상적 비전보다 실행 가능한 단계가 중요하다.",
       "answers": [
-        {
-          "id": "m_q22_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q22_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q22_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q22_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q22_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q22_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q22_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q22_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q22_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q22_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q22_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q22_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q22_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q22_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q23",
-      "prompt": "조용한 장소보다 붐비는 곳을 선호한다.",
+      "prompt": "새 도구를 배울 때 매뉴얼과 예시를 꼼꼼히 본다.",
       "answers": [
-        {
-          "id": "m_q23_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q23_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q23_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q23_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q23_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q23_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q23_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q23_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q23_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q23_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q23_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q23_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q23_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q23_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q24",
-      "prompt": "팀 회의에서 침묵이 있으면 불편하다.",
+      "prompt": "회의록에 세부 사항을 기록해야 안심된다.",
       "answers": [
-        {
-          "id": "m_q24_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q24_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q24_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q24_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q24_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q24_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q24_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q24_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q24_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q24_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q24_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q24_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q24_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q24_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q25",
-      "prompt": "새로운 친구를 만드는 걸 삶의 즐거움이라 느낀다.",
+      "prompt": "과거 사례를 근거로 성공 가능성을 판단한다.",
       "answers": [
-        {
-          "id": "m_q25_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 3
-        },
-        {
-          "id": "m_q25_a2",
-          "label": "그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 2
-        },
-        {
-          "id": "m_q25_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 1
-        },
-        {
-          "id": "m_q25_a4",
-          "label": "보통이다",
-          "mbtiAxis": "EI",
-          "direction": "E",
-          "weight": 0
-        },
-        {
-          "id": "m_q25_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 1
-        },
-        {
-          "id": "m_q25_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 2
-        },
-        {
-          "id": "m_q25_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "EI",
-          "direction": "I",
-          "weight": 3
-        }
+        {"id": "m_q25_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q25_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q25_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q25_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q25_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q25_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q25_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q26",
-      "prompt": "문제를 볼 때 구체적인 사실부터 정리한다.",
+      "prompt": "범위를 모호하게 두기보다 명확한 정의가 필요하다.",
       "answers": [
-        {
-          "id": "m_q26_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q26_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q26_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q26_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q26_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q26_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q26_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q26_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q26_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q26_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q26_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q26_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q26_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q26_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q27",
-      "prompt": "설명서에 적힌 순서를 따르는 편이다.",
+      "prompt": "숫자와 지표가 제시되면 설득력이 높아진다.",
       "answers": [
-        {
-          "id": "m_q27_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q27_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q27_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q27_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q27_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q27_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q27_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q27_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q27_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q27_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q27_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q27_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q27_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q27_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q28",
-      "prompt": "과거 경험을 근거로 결정한다.",
+      "prompt": "실험보다 검증된 프로세스를 우선한다.",
       "answers": [
-        {
-          "id": "m_q28_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q28_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q28_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q28_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q28_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q28_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q28_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q28_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q28_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q28_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q28_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q28_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q28_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q28_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q29",
-      "prompt": "메모나 체크리스트를 자주 만든다.",
+      "prompt": "단계별 체크리스트가 있어야 실행 속도가 난다.",
       "answers": [
-        {
-          "id": "m_q29_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q29_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q29_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q29_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q29_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q29_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q29_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q29_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q29_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q29_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q29_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q29_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q29_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q29_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q30",
-      "prompt": "세부사항이 명확해야 안심된다.",
+      "prompt": "오감으로 확인한 정보가 가장 믿을 만하다고 느낀다.",
       "answers": [
-        {
-          "id": "m_q30_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q30_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q30_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q30_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q30_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q30_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q30_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q30_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q30_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q30_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q30_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q30_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q30_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q30_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q31",
-      "prompt": "새로운 아이디어보다 검증된 방식을 선호한다.",
+      "prompt": "추상적 컨셉 설명만으로는 바로 행동하기 어렵다.",
       "answers": [
-        {
-          "id": "m_q31_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q31_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q31_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q31_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q31_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q31_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q31_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q31_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q31_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q31_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q31_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q31_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q31_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q31_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q32",
-      "prompt": "숫자나 데이터로 설명할 때 설득된다.",
+      "prompt": "현재 리스크를 정확히 측정해야 다음 단계를 결정한다.",
       "answers": [
-        {
-          "id": "m_q32_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q32_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q32_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q32_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q32_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q32_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q32_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q32_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q32_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q32_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q32_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q32_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q32_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q32_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q33",
-      "prompt": "현재에 집중하고 먼 미래는 덜 신경 쓴다.",
+      "prompt": "주어진 일정과 리소스 안에서 현실적인 계획을 선호한다.",
       "answers": [
-        {
-          "id": "m_q33_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q33_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q33_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q33_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q33_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q33_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q33_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q33_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q33_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q33_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q33_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q33_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q33_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q33_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q34",
-      "prompt": "감각적인 디테일을 쉽게 기억한다.",
+      "prompt": "자료가 정리된 후에 의견을 내는 편이다.",
       "answers": [
-        {
-          "id": "m_q34_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q34_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q34_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q34_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q34_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q34_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q34_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q34_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q34_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q34_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q34_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q34_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q34_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q34_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q35",
-      "prompt": "일을 배울 때 예시를 보고 익힌다.",
+      "prompt": "작은 세부 오류도 발견하면 바로 수정하려 한다.",
       "answers": [
-        {
-          "id": "m_q35_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q35_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q35_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q35_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q35_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q35_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q35_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q35_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q35_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q35_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q35_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q35_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q35_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q35_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q36",
-      "prompt": "계획이 현실적이지 않으면 실행하지 않는다.",
+      "prompt": "추가 가정을 하기 전에 사실을 확인한다.",
       "answers": [
-        {
-          "id": "m_q36_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q36_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q36_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q36_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q36_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q36_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q36_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q36_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q36_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q36_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q36_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q36_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q36_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q36_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q37",
-      "prompt": "눈앞의 문제를 먼저 해결한다.",
+      "prompt": "새로운 아이디어도 먼저 작은 파일럿으로 검증한다.",
       "answers": [
-        {
-          "id": "m_q37_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q37_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q37_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q37_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q37_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q37_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q37_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q37_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q37_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q37_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q37_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q37_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q37_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q37_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q38",
-      "prompt": "관찰 가능한 증거가 중요하다.",
+      "prompt": "성과를 짧은 주기로 확인하며 방향을 조정한다.",
       "answers": [
-        {
-          "id": "m_q38_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q38_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q38_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q38_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q38_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q38_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q38_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q38_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q38_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q38_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q38_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q38_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q38_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q38_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q39",
-      "prompt": "실용성이 감성보다 우선이다.",
+      "prompt": "모호한 목표보다 구체적 KPI가 주어져야 동기부여가 된다.",
       "answers": [
-        {
-          "id": "m_q39_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q39_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q39_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q39_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q39_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q39_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q39_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q39_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q39_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q39_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q39_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q39_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q39_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q39_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
     {
       "id": "m_q40",
-      "prompt": "한 번에 한 단계씩 진행하는 것을 좋아한다.",
+      "prompt": "과거 데이터 트렌드가 미래 예측에 더 신뢰할 만하다.",
       "answers": [
-        {
-          "id": "m_q40_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q40_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q40_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q40_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q40_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q40_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q40_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q40_a1", "label": "매우 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 3},
+        {"id": "m_q40_a2", "label": "그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 2},
+        {"id": "m_q40_a3", "label": "약간 그렇다", "mbtiAxis": "SN", "direction": "S", "weight": 1},
+        {"id": "m_q40_a4", "label": "보통이다", "mbtiAxis": "SN", "direction": "S", "weight": 0},
+        {"id": "m_q40_a5", "label": "약간 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 1},
+        {"id": "m_q40_a6", "label": "그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 2},
+        {"id": "m_q40_a7", "label": "매우 그렇지 않다", "mbtiAxis": "SN", "direction": "N", "weight": 3}
       ]
     },
+
     {
       "id": "m_q41",
-      "prompt": "큰 그림보다 오늘 해야 할 일을 먼저 생각한다.",
+      "prompt": "의견 충돌 시 논리적 근거부터 확인한다.",
       "answers": [
-        {
-          "id": "m_q41_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q41_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q41_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q41_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q41_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q41_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q41_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q41_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q41_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q41_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q41_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q41_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q41_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q41_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q42",
-      "prompt": "새 기능을 배우면 바로 시험해 본다.",
+      "prompt": "비판을 받을 때 감정보다 타당성을 먼저 본다.",
       "answers": [
-        {
-          "id": "m_q42_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q42_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q42_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q42_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q42_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q42_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q42_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q42_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q42_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q42_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q42_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q42_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q42_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q42_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q43",
-      "prompt": "실제 사례를 듣는 것이 이론보다 도움이 된다.",
+      "prompt": "업무 피드백은 구체적 사실과 예시가 있어야 납득한다.",
       "answers": [
-        {
-          "id": "m_q43_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q43_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q43_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q43_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q43_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q43_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q43_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q43_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q43_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q43_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q43_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q43_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q43_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q43_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q44",
-      "prompt": "추상적인 설명보다 구체적 지시를 원한다.",
+      "prompt": "문제가 생기면 원인 분석 표를 작성한다.",
       "answers": [
-        {
-          "id": "m_q44_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q44_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q44_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q44_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q44_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q44_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q44_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q44_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q44_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q44_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q44_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q44_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q44_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q44_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q45",
-      "prompt": "장기 비전보다 단기 성과를 챙긴다.",
+      "prompt": "친구를 위로할 때도 해결책을 함께 제안한다.",
       "answers": [
-        {
-          "id": "m_q45_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q45_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q45_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q45_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q45_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q45_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q45_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q45_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q45_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q45_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q45_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q45_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q45_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q45_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q46",
-      "prompt": "미래 가능성보다는 현재 안정이 우선이다.",
+      "prompt": "회의는 감정 표현보다 안건 중심이 되어야 한다고 생각한다.",
       "answers": [
-        {
-          "id": "m_q46_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q46_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q46_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q46_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q46_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q46_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q46_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q46_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q46_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q46_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q46_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q46_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q46_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q46_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q47",
-      "prompt": "일상 루틴이 크게 변하는 것이 부담스럽다.",
+      "prompt": "개인의 호감보다 공정한 규칙 적용이 우선이다.",
       "answers": [
-        {
-          "id": "m_q47_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q47_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q47_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q47_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q47_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q47_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q47_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q47_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q47_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q47_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q47_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q47_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q47_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q47_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q48",
-      "prompt": "사실 확인 없이 가정하는 것을 꺼린다.",
+      "prompt": "자료가 부족하면 결론을 보류한다.",
       "answers": [
-        {
-          "id": "m_q48_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q48_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q48_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q48_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q48_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q48_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q48_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q48_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q48_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q48_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q48_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q48_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q48_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q48_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q49",
-      "prompt": "직관보다 오감을 믿는다.",
+      "prompt": "최적화와 효율 개선을 즐긴다.",
       "answers": [
-        {
-          "id": "m_q49_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q49_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q49_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q49_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q49_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q49_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q49_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q49_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q49_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q49_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q49_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q49_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q49_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q49_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q50",
-      "prompt": "경험으로 축적된 노하우가 중요하다.",
+      "prompt": "감정적 설득보다 데이터 설득이 더 효과적이다.",
       "answers": [
-        {
-          "id": "m_q50_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 3
-        },
-        {
-          "id": "m_q50_a2",
-          "label": "그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 2
-        },
-        {
-          "id": "m_q50_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 1
-        },
-        {
-          "id": "m_q50_a4",
-          "label": "보통이다",
-          "mbtiAxis": "SN",
-          "direction": "S",
-          "weight": 0
-        },
-        {
-          "id": "m_q50_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 1
-        },
-        {
-          "id": "m_q50_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 2
-        },
-        {
-          "id": "m_q50_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "SN",
-          "direction": "N",
-          "weight": 3
-        }
+        {"id": "m_q50_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q50_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q50_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q50_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q50_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q50_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q50_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q51",
-      "prompt": "어려운 이야기도 직설적으로 말한다.",
+      "prompt": "의사결정에서 관계보다 기준을 우선한다.",
       "answers": [
-        {
-          "id": "m_q51_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q51_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q51_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q51_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q51_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q51_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q51_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q51_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q51_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q51_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q51_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q51_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q51_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q51_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q52",
-      "prompt": "의사결정 시 논리적 근거를 우선한다.",
+      "prompt": "논리적 허점을 발견하면 바로 지적하는 편이다.",
       "answers": [
-        {
-          "id": "m_q52_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q52_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q52_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q52_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q52_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q52_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q52_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q52_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q52_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q52_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q52_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q52_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q52_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q52_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q53",
-      "prompt": "감정보다 사실을 먼저 본다.",
+      "prompt": "토론이 생산적이면 강한 어조도 괜찮다고 생각한다.",
       "answers": [
-        {
-          "id": "m_q53_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q53_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q53_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q53_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q53_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q53_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q53_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q53_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q53_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q53_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q53_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q53_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q53_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q53_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q54",
-      "prompt": "갈등 상황에서 원인 분석부터 한다.",
+      "prompt": "감정이입보다 객관적 시각을 유지하려 노력한다.",
       "answers": [
-        {
-          "id": "m_q54_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q54_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q54_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q54_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q54_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q54_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q54_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q54_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q54_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q54_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q54_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q54_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q54_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q54_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q55",
-      "prompt": "상대를 위로하기보다 해결책을 제안한다.",
+      "prompt": "업무 성과는 명확한 지표로 평가되어야 한다.",
       "answers": [
-        {
-          "id": "m_q55_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q55_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q55_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q55_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q55_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q55_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q55_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q55_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q55_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q55_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q55_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q55_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q55_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q55_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q56",
-      "prompt": "비판을 받을 때 논리성이 있으면 수용한다.",
+      "prompt": "갈등 상황에서도 필요한 말은 돌려 말하지 않는다.",
       "answers": [
-        {
-          "id": "m_q56_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q56_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q56_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q56_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q56_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q56_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q56_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q56_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q56_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q56_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q56_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q56_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q56_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q56_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q57",
-      "prompt": "감정적인 회의보다 차분한 토론을 선호한다.",
+      "prompt": "데이터가 충분하면 과감히 방향을 바꾼다.",
       "answers": [
-        {
-          "id": "m_q57_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q57_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q57_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q57_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q57_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q57_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q57_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q57_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q57_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q57_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q57_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q57_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q57_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q57_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q58",
-      "prompt": "공감 표현보다 조언을 먼저 준다.",
+      "prompt": "팀 규칙을 감정적으로 예외 없이 적용해야 한다고 본다.",
       "answers": [
-        {
-          "id": "m_q58_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q58_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q58_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q58_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q58_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q58_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q58_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q58_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q58_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q58_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q58_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q58_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q58_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q58_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q59",
-      "prompt": "공정성이 친밀감보다 중요하다.",
+      "prompt": "칭찬보다 개선점 피드백이 더 가치 있다고 느낀다.",
       "answers": [
-        {
-          "id": "m_q59_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q59_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q59_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q59_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q59_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q59_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q59_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q59_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q59_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q59_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q59_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q59_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q59_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q59_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
     {
       "id": "m_q60",
-      "prompt": "규칙이 감정보다 우선이라고 생각한다.",
+      "prompt": "결정 이후에는 감정보다 실행과 후속 검증이 중요하다.",
       "answers": [
-        {
-          "id": "m_q60_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q60_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q60_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q60_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q60_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q60_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q60_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q60_a1", "label": "매우 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 3},
+        {"id": "m_q60_a2", "label": "그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 2},
+        {"id": "m_q60_a3", "label": "약간 그렇다", "mbtiAxis": "TF", "direction": "T", "weight": 1},
+        {"id": "m_q60_a4", "label": "보통이다", "mbtiAxis": "TF", "direction": "T", "weight": 0},
+        {"id": "m_q60_a5", "label": "약간 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 1},
+        {"id": "m_q60_a6", "label": "그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 2},
+        {"id": "m_q60_a7", "label": "매우 그렇지 않다", "mbtiAxis": "TF", "direction": "F", "weight": 3}
       ]
     },
+
     {
       "id": "m_q61",
-      "prompt": "타협보다 원칙을 지키는 편이다.",
+      "prompt": "프로젝트 킥오프 전에 일정표와 마일스톤을 만든다.",
       "answers": [
-        {
-          "id": "m_q61_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q61_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q61_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q61_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q61_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q61_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q61_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q61_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q61_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q61_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q61_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q61_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q61_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q61_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q62",
-      "prompt": "칭찬보다 피드백이 더 가치 있다고 느낀다.",
+      "prompt": "마감 1~2일 전에는 결과물을 얼추 완성해둔다.",
       "answers": [
-        {
-          "id": "m_q62_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q62_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q62_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q62_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q62_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q62_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q62_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q62_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q62_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q62_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q62_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q62_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q62_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q62_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q63",
-      "prompt": "감정 기복이 적은 편이다.",
+      "prompt": "계획이 자주 바뀌면 스트레스를 느낀다.",
       "answers": [
-        {
-          "id": "m_q63_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q63_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q63_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q63_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q63_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q63_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q63_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q63_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q63_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q63_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q63_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q63_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q63_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q63_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q64",
-      "prompt": "결정할 때 감정 개입을 최소화하려고 한다.",
+      "prompt": "즉흥 요청보다는 사전 공지가 필요하다.",
       "answers": [
-        {
-          "id": "m_q64_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q64_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q64_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q64_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q64_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q64_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q64_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q64_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q64_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q64_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q64_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q64_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q64_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q64_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q65",
-      "prompt": "논리적 허점이 보이면 지적한다.",
+      "prompt": "회의 자료는 미리 공유되어야 한다고 생각한다.",
       "answers": [
-        {
-          "id": "m_q65_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q65_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q65_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q65_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q65_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q65_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q65_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q65_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q65_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q65_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q65_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q65_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q65_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q65_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q66",
-      "prompt": "감정적 호소보다는 데이터가 설득력이 있다.",
+      "prompt": "할 일 목록을 매일 업데이트한다.",
       "answers": [
-        {
-          "id": "m_q66_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q66_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q66_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q66_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q66_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q66_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q66_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q66_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q66_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q66_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q66_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q66_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q66_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q66_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q67",
-      "prompt": "회의에서 사람보다는 안건에 집중한다.",
+      "prompt": "정시 도착을 중요한 약속 이행으로 본다.",
       "answers": [
-        {
-          "id": "m_q67_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q67_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q67_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q67_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q67_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q67_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q67_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q67_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q67_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q67_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q67_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q67_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q67_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q67_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q68",
-      "prompt": "일 처리는 효율성이 가장 중요하다.",
+      "prompt": "모호한 역할 분담이 있으면 바로 명확히 한다.",
       "answers": [
-        {
-          "id": "m_q68_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q68_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q68_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q68_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q68_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q68_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q68_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q68_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q68_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q68_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q68_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q68_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q68_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q68_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q69",
-      "prompt": "사람 중심 문화보다 성과 중심 문화를 선호한다.",
+      "prompt": "여행도 시간표와 예약을 확정해두고 움직인다.",
       "answers": [
-        {
-          "id": "m_q69_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q69_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q69_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q69_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q69_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q69_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q69_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q69_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q69_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q69_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q69_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q69_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q69_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q69_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q70",
-      "prompt": "갈등 후에도 필요한 말은 한다.",
+      "prompt": "작업 순서를 미리 정의해두면 안심된다.",
       "answers": [
-        {
-          "id": "m_q70_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q70_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q70_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q70_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q70_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q70_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q70_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q70_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q70_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q70_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q70_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q70_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q70_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q70_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q71",
-      "prompt": "어려운 선택에서도 객관성을 유지하려 한다.",
+      "prompt": "업무 공간과 파일 구조를 수시로 정리한다.",
       "answers": [
-        {
-          "id": "m_q71_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q71_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q71_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q71_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q71_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q71_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q71_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q71_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q71_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q71_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q71_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q71_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q71_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q71_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q72",
-      "prompt": "논쟁이 생산적일 수 있다고 생각한다.",
+      "prompt": "결정은 빠르게 닫아야 에너지가 집중된다.",
       "answers": [
-        {
-          "id": "m_q72_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q72_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q72_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q72_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q72_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q72_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q72_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q72_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q72_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q72_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q72_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q72_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q72_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q72_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q73",
-      "prompt": "관계보다 옳고 그름이 중요할 때가 많다.",
+      "prompt": "예상치 못한 변수에 대비한 플랜 B를 준비한다.",
       "answers": [
-        {
-          "id": "m_q73_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q73_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q73_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q73_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q73_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q73_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q73_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q73_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q73_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q73_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q73_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q73_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q73_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q73_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q74",
-      "prompt": "감정 표현이 서툴다는 말을 듣는다.",
+      "prompt": "회의 목표와 종료 시간을 사전에 합의하길 원한다.",
       "answers": [
-        {
-          "id": "m_q74_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q74_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q74_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q74_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q74_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q74_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q74_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q74_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q74_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q74_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q74_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q74_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q74_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q74_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q75",
-      "prompt": "결정을 내릴 때 친밀도보다 기준을 본다.",
+      "prompt": "큰 목표를 주차별/일별 계획으로 쪼갠다.",
       "answers": [
-        {
-          "id": "m_q75_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 3
-        },
-        {
-          "id": "m_q75_a2",
-          "label": "그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 2
-        },
-        {
-          "id": "m_q75_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 1
-        },
-        {
-          "id": "m_q75_a4",
-          "label": "보통이다",
-          "mbtiAxis": "TF",
-          "direction": "T",
-          "weight": 0
-        },
-        {
-          "id": "m_q75_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 1
-        },
-        {
-          "id": "m_q75_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 2
-        },
-        {
-          "id": "m_q75_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "TF",
-          "direction": "F",
-          "weight": 3
-        }
+        {"id": "m_q75_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q75_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q75_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q75_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q75_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q75_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q75_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q76",
-      "prompt": "하루 일정을 미리 계획해둔다.",
+      "prompt": "마감 임박 상황을 피하려고 여유 있게 착수한다.",
       "answers": [
-        {
-          "id": "m_q76_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q76_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q76_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q76_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q76_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q76_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q76_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
+        {"id": "m_q76_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q76_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q76_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q76_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q76_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q76_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q76_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q77",
-      "prompt": "마감일 전에 일을 끝내두려 한다.",
+      "prompt": "규칙과 프로세스를 따르면 품질이 일정해진다고 본다.",
       "answers": [
-        {
-          "id": "m_q77_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q77_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q77_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q77_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q77_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q77_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q77_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
+        {"id": "m_q77_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q77_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q77_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q77_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q77_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q77_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q77_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q78",
-      "prompt": "계획이 바뀌면 스트레스를 받는다.",
+      "prompt": "빈 시간보다 일정이 정리된 하루가 더 편하다.",
       "answers": [
-        {
-          "id": "m_q78_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q78_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q78_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q78_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q78_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q78_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q78_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
+        {"id": "m_q78_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q78_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q78_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q78_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q78_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q78_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q78_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q79",
-      "prompt": "즉흥보다는 준비된 상태가 편하다.",
+      "prompt": "최종 확정 전까지 계속 바뀌는 요구사항이 힘들다.",
       "answers": [
-        {
-          "id": "m_q79_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q79_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q79_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q79_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q79_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q79_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q79_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
+        {"id": "m_q79_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q79_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q79_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q79_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q79_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q79_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q79_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     },
     {
       "id": "m_q80",
-      "prompt": "할 일 목록을 체크하는 걸 좋아한다.",
+      "prompt": "초기 합의가 깨지면 다시 정리하는 시간을 요청한다.",
       "answers": [
-        {
-          "id": "m_q80_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q80_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q80_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q80_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q80_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q80_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q80_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q81",
-      "prompt": "지각하는 것을 매우 싫어한다.",
-      "answers": [
-        {
-          "id": "m_q81_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q81_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q81_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q81_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q81_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q81_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q81_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q82",
-      "prompt": "결정은 빠르게 내려 정리한다.",
-      "answers": [
-        {
-          "id": "m_q82_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q82_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q82_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q82_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q82_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q82_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q82_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q83",
-      "prompt": "깔끔한 책상과 폴더 정리를 유지한다.",
-      "answers": [
-        {
-          "id": "m_q83_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q83_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q83_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q83_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q83_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q83_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q83_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q84",
-      "prompt": "장기 목표를 세부 계획으로 나눈다.",
-      "answers": [
-        {
-          "id": "m_q84_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q84_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q84_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q84_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q84_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q84_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q84_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q85",
-      "prompt": "미리 예약하고 움직인다.",
-      "answers": [
-        {
-          "id": "m_q85_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q85_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q85_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q85_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q85_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q85_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q85_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q86",
-      "prompt": "일을 시작하기 전에 자료를 모두 준비한다.",
-      "answers": [
-        {
-          "id": "m_q86_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q86_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q86_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q86_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q86_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q86_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q86_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q87",
-      "prompt": "계획한 순서를 지키려 한다.",
-      "answers": [
-        {
-          "id": "m_q87_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q87_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q87_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q87_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q87_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q87_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q87_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q88",
-      "prompt": "갑작스러운 요청을 부담스러워한다.",
-      "answers": [
-        {
-          "id": "m_q88_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q88_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q88_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q88_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q88_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q88_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q88_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q89",
-      "prompt": "확정된 일정표가 있을 때 마음이 놓인다.",
-      "answers": [
-        {
-          "id": "m_q89_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q89_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q89_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q89_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q89_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q89_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q89_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q90",
-      "prompt": "마감이 임박하면 불안하다.",
-      "answers": [
-        {
-          "id": "m_q90_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q90_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q90_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q90_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q90_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q90_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q90_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q91",
-      "prompt": "회의 안건을 미리 공유받길 원한다.",
-      "answers": [
-        {
-          "id": "m_q91_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q91_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q91_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q91_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q91_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q91_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q91_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q92",
-      "prompt": "선택지를 오래 열어두기보다 닫고 싶다.",
-      "answers": [
-        {
-          "id": "m_q92_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q92_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q92_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q92_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q92_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q92_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q92_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q93",
-      "prompt": "프로젝트에 명확한 역할이 필요하다.",
-      "answers": [
-        {
-          "id": "m_q93_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q93_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q93_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q93_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q93_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q93_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q93_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q94",
-      "prompt": "시간표 없이 하루를 보내면 불편하다.",
-      "answers": [
-        {
-          "id": "m_q94_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q94_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q94_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q94_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q94_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q94_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q94_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q95",
-      "prompt": "정리된 공간에서 집중이 잘 된다.",
-      "answers": [
-        {
-          "id": "m_q95_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q95_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q95_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q95_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q95_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q95_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q95_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q96",
-      "prompt": "계획 없는 여행은 걱정된다.",
-      "answers": [
-        {
-          "id": "m_q96_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q96_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q96_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q96_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q96_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q96_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q96_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q97",
-      "prompt": "결정을 미루는 것을 싫어한다.",
-      "answers": [
-        {
-          "id": "m_q97_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q97_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q97_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q97_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q97_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q97_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q97_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q98",
-      "prompt": "해야 할 일을 끝내야 쉬는 편이다.",
-      "answers": [
-        {
-          "id": "m_q98_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q98_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q98_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q98_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q98_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q98_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q98_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q99",
-      "prompt": "규칙이 명확해야 마음이 편하다.",
-      "answers": [
-        {
-          "id": "m_q99_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q99_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q99_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q99_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q99_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q99_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q99_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
-      ]
-    },
-    {
-      "id": "m_q100",
-      "prompt": "일찍 도착해 준비하는 편이다.",
-      "answers": [
-        {
-          "id": "m_q100_a1",
-          "label": "매우 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 3
-        },
-        {
-          "id": "m_q100_a2",
-          "label": "그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 2
-        },
-        {
-          "id": "m_q100_a3",
-          "label": "약간 그렇다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 1
-        },
-        {
-          "id": "m_q100_a4",
-          "label": "보통이다",
-          "mbtiAxis": "JP",
-          "direction": "J",
-          "weight": 0
-        },
-        {
-          "id": "m_q100_a5",
-          "label": "약간 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 1
-        },
-        {
-          "id": "m_q100_a6",
-          "label": "그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 2
-        },
-        {
-          "id": "m_q100_a7",
-          "label": "매우 그렇지 않다",
-          "mbtiAxis": "JP",
-          "direction": "P",
-          "weight": 3
-        }
+        {"id": "m_q80_a1", "label": "매우 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 3},
+        {"id": "m_q80_a2", "label": "그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 2},
+        {"id": "m_q80_a3", "label": "약간 그렇다", "mbtiAxis": "JP", "direction": "J", "weight": 1},
+        {"id": "m_q80_a4", "label": "보통이다", "mbtiAxis": "JP", "direction": "J", "weight": 0},
+        {"id": "m_q80_a5", "label": "약간 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 1},
+        {"id": "m_q80_a6", "label": "그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 2},
+        {"id": "m_q80_a7", "label": "매우 그렇지 않다", "mbtiAxis": "JP", "direction": "P", "weight": 3}
       ]
     }
   ],
   "results": {
-    "ISTJ": {
-      "image": "images/ISTJ.svg",
-      "summary": "차분하고 책임감 있는 실행가입니다."
-    },
-    "ISFJ": {
-      "image": "images/ISFJ.svg",
-      "summary": "섬세하게 배려하며 안정감을 주는 조력자입니다."
-    },
-    "INFJ": {
-      "image": "images/INFJ.svg",
-      "summary": "깊은 통찰로 사람을 이해하는 조용한 전략가입니다."
-    },
-    "INTJ": {
-      "image": "images/INTJ.svg",
-      "summary": "체계적 사고로 목표를 향해 나아가는 기획자입니다."
-    },
-    "ISTP": {
-      "image": "images/ISTP.svg",
-      "summary": "현실적인 분석과 손재주로 문제를 해결합니다."
-    },
-    "ISFP": {
-      "image": "images/ISFP.svg",
-      "summary": "감성을 중요하게 여기며 유연하게 적응합니다."
-    },
-    "INFP": {
-      "image": "images/INFP.svg",
-      "summary": "가치와 의미를 추구하며 따뜻한 이상을 품습니다."
-    },
-    "INTP": {
-      "image": "images/INTP.svg",
-      "summary": "호기심 많은 사색가로 논리적 구조를 탐구합니다."
-    },
-    "ESTP": {
-      "image": "images/ESTP.svg",
-      "summary": "순간 판단과 실행으로 변화를 주도합니다."
-    },
-    "ESFP": {
-      "image": "images/ESFP.svg",
-      "summary": "즐거움을 나누고 분위기를 띄우는 낙천가입니다."
-    },
-    "ENFP": {
-      "image": "images/ENFP.svg",
-      "summary": "새로운 가능성을 발견하고 영감을 전파합니다."
-    },
-    "ENTP": {
-      "image": "images/ENTP.svg",
-      "summary": "도전적이며 창의적으로 아이디어를 실험합니다."
-    },
-    "ESTJ": {
-      "image": "images/ESTJ.svg",
-      "summary": "명확한 기준으로 조직을 이끄는 리더형입니다."
-    },
-    "ESFJ": {
-      "image": "images/ESFJ.svg",
-      "summary": "조화를 중시하며 주변을 세심히 챙깁니다."
-    },
-    "ENFJ": {
-      "image": "images/ENFJ.svg",
-      "summary": "사람을 격려하며 방향을 제시하는 카리스마형입니다."
-    },
-    "ENTJ": {
-      "image": "images/ENTJ.svg",
-      "summary": "목표 달성을 위해 전략을 세우는 추진가입니다."
-    }
+    "ISTJ": {"image": "images/ISTJ.svg", "summary": "차분하고 책임감 있는 실행가입니다."},
+    "ISFJ": {"image": "images/ISFJ.svg", "summary": "섬세하게 배려하며 안정감을 주는 조력자입니다."},
+    "INFJ": {"image": "images/INFJ.svg", "summary": "깊은 통찰로 사람을 이해하는 조용한 전략가입니다."},
+    "INTJ": {"image": "images/INTJ.svg", "summary": "체계적 사고로 목표를 향해 나아가는 기획자입니다."},
+    "ISTP": {"image": "images/ISTP.svg", "summary": "현실적인 분석과 손재주로 문제를 해결합니다."},
+    "ISFP": {"image": "images/ISFP.svg", "summary": "감성을 중요하게 여기며 유연하게 적응합니다."},
+    "INFP": {"image": "images/INFP.svg", "summary": "가치와 의미를 추구하며 따뜻한 이상을 품습니다."},
+    "INTP": {"image": "images/INTP.svg", "summary": "호기심 많은 사색가로 논리적 구조를 탐구합니다."},
+    "ESTP": {"image": "images/ESTP.svg", "summary": "순간 판단과 실행으로 변화를 주도합니다."},
+    "ESFP": {"image": "images/ESFP.svg", "summary": "즐거움을 나누고 분위기를 띄우는 낙천가입니다."},
+    "ENFP": {"image": "images/ENFP.svg", "summary": "새로운 가능성을 발견하고 영감을 전파합니다."},
+    "ENTP": {"image": "images/ENTP.svg", "summary": "도전적이며 창의적으로 아이디어를 실험합니다."},
+    "ESTJ": {"image": "images/ESTJ.svg", "summary": "명확한 기준으로 조직을 이끄는 리더형입니다."},
+    "ESFJ": {"image": "images/ESFJ.svg", "summary": "조화를 중시하며 주변을 세심히 챙깁니다."},
+    "ENFJ": {"image": "images/ENFJ.svg", "summary": "사람을 격려하며 방향을 제시하는 카리스마형입니다."},
+    "ENTJ": {"image": "images/ENTJ.svg", "summary": "목표 달성을 위해 전략을 세우는 추진가입니다."}
   }
 }

@@ -242,7 +242,10 @@ export class Router {
     quizEngine.addAnswer(session, answer);
 
     if (!quizEngine.hasNextQuestion(session)) {
-      const resultDetail = quizEngine.calculateMbtiResult(session.answers);
+      const resultDetail = quizEngine.calculateMbtiResult(session.answers, {
+        questions: test.questions,
+        maxWeight: 3,
+      });
       const mbtiCode = resultDetail?.type;
       if (!mbtiCode || mbtiCode.length !== 4) {
         console.error('MBTI 코드 계산 실패:', session.answers);

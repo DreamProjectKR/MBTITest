@@ -87,7 +87,7 @@
     },
     {
       "id": "test-mbti-100",
-      "title": "정밀 MBTI 100문항 검사",
+      "title": "정밀 MBTI 80문항 검사",
       "path": "test-mbti-100/test.json"
     }
   ]
