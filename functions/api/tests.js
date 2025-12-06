@@ -14,7 +14,7 @@ const MBTI_CODES = [
   'ISTP',
   'ISFP',
   'ESTP',
-  'ESFP'
+  'ESFP',
 ];
 
 const INDEX_KEY = 'assets/data/index.json';
@@ -32,7 +32,7 @@ export async function onRequest(context) {
     return jsonResponse(
       { error: 'R2 버킷 바인딩(MBTI_BUCKET)이 설정되지 않았습니다.' },
       request,
-      500
+      500,
     );
   }
 
@@ -68,10 +68,10 @@ async function handleGet({ request, env }) {
         { ...testJson, path: meta.path },
         {
           testPath: meta.path,
-          assetBaseUrl
-        }
+          assetBaseUrl,
+        },
       );
-    })
+    }),
   );
 
   const filtered = tests.filter(Boolean);
@@ -79,16 +79,20 @@ async function handleGet({ request, env }) {
     {
       tests: filtered,
       forumHighlights: index.forumHighlights ?? [],
-      assetBaseUrl
+      assetBaseUrl,
     },
-    request
+    request,
   );
 }
 
 async function handlePost({ request, env }) {
   const contentType = request.headers.get('content-type') || '';
   if (!contentType.includes('multipart/form-data')) {
-    return jsonResponse({ error: 'multipart/form-data 요청이어야 합니다.' }, request, 400);
+    return jsonResponse(
+      { error: 'multipart/form-data 요청이어야 합니다.' },
+      request,
+      400,
+    );
   }
 
   const formData = await request.formData();
@@ -97,7 +101,9 @@ async function handlePost({ request, env }) {
 
   const title = (formData.get('title') || '').toString().trim();
   const description = (formData.get('description') || '').toString().trim();
-  const heroAnimation = (formData.get('heroAnimation') || 'pan').toString().trim();
+  const heroAnimation = (formData.get('heroAnimation') || 'pan')
+    .toString()
+    .trim();
   const rawTags = formData.get('tags');
   const rawQuestions = formData.get('questions');
   const rawResults = formData.get('results');
@@ -116,7 +122,11 @@ async function handlePost({ request, env }) {
   const incomingResults = parseJsonSafely(rawResults, {});
 
   if (!Array.isArray(questions) || !questions.length) {
-    return jsonResponse({ error: 'questions 배열이 비어 있습니다.' }, request, 400);
+    return jsonResponse(
+      { error: 'questions 배열이 비어 있습니다.' },
+      request,
+      400,
+    );
   }
 
   const uploadThumbnail = formData.get('thumbnail');
@@ -127,14 +137,17 @@ async function handlePost({ request, env }) {
       file: uploadThumbnail,
       key: `${imageDir}/thumbnail${inferExt(uploadThumbnail)}`,
       returnPath: `images/thumbnail${inferExt(uploadThumbnail)}`,
-      allowEmpty: false
+      allowEmpty: false,
     });
   }
 
   const results = {};
   for (const code of MBTI_CODES) {
-    const summary =
-      (incomingResults?.[code]?.summary ?? incomingResults?.[code] ?? '').toString();
+    const summary = (
+      incomingResults?.[code]?.summary ??
+      incomingResults?.[code] ??
+      ''
+    ).toString();
     const file = formData.get(`resultImage_${code}`);
     let imagePath = incomingResults?.[code]?.image ?? '';
     if (file && file.name) {
@@ -143,14 +156,14 @@ async function handlePost({ request, env }) {
         file,
         key: `${imageDir}/${code}${inferExt(file)}`,
         returnPath: `images/${code}${inferExt(file)}`,
-        allowEmpty: false
+        allowEmpty: false,
       });
     }
 
     if (summary || imagePath) {
       results[code] = {
         summary,
-        image: imagePath
+        image: imagePath,
       };
     }
   }
@@ -163,22 +176,22 @@ async function handlePost({ request, env }) {
     heroAnimation,
     thumbnail: thumbnailPath,
     questions,
-    results
+    results,
   };
 
   await bucket.put(`${testDir}/test.json`, JSON.stringify(testJson, null, 2), {
-    httpMetadata: { contentType: 'application/json; charset=utf-8' }
+    httpMetadata: { contentType: 'application/json; charset=utf-8' },
   });
 
   await upsertIndex(bucket, {
     id: testId,
     title,
-    path: `${testId}/test.json`
+    path: `${testId}/test.json`,
   });
 
   const normalized = normalizeTest(
     { ...testJson, path: `${testId}/test.json` },
-    { testPath: `${testId}/test.json`, assetBaseUrl }
+    { testPath: `${testId}/test.json`, assetBaseUrl },
   );
 
   return jsonResponse({ test: normalized }, request, 201);
@@ -203,7 +216,7 @@ async function upsertIndex(bucket, entry) {
   }
   const nextIndex = { ...index, tests: nextTests };
   await bucket.put(INDEX_KEY, JSON.stringify(nextIndex, null, 2), {
-    httpMetadata: { contentType: 'application/json; charset=utf-8' }
+    httpMetadata: { contentType: 'application/json; charset=utf-8' },
   });
 }
 
@@ -217,7 +230,10 @@ function normalizeTest(test, { testPath, assetBaseUrl }) {
   const normalized = { ...test, assetBaseUrl };
 
   if (prefix && normalized.thumbnail?.startsWith('images/')) {
-    normalized.thumbnail = `${prefix}${normalized.thumbnail.replace(/^images\//, '')}`;
+    normalized.thumbnail = `${prefix}${normalized.thumbnail.replace(
+      /^images\//,
+      '',
+    )}`;
   }
 
   if (prefix && normalized.results) {
@@ -228,7 +244,7 @@ function normalizeTest(test, { testPath, assetBaseUrl }) {
         image:
           value.image && value.image.startsWith('images/')
             ? `${prefix}${value.image.replace(/^images\//, '')}`
-            : value.image
+            : value.image,
       };
     }
     normalized.results = mapped;
@@ -242,7 +258,7 @@ async function putImage({ bucket, file, key, returnPath, allowEmpty }) {
     throw new Error('파일이 필요합니다.');
   }
   await bucket.put(key, file.stream(), {
-    httpMetadata: { contentType: file.type || 'application/octet-stream' }
+    httpMetadata: { contentType: file.type || 'application/octet-stream' },
   });
   if (returnPath) return returnPath;
   return key.replace(`${DATA_PREFIX}/`, '').replace(/^\/+/, '');
@@ -269,15 +285,17 @@ function ensureTestId(raw) {
 }
 
 function slugify(value) {
-  return value
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\\-\\s_]/g, '')
-    .replace(/[\\s_]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 64) || 'test';
+  return (
+    value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\\-\\s_]/g, '')
+      .replace(/[\\s_]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 64) || 'test'
+  );
 }
 
 function parseJsonSafely(raw, fallback) {
@@ -299,8 +317,8 @@ function jsonResponse(body, request, status = 200) {
     status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      ...buildCorsHeaders(request)
-    }
+      ...buildCorsHeaders(request),
+    },
   });
 }
 
@@ -309,7 +327,13 @@ function buildCorsHeaders(request) {
   return {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
+    'Access-Control-Allow-Headers': 'Content-Type',
   };
 }
 
+// Workers 모드 배포 시 fetch 핸들러를 요구하므로 onRequest를 연결해 준다.
+export default {
+  async fetch(request, env, ctx) {
+    return onRequest({ request, env, context: ctx });
+  },
+};
