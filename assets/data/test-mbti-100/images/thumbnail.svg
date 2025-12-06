@@ -1,4 +1,4 @@
-<xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-labelledby="title desc">
   <title id="title">정밀 MBTI 100문항 썸네일</title>
   <desc id="desc">퍼플과 시안 그라디언트 배경 위에 MBTI 100문항 검사를 나타내는 카드형 썸네일</desc>
@@ -54,6 +54,6 @@
     7점 척도 · 세밀한 성향 분석
   </text>
   <text x="200" y="234" text-anchor="middle" font-family="Inter, 'Noto Sans KR', 'Pretendard', -apple-system, system-ui, sans-serif" font-size="13" font-weight="500" fill="#CFFAFE">
-    16개 유형 프로필 & 맞춤 리포트
+    16개 유형 프로필 &amp; 맞춤 리포트
   </text>
 </svg>
