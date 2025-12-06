@@ -117,7 +117,7 @@ assets/data/mbti-tests.json # 샘플 테스트 및 결과 데이터
 
 - `MBTI_BUCKET`: R2 버킷 바인딩 이름 (Pages Functions에서 R2 객체로 주입됨)
 - `R2_PUBLIC_BASE_URL`: R2에 정적 공개 경로(`https://<도메인>/assets/data`)를 가
-  리키는 URL
+  리키는 URL. 실 서비스 예: `https://dreamp.org/assets/data`
 
 로컬 개발 시 `.dev.vars`를 사용하세요. 샘플: `.dev.vars.example` → `.dev.vars`로
 복사 후 값 채우기.
@@ -133,7 +133,7 @@ name = "mbti-admin"
 main = "functions/api/tests.js"
 compatibility_date = "2024-12-01"
 
-r2_buckets = [{ binding = "MBTI_BUCKET", bucket_name = "mbti-data" }]
+r2_buckets = [{ binding = "MBTI_BUCKET", bucket_name = "mbtitest" }]
 
 # D1 (선택: 테스트 메타/로그 저장용)
 d1_databases = [{ binding = "MBTI_DB", database_name = "mbti-db", database_id = "<your-d1-id>" }]

@@ -217,7 +217,7 @@ function normalizeTest(test, { testPath, assetBaseUrl }) {
   const normalized = { ...test, assetBaseUrl };
 
   if (prefix && normalized.thumbnail?.startsWith('images/')) {
-    normalized.thumbnail = `${prefix}${normalized.thumbnail.replace(/^images\\//, '')}`;
+    normalized.thumbnail = `${prefix}${normalized.thumbnail.replace(/^images\//, '')}`;
   }
 
   if (prefix && normalized.results) {
@@ -227,7 +227,7 @@ function normalizeTest(test, { testPath, assetBaseUrl }) {
         ...value,
         image:
           value.image && value.image.startsWith('images/')
-            ? `${prefix}${value.image.replace(/^images\\//, '')}`
+            ? `${prefix}${value.image.replace(/^images\//, '')}`
             : value.image
       };
     }
