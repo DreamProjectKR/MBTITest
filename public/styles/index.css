@@ -304,7 +304,6 @@ select {
   align-items: center;
   justify-content: center;
   background: #ffffff;
-  margin-top: 100px;
   margin-bottom: 100px;
 }
 
@@ -472,7 +471,6 @@ select {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  margin-top: 100px;
 }
 
 .test-list__header h2 {
