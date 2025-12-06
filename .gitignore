@@ -1,0 +1,6 @@
+.DS_Store
+
+.dev.*
+.github/*
+.cursor/*
+.env*
