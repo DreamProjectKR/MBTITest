@@ -434,6 +434,17 @@ select {
   margin-right: 0;
 }
 
+.test-list-page .TestListArticle {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.test-list-page .TestListArticle .Article {
+  width: 100%;
+}
+
 .ds-card--test {
   border-radius: 24px;
   min-height: 260px;
