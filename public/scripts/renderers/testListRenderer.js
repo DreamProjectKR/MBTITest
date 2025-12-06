@@ -24,7 +24,7 @@ export function renderTestListPage(tests = [], onTestClick, onHomeClick) {
   wrapper.style.margin = '0 auto';
 
   const header = createElement('div', {
-    className: 'test-list__header TestListTittle',
+    className: 'test-list__header',
   });
 
   const heading = createElement('h2', {}, '전체 MBTI 테스트');
@@ -58,6 +58,8 @@ export function renderTestListPage(tests = [], onTestClick, onHomeClick) {
   const grid = createElement('div', {
     className: 'test-grid test-list__grid TestListArticle',
   });
+  // 리스트 페이지에서는 최대 4열로 고정
+  grid.style.gridTemplateColumns = 'repeat(4, minmax(0, 1fr))';
 
   // 더 보기 버튼 컨테이너
   const loadMoreContainer = createElement('div', {
