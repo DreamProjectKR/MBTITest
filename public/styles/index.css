@@ -121,7 +121,7 @@ select {
   height: 34px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .site-header__nav-item--pill {
@@ -470,6 +470,7 @@ select {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  margin-bottom: 100px;
 }
 
 .test-list__header h2 {
@@ -496,7 +497,6 @@ select {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: var(--space-lg);
-  margin-top: 100px;
 }
 
 .test-list__empty {
