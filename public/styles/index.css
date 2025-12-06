@@ -114,7 +114,7 @@ select {
   height: 34px;
   right: 0px;
   top: calc(50% - 34px / 2);
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .site-header__nav-item {
@@ -168,7 +168,7 @@ select {
   color: #ffffff;
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   padding: 0;
   box-shadow: none;
   transition: background var(--duration-fast) var(--easing-standard),
