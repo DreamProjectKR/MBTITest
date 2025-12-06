@@ -45,6 +45,10 @@ export function renderTestListPage(tests = [], onTestClick, onHomeClick) {
     {
       type: 'button',
       className: 'ds-button ds-button--ghost',
+      style: {
+        marginBottom: '24px',
+        padding: '0',
+      },
     },
     '홈으로 돌아가기',
   );

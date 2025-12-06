@@ -661,6 +661,7 @@ select {
 .test-page__content {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-md);
   padding-left: 8px;
 }
@@ -921,6 +922,8 @@ select {
 /* Footer */
 .site-footer {
   width: 100%;
+  position: absolute;
+  bottom: 0;
   display: flex;
   justify-content: center;
   align-items: center;

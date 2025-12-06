@@ -18,9 +18,13 @@ function createTagChips(tags = []) {
     className: 'ds-chip-row',
   });
   tags.slice(0, 4).forEach((tag) => {
-    const chip = createElement('span', {
-      className: 'ds-chip',
-    }, tag);
+    const chip = createElement(
+      'span',
+      {
+        className: 'ds-chip',
+      },
+      tag,
+    );
     row.appendChild(chip);
   });
   return row;
@@ -56,9 +60,13 @@ export function renderTestIntroPage(test, onStartClick, onHomeClick) {
     className: 'test-page__content',
   });
 
-  const eyebrow = createElement('p', {
-    className: 'test-page__eyebrow',
-  }, '테스트 소개');
+  const eyebrow = createElement(
+    'p',
+    {
+      className: 'test-page__eyebrow',
+    },
+    '테스트 소개',
+  );
   content.appendChild(eyebrow);
 
   const title = createElement('h2', {}, test.title ?? 'MBTI 테스트');
@@ -92,18 +100,26 @@ export function renderTestIntroPage(test, onStartClick, onHomeClick) {
     className: 'test-page__actions',
   });
 
-  const startBtn = createElement('button', {
-    type: 'button',
-    className: 'ds-button ds-button--primary',
-  }, '테스트 시작하기');
+  const startBtn = createElement(
+    'button',
+    {
+      type: 'button',
+      className: 'ds-button ds-button--primary',
+    },
+    '테스트 시작하기',
+  );
   if (onStartClick) {
     startBtn.addEventListener('click', () => onStartClick(test.id));
   }
 
-  const homeBtn = createElement('button', {
-    type: 'button',
-    className: 'ds-button ds-button--ghost',
-  }, '홈으로 돌아가기');
+  const homeBtn = createElement(
+    'button',
+    {
+      type: 'button',
+      className: 'ds-button ds-button--ghost',
+    },
+    '홈으로 돌아가기',
+  );
   if (onHomeClick) {
     homeBtn.addEventListener('click', onHomeClick);
   }
@@ -114,4 +130,3 @@ export function renderTestIntroPage(test, onStartClick, onHomeClick) {
   wrapper.append(media, content);
   return wrapper;
 }
-
