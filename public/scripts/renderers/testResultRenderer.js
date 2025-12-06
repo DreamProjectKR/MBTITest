@@ -20,7 +20,7 @@ export function renderTestResultPage(
   mbtiType = '',
   resultDetail = null,
   onRetryClick,
-  onHomeClick
+  onHomeClick,
 ) {
   const isProfessionalTest = test?.id === 'test-mbti-100';
   const normalizedType = normalizeMbtiType(mbtiType);
@@ -60,7 +60,9 @@ export function renderTestResultPage(
     className: 'test-result__description',
   });
   detail.textContent = isProfessionalTest
-    ? `${normalizedType || 'MBTI'} 타입의 특징이에요. 아래에서 4개 축의 비율을 확인해 보세요.`
+    ? `${
+        normalizedType || 'MBTI'
+      } 타입의 특징이에요. 아래에서 4개 축의 비율을 확인해 보세요.`
     : `${normalizedType || 'MBTI'} 타입의 특징이에요.`;
 
   const metrics =
@@ -71,9 +73,10 @@ export function renderTestResultPage(
   const media = createElement('div', {
     className: 'test-result__media',
   });
-  if (resultInfo?.image) {
+  const resolvedImage = resolveResultImage(resultInfo?.image, test);
+  if (resolvedImage) {
     const img = createElement('img', {
-      src: resultInfo.image,
+      src: resolvedImage,
       alt: `${normalizedType} 결과 이미지`,
     });
     media.appendChild(img);
@@ -86,18 +89,26 @@ export function renderTestResultPage(
     className: 'test-page__actions',
   });
 
-  const retryBtn = createElement('button', {
-    type: 'button',
-    className: 'ds-button ds-button--primary',
-  }, '다시 테스트하기');
+  const retryBtn = createElement(
+    'button',
+    {
+      type: 'button',
+      className: 'ds-button ds-button--primary',
+    },
+    '다시 테스트하기',
+  );
   if (onRetryClick) {
     retryBtn.addEventListener('click', () => onRetryClick(test.id));
   }
 
-  const homeBtn = createElement('button', {
-    type: 'button',
-    className: 'ds-button ds-button--ghost',
-  }, '홈으로 돌아가기');
+  const homeBtn = createElement(
+    'button',
+    {
+      type: 'button',
+      className: 'ds-button ds-button--ghost',
+    },
+    '홈으로 돌아가기',
+  );
   if (onHomeClick) {
     homeBtn.addEventListener('click', onHomeClick);
   }
@@ -110,6 +121,31 @@ export function renderTestResultPage(
     wrapper.append(header, summary, detail, media, actions);
   }
   return wrapper;
+}
+
+function resolveResultImage(image, test) {
+  if (!image) return null;
+  // 이미 절대경로거나 data/blob URL이면 그대로 사용
+  if (
+    /^https?:\/\//.test(image) ||
+    image.startsWith('data:') ||
+    image.startsWith('blob:') ||
+    image.startsWith('//') ||
+    image.startsWith('/')
+  ) {
+    return image;
+  }
+
+  const assetBase = test?.assetBaseUrl?.replace(/\/$/, '');
+  if (!assetBase) return image;
+
+  const testDir = test?.path?.includes('/')
+    ? test.path.substring(0, test.path.lastIndexOf('/'))
+    : test?.id || '';
+
+  const prefix = [assetBase, testDir].filter(Boolean).join('/');
+  // 중복 슬래시를 정리하되 프로토콜 구문은 유지
+  return prefix ? `${prefix}/${image}`.replace(/([^:]\/)\/+/g, '$1') : image;
 }
 
 /**
@@ -188,4 +224,3 @@ function createResultMetrics(resultDetail) {
 
   return container;
 }
-
