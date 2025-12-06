@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="mbti100ThumbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4338ca" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" rx="24" fill="url(#mbti100ThumbGrad)" />
+  <g opacity="0.16" stroke="#FFFFFF" stroke-width="2" fill="none">
+    <circle cx="120" cy="90" r="46" />
+    <circle cx="290" cy="120" r="34" />
+    <path d="M80 220 Q200 140 320 220" />
+  </g>
+  <g opacity="0.18" fill="#FFFFFF">
+    <rect x="70" y="170" width="260" height="54" rx="16" />
+    <rect x="110" y="190" width="180" height="6" rx="3" />
+  </g>
+  <text x="200" y="80" font-family="Inter, 'Noto Sans KR', 'Pretendard', -apple-system, system-ui, sans-serif" font-size="18" font-weight="600" fill="#E5ECFF" text-anchor="middle">정밀 MBTI 100문항</text>
+  <text x="200" y="130" font-family="Inter, 'Noto Sans KR', 'Pretendard', -apple-system, system-ui, sans-serif" font-size="64" font-weight="800" fill="#FFFFFF" text-anchor="middle">100</text>
+  <text x="200" y="210" font-family="Inter, 'Noto Sans KR', 'Pretendard', -apple-system, system-ui, sans-serif" font-size="18" font-weight="600" fill="#FFFFFF" text-anchor="middle">7점 척도 · 세밀한 성향 분석</text>
+  <text x="200" y="238" font-family="Inter, 'Noto Sans KR', 'Pretendard', -apple-system, system-ui, sans-serif" font-size="14" fill="#E5ECFF" text-anchor="middle">16개 유형 프로필 & 맞춤 리포트</text>
+</svg>
