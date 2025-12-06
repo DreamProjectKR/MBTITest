@@ -510,20 +510,19 @@ select {
   color: #7a7a7a;
 }
 
-.section--tests .section__footer {
+.section__inner .section__footer {
   width: 100%;
   display: flex;
   justify-content: center;
   margin-top: 16px;
 }
 
-.section--tests .ds-button--ghost {
+.section__inner .ds-button--ghost {
   width: auto;
   height: 56px;
   padding: 0 24px;
   border-radius: 100px;
-  --btn-bg: #00ffff;
-  background: var(--btn-bg);
+  background: #00ffff;
   font-size: 18px;
   font-weight: 700;
   color: #000;
