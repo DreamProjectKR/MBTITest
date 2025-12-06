@@ -161,10 +161,7 @@ export class DataService {
       normalized.thumbnail &&
       normalized.thumbnail.startsWith('images/')
     ) {
-      normalized.thumbnail = `${prefix}${normalized.thumbnail.replace(
-        /^images\//,
-        '',
-      )}`;
+      normalized.thumbnail = `${prefix}${normalized.thumbnail}`;
     }
 
     if (prefix && normalized.results) {
@@ -174,7 +171,7 @@ export class DataService {
           ...result,
           image:
             result.image && result.image.startsWith('images/')
-              ? `${prefix}${result.image.replace(/^images\//, '')}`
+              ? `${prefix}${result.image}`
               : result.image,
         };
       }
