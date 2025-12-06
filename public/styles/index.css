@@ -100,7 +100,7 @@ select {
   top: 0px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .site-header__nav {
@@ -303,6 +303,7 @@ select {
   justify-content: center;
   background: #ffffff;
   margin-top: 100px;
+  margin-bottom: 100px;
 }
 
 .hero__image-wrapper {
@@ -374,13 +375,17 @@ select {
   border-radius: 24px;
   min-height: 260px;
   padding: var(--space-lg);
-  margin: 42px 42px;
   background: transparent;
   box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  cursor: pointer;
+}
+
+.ds-card--test * {
+  cursor: inherit;
 }
 
 .ds-card__thumbnail {
@@ -456,26 +461,6 @@ select {
   gap: 12px;
   border: none;
   --btn-border: transparent;
-}
-
-/* Route pages */
-.route-outlet {
-  width: 100%;
-  padding: 100px 0 80px;
-  display: flex;
-  justify-content: center;
-}
-
-.route-section {
-  width: min(100%, var(--layout-max-width, 1230px));
-  border-radius: 24px;
-  padding: 48px;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-soft);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-  margin: 0 auto;
 }
 
 .test-list-page {
