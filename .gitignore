@@ -1,6 +1,6 @@
 .DS_Store
 
-.dev.*
+.dev.vars
 .github/*
 .cursor/*
 .env*
