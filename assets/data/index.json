@@ -1,14 +1,9 @@
 {
   "tests": [
     {
-      "id": "test-spring-001",
-      "title": "나의 봄꽃 MBTI 테스트",
-      "path": "test-spring-001/test.json"
-    },
-    {
-      "id": "test-summer-001",
-      "title": "여름 바캉스 스타일 테스트",
-      "path": "test-summer-001/test.json"
+      "id": "test-airport-001",
+      "title": "공항/비행 테스트",
+      "path": "test-airport-001/test.json"
     },
     {
       "id": "test-autumn-001",
@@ -16,79 +11,354 @@
       "path": "test-autumn-001/test.json"
     },
     {
+      "id": "test-backpacking-001",
+      "title": "백패킹 테스트",
+      "path": "test-backpacking-001/test.json"
+    },
+    {
+      "id": "test-baking-001",
+      "title": "홈 베이킹 테스트",
+      "path": "test-baking-001/test.json"
+    },
+    {
+      "id": "test-beach-001",
+      "title": "해변 휴양 테스트",
+      "path": "test-beach-001/test.json"
+    },
+    {
+      "id": "test-bedtime-001",
+      "title": "나의 취침 전 습관 테스트",
+      "path": "test-bedtime-001/test.json"
+    },
+    {
+      "id": "test-boardgame-001",
+      "title": "보드게임 모임 테스트",
+      "path": "test-boardgame-001/test.json"
+    },
+    {
+      "id": "test-brunch-001",
+      "title": "브런치 카페 취향 테스트",
+      "path": "test-brunch-001/test.json"
+    },
+    {
+      "id": "test-bubbletea-001",
+      "title": "버블티 취향 테스트",
+      "path": "test-bubbletea-001/test.json"
+    },
+    {
+      "id": "test-camping-001",
+      "title": "캠핑 스타일 테스트",
+      "path": "test-camping-001/test.json"
+    },
+    {
+      "id": "test-catlover-001",
+      "title": "고양이 집사 테스트",
+      "path": "test-catlover-001/test.json"
+    },
+    {
+      "id": "test-citylife-001",
+      "title": "도시 라이프 테스트",
+      "path": "test-citylife-001/test.json"
+    },
+    {
+      "id": "test-climbinggym-001",
+      "title": "클라이밍짐 테스트",
+      "path": "test-climbinggym-001/test.json"
+    },
+    {
+      "id": "test-cocktail-001",
+      "title": "칵테일바 테스트",
+      "path": "test-cocktail-001/test.json"
+    },
+    {
+      "id": "test-coding-001",
+      "title": "코딩 스타일 테스트",
+      "path": "test-coding-001/test.json"
+    },
+    {
+      "id": "test-coffee-001",
+      "title": "나의 커피 스타일 테스트",
+      "path": "test-coffee-001/test.json"
+    },
+    {
+      "id": "test-cookingclass-001",
+      "title": "쿠킹 클래스 테스트",
+      "path": "test-cookingclass-001/test.json"
+    },
+    {
+      "id": "test-coworking-001",
+      "title": "코워킹 스페이스 테스트",
+      "path": "test-coworking-001/test.json"
+    },
+    {
+      "id": "test-dating-001",
+      "title": "소개팅/데이트 테스트",
+      "path": "test-dating-001/test.json"
+    },
+    {
+      "id": "test-dessert-001",
+      "title": "디저트 선택 테스트",
+      "path": "test-dessert-001/test.json"
+    },
+    {
+      "id": "test-diy-001",
+      "title": "DIY/메이킹 테스트",
+      "path": "test-diy-001/test.json"
+    },
+    {
+      "id": "test-dogtrain-001",
+      "title": "반려견 산책/훈련 테스트",
+      "path": "test-dogtrain-001/test.json"
+    },
+    {
+      "id": "test-family-001",
+      "title": "가족 모임 테스트",
+      "path": "test-family-001/test.json"
+    },
+    {
+      "id": "test-fashionweek-001",
+      "title": "패션위크 관람 테스트",
+      "path": "test-fashionweek-001/test.json"
+    },
+    {
+      "id": "test-festival-001",
+      "title": "뮤직 페스티벌 테스트",
+      "path": "test-festival-001/test.json"
+    },
+    {
+      "id": "test-finance-001",
+      "title": "소비/가계부 테스트",
+      "path": "test-finance-001/test.json"
+    },
+    {
+      "id": "test-gaming-001",
+      "title": "게임 플레이 성향 테스트",
+      "path": "test-gaming-001/test.json"
+    },
+    {
+      "id": "test-hiking-001",
+      "title": "등산/트레킹 테스트",
+      "path": "test-hiking-001/test.json"
+    },
+    {
+      "id": "test-horoscope-001",
+      "title": "별자리/운세 테스트",
+      "path": "test-horoscope-001/test.json"
+    },
+    {
+      "id": "test-housekeeping-001",
+      "title": "집안일/정리 테스트",
+      "path": "test-housekeeping-001/test.json"
+    },
+    {
+      "id": "test-language-001",
+      "title": "언어학습 테스트",
+      "path": "test-language-001/test.json"
+    },
+    {
+      "id": "test-library-001",
+      "title": "도서관 루틴 테스트",
+      "path": "test-library-001/test.json"
+    },
+    {
+      "id": "test-mbti-100",
+      "title": "정밀 80문항 검사",
+      "path": "test-mbti-100/test.json"
+    },
+    {
+      "id": "test-mentor-001",
+      "title": "멘토링/커뮤니티 테스트",
+      "path": "test-mentor-001/test.json"
+    },
+    {
+      "id": "test-minimal-001",
+      "title": "미니멀 정리 테스트",
+      "path": "test-minimal-001/test.json"
+    },
+    {
+      "id": "test-morning-001",
+      "title": "아침 루틴 테스트",
+      "path": "test-morning-001/test.json"
+    },
+    {
+      "id": "test-museum-001",
+      "title": "미술관/전시 테스트",
+      "path": "test-museum-001/test.json"
+    },
+    {
+      "id": "test-music-001",
+      "title": "나의 음악 취향 테스트",
+      "path": "test-music-001/test.json"
+    },
+    {
+      "id": "test-nightmarket-001",
+      "title": "야시장 테스트",
+      "path": "test-nightmarket-001/test.json"
+    },
+    {
+      "id": "test-nightowl-001",
+      "title": "야행성 루틴 테스트",
+      "path": "test-nightowl-001/test.json"
+    },
+    {
+      "id": "test-office-001",
+      "title": "오피스 생활 테스트",
+      "path": "test-office-001/test.json"
+    },
+    {
+      "id": "test-pet-001",
+      "title": "나의 반려동물 스타일 테스트",
+      "path": "test-pet-001/test.json"
+    },
+    {
+      "id": "test-photo-001",
+      "title": "사진 출사 테스트",
+      "path": "test-photo-001/test.json"
+    },
+    {
+      "id": "test-picnic-001",
+      "title": "도시 피크닉 테스트",
+      "path": "test-picnic-001/test.json"
+    },
+    {
+      "id": "test-pizza-001",
+      "title": "피자 취향 테스트",
+      "path": "test-pizza-001/test.json"
+    },
+    {
+      "id": "test-plant-001",
+      "title": "식물/가드닝 테스트",
+      "path": "test-plant-001/test.json"
+    },
+    {
+      "id": "test-playlist-001",
+      "title": "플레이리스트 큐레이션 테스트",
+      "path": "test-playlist-001/test.json"
+    },
+    {
+      "id": "test-productivity-001",
+      "title": "생산성 툴 워크플로 테스트",
+      "path": "test-productivity-001/test.json"
+    },
+    {
+      "id": "test-rainy-001",
+      "title": "비오는 날 무드 테스트",
+      "path": "test-rainy-001/test.json"
+    },
+    {
+      "id": "test-ramen-001",
+      "title": "라멘 성향 테스트",
+      "path": "test-ramen-001/test.json"
+    },
+    {
+      "id": "test-roadtrip-001",
+      "title": "로드트립 테스트",
+      "path": "test-roadtrip-001/test.json"
+    },
+    {
+      "id": "test-routine-001",
+      "title": "나의 데일리 루틴 테스트",
+      "path": "test-routine-001/test.json"
+    },
+    {
+      "id": "test-run-001",
+      "title": "러닝/마라톤 테스트",
+      "path": "test-run-001/test.json"
+    },
+    {
+      "id": "test-shopping-001",
+      "title": "나의 쇼핑 스타일 테스트",
+      "path": "test-shopping-001/test.json"
+    },
+    {
+      "id": "test-skincare-001",
+      "title": "스킨케어 루틴 테스트",
+      "path": "test-skincare-001/test.json"
+    },
+    {
+      "id": "test-sns-001",
+      "title": "나의 SNS 사용 패턴 테스트",
+      "path": "test-sns-001/test.json"
+    },
+    {
+      "id": "test-spa-001",
+      "title": "스파/휴식 테스트",
+      "path": "test-spa-001/test.json"
+    },
+    {
+      "id": "test-startup-001",
+      "title": "스타트업 워크스타일 테스트",
+      "path": "test-startup-001/test.json"
+    },
+    {
+      "id": "test-study-001",
+      "title": "공부/학습 스타일 테스트",
+      "path": "test-study-001/test.json"
+    },
+    {
+      "id": "test-studyabroad-001",
+      "title": "유학 준비 테스트",
+      "path": "test-studyabroad-001/test.json"
+    },
+    {
+      "id": "test-summer-001",
+      "title": "여름 바캉스 스타일 테스트",
+      "path": "test-summer-001/test.json"
+    },
+    {
+      "id": "test-sushi-001",
+      "title": "스시집 취향 테스트",
+      "path": "test-sushi-001/test.json"
+    },
+    {
+      "id": "test-tea-001",
+      "title": "티/다도 테스트",
+      "path": "test-tea-001/test.json"
+    },
+    {
+      "id": "test-tech-001",
+      "title": "테크/가젯 소비 테스트",
+      "path": "test-tech-001/test.json"
+    },
+    {
+      "id": "test-thrift-001",
+      "title": "빈티지/중고 쇼핑 테스트",
+      "path": "test-thrift-001/test.json"
+    },
+    {
+      "id": "test-travel-001",
+      "title": "나의 여행 스타일 테스트",
+      "path": "test-travel-001/test.json"
+    },
+    {
+      "id": "test-volunteer-001",
+      "title": "봉사활동 테스트",
+      "path": "test-volunteer-001/test.json"
+    },
+    {
+      "id": "test-weekend-001",
+      "title": "주말 사용법 테스트",
+      "path": "test-weekend-001/test.json"
+    },
+    {
+      "id": "test-wine-001",
+      "title": "와인 취향 테스트",
+      "path": "test-wine-001/test.json"
+    },
+    {
       "id": "test-winter-001",
       "title": "겨울 붕어빵 테스트",
       "path": "test-winter-001/test.json"
     },
     {
-      "id": "test-travel-001",
-      "title": "나의 여행 스타일 MBTI 테스트",
-      "path": "test-travel-001/test.json"
+      "id": "test-yoga-001",
+      "title": "요가/명상 테스트",
+      "path": "test-yoga-001/test.json"
     },
     {
-      "id": "test-coffee-001",
-      "title": "나의 커피 스타일 MBTI 테스트",
-      "path": "test-coffee-001/test.json"
-    },
-    {
-      "id": "test-sns-001",
-      "title": "나의 SNS 사용 패턴 MBTI 테스트",
-      "path": "test-sns-001/test.json"
-    },
-    {
-      "id": "test-homebody-001",
-      "title": "나의 집순이/집돌이 스타일 MBTI 테스트",
-      "path": "test-homebody-001/test.json"
-    },
-    {
-      "id": "test-pet-001",
-      "title": "나의 반려동물 스타일 MBTI 테스트",
-      "path": "test-pet-001/test.json"
-    },
-    {
-      "id": "test-shopping-001",
-      "title": "나의 쇼핑 스타일 MBTI 테스트",
-      "path": "test-shopping-001/test.json"
-    },
-    {
-      "id": "test-fitness-001",
-      "title": "나의 운동/헬스 스타일 MBTI 테스트",
-      "path": "test-fitness-001/test.json"
-    },
-    {
-      "id": "test-music-001",
-      "title": "나의 음악 취향 MBTI 테스트",
-      "path": "test-music-001/test.json"
-    },
-    {
-      "id": "test-entertainment-001",
-      "title": "나의 드라마/영화 취향 MBTI 테스트",
-      "path": "test-entertainment-001/test.json"
-    },
-    {
-      "id": "test-cooking-001",
-      "title": "나의 요리 스타일 MBTI 테스트",
-      "path": "test-cooking-001/test.json"
-    },
-    {
-      "id": "test-routine-001",
-      "title": "나의 데일리 루틴 MBTI 테스트",
-      "path": "test-routine-001/test.json"
-    },
-    {
-      "id": "test-fashion-001",
-      "title": "나의 패션 스타일 MBTI 테스트",
-      "path": "test-fashion-001/test.json"
-    },
-    {
-      "id": "test-bedtime-001",
-      "title": "나의 취침 전 습관 MBTI 테스트",
-      "path": "test-bedtime-001/test.json"
-    },
-    {
-      "id": "test-mbti-100",
-      "title": "정밀 MBTI 80문항 검사",
-      "path": "test-mbti-100/test.json"
+      "id": "test-zerowaste-001",
+      "title": "제로웨이스트 테스트",
+      "path": "test-zerowaste-001/test.json"
     }
   ]
 }
