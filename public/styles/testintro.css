@@ -1,7 +1,3 @@
-.testlistPageShell {
-    height: 100vh;
-}
-
 main {
     display: flex;
     flex-flow: row;
@@ -82,4 +78,14 @@ main {
 
 .IntroBtnShell .TestShare>button {
     width: 146px;
+}
+
+footer {
+    position: absolute;
+    width: 1230px;
+    bottom: 0;
+}
+
+.testlistPageShell {
+    max-height: 100vh;
 }

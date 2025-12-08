@@ -1,0 +1,5 @@
+name = "mbtitest"
+compatibility_date = "2024-12-08"
+
+[site]
+bucket = "./public"
