@@ -1,7 +1,8 @@
 body {
   display: flex;
   justify-content: center;
-  background-color: #d0c3e8;
+  background-color: #DAF0F6;
+  font-family: 'Noto Sans', sans-serif;
 }
 
 .PageShell {

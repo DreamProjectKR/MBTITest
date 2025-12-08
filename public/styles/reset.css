@@ -1,4 +1,6 @@
 /* CSS Reset - 기본 스타일 초기화 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
+
 *,
 *::before,
 *::after {
@@ -7,13 +9,15 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
-  font-family: sans-serif;
+  font-family: 'Noto Sans', sans-serif;
   line-height: 1.5;
 }
 
-ol, ul {
+ol,
+ul {
   list-style: none;
 }
 
@@ -33,7 +37,10 @@ table {
   width: 100%;
 }
 
-input, button, select, textarea {
+input,
+button,
+select,
+textarea {
   font-family: inherit;
   font-size: inherit;
   border: none;
