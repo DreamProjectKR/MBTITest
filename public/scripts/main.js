@@ -4,17 +4,13 @@ const MainTop = document.getElementById('MainTop');
 // index.json은 스크립트 위치 기준으로 찾도록 고정 경로를 계산
 const INDEX_JSON_URL = new URL('../assets/index.json', import.meta.url).href;
 
+const headerOffset = header.offsetTop; // 헤더 원래 위치 저장
+
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 60) {
-    console.log('스크롤내렸다.');
-    header.classList.add('scrolled');
-    headerScroll.style.backgroundColor = 'transparent';
-    MainTop.style.marginTop = '142px';
+  if (window.scrollY > headerOffset) {
+    header.classList.add('fixed-header', 'bg-on');
   } else {
-    console.log('스크롤올렸다.');
-    header.classList.remove('scrolled');
-    headerScroll.style.backgroundColor = '#ffffff';
-    MainTop.style.marginTop = '0px';
+    header.classList.remove('fixed-header', 'bg-on');
   }
 });
 

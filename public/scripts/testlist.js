@@ -2,17 +2,13 @@ const header = document.getElementById('header');
 const headerScroll = document.getElementById('headerScroll');
 const MainTop = document.getElementById('MainTop');
 
+const headerOffset = header.offsetTop; // 헤더 원래 위치 저장
+
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 60) {
-    console.log('스크롤내렸다.');
-    header.classList.add('scrolledList');
-    headerScroll.style.backgroundColor = 'transparent';
-    MainTop.style.marginTop = '142px';
+  if (window.scrollY > headerOffset) {
+    header.classList.add('fixed-header');
   } else {
-    console.log('스크롤올렸다.');
-    header.classList.remove('scrolledList');
-    headerScroll.style.backgroundColor = '#ffffff';
-    MainTop.style.marginTop = '0px';
+    header.classList.remove('fixed-header');
   }
 });
 
