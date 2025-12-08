@@ -1,5 +1,5 @@
 header {
-    background-image: url('../images/HeaderBackgroundImg.png');
+    background-image: url('https://pub-9394623df95a4f669f145a4ede63d588.r2.dev/assets/images/HeaderBackgroundImg.png');
     padding: 20px 5px 80px;
     background-size: cover;
     background-position: center;
@@ -15,7 +15,7 @@ footer {
 @media (max-width: 900px) {
     header {
         padding: 28px 12px 20px;
-        background-image: url('../images/HeaderBackgroundImg.png');
+        background-image: url('https://pub-9394623df95a4f669f145a4ede63d588.r2.dev/assets/images/HeaderBackgroundImg.png');
         background-size: 100% auto;
         background-repeat: no-repeat;
         background-position: top center;

@@ -1,8 +1,7 @@
 const header = document.getElementById('header');
 const headerScroll = document.getElementById('headerScroll');
 const MainTop = document.getElementById('MainTop');
-// index.json은 스크립트 위치 기준으로 찾도록 고정 경로를 계산
-const INDEX_JSON_URL = new URL('../assets/index.json', import.meta.url).href;
+const API_TESTS_URL = window.API_TESTS_BASE || '/api/tests';
 
 const headerOffset = header.offsetTop; // 헤더 원래 위치 저장
 
@@ -61,39 +60,12 @@ function createTestCard(test, variantClass) {
   return shell;
 }
 
-// ----- AJAX로 테스트 목록 불러오기 -----
-function fetchTestsAjax() {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', INDEX_JSON_URL, true);
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState !== 4) return;
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const body = xhr.responseText || '';
-          const trimmed = body.trim();
-          // SPA 서버 등에서 404 시 index.html(HTML)로 응답하는 경우를 방지
-          if (trimmed.startsWith('<')) {
-            reject(
-              new Error(
-                'index.json 응답이 HTML입니다. 정적 경로를 확인하세요: ' +
-                  INDEX_JSON_URL,
-              ),
-            );
-            return;
-          }
-
-          const data = JSON.parse(body);
-          resolve(Array.isArray(data.tests) ? data.tests : []);
-        } catch (err) {
-          reject(err);
-        }
-      } else {
-        reject(new Error('index.json 요청 실패: ' + xhr.status));
-      }
-    };
-    xhr.send();
-  });
+// ----- 테스트 목록 불러오기 (/api/tests) -----
+async function fetchTestsAjax() {
+  const res = await fetch(API_TESTS_URL);
+  if (!res.ok) throw new Error('/api/tests 요청 실패: ' + res.status);
+  const data = await res.json();
+  return Array.isArray(data.tests) ? data.tests : [];
 }
 
 // ----- 중복 제거 + 최신순 정렬 -----

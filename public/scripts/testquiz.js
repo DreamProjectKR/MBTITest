@@ -14,6 +14,21 @@ const dom = {
   pageShell: document.querySelector('.PageShell'),
 };
 
+const ASSETS_BASE =
+  window.ASSETS_BASE || 'https://pub-9394623df95a4f669f145a4ede63d588.r2.dev';
+const assetUrl =
+  window.assetUrl ||
+  ((path) =>
+    `${ASSETS_BASE}/${path
+      .replace(/^\.?\/+/, '')
+      .replace(/^assets\//, 'assets/')}`);
+const ICONS = {
+  instagram: assetUrl('assets/images/instagram.png'),
+  katalk: assetUrl('assets/images/katalk.png'),
+  naver: assetUrl('assets/images/naver.png'),
+  mail: assetUrl('assets/images/mail.png'),
+};
+
 function ensureResultFooter() {
   let footer = document.querySelector('.QuizFooter');
   if (footer) return footer;
@@ -24,16 +39,16 @@ function ensureResultFooter() {
     <ul>
       <li>
         <a href="#">
-          <img class="icon" src="./images/instagram.png" alt="인스타그램 바로가기">
+          <img class="icon" src="${ICONS.instagram}" alt="인스타그램 바로가기">
         </a>
         <a href="#">
-          <img class="icon" src="./images/katalk.png" alt="카카오톡 바로가기">
+          <img class="icon" src="${ICONS.katalk}" alt="카카오톡 바로가기">
         </a>
         <a href="#">
-          <img class="icon" src="./images/naver.png" alt="네이버 바로가기">
+          <img class="icon" src="${ICONS.naver}" alt="네이버 바로가기">
         </a>
         <a href="#">
-          <img class="icon" src="./images/mail.png" alt="메일 바로가기">
+          <img class="icon" src="${ICONS.mail}" alt="메일 바로가기">
         </a>
       </li>
     </ul>
@@ -72,14 +87,6 @@ function getTestIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('testId');
   return id ? decodeURIComponent(id) : '';
-}
-
-function buildDataUrl(relativePath) {
-  if (!relativePath) return null;
-  const cleanPath = relativePath
-    .replace(/^\.?\/?assets\//, '')
-    .replace(/^\.\//, '');
-  return `./assets/${cleanPath}`;
 }
 
 function deriveBaseDir(path) {
@@ -271,30 +278,13 @@ async function loadTestData() {
   }
 
   try {
-    const indexRes = await fetch('./assets/index.json');
-    if (!indexRes.ok) throw new Error('테스트 목록 로딩 실패');
-    const indexData = await indexRes.json();
-    const tests = Array.isArray(indexData?.tests) ? indexData.tests : [];
-    const targetTest = tests.find((item) => item.id === testId);
-
-    if (!targetTest || !targetTest.path) {
-      renderError('해당 테스트를 찾을 수 없습니다.');
-      return;
-    }
-
-    state.baseDir = deriveBaseDir(targetTest.path);
-
-    const dataUrl = buildDataUrl(targetTest.path);
-    if (!dataUrl) {
-      renderError('테스트 데이터 경로가 없습니다.');
-      return;
-    }
-
-    const dataRes = await fetch(dataUrl);
+    const apiBase = window.API_TESTS_BASE || '/api/tests';
+    const dataRes = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
     if (!dataRes.ok) throw new Error('테스트 데이터 로딩 실패');
     const data = await dataRes.json();
 
-    state.test = { ...targetTest, ...data };
+    state.baseDir = deriveBaseDir(data.path || '');
+    state.test = data;
     state.totalQuestions = Array.isArray(state.test.questions)
       ? state.test.questions.length
       : 0;

@@ -11,14 +11,6 @@ function getParam(name) {
   return value ? decodeURIComponent(value) : '';
 }
 
-function buildDataUrl(relativePath) {
-  if (!relativePath) return null;
-  const cleanPath = relativePath
-    .replace(/^\.?\/?assets\//, '')
-    .replace(/^\.\//, '');
-  return `./assets/${cleanPath}`;
-}
-
 function deriveBaseDir(path) {
   if (!path) return '';
   const clean = path.replace(/^\.?\/?assets\//, '').replace(/^\.\//, '');
@@ -113,37 +105,13 @@ async function loadResultData() {
   }
 
   try {
-    const indexRes = await fetch('./assets/index.json');
-    if (!indexRes.ok) throw new Error('테스트 목록 로딩 실패');
-    const indexData = await indexRes.json();
-
-    const tests = Array.isArray(indexData?.tests) ? indexData.tests : [];
-    const targetTest = tests.find((item) => item.id === testId);
-
-    if (!targetTest || !targetTest.path) {
-      renderError('해당 테스트를 찾을 수 없습니다.');
-      return;
-    }
-
-    const dataUrl = buildDataUrl(targetTest.path);
-    if (!dataUrl) {
-      renderError('테스트 데이터 경로가 없습니다.');
-      return;
-    }
-
-    const dataRes = await fetch(dataUrl);
+    const apiBase = window.API_TESTS_BASE || '/api/tests';
+    const dataRes = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
     if (!dataRes.ok) throw new Error('테스트 데이터 로딩 실패');
     const data = await dataRes.json();
 
-    const mergedData = {
-      ...targetTest,
-      ...data,
-      author: targetTest.author ?? data.author,
-      authorImg: targetTest.authorImg ?? data.authorImg,
-    };
-
-    const baseDir = deriveBaseDir(targetTest.path);
-    renderResultPage(mergedData, mbti, baseDir);
+    const baseDir = deriveBaseDir(data.path || '');
+    renderResultPage(data, mbti, baseDir);
   } catch (err) {
     console.error('결과 페이지 로딩 오류:', err);
     renderError('결과 정보를 불러오지 못했습니다.');

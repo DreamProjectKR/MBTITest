@@ -25,26 +25,13 @@ document.querySelector('.test1').onclick = function () {
 
 // index.json을 AJAX로 읽어와 테스트 카드 목록을 구성한다.
 (function () {
-  // ----- AJAX: index.json 로드 -----
-  function fetchTestIndex() {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', './assets/index.json', true);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState !== 4) return;
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            resolve(Array.isArray(data.tests) ? data.tests : []);
-          } catch (err) {
-            reject(err);
-          }
-        } else {
-          reject(new Error('index.json 요청 실패: ' + xhr.status));
-        }
-      };
-      xhr.send();
-    });
+  // ----- AJAX: /api/tests 로드 -----
+  async function fetchTestIndex() {
+    const apiUrl = window.API_TESTS_BASE || '/api/tests';
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error(apiUrl + ' 요청 실패: ' + res.status);
+    const data = await res.json();
+    return Array.isArray(data.tests) ? data.tests : [];
   }
 
   // ----- 데이터 정규화: 중복 제거 + 최신순 정렬 -----
@@ -68,8 +55,7 @@ document.querySelector('.test1').onclick = function () {
   // ----- 썸네일 경로 보정 -----
   function resolveThumbnailPath(thumbnail) {
     if (!thumbnail) return '#';
-    if (thumbnail.startsWith('.assets'))
-      return thumbnail.replace('.assets', './assets');
+    if (/^https?:\/\//i.test(thumbnail)) return thumbnail;
     if (thumbnail.startsWith('assets/')) return `./${thumbnail}`;
     if (thumbnail.startsWith('./') || thumbnail.startsWith('/'))
       return thumbnail;

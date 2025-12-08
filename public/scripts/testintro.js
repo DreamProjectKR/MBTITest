@@ -24,14 +24,6 @@ function getTestIdFromQuery() {
   return id ? decodeURIComponent(id) : '';
 }
 
-function buildAssetUrl(relativePath) {
-  if (!relativePath) return null;
-  const cleanPath = relativePath
-    .replace(/^\.?\/?assets\//, '')
-    .replace(/^\.?\//, '');
-  return `./assets/${cleanPath}`;
-}
-
 function renderIntroError(message) {
   const titleEl = document.querySelector('.IntroShellTextBox h2');
   const descEl = document.querySelector('.IntroDescription');
@@ -49,37 +41,13 @@ async function loadIntroData() {
   setupStartButton(testId);
 
   try {
-    const indexRes = await fetch('./assets/index.json');
-    if (!indexRes.ok) throw new Error('테스트 목록 로딩 실패');
-    const indexData = await indexRes.json();
-
-    const tests = Array.isArray(indexData?.tests) ? indexData.tests : [];
-    const targetTest = tests.find((item) => item.id === testId);
-
-    if (!targetTest || !targetTest.path) {
-      renderIntroError('해당 테스트를 찾을 수 없습니다.');
-      return;
-    }
-
-    const dataUrl = buildAssetUrl(targetTest.path);
-    if (!dataUrl) {
-      renderIntroError('테스트 데이터 경로가 없습니다.');
-      return;
-    }
-
-    const res = await fetch(dataUrl);
+    const apiBase = window.API_TESTS_BASE || '/api/tests';
+    const res = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
     if (!res.ok) throw new Error('테스트 데이터 로딩 실패');
     const data = await res.json();
 
-    const mergedData = {
-      ...targetTest,
-      ...data,
-      author: targetTest.author ?? data.author,
-      authorImg: targetTest.authorImg ?? data.authorImg,
-    };
-
-    setupShareButton(mergedData);
-    renderIntro(mergedData);
+    setupShareButton(data);
+    renderIntro(data);
   } catch (err) {
     console.error('테스트 인트로 로딩 오류:', err);
     renderIntroError('테스트 정보를 불러오지 못했습니다.');
