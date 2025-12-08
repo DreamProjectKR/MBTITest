@@ -236,52 +236,52 @@
   ],
   "results": {
     "ISTJ": {
-      "image": "./assets/test-summer/images/ISTJ.svg"
+      "image": "./assets/test-summer/images/ISTJ.png"
     },
     "ISFJ": {
-      "image": "./assets/test-summer/images/ISFJ.svg"
+      "image": "./assets/test-summer/images/ISFJ.png"
     },
     "INFJ": {
-      "image": "./assets/test-summer/images/INFJ.svg"
+      "image": "./assets/test-summer/images/INFJ.png"
     },
     "INTJ": {
-      "image": "./assets/test-summer/images/INTJ.svg"
+      "image": "./assets/test-summer/images/INTJ.png"
     },
     "ISTP": {
-      "image": "./assets/test-summer/images/ISTP.svg"
+      "image": "./assets/test-summer/images/ISTP.png"
     },
     "ISFP": {
-      "image": "./assets/test-summer/images/ISFP.svg"
+      "image": "./assets/test-summer/images/ISFP.png"
     },
     "INFP": {
-      "image": "./assets/test-summer/images/INFP.svg"
+      "image": "./assets/test-summer/images/INFP.png"
     },
     "INTP": {
-      "image": "./assets/test-summer/images/INTP.svg"
+      "image": "./assets/test-summer/images/INTP.png"
     },
     "ESTP": {
-      "image": "./assets/test-summer/images/ESTP.svg"
+      "image": "./assets/test-summer/images/ESTP.png"
     },
     "ESFP": {
-      "image": "./assets/test-summer/images/ESFP.svg"
+      "image": "./assets/test-summer/images/ESFP.png"
     },
     "ENFP": {
-      "image": "./assets/test-summer/images/ENFP.svg"
+      "image": "./assets/test-summer/images/ENFP.png"
     },
     "ENTP": {
-      "image": "./assets/test-summer/images/ENTP.svg"
+      "image": "./assets/test-summer/images/ENTP.png"
     },
     "ESTJ": {
-      "image": "./assets/test-summer/images/thumbnail.png"
+      "image": "./assets/test-summer/images/ESTJ.png"
     },
     "ESFJ": {
-      "image": "./assets/test-summer/images/ESFJ.svg"
+      "image": "./assets/test-summer/images/ESFJ.png"
     },
     "ENFJ": {
-      "image": "./assets/test-summer/images/ENFJ.svg"
+      "image": "./assets/test-summer/images/ENFJ.png"
     },
     "ENTJ": {
-      "image": "./assets/test-summer/images/ENTJ.svg"
+      "image": "./assets/test-summer/images/ENTJ.png"
     }
   }
 }
