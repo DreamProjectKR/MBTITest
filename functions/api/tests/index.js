@@ -16,7 +16,7 @@ async function readJsonFromR2(bucket, key) {
 
 export async function onRequestGet({ env }) {
   try {
-    const data = await readJsonFromR2(env.ASSETS, 'assets/index.json');
+    const data = await readJsonFromR2(env.MBTI_BUCKET, 'assets/index.json');
     if (!data) return jsonResponse({ error: 'not found' }, 404);
     return jsonResponse(data);
   } catch (err) {

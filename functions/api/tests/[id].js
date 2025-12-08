@@ -19,8 +19,8 @@ export async function onRequestGet({ params, env }) {
   if (!id) return jsonResponse({ error: 'missing id' }, 400);
 
   try {
-    // 우선 index에서 경로를 찾고, 없으면 기본 패턴으로 조회
-    const index = await readJsonFromR2(env.ASSETS, 'assets/index.json');
+    // index.json에서 path를 우선 찾고, 없으면 기본 패턴 사용
+    const index = await readJsonFromR2(env.MBTI_BUCKET, 'assets/index.json');
     const entry = Array.isArray(index?.tests)
       ? index.tests.find((t) => t.id === id)
       : null;
@@ -32,7 +32,7 @@ export async function onRequestGet({ params, env }) {
       ? `assets/${explicitPath}`
       : `assets/${id}/test.json`;
 
-    const data = await readJsonFromR2(env.ASSETS, key);
+    const data = await readJsonFromR2(env.MBTI_BUCKET, key);
     if (!data) return jsonResponse({ error: 'not found' }, 404);
     return jsonResponse(data);
   } catch (err) {
