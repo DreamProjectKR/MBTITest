@@ -1,0 +1,136 @@
+function getTestIdFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('testId');
+  return id ? decodeURIComponent(id) : '';
+}
+
+function buildAssetUrl(relativePath) {
+  if (!relativePath) return null;
+  const cleanPath = relativePath
+    .replace(/^\.?\/?assets\//, '')
+    .replace(/^\.?\//, '');
+  return `./assets/${cleanPath}`;
+}
+
+function renderIntroError(message) {
+  const titleEl = document.querySelector('.IntroShellTextBox h2');
+  const descEl = document.querySelector('.IntroDescription');
+  if (titleEl) titleEl.textContent = '테스트를 불러올 수 없습니다.';
+  if (descEl) descEl.textContent = message || '테스트 정보를 찾을 수 없습니다.';
+}
+
+// 테스트 인트로 데이터를 JSON에서 로딩해 화면에 주입
+async function loadIntroData() {
+  const testId = getTestIdFromQuery();
+  if (!testId) {
+    renderIntroError('testId 파라미터가 없습니다.');
+    return;
+  }
+  setupStartButton(testId);
+
+  try {
+    const indexRes = await fetch('./assets/index.json');
+    if (!indexRes.ok) throw new Error('테스트 목록 로딩 실패');
+    const indexData = await indexRes.json();
+
+    const tests = Array.isArray(indexData?.tests) ? indexData.tests : [];
+    const targetTest = tests.find((item) => item.id === testId);
+
+    if (!targetTest || !targetTest.path) {
+      renderIntroError('해당 테스트를 찾을 수 없습니다.');
+      return;
+    }
+
+    const dataUrl = buildAssetUrl(targetTest.path);
+    if (!dataUrl) {
+      renderIntroError('테스트 데이터 경로가 없습니다.');
+      return;
+    }
+
+    const res = await fetch(dataUrl);
+    if (!res.ok) throw new Error('테스트 데이터 로딩 실패');
+    const data = await res.json();
+
+    renderIntro({ ...targetTest, ...data });
+  } catch (err) {
+    console.error('테스트 인트로 로딩 오류:', err);
+    renderIntroError('테스트 정보를 불러오지 못했습니다.');
+  }
+}
+
+// 태그를 DOM으로 생성해 스타일 클래스(HashTag)를 그대로 사용
+function renderTags(tagsEl, tags) {
+  if (!tagsEl) return;
+  tagsEl.innerHTML = '';
+  if (!Array.isArray(tags)) return;
+
+  const frag = document.createDocumentFragment();
+  tags.forEach((tag) => {
+    const span = document.createElement('span');
+    span.className = 'HashTag';
+    span.textContent = `#${tag}`;
+    frag.appendChild(span);
+  });
+  tagsEl.appendChild(frag);
+}
+
+// 설명이 배열이면 줄마다 <p>로 만들어 CSS는 유지하고 내용만 채움
+function renderDescription(descEl, description) {
+  if (!descEl) return;
+  descEl.innerHTML = '';
+
+  const lines = Array.isArray(description)
+    ? description
+    : description
+    ? [description]
+    : [];
+
+  const frag = document.createDocumentFragment();
+  lines.forEach((line) => {
+    const p = document.createElement('p');
+    p.textContent = line;
+    frag.appendChild(p);
+  });
+
+  if (frag.childNodes.length) descEl.appendChild(frag);
+}
+
+function renderIntro(data) {
+  if (!data) return;
+
+  const thumbnailEl = document.querySelector('.IntroShellImg img');
+  const tagsEl = document.querySelector('.IntroShellImg .NewTestHashTag');
+  const titleEl = document.querySelector('.IntroShellTextBox h2');
+  const authorImgEl = document.querySelector('.Creator img');
+  const authorNameEl = document.querySelector('.CreatorName');
+  const descEl = document.querySelector('.IntroDescription');
+
+  if (thumbnailEl) {
+    if (data.thumbnail) thumbnailEl.src = data.thumbnail;
+    if (data.title) thumbnailEl.alt = data.title;
+  }
+
+  renderTags(tagsEl, data.tags);
+
+  if (titleEl && data.title) titleEl.textContent = data.title;
+
+  if (authorImgEl) {
+    if (data.authorImg) authorImgEl.src = data.authorImg;
+    if (data.author) authorImgEl.alt = data.author;
+  }
+
+  if (authorNameEl && data.author) authorNameEl.textContent = data.author;
+
+  renderDescription(descEl, data.description);
+}
+
+document.addEventListener('DOMContentLoaded', loadIntroData);
+
+function setupStartButton(testId) {
+  const startBtn = document.querySelector('.TestStart button');
+  if (!startBtn) return;
+  const targetUrl = `./testquiz.html?testId=${encodeURIComponent(testId)}`;
+  startBtn.addEventListener('click', () => {
+    window.location.href = targetUrl;
+  });
+}

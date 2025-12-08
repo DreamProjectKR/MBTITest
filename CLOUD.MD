@@ -86,6 +86,14 @@ flowchart LR
 - 기존 `assets/data/**`를 JSONL로 변환해 `kv:bulk put`으로 적재.
 - R2 이미지는 JSON의 URL을 업데이트 후 KV에 함께 저장.
 
+## 현재 해야 할 작업
+
+- R2 바인딩 이름을 `MBTI_BUCKET`으로 설정하고 `ASSETS_BASE`(R2 퍼블릭 URL + `assets/data`) 환경변수를 wrangler.toml/Pages에 추가한다.
+- 기존 `assets/data/index.json`과 테스트 JSON들을 R2 `assets/data/**` 경로로 업로드해 초기 데이터를 준비한다.
+- `wrangler pages dev public`으로 `/api/tests` GET/POST 흐름과 프런트(`public/index.html`) 페치 정상 동작을 확인한다.
+- 관리자 업로드 흐름(`public/admin.html`)에서 썸네일·결과 이미지가 R2에 적재되고 응답 payload가 프런트에서 재사용되는지 검증한다.
+- 필요 시 관리자 API 보호(Access/토큰)를 추가해 비인가 업로드를 막는다.
+
 ## 체크리스트
 
 - [ ] KV 바인딩(`DB`)과 R2 바인딩(`ASSETS`), `ASSETS_BASE`/`ADMIN_TOKEN`이 설정되었는가.

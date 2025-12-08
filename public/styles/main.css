@@ -1,9 +1,10 @@
-body{
+body {
     display: flex;
     justify-content: center;
     background-color: #d0c3e8;
 }
-.PageShell{
+
+.PageShell {
     display: flex;
     flex-flow: column;
     width: 1230px;
@@ -14,34 +15,42 @@ body{
 header.scrolled::before {
     opacity: 1;
 }
-.Sticky{
+
+.Sticky {
     top: 0;
     height: 85px;
     position: sticky;
     background-color: #ffffff;
 }
+
 .scrolled {
     height: 218px;
     background-color: transparent;
-    background-image: url('./images/HeaderBackgroundImgNon.png');
+    background-image: url('../images/HeaderBackgroundImgNon.png');
 }
+
 .scrolledList {
     height: 218px;
     background-color: transparent;
-    background-image: url('./images/HeaderBackgroundImg.png');
+    background-image: url('../images/HeaderBackgroundImg.png');
 }
-header .Head{
+
+header .Head {
     display: flex;
     justify-content: space-between;
     padding: 20px 5px;
 }
-header .Head .Logo{
+
+header .Head .Logo {
     width: 18%;
 }
-header .Head .Logo a{}
-header .Head .Logo a img{
+
+header .Head .Logo a {}
+
+header .Head .Logo a img {
     transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
 }
+
 header .Head .Logo:hover img {
     transform: scale(1.1);
     opacity: 0.5;
@@ -85,12 +94,10 @@ header .Head .Logo:hover img {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(
-    0deg, 
-    transparent, 
-    transparent 30%, 
-    rgba(0,255,255,0.3)
-    );
+    background: linear-gradient(0deg,
+            transparent,
+            transparent 30%,
+            rgba(0, 255, 255, 0.3));
     transform: rotate(-45deg);
     transition: all 0.5s ease;
     opacity: 0;
@@ -98,7 +105,7 @@ header .Head .Logo:hover img {
 
 .holographic-card:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(0,255,255,0.5);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
 }
 
 .holographic-card:hover::before {
@@ -107,39 +114,44 @@ header .Head .Logo:hover img {
 }
 
 /* 메인 */
-main{
+main {
     transition: all 0.8s ease;
 }
 
 /* 배너 */
-main .MainBanner{}
-main .MainBanner a{}
-main .MainBanner a img{}
+main .MainBanner {}
+
+main .MainBanner a {}
+
+main .MainBanner a img {}
 
 /* 새로운 테스트 리스트 */
-main .NewTestList{
+main .NewTestList {
     display: flex;
     flex-flow: column;
 }
 
 /* 새로운 테스트 리스트 타이틀 */
 
-main .NewTestList .NewTestListTittle{
+main .NewTestList .NewTestListTittle {
     display: flex;
     padding: 16px 0 4px;
 }
-main .NewTestList .NewTestListTittle img{
+
+main .NewTestList .NewTestListTittle img {
     display: block;
     width: 32px;
     height: 32px;
     margin: 0 8px;
 }
-main .NewTestList .NewTestListTittle .fire{
+
+main .NewTestList .NewTestListTittle .fire {
     display: block;
     width: 24px;
     height: 24px;
 }
-main .NewTestList .NewTestListTittle p{
+
+main .NewTestList .NewTestListTittle p {
     display: flex;
     align-items: center;
     font-size: 1.0rem;
@@ -147,94 +159,102 @@ main .NewTestList .NewTestListTittle p{
 }
 
 /* 새로운 테스트 리스트 카드 디자인 */
-main .NewTestList .NewTestListShell{
+main .NewTestList .NewTestListShell {
     display: flex;
     justify-content: space-between;
     width: 100%;
 }
-main .NewTestList .NewTestListShell .NewTestShell{
+
+main .NewTestList .NewTestListShell .NewTestShell {
     width: 22%;
     padding: 16px;
     border-radius: 15px;
     background-color: #ffffff;
     cursor: pointer;
 }
-main .NewTestList .NewTestListShell .NewTestShell .NewTest{
+
+main .NewTestList .NewTestListShell .NewTestShell .NewTest {
     background-color: #ffffff;
 }
-main .NewTestList .NewTestListShell .NewTestShell .NewTest img{
+
+main .NewTestList .NewTestListShell .NewTestShell .NewTest img {
     display: block;
     width: 100%;
     height: 260px;
     background-color: aquamarine;
 }
-main .NewTestList .NewTestListShell .NewTestShell .NewTest h4{
+
+main .NewTestList .NewTestListShell .NewTestShell .NewTest h4 {
     padding: 12px 0 12px;
 }
-main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag{}
-main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag > span{}
 
-.TestMoreBtn{
+main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag {}
+
+main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag>span {}
+
+.TestMoreBtn {
     display: flex;
     justify-content: center;
     align-items: center;
 }
-.Morebutton{
-    position:relative;
-    display:inline-block;
-    margin:20px;
+
+.Morebutton {
+    position: relative;
+    display: inline-block;
+    margin: 20px;
 }
 
-.Morebutton a{
-    color:#000;
-    font-family:Helvetica, sans-serif;
-    font-weight:bold;
-    font-size:1rem;
+.Morebutton a {
+    color: #000;
+    font-family: Helvetica, sans-serif;
+    font-weight: bold;
+    font-size: 1rem;
     text-align: center;
-    text-decoration:none;
-    background-color:#FFD48D;
-    display:flex;
+    text-decoration: none;
+    background-color: #FFD48D;
+    display: flex;
     flex-flow: row;
     justify-content: center;
     align-items: center;
-    position:relative;
-    padding:10px 20px;
+    position: relative;
+    padding: 10px 20px;
 
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     text-shadow: 0px 1px 0px #FFD48D;
     filter: dropshadow(color=#FFD48D, offx=0px, offy=1px);
 
-    -webkit-box-shadow:inset 0 1px 0 #FFE5C4, 0 10px 0 #E1A860;
-    -moz-box-shadow:inset 0 1px 0 #FFE5C4, 0 10px 0 #E1A860;
-    box-shadow:inset 0 1px 0 #FFE5C4, 0 10px 0 #E1A860;
+    -webkit-box-shadow: inset 0 1px 0 #FFE5C4, 0 10px 0 #E1A860;
+    -moz-box-shadow: inset 0 1px 0 #FFE5C4, 0 10px 0 #E1A860;
+    box-shadow: inset 0 1px 0 #FFE5C4, 0 10px 0 #E1A860;
 
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
 }
-.Morebutton a img{
+
+.Morebutton a img {
     display: block;
     width: 16px;
     height: 16px;
     margin-right: 10px;
 }
 
-.Morebutton a:active{
-    top:10px;
-    background-color:#FFD48D;
+.Morebutton a:active {
+    top: 10px;
+    background-color: #FFD48D;
 
-    -webkit-box-shadow:inset 0 1px 0 #FFE5C4, inset 0 -3px 0 #E1A860;
-    -moz-box-shadow:inset 0 1px 0 #FFE5C4, inset 0 -3pxpx 0 #E1A860;
-    box-shadow:inset 0 1px 0 #FFE5C4, inset 0 -3px 0 #E1A860;
+    -webkit-box-shadow: inset 0 1px 0 #FFE5C4, inset 0 -3px 0 #E1A860;
+    -moz-box-shadow: inset 0 1px 0 #FFE5C4, inset 0 -3pxpx 0 #E1A860;
+    box-shadow: inset 0 1px 0 #FFE5C4, inset 0 -3px 0 #E1A860;
 }
 
 /* 푸터 시작 */
-footer{
-    background-image: url(./images/FooterBackgroundImg.png);
+footer {
+    background-image: url('../images/FooterBackgroundImg.png');
     margin-top: 48px;
 }
 
-footer ul li{
+footer ul li {
     display: flex;
     flex-flow: row;
     justify-content: center;
@@ -290,11 +310,11 @@ footer ul li a:hover:before {
     top: 0;
 }
 
-footer ul li a:nth-child(1):before{
+footer ul li a:nth-child(1):before {
     background: #5851DB;
 }
 
-footer ul li a:nth-child(2):before{
+footer ul li a:nth-child(2):before {
     background: #fae100;
 }
 
@@ -306,21 +326,24 @@ footer ul li a:nth-child(4):before {
     background: #dd4b39;
 }
 
-footer .FooterShell{
+footer .FooterShell {
     display: flex;
     flex-flow: row;
     justify-content: center;
     align-items: center;
     padding: 0 0 16px;
 }
-footer .FooterShell p{
+
+footer .FooterShell p {
     margin-right: 12px;
     color: #9d9d9d;
 }
-footer .FooterShell p:last-child{
+
+footer .FooterShell p:last-child {
     margin-right: 0px;
 }
-footer .Copyright{
+
+footer .Copyright {
     display: flex;
     flex-flow: row;
     justify-content: center;
@@ -332,14 +355,16 @@ footer .Copyright{
 }
 
 /* 공통CSS */
-.HashTag{
+.HashTag {
     font-size: 0.75rem;
     color: #9d9d9d;
     margin-right: 3px;
 }
-.HashTag:last-child{
+
+.HashTag:last-child {
     margin-right: 0px;
 }
-.Shellheight{
+
+.Shellheight {
     margin-top: 20px;
 }

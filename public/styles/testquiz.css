@@ -1,0 +1,136 @@
+body {
+    display: flex;
+    justify-content: center;
+}
+
+.PageShell {
+    max-width: 476px;
+    width: 100%;
+    background-color: #ffffff;
+    padding: 0 6px;
+}
+
+.PageShell header .Head {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 5px;
+}
+
+.PageShell header .Head .Logo {
+    width: 100%;
+}
+
+.PageShell header .Head .Logo a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.PageShell header .Head .Logo a img {
+    max-width: 40%;
+}
+
+.PageShell main {
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.PageShell main .ProgressBar,
+.PageShell main .TestImg,
+.PageShell main .TestSelectBtn {
+    max-width: 476px;
+    width: 100%;
+}
+
+.PageShell main .ProgressBar {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 368px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.PageShell main .ProgressBar .Progress {
+    max-width: 444px;
+    width: 100%;
+    height: 20px;
+    padding: 2px 0px;
+    border: 2px solid #000000;
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.PageShell main .ProgressBar .Progress .ProgressFill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ffd48d 0%, #ffc400 100%);
+    transition: width 0.25s ease;
+}
+
+.PageShell main .TestImg {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.PageShell main .TestImg img {
+    max-width: 70%;
+}
+
+.PageShell main .TestSelectBtn {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 368px;
+    width: 100%;
+}
+
+.PageShell main .TestSelectBtn .IntroBtnShell {
+    display: flex;
+    flex-flow: row;
+    margin-top: 16px;
+    justify-content: center;
+}
+
+.PageShell main .TestSelectBtn .IntroBtnShell>div>button {
+    background-color: transparent;
+    transition: all 0.5s ease-in-out;
+    border: none;
+    padding: 0;
+}
+
+.PageShell main .TestSelectBtn .IntroBtnShell>div>button:hover {
+    transform: scale(1.05);
+}
+
+.PageShell main .TestSelectBtn .IntroBtnShell .TestStart {
+    margin-right: 16px;
+}
+
+.PageShell main .TestSelectBtn .IntroBtnShell .TestStart>button {
+    width: 146px;
+}
+
+.PageShell main .TestSelectBtn .IntroBtnShell .TestShare>button {
+    width: 146px;
+}
+
+.PageShell main .TestSelectBtn button {
+    display: block;
+    max-width: 444px;
+    width: 100%;
+    margin-bottom: 6px;
+    padding: 18px 14px;
+    border-radius: 15px;
+    border: 2px solid #000000;
+    background-color: rgb(255, 242, 128);
+}

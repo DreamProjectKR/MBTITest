@@ -1,0 +1,301 @@
+const state = {
+  test: null,
+  baseDir: '',
+  currentIndex: 0,
+  totalQuestions: 0,
+  scores: {},
+  answers: [],
+};
+
+const dom = {
+  progress: document.querySelector('.Progress'),
+  image: document.querySelector('.TestImg img'),
+  options: document.querySelector('.TestSelectBtn'),
+};
+
+function getTestIdFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('testId');
+  return id ? decodeURIComponent(id) : '';
+}
+
+function buildDataUrl(relativePath) {
+  if (!relativePath) return null;
+  const cleanPath = relativePath
+    .replace(/^\.?\/?assets\//, '')
+    .replace(/^\.\//, '');
+  return `./assets/${cleanPath}`;
+}
+
+function deriveBaseDir(path) {
+  if (!path) return '';
+  const clean = path.replace(/^\.?\/?assets\//, '').replace(/^\.\//, '');
+  const parts = clean.split('/');
+  parts.pop(); // remove filename
+  return parts.join('/');
+}
+
+function resolveAssetPath(relative) {
+  if (!relative) return '';
+  if (/^https?:\/\//i.test(relative)) return relative;
+  if (/^\.?\/?assets\//i.test(relative)) return relative.replace(/^\.\//, './');
+
+  const clean = relative.replace(/^\.\//, '');
+  const prefix = state.baseDir ? `${state.baseDir}/` : '';
+  return `./assets/${prefix}${clean}`;
+}
+
+function renderError(message) {
+  if (dom.image) {
+    dom.image.alt = message || '오류';
+    dom.image.removeAttribute('src');
+  }
+  if (dom.options) {
+    dom.options.innerHTML = '';
+    const p = document.createElement('p');
+    p.textContent = message || '테스트를 불러올 수 없습니다.';
+    dom.options.appendChild(p);
+  }
+}
+
+function ensureProgressFill() {
+  if (!dom.progress) return null;
+  let fill = dom.progress.querySelector('.ProgressFill');
+  if (!fill) {
+    fill = document.createElement('div');
+    fill.className = 'ProgressFill';
+    dom.progress.innerHTML = '';
+    dom.progress.appendChild(fill);
+  }
+  return fill;
+}
+
+function setProgressVisibility(show) {
+  if (!dom.progress) return;
+  const container = dom.progress.closest('.ProgressBar');
+  const target = container || dom.progress;
+  target.style.display = show ? '' : 'none';
+}
+
+function updateProgressBar(index, total) {
+  const fill = ensureProgressFill();
+  if (!fill || !dom.progress) return;
+  const percent =
+    total === 0 ? 0 : Math.min(100, Math.round(((index + 1) / total) * 100));
+  fill.style.width = `${percent}%`;
+  fill.style.setProperty('--quiz-progress', `${percent}%`);
+  dom.progress.setAttribute('aria-valuemin', '0');
+  dom.progress.setAttribute('aria-valuemax', '100');
+  dom.progress.setAttribute('aria-valuenow', String(percent));
+  dom.progress.title = `진행률 ${percent}%`;
+}
+
+function renderQuestion() {
+  const question =
+    Array.isArray(state.test?.questions) &&
+    state.test.questions[state.currentIndex]
+      ? state.test.questions[state.currentIndex]
+      : null;
+
+  if (!question) {
+    renderError('질문 데이터를 찾지 못했습니다.');
+    return;
+  }
+
+  setProgressVisibility(true);
+  updateProgressBar(state.currentIndex, state.totalQuestions);
+
+  if (dom.image) {
+    dom.image.src = resolveAssetPath(question.prompt) || '#';
+    dom.image.alt = question.id || `문항 ${state.currentIndex + 1}`;
+  }
+
+  if (!dom.options) return;
+  dom.options.innerHTML = '';
+
+  const answers = Array.isArray(question.answers) ? question.answers : [];
+
+  if (!answers.length) {
+    const empty = document.createElement('p');
+    empty.textContent = '선택지가 준비되지 않았습니다.';
+    dom.options.appendChild(empty);
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  answers.forEach((answer, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `select${idx + 1}`;
+    btn.textContent = answer.label || `문항 ${idx + 1}`;
+    btn.addEventListener('click', () => handleAnswer(answer));
+    frag.appendChild(btn);
+  });
+  dom.options.appendChild(frag);
+}
+
+function recordScore(answer) {
+  const axis = answer.mbtiAxis;
+  const dir = answer.direction;
+  if (!axis || !dir) return;
+
+  if (!state.scores[axis]) state.scores[axis] = {};
+  state.scores[axis][dir] = (state.scores[axis][dir] || 0) + 1;
+}
+
+function handleAnswer(answer) {
+  state.answers.push(answer);
+  recordScore(answer);
+
+  const nextIndex = state.currentIndex + 1;
+  if (nextIndex >= state.totalQuestions) {
+    renderResult();
+    return;
+  }
+
+  state.currentIndex = nextIndex;
+  renderQuestion();
+}
+
+function computeMbti() {
+  const axes = [
+    ['E', 'I'],
+    ['S', 'N'],
+    ['T', 'F'],
+    ['J', 'P'],
+  ];
+
+  let result = '';
+  axes.forEach(([first, second]) => {
+    const key = `${first}${second}`;
+    const scores = state.scores[key] || {};
+    const firstScore = scores[first] || 0;
+    const secondScore = scores[second] || 0;
+    result += firstScore >= secondScore ? first : second;
+  });
+
+  return result;
+}
+
+function renderResult() {
+  setProgressVisibility(false);
+  updateProgressBar(state.totalQuestions - 1, state.totalQuestions);
+
+  const mbti = computeMbti();
+  const resultData = state.test?.results?.[mbti];
+  const resultImage = resolveAssetPath(resultData?.image);
+
+  if (dom.image) {
+    dom.image.src = resultImage || '';
+    dom.image.alt = mbti ? `${mbti} 결과` : '결과 이미지';
+  }
+
+  if (dom.options) {
+    dom.options.innerHTML = '';
+    const btnShell = document.createElement('div');
+    btnShell.className = 'IntroBtnShell';
+
+    const restartWrap = document.createElement('div');
+    restartWrap.className = 'TestStart';
+    const restartBtn = document.createElement('button');
+    restartBtn.type = 'button';
+    restartBtn.innerHTML =
+      '<img src="../images/TestRestart.png" alt="테스트 다시 시작">';
+    restartBtn.addEventListener('click', () => {
+      state.currentIndex = 0;
+      state.scores = {};
+      state.answers = [];
+      setProgressVisibility(true);
+      renderQuestion();
+    });
+    restartWrap.appendChild(restartBtn);
+
+    const shareWrap = document.createElement('div');
+    shareWrap.className = 'TestShare';
+    const shareBtn = document.createElement('button');
+    shareBtn.type = 'button';
+    shareBtn.className = 'share-button';
+    shareBtn.innerHTML =
+      '<img src="../images/TestShare.png" alt="테스트 공유버튼" />';
+    shareBtn.addEventListener('click', () => {
+      shareCurrentTest(state.test);
+    });
+    shareWrap.appendChild(shareBtn);
+
+    btnShell.append(restartWrap, shareWrap);
+    dom.options.append(btnShell);
+  }
+}
+
+async function shareCurrentTest(test) {
+  const shareUrl = window.location.href;
+  const title = test?.title || 'MBTI ZOO 테스트';
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title,
+        text: title,
+        url: shareUrl,
+      });
+      return;
+    }
+    await navigator.clipboard.writeText(shareUrl);
+    alert('링크가 클립보드에 복사되었습니다.');
+  } catch (err) {
+    console.error('공유하기 실패:', err);
+    alert('공유하기를 진행할 수 없습니다. 링크를 직접 복사해주세요.');
+  }
+}
+
+async function loadTestData() {
+  const testId = getTestIdFromQuery();
+  if (!testId) {
+    renderError('testId 파라미터가 없습니다.');
+    return;
+  }
+
+  try {
+    const indexRes = await fetch('./assets/index.json');
+    if (!indexRes.ok) throw new Error('테스트 목록 로딩 실패');
+    const indexData = await indexRes.json();
+    const tests = Array.isArray(indexData?.tests) ? indexData.tests : [];
+    const targetTest = tests.find((item) => item.id === testId);
+
+    if (!targetTest || !targetTest.path) {
+      renderError('해당 테스트를 찾을 수 없습니다.');
+      return;
+    }
+
+    state.baseDir = deriveBaseDir(targetTest.path);
+
+    const dataUrl = buildDataUrl(targetTest.path);
+    if (!dataUrl) {
+      renderError('테스트 데이터 경로가 없습니다.');
+      return;
+    }
+
+    const dataRes = await fetch(dataUrl);
+    if (!dataRes.ok) throw new Error('테스트 데이터 로딩 실패');
+    const data = await dataRes.json();
+
+    state.test = { ...targetTest, ...data };
+    state.totalQuestions = Array.isArray(state.test.questions)
+      ? state.test.questions.length
+      : 0;
+    state.currentIndex = 0;
+    state.scores = {};
+    state.answers = [];
+
+    if (!state.totalQuestions) {
+      renderError('문항이 없습니다.');
+      return;
+    }
+
+    renderQuestion();
+  } catch (error) {
+    console.error('테스트 퀴즈 로딩 오류:', error);
+    renderError('테스트 정보를 불러오지 못했습니다.');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadTestData);

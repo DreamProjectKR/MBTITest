@@ -1,24 +1,18 @@
 name = "mbtitest"
-main = "functions/api/tests.js"
-compatibility_date = "2024-12-06"
+compatibility_date = "2024-12-08"
 
 [site]
-bucket = "./public"           # Pages static assets
+bucket = "./public"
+
+[[kv_namespaces]]
+binding = "DB"
+id = "5a0e18d5651c42ffa582f57ee1e18c9b"
+preview_id = "5a0e18d5651c42ffa582f57ee1e18c9b"
 
 [[r2_buckets]]
-binding = "MBTI_BUCKET"       # used inside Functions (env.MBTI_BUCKET)
-bucket_name = "mbtitest"
+binding = "ASSETS"
+bucket_name = "mbti-assets"
 
 [vars]
-# R2 public asset base (unauthenticated). Keep bucket name; Functions will append assets/data.
-ASSETS_BASE = "https://pub-6eede8799513497397b2ee73cfbc9020.r2.dev"
-# Optional: FRONTEND_API_BASE = "https://<pages-domain>/api"
-# Optional: LOG_LEVEL = "info"
-
-[env.production.vars]
-# Production uses the same public R2 endpoint.
-ASSETS_BASE = "https://pub-6eede8799513497397b2ee73cfbc9020.r2.dev"
-# Put any prod-only overrides here
-
-# For local CLI uploads (not used by Pages runtime; only wrangler r2):
-# [r2_buckets] above is enough for runtime. Do NOT place access/secret keys here.
+ASSETS_BASE = "https://01d6807196c93a4774c1bb50ee8f4ebb.r2.cloudflarestorage.com/mbti-assets"
+ADMIN_TOKEN = "change-me" # HMAC/Service Token/Access 사용 권장
