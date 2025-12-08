@@ -53,21 +53,16 @@ function setupButtons(testId, mbti, title) {
 async function shareResult({ mbti, title }) {
   const shareUrl = window.location.href;
   const shareTitle = title ? `${title} - ${mbti}` : `MBTI 결과 ${mbti}`;
-  try {
-    if (navigator.share) {
-      await navigator.share({
-        title: shareTitle,
-        text: shareTitle,
-        url: shareUrl,
-      });
-      return;
-    }
-    await navigator.clipboard.writeText(shareUrl);
-    alert('링크가 클립보드에 복사되었습니다.');
-  } catch (err) {
-    console.error('결과 공유 실패:', err);
-    alert('공유를 진행할 수 없습니다. 링크를 직접 복사해주세요.');
+  if (navigator.share) {
+    await navigator.share({
+      title: shareTitle,
+      text: shareTitle,
+      url: shareUrl,
+    });
+    return;
   }
+  await navigator.clipboard.writeText(shareUrl);
+  alert('링크가 클립보드에 복사되었습니다.');
 }
 
 function renderResultPage(data, mbti, baseDir) {

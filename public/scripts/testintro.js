@@ -136,21 +136,16 @@ function setupShareButton(test) {
 async function shareCurrentTest(test) {
   const shareUrl = window.location.href;
   const title = test?.title || 'MBTI ZOO 테스트';
-  try {
-    if (navigator.share) {
-      await navigator.share({
-        title,
-        text: title,
-        url: shareUrl,
-      });
-      return;
-    }
-    await navigator.clipboard.writeText(shareUrl);
-    alert('링크가 클립보드에 복사되었습니다.');
-  } catch (err) {
-    console.error('공유하기 실패:', err);
-    alert('공유하기를 진행할 수 없습니다. 링크를 직접 복사해주세요.');
+  if (navigator.share) {
+    await navigator.share({
+      title,
+      text: title,
+      url: shareUrl,
+    });
+    return;
   }
+  await navigator.clipboard.writeText(shareUrl);
+  alert('링크가 클립보드에 복사되었습니다.');
 }
 
 function setupStartButton(testId) {

@@ -144,7 +144,7 @@ body {
 
 .QuizFooter ul {
     padding: 28px 12px 20px;
-    background-image: url('https://pub-9394623df95a4f669f145a4ede63d588.r2.dev/assets/images/FooterBackgroundImg.png');
+    background-image: var(--asset-footer-bg);
     background-repeat: no-repeat;
     background-size: 100% auto;
     background-position: center;

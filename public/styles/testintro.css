@@ -9,7 +9,7 @@ main {
 }
 
 header {
-    background-image: url('https://pub-9394623df95a4f669f145a4ede63d588.r2.dev/assets/images/HeaderBackgroundImg.png');
+    background-image: var(--asset-header-bg);
     padding: 20px 5px 80px;
 }
 
@@ -103,7 +103,7 @@ footer {
 
     header {
         padding: 28px 12px 20px;
-        background-image: url('https://pub-9394623df95a4f669f145a4ede63d588.r2.dev/assets/images/HeaderBackgroundImgNon.png');
+        background-image: var(--asset-header-bg-non);
         background-size: 100% auto;
         background-repeat: no-repeat;
         background-position: top center;

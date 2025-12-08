@@ -16,4 +16,50 @@
     const prefixed = clean.startsWith('assets/') ? clean : `assets/${clean}`;
     return `${ASSETS_BASE}/${prefixed}`;
   };
+
+  // CSS 변수로도 내려주기 (background-image 등)
+  if (typeof document !== 'undefined') {
+    const root = document.documentElement.style;
+    root.setProperty('--ASSETS_BASE', ASSETS_BASE);
+    root.setProperty(
+      '--asset-header-bg',
+      `url(${window.assetUrl('assets/images/HeaderBackgroundImg.png')})`,
+    );
+    root.setProperty(
+      '--asset-header-bg-non',
+      `url(${window.assetUrl('assets/images/HeaderBackgroundImgNon.png')})`,
+    );
+    root.setProperty(
+      '--asset-footer-bg',
+      `url(${window.assetUrl('assets/images/FooterBackgroundImg.png')})`,
+    );
+  }
+
+  // data-asset-* 속성 자동 주입 (img/src, link/href, bg)
+  function applyAssetAttributes() {
+    const toUrl = (v) => (v ? window.assetUrl(v) : '');
+
+    document.querySelectorAll('[data-asset-src]').forEach((el) => {
+      const path = el.getAttribute('data-asset-src');
+      if (path) el.src = toUrl(path);
+    });
+
+    document.querySelectorAll('[data-asset-href]').forEach((el) => {
+      const path = el.getAttribute('data-asset-href');
+      if (path) el.href = toUrl(path);
+    });
+
+    document.querySelectorAll('[data-asset-bg]').forEach((el) => {
+      const path = el.getAttribute('data-asset-bg');
+      if (path) el.style.backgroundImage = `url(${toUrl(path)})`;
+    });
+  }
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applyAssetAttributes);
+    } else {
+      applyAssetAttributes();
+    }
+  }
 })();
