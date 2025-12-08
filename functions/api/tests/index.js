@@ -14,9 +14,19 @@ async function readJsonFromR2(bucket, key) {
   return JSON.parse(text);
 }
 
+async function fetchPublicJson(base, path) {
+  if (!base) return null;
+  const url = `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export async function onRequestGet({ env }) {
   try {
-    const data = await readJsonFromR2(env.MBTI_BUCKET, 'assets/index.json');
+    const data =
+      (await readJsonFromR2(env.MBTI_BUCKET, 'assets/index.json')) ||
+      (await fetchPublicJson(env.ASSETS_BASE, 'assets/index.json'));
     if (!data) return jsonResponse({ error: 'not found' }, 404);
     return jsonResponse(data);
   } catch (err) {
