@@ -5,6 +5,12 @@ header {
     background-position: center;
 }
 
+footer {
+    position: absolute;
+    width: 1230px;
+    bottom: 0;
+}
+
 /* 900px 이하: 카드 2개씩 보이도록 */
 @media (max-width: 900px) {
     header {
