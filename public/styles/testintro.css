@@ -8,6 +8,11 @@ main {
     padding: 44px 16px;
 }
 
+header {
+    background-image: url('../images/HeaderBackgroundImg.png');
+    padding: 20px 5px 80px;
+}
+
 .IntroShellImg {
     width: 350px;
     height: 500px;

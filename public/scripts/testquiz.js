@@ -200,7 +200,7 @@ function renderResult() {
     const restartBtn = document.createElement('button');
     restartBtn.type = 'button';
     restartBtn.innerHTML =
-      '<img src="../images/TestRestart.png" alt="테스트 다시 시작">';
+      '<img src="./images/TestRestart.png" alt="테스트 다시 시작">';
     restartBtn.addEventListener('click', () => {
       state.currentIndex = 0;
       state.scores = {};
@@ -216,7 +216,7 @@ function renderResult() {
     shareBtn.type = 'button';
     shareBtn.className = 'share-button';
     shareBtn.innerHTML =
-      '<img src="../images/TestShare.png" alt="테스트 공유버튼" />';
+      '<img src="./images/TestShare.png" alt="테스트 공유버튼" />';
     shareBtn.addEventListener('click', () => {
       shareCurrentTest(state.test);
     });
