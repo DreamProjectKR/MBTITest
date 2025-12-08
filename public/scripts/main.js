@@ -4,44 +4,6 @@ const MainTop = document.getElementById('MainTop');
 // index.json은 스크립트 위치 기준으로 찾도록 고정 경로를 계산
 const INDEX_JSON_URL = new URL('../assets/index.json', import.meta.url).href;
 
-// ----- 정적 에셋 경로 보정 -----
-function resolveStaticAsset(relativePath) {
-  return new URL(relativePath, import.meta.url).href;
-}
-
-function ensureStaticImages() {
-  // 헤더 로고
-  const logoImg = document.querySelector('.Logo img');
-  if (logoImg) {
-    logoImg.src = resolveStaticAsset('../images/mainLogo.png');
-  }
-
-  // 메인 배너
-  const mainBanner = document.querySelector('.MainBanner img');
-  if (mainBanner) {
-    mainBanner.src = resolveStaticAsset('../images/mainbanner.png');
-  }
-
-  // NEW / TOP 타이틀 아이콘
-  const newIcon = document.querySelector('.NewTestListTittle img:not(.fire)');
-  if (newIcon) {
-    newIcon.src = resolveStaticAsset('../images/new.png');
-  }
-  const fireIcon = document.querySelector('.NewTestListTittle .fire');
-  if (fireIcon) {
-    fireIcon.src = resolveStaticAsset('../images/fire.png');
-  }
-
-  // 푸터 아이콘들 (DOM 순서대로 instagram, katalk, naver, mail)
-  const footerIcons = Array.from(document.querySelectorAll('footer .icon'));
-  const footerAssets = ['instagram', 'katalk', 'naver', 'mail'];
-  footerIcons.forEach((img, idx) => {
-    const name = footerAssets[idx];
-    if (!name) return;
-    img.src = resolveStaticAsset(`../images/${name}.png`);
-  });
-}
-
 window.addEventListener('scroll', () => {
   if (window.scrollY > 60) {
     console.log('스크롤내렸다.');
@@ -204,7 +166,4 @@ function initTestSectionsAjax() {
     .catch((err) => console.error('테스트 목록 로딩 실패:', err));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  ensureStaticImages();
-  initTestSectionsAjax();
-});
+document.addEventListener('DOMContentLoaded', initTestSectionsAjax);
