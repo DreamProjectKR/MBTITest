@@ -1,0 +1,49 @@
+{
+  "tests": [
+    {
+      "id": "test-summer",
+      "title": "여름 바캉스 스타일 테스트",
+      "thumbnail": "./assets/test-summer/images/thumbnail.png",
+      "tags": ["여름", "여행", "휴가", "바캉스"],
+      "path": "test-summer/test.json",
+      "createdAt": "2025-12-08",
+      "updatedAt": "2025-12-08"
+    },
+    {
+      "id": "test-winter",
+      "title": "겨울 스타일 테스트",
+      "thumbnail": "./assets/test-winter/images/thumbnail.png",
+      "tags": ["겨울", "겨울휴가", "휴가", "바캉스"],
+      "path": "test-winter/test.json",
+      "createdAt": "2025-12-08",
+      "updatedAt": "2025-12-08"
+    },
+    {
+      "id": "test-autumn",
+      "title": "가을 스타일 테스트",
+      "thumbnail": "./assets/test-autumn/images/thumbnail.png",
+      "tags": ["가을", "가을휴가", "휴가", "바캉스"],
+      "path": "test-autumn/test.json",
+      "createdAt": "2025-12-08",
+      "updatedAt": "2025-12-08"
+    },
+    {
+      "id": "test-spring",
+      "title": "봄 스타일 테스트",
+      "thumbnail": "./assets/test-spring/images/thumbnail.png",
+      "tags": ["봄", "봄휴가", "휴가", "바캉스"],
+      "path": "test-spring/test.json",
+      "createdAt": "2025-12-08",
+      "updatedAt": "2025-12-08"
+    },
+    {
+      "id": "test-coding",
+      "title": "코딩 스타일 테스트",
+      "thumbnail": "./assets/test-coding/images/thumbnail.png",
+      "tags": ["코딩", "코딩휴가", "휴가", "바캉스"],
+      "path": "test-coding/test.json",
+      "createdAt": "2025-12-08",
+      "updatedAt": "2025-12-08"
+    }
+  ]
+}
