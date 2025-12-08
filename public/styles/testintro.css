@@ -91,6 +91,7 @@ footer {
     bottom: 0;
 }
 
+
 /* Mobile (<=900px) */
 @media (max-width: 900px) {
     body {
@@ -140,7 +141,7 @@ footer {
     main {
         flex-flow: column;
         align-items: center;
-        padding: 24px 12px 64px;
+        padding: 0 12px 64px;
         margin-top: 0;
     }
 

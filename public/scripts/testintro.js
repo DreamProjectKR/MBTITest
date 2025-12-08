@@ -8,7 +8,7 @@ window.addEventListener('scroll', () => {
   if (window.scrollY > headerOffset) {
     header.classList.add('fixed-header', 'bg-on');
     if (isMobile && headerScroll) {
-      headerScroll.style.marginBottom = '25px';
+      headerScroll.style.marginBottom = '35px';
     }
   } else {
     header.classList.remove('fixed-header', 'bg-on');
