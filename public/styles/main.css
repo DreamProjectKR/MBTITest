@@ -1,14 +1,14 @@
 body {
     display: flex;
     justify-content: center;
-    background-color: #d0c3e8;
+    background-color: #D5F0F5;
 }
 
 .PageShell {
     display: flex;
     flex-flow: column;
     width: 1230px;
-    height: 272vh;
+    height: 266vh;
     background-color: #ffffff;
 }
 
