@@ -5,10 +5,6 @@ header {
     background-position: center;
 }
 
-body {
-    font-family: 'Noto Sans', sans-serif;
-}
-
 /* 900px 이하: 카드 2개씩 보이도록 */
 @media (max-width: 900px) {
     header {

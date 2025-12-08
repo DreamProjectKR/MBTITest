@@ -1,6 +1,4 @@
 /* CSS Reset - 기본 스타일 초기화 */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
-
 *,
 *::before,
 *::after {
@@ -12,7 +10,7 @@
 html,
 body {
   height: 100%;
-  font-family: 'Noto Sans', sans-serif;
+  font-family: sans-serif;
   line-height: 1.5;
 }
 

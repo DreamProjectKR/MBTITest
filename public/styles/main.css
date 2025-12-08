@@ -1,7 +1,7 @@
 body {
   display: flex;
   justify-content: center;
-  background-color: #DAF0F6;
+  background-color: #d0c3e8;
   font-family: 'Noto Sans', sans-serif;
 }
 
@@ -426,7 +426,7 @@ footer .Copyright {
   }
 
   main {
-    padding: 0 10px 24px;
+    padding: 0 0 24px;
   }
 
   .MainBanner a img {
