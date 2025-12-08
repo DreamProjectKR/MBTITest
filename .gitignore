@@ -120,3 +120,4 @@ __pycache__/
 .pnp.js/
 .pnp/
 .cursor/
+.wrangler/
