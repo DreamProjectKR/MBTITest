@@ -48,7 +48,7 @@ header .Head .Logo a img {
 }
 
 header .Head .Logo:hover img {
-  transform: scale(1.1);
+  transform: scale(1.01);
   opacity: 0.5;
   filter: brightness(1.1);
 }
@@ -169,6 +169,11 @@ main .NewTestList .NewTestListShell .NewTestShell {
   background-color: #ffffff;
   cursor: pointer;
   margin-bottom: 20px
+}
+
+main .NewTestList .NewTestListShell .NewTestShell:hover {
+  transition: all 0.5s ease;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
 }
 
 main .NewTestList .NewTestListShell .NewTestShell .NewTest {
