@@ -71,7 +71,12 @@ async function loadIntroData() {
     if (!res.ok) throw new Error('테스트 데이터 로딩 실패');
     const data = await res.json();
 
-    const mergedData = { ...targetTest, ...data };
+    const mergedData = {
+      ...targetTest,
+      ...data,
+      author: targetTest.author ?? data.author,
+      authorImg: targetTest.authorImg ?? data.authorImg,
+    };
 
     setupShareButton(mergedData);
     renderIntro(mergedData);
@@ -137,12 +142,15 @@ function renderIntro(data) {
 
   if (titleEl && data.title) titleEl.textContent = data.title;
 
+  const authorName = data.author;
+
   if (authorImgEl) {
     if (data.authorImg) authorImgEl.src = data.authorImg;
-    if (data.author) authorImgEl.alt = data.author;
+    if (authorName) authorImgEl.alt = `제작자 ${authorName}`;
   }
 
-  if (authorNameEl && data.author) authorNameEl.textContent = data.author;
+  if (authorNameEl && authorName)
+    authorNameEl.textContent = `제작자 : ${authorName}`;
 
   renderDescription(descEl, data.description);
 }

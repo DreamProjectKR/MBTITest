@@ -1,0 +1,66 @@
+/* 결과 페이지 전용 */
+main {
+    flex-flow: column;
+}
+
+body.ResultPage .ResultShellImg .NewTestHashTag,
+body.ResultPage .ResultShellTextBox h2,
+body.ResultPage .ResultShellTextBox .Creator,
+body.ResultPage .ResultShellTextBox .IntroDescription {
+    display: none;
+}
+
+body.ResultPage .ResultShell {
+    align-items: center;
+}
+
+body.ResultPage .ResultShellImg {
+    margin-right: 0;
+}
+
+body.ResultPage .ResultShellImg img {
+    display: block;
+    max-width: 350px;
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+}
+
+body.ResultPage .ResultShellTextBox {
+    align-items: center;
+    width: 100%;
+}
+
+body.ResultPage .ResultShellTextBox .ResultBtnShell {
+    margin-top: 24px;
+    justify-content: center;
+}
+
+.ResultBtnShell {
+    display: flex;
+    flex-flow: row;
+    margin-top: 16px;
+}
+
+.ResultBtnShell>div>button {
+    background-color: transparent;
+    transition: all 0.5 ease-in-out;
+}
+
+.ResultBtnShell>div>button:hover {
+    transform: scale(1.05);
+}
+
+.ResultBtnShell .Restart {
+    margin-right: 16px;
+}
+
+.ResultBtnShell .Restart>button {
+    width: 146px;
+}
+
+.ResultBtnShell .Restart>button img {}
+
+.ResultBtnShell .TestShare>button {
+    width: 146px;
+}

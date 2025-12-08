@@ -11,7 +11,62 @@ const dom = {
   progress: document.querySelector('.Progress'),
   image: document.querySelector('.TestImg img'),
   options: document.querySelector('.TestSelectBtn'),
+  pageShell: document.querySelector('.PageShell'),
 };
+
+function ensureResultFooter() {
+  let footer = document.querySelector('.QuizFooter');
+  if (footer) return footer;
+
+  footer = document.createElement('footer');
+  footer.className = 'QuizFooter';
+  footer.innerHTML = `
+    <ul>
+      <li>
+        <a href="#">
+          <img class="icon" src="./images/instagram.png" alt="인스타그램 바로가기">
+        </a>
+        <a href="#">
+          <img class="icon" src="./images/katalk.png" alt="카카오톡 바로가기">
+        </a>
+        <a href="#">
+          <img class="icon" src="./images/naver.png" alt="네이버 바로가기">
+        </a>
+        <a href="#">
+          <img class="icon" src="./images/mail.png" alt="메일 바로가기">
+        </a>
+      </li>
+    </ul>
+    <div class="Copyright">
+      <span class="Copy">
+        Copyright &copy; 2025; Designed by DREAMPROJECT
+      </span>
+    </div>
+  `;
+  footer.style.display = 'none';
+
+  const container = dom.pageShell || document.body;
+  container.appendChild(footer);
+  return footer;
+}
+
+function toggleResultFooter(show) {
+  const footer = ensureResultFooter();
+  footer.style.display = show ? '' : 'none';
+}
+
+function goToResultPage(mbti) {
+  const testId = state.test?.id;
+  if (!testId || !mbti) {
+    renderError('결과를 계산하지 못했습니다.');
+    return;
+  }
+
+  const url = new URL('./testresult.html', window.location.href);
+  url.searchParams.set('testId', testId);
+  url.searchParams.set('result', mbti);
+  window.location.href = url.toString();
+}
 
 function getTestIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
@@ -102,6 +157,7 @@ function renderQuestion() {
     return;
   }
 
+  toggleResultFooter(false);
   setProgressVisibility(true);
   updateProgressBar(state.currentIndex, state.totalQuestions);
 
@@ -178,53 +234,13 @@ function computeMbti() {
 }
 
 function renderResult() {
-  setProgressVisibility(false);
-  updateProgressBar(state.totalQuestions - 1, state.totalQuestions);
-
   const mbti = computeMbti();
-  const resultData = state.test?.results?.[mbti];
-  const resultImage = resolveAssetPath(resultData?.image);
-
-  if (dom.image) {
-    dom.image.src = resultImage || '';
-    dom.image.alt = mbti ? `${mbti} 결과` : '결과 이미지';
+  if (!mbti) {
+    renderError('결과를 계산하지 못했습니다.');
+    return;
   }
 
-  if (dom.options) {
-    dom.options.innerHTML = '';
-    const btnShell = document.createElement('div');
-    btnShell.className = 'IntroBtnShell';
-
-    const restartWrap = document.createElement('div');
-    restartWrap.className = 'TestStart';
-    const restartBtn = document.createElement('button');
-    restartBtn.type = 'button';
-    restartBtn.innerHTML =
-      '<img src="./images/TestRestart.png" alt="테스트 다시 시작">';
-    restartBtn.addEventListener('click', () => {
-      state.currentIndex = 0;
-      state.scores = {};
-      state.answers = [];
-      setProgressVisibility(true);
-      renderQuestion();
-    });
-    restartWrap.appendChild(restartBtn);
-
-    const shareWrap = document.createElement('div');
-    shareWrap.className = 'TestShare';
-    const shareBtn = document.createElement('button');
-    shareBtn.type = 'button';
-    shareBtn.className = 'share-button';
-    shareBtn.innerHTML =
-      '<img src="./images/TestShare.png" alt="테스트 공유버튼" />';
-    shareBtn.addEventListener('click', () => {
-      shareCurrentTest(state.test);
-    });
-    shareWrap.appendChild(shareBtn);
-
-    btnShell.append(restartWrap, shareWrap);
-    dom.options.append(btnShell);
-  }
+  goToResultPage(mbti);
 }
 
 async function shareCurrentTest(test) {
