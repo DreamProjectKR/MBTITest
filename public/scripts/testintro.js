@@ -51,7 +51,10 @@ async function loadIntroData() {
     if (!res.ok) throw new Error('테스트 데이터 로딩 실패');
     const data = await res.json();
 
-    renderIntro({ ...targetTest, ...data });
+    const mergedData = { ...targetTest, ...data };
+
+    setupShareButton(mergedData);
+    renderIntro(mergedData);
   } catch (err) {
     console.error('테스트 인트로 로딩 오류:', err);
     renderIntroError('테스트 정보를 불러오지 못했습니다.');
@@ -125,6 +128,34 @@ function renderIntro(data) {
 }
 
 document.addEventListener('DOMContentLoaded', loadIntroData);
+
+function setupShareButton(test) {
+  const shareBtn = document.querySelector('.TestShare button');
+  if (!shareBtn) return;
+  shareBtn.addEventListener('click', () => {
+    shareCurrentTest(test);
+  });
+}
+
+async function shareCurrentTest(test) {
+  const shareUrl = window.location.href;
+  const title = test?.title || 'MBTI ZOO 테스트';
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title,
+        text: title,
+        url: shareUrl,
+      });
+      return;
+    }
+    await navigator.clipboard.writeText(shareUrl);
+    alert('링크가 클립보드에 복사되었습니다.');
+  } catch (err) {
+    console.error('공유하기 실패:', err);
+    alert('공유하기를 진행할 수 없습니다. 링크를 직접 복사해주세요.');
+  }
+}
 
 function setupStartButton(testId) {
   const startBtn = document.querySelector('.TestStart button');

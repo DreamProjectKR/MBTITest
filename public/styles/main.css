@@ -251,7 +251,7 @@ main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag>span 
 /* 푸터 시작 */
 footer {
     background-image: url('../images/FooterBackgroundImg.png');
-    margin-top: 48px;
+    margin-top: 24px;
 }
 
 footer ul li {

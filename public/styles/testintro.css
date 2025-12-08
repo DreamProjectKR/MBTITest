@@ -1,76 +1,85 @@
-.testlistPageShell{
+.testlistPageShell {
     height: 100vh;
 }
 
-main{
+main {
     display: flex;
     flex-flow: row;
     justify-content: center;
     width: 100%;
     padding: 0 16px;
+    margin-top: 20px;
+    padding: 44px 16px;
 }
 
-.IntroShellImg{
+.IntroShellImg {
     width: 350px;
     height: 500px;
     padding: 10px 0;
     margin-right: 32px;
 }
-.IntroShellImg img{
+
+.IntroShellImg img {
     display: block;
     width: 350px;
     height: 400px;
     background-color: aqua;
 }
 
-.TestIntroShell .IntroShellTextBox{
+.TestIntroShell .IntroShellTextBox {}
 
-}
-
-.TestIntroShell .IntroShellTextBox h2{
+.TestIntroShell .IntroShellTextBox h2 {
     margin-bottom: 8px;
 }
 
-.TestIntroShell .IntroShellTextBox .Creator{
+.TestIntroShell .IntroShellTextBox .Creator {
     display: flex;
     flex-flow: row;
     padding: 10px 0 18px;
 }
-.TestIntroShell .IntroShellTextBox .Creator img{
+
+.TestIntroShell .IntroShellTextBox .Creator img {
     display: block;
     border-radius: 24px;
     width: 24px;
     height: 24px;
     margin-right: 8px;
 }
-.TestIntroShell .IntroShellTextBox .Creator .CreatorName{
+
+.TestIntroShell .IntroShellTextBox .Creator .CreatorName {
     font-size: 0.95rem;
     font-weight: 600;
 }
-.TestIntroShell .IntroShellTextBox .IntroDescription{
+
+.TestIntroShell .IntroShellTextBox .IntroDescription {
     font-size: 0.85rem;
 }
 
-.IntroBtnShell{
+.IntroBtnShell {
     display: flex;
     flex-flow: row;
     margin-top: 16px;
 }
-.IntroBtnShell > div > button {
+
+.IntroBtnShell>div>button {
     background-color: transparent;
     transition: all 0.5 ease-in-out;
 }
-.IntroBtnShell > div > button:hover{
+
+.IntroBtnShell>div>button:hover {
     transform: scale(1.05);
 }
-.IntroBtnShell .TestStart{
+
+.IntroBtnShell .TestStart {
     margin-right: 16px;
 }
-.IntroBtnShell .TestStart > button{
+
+.IntroBtnShell .TestStart>button {
     width: 146px;
 }
-.IntroBtnShell .TestStart > button img{}
 
-.IntroBtnShell .TestShare > button{
+.IntroBtnShell .TestStart>button img {}
+
+.IntroBtnShell .TestShare>button {
     width: 146px;
 }
