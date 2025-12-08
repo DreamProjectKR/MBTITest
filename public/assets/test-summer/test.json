@@ -19,7 +19,7 @@
   "questions": [
     {
       "id": "q1",
-      "prompt": "./assets/test-summer/images/thumbnail.png",
+      "prompt": "./assets/test-summer/images/q1.png",
       "answers": [
         {
           "id": "q1_a",
