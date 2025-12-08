@@ -130,11 +130,22 @@ function renderSections(tests) {
 
   if (newShellContainer) newShellContainer.innerHTML = '';
   if (topShellContainer) topShellContainer.innerHTML = '';
-  // toptest: 4개씩 2줄(최대 8개) 보이도록 래핑
+  // toptest: 레이아웃을 뷰포트에 따라 조정
   if (topShellContainer) {
-    topShellContainer.style.flexWrap = 'wrap';
-    topShellContainer.style.rowGap = '0px';
-    topShellContainer.style.columnGap = '0px';
+    const mq = window.matchMedia('(max-width: 900px)');
+    const applyTopLayout = () => {
+      if (mq.matches) {
+        topShellContainer.style.flexWrap = 'nowrap';
+        topShellContainer.style.rowGap = '';
+        topShellContainer.style.columnGap = '';
+      } else {
+        topShellContainer.style.flexWrap = 'wrap';
+        topShellContainer.style.rowGap = '0px';
+        topShellContainer.style.columnGap = '0px';
+      }
+    };
+    applyTopLayout();
+    mq.addEventListener('change', applyTopLayout);
   }
 
   // newtest 섹션: 최대 4개

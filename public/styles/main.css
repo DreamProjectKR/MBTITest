@@ -246,8 +246,11 @@ main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag>span 
 }
 
 /* 푸터 시작 */
-footer {
+footer ul {
   background-image: url('../images/FooterBackgroundImg.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 footer ul li {
@@ -363,4 +366,135 @@ footer .Copyright {
 
 .Shellheight {
   margin-top: 20px;
+}
+
+/* Mobile (<=500px) */
+@media (max-width: 900px) {
+  body {
+    display: block;
+  }
+
+  .PageShell {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 28px 12px 20px;
+    background-image: url('../images/HeaderBackgroundImgNon.png');
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: top center;
+  }
+
+  .fixed-header {
+    width: 100%;
+    max-width: none;
+    left: 0;
+    transform: none;
+  }
+
+  .bg-on {
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: top center;
+  }
+
+  header .Head {
+    padding: 0;
+    align-items: center;
+  }
+
+  header .Head .Logo {
+    width: 22%;
+    min-width: 120px;
+  }
+
+  header .Head .Logo a img {
+    width: 100%;
+    max-width: 160px;
+  }
+
+  .holographic-container {
+    height: 38px;
+  }
+
+  .holographic-card {
+    height: 38px;
+    padding: 2px 10px;
+  }
+
+  main {
+    padding: 0 10px 24px;
+  }
+
+  .MainBanner a img {
+    width: 100%;
+    height: auto;
+  }
+
+  main .NewTestList {
+    padding: 0 4px;
+  }
+
+  main .NewTestList .NewTestListTittle {
+    padding: 12px 4px 6px;
+    align-items: center;
+  }
+
+  main .NewTestList .NewTestListShell {
+    gap: 12px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  main .NewTestList .NewTestListShell::-webkit-scrollbar {
+    display: none;
+  }
+
+  main .NewTestList .NewTestListShell .NewTestShell {
+    flex: 0 0 72%;
+    min-width: 72%;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  main .NewTestList .NewTestListShell .NewTestShell .NewTest img {
+    height: 100%;
+  }
+
+  .TestMoreBtn {
+    padding: 8px 0 14px;
+  }
+
+  .Morebutton a {
+    width: 100%;
+  }
+
+  footer ul {
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: top center;
+    padding: 12px 0;
+  }
+
+  footer ul li {
+    padding: 0;
+  }
+
+  footer ul li a {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    font-size: 18px;
+    margin: 0 4px;
+    border: 2px solid #fff;
+  }
+
+  footer ul li a .icon {
+    width: 12px;
+    height: 12px;
+  }
 }

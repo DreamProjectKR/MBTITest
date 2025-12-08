@@ -1,3 +1,37 @@
-header .Head {
-    background-color: #FFF
+header {
+    background-image: url('../images/HeaderBackgroundImg.png');
+    padding: 20px 5px 80px;
+    background-size: cover;
+    background-position: center;
+}
+
+/* 900px 이하: 카드 2개씩 보이도록 */
+@media (max-width: 900px) {
+    header {
+        padding: 28px 12px 20px;
+        background-image: url('../images/HeaderBackgroundImg.png');
+        background-size: 100% auto;
+        background-repeat: no-repeat;
+        background-position: top center;
+    }
+
+    header .Head {
+        background-color: unset;
+    }
+
+    main .NewTestList .NewTestListShell {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    main .NewTestList .NewTestListShell .NewTestShell {
+        flex: 0 0 calc(50% - 12px);
+        min-width: calc(50% - 12px);
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    main .NewTestList .NewTestListShell .NewTestShell .NewTest img {
+        height: auto;
+    }
 }

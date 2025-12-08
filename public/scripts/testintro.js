@@ -1,3 +1,23 @@
+const header = document.querySelector('.Head');
+const headerScroll = document.querySelector('header');
+const headerOffset = header ? header.offsetTop : 0;
+
+window.addEventListener('scroll', () => {
+  if (!header) return;
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  if (window.scrollY > headerOffset) {
+    header.classList.add('fixed-header', 'bg-on');
+    if (isMobile && headerScroll) {
+      headerScroll.style.marginBottom = '25px';
+    }
+  } else {
+    header.classList.remove('fixed-header', 'bg-on');
+    if (headerScroll) {
+      headerScroll.style.marginBottom = '';
+    }
+  }
+});
+
 function getTestIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('testId');

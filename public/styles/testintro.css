@@ -94,3 +94,92 @@ footer {
 .testlistPageShell {
     max-height: 100vh;
 }
+
+/* Mobile (<=900px) */
+@media (max-width: 900px) {
+    body {
+        display: block;
+    }
+
+    .PageShell {
+        width: 100%;
+        min-height: 100vh;
+    }
+
+    header {
+        padding: 28px 12px 20px;
+        background-image: url('../images/HeaderBackgroundImgNon.png');
+        background-size: 100% auto;
+        background-repeat: no-repeat;
+        background-position: top center;
+    }
+
+    .fixed-header {
+        width: 100%;
+        max-width: none;
+        left: 0;
+        transform: none;
+    }
+
+    .bg-on {
+        background-size: 100% auto;
+        background-repeat: no-repeat;
+        background-position: top center;
+    }
+
+    header .Head {
+        padding: 0;
+        align-items: center;
+    }
+
+    header .Head .Logo {
+        width: 22%;
+        min-width: 120px;
+    }
+
+    header .Head .Logo a img {
+        width: 100%;
+        max-width: 160px;
+    }
+
+    main {
+        flex-flow: column;
+        align-items: center;
+        padding: 24px 12px 64px;
+        margin-top: 0;
+    }
+
+    .IntroShellImg {
+        width: 100%;
+        height: auto;
+        margin-right: 0;
+    }
+
+    .IntroShellImg img {
+        width: 100%;
+        height: auto;
+    }
+
+    .IntroBtnShell {
+        flex-flow: row;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+        margin-top: 30px;
+    }
+
+    .IntroBtnShell .TestStart,
+    .IntroBtnShell .TestShare {
+        margin-right: 0;
+        width: 50%;
+    }
+
+    .IntroBtnShell button {
+        width: 100%;
+    }
+
+    footer {
+        position: static;
+        width: 100%;
+    }
+}
