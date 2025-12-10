@@ -1,6 +1,5 @@
 const state = {
   test: null,
-  baseDir: '',
   currentIndex: 0,
   totalQuestions: 0,
   scores: {},
@@ -8,33 +7,33 @@ const state = {
 };
 
 const dom = {
-  progress: document.querySelector('.Progress'),
-  image: document.querySelector('.TestImg img'),
-  options: document.querySelector('.TestSelectBtn'),
-  pageShell: document.querySelector('.PageShell'),
+  progress: document.querySelector(".Progress"),
+  image: document.querySelector(".TestImg img"),
+  options: document.querySelector(".TestSelectBtn"),
+  pageShell: document.querySelector(".PageShell"),
 };
 
 const ASSETS_BASE =
-  window.ASSETS_BASE || 'https://pub-9394623df95a4f669f145a4ede63d588.r2.dev';
+  window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
 const assetUrl =
   window.assetUrl ||
   ((path) =>
     `${ASSETS_BASE}/${path
-      .replace(/^\.?\/+/, '')
-      .replace(/^assets\//, 'assets/')}`);
+      .replace(/^\.?\/+/, "")
+      .replace(/^assets\//, "assets/")}`);
 const ICONS = {
-  instagram: assetUrl('assets/images/instagram.png'),
-  katalk: assetUrl('assets/images/katalk.png'),
-  naver: assetUrl('assets/images/naver.png'),
-  mail: assetUrl('assets/images/mail.png'),
+  instagram: assetUrl("assets/images/instagram.png"),
+  katalk: assetUrl("assets/images/katalk.png"),
+  naver: assetUrl("assets/images/naver.png"),
+  mail: assetUrl("assets/images/mail.png"),
 };
 
 function ensureResultFooter() {
-  let footer = document.querySelector('.QuizFooter');
+  let footer = document.querySelector(".QuizFooter");
   if (footer) return footer;
 
-  footer = document.createElement('footer');
-  footer.className = 'QuizFooter';
+  footer = document.createElement("footer");
+  footer.className = "QuizFooter";
   footer.innerHTML = `
     <ul>
       <li>
@@ -58,7 +57,7 @@ function ensureResultFooter() {
       </span>
     </div>
   `;
-  footer.style.display = 'none';
+  footer.style.display = "none";
 
   const container = dom.pageShell || document.body;
   container.appendChild(footer);
@@ -67,66 +66,54 @@ function ensureResultFooter() {
 
 function toggleResultFooter(show) {
   const footer = ensureResultFooter();
-  footer.style.display = show ? '' : 'none';
+  footer.style.display = show ? "" : "none";
 }
 
 function goToResultPage(mbti) {
   const testId = state.test?.id;
   if (!testId || !mbti) {
-    renderError('결과를 계산하지 못했습니다.');
+    renderError("결과를 계산하지 못했습니다.");
     return;
   }
 
-  const url = new URL('./testresult.html', window.location.href);
-  url.searchParams.set('testId', testId);
-  url.searchParams.set('result', mbti);
+  const url = new URL("./testresult.html", window.location.href);
+  url.searchParams.set("testId", testId);
+  url.searchParams.set("result", mbti);
   window.location.href = url.toString();
 }
 
 function getTestIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
-  const id = params.get('testId');
-  return id ? decodeURIComponent(id) : '';
-}
-
-function deriveBaseDir(path) {
-  if (!path) return '';
-  const clean = path.replace(/^\.?\/?assets\//, '').replace(/^\.\//, '');
-  const parts = clean.split('/');
-  parts.pop(); // remove filename
-  return parts.join('/');
+  const id = params.get("testId");
+  return id ? decodeURIComponent(id) : "";
 }
 
 function resolveAssetPath(relative) {
-  if (!relative) return '';
+  if (!relative) return "";
   if (/^https?:\/\//i.test(relative)) return relative;
-  if (/^\.?\/?assets\//i.test(relative)) return relative.replace(/^\.\//, './');
-
-  const clean = relative.replace(/^\.\//, '');
-  const prefix = state.baseDir ? `${state.baseDir}/` : '';
-  return `./assets/${prefix}${clean}`;
+  return window.assetUrl(relative);
 }
 
 function renderError(message) {
   if (dom.image) {
-    dom.image.alt = message || '오류';
-    dom.image.removeAttribute('src');
+    dom.image.alt = message || "오류";
+    dom.image.removeAttribute("src");
   }
   if (dom.options) {
-    dom.options.innerHTML = '';
-    const p = document.createElement('p');
-    p.textContent = message || '테스트를 불러올 수 없습니다.';
+    dom.options.innerHTML = "";
+    const p = document.createElement("p");
+    p.textContent = message || "테스트를 불러올 수 없습니다.";
     dom.options.appendChild(p);
   }
 }
 
 function ensureProgressFill() {
   if (!dom.progress) return null;
-  let fill = dom.progress.querySelector('.ProgressFill');
+  let fill = dom.progress.querySelector(".ProgressFill");
   if (!fill) {
-    fill = document.createElement('div');
-    fill.className = 'ProgressFill';
-    dom.progress.innerHTML = '';
+    fill = document.createElement("div");
+    fill.className = "ProgressFill";
+    dom.progress.innerHTML = "";
     dom.progress.appendChild(fill);
   }
   return fill;
@@ -134,9 +121,9 @@ function ensureProgressFill() {
 
 function setProgressVisibility(show) {
   if (!dom.progress) return;
-  const container = dom.progress.closest('.ProgressBar');
+  const container = dom.progress.closest(".ProgressBar");
   const target = container || dom.progress;
-  target.style.display = show ? '' : 'none';
+  target.style.display = show ? "" : "none";
 }
 
 function updateProgressBar(index, total) {
@@ -145,10 +132,10 @@ function updateProgressBar(index, total) {
   const percent =
     total === 0 ? 0 : Math.min(100, Math.round(((index + 1) / total) * 100));
   fill.style.width = `${percent}%`;
-  fill.style.setProperty('--quiz-progress', `${percent}%`);
-  dom.progress.setAttribute('aria-valuemin', '0');
-  dom.progress.setAttribute('aria-valuemax', '100');
-  dom.progress.setAttribute('aria-valuenow', String(percent));
+  fill.style.setProperty("--quiz-progress", `${percent}%`);
+  dom.progress.setAttribute("aria-valuemin", "0");
+  dom.progress.setAttribute("aria-valuemax", "100");
+  dom.progress.setAttribute("aria-valuenow", String(percent));
   dom.progress.title = `진행률 ${percent}%`;
 }
 
@@ -160,7 +147,7 @@ function renderQuestion() {
       : null;
 
   if (!question) {
-    renderError('질문 데이터를 찾지 못했습니다.');
+    renderError("질문 데이터를 찾지 못했습니다.");
     return;
   }
 
@@ -169,29 +156,29 @@ function renderQuestion() {
   updateProgressBar(state.currentIndex, state.totalQuestions);
 
   if (dom.image) {
-    dom.image.src = resolveAssetPath(question.prompt) || '#';
+    dom.image.src = resolveAssetPath(question.prompt) || "#";
     dom.image.alt = question.id || `문항 ${state.currentIndex + 1}`;
   }
 
   if (!dom.options) return;
-  dom.options.innerHTML = '';
+  dom.options.innerHTML = "";
 
   const answers = Array.isArray(question.answers) ? question.answers : [];
 
   if (!answers.length) {
-    const empty = document.createElement('p');
-    empty.textContent = '선택지가 준비되지 않았습니다.';
+    const empty = document.createElement("p");
+    empty.textContent = "선택지가 준비되지 않았습니다.";
     dom.options.appendChild(empty);
     return;
   }
 
   const frag = document.createDocumentFragment();
   answers.forEach((answer, idx) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
+    const btn = document.createElement("button");
+    btn.type = "button";
     btn.className = `select${idx + 1}`;
     btn.textContent = answer.label || `문항 ${idx + 1}`;
-    btn.addEventListener('click', () => handleAnswer(answer));
+    btn.addEventListener("click", () => handleAnswer(answer));
     frag.appendChild(btn);
   });
   dom.options.appendChild(frag);
@@ -222,13 +209,13 @@ function handleAnswer(answer) {
 
 function computeMbti() {
   const axes = [
-    ['E', 'I'],
-    ['S', 'N'],
-    ['T', 'F'],
-    ['J', 'P'],
+    ["E", "I"],
+    ["S", "N"],
+    ["T", "F"],
+    ["J", "P"],
   ];
 
-  let result = '';
+  let result = "";
   axes.forEach(([first, second]) => {
     const key = `${first}${second}`;
     const scores = state.scores[key] || {};
@@ -243,7 +230,7 @@ function computeMbti() {
 function renderResult() {
   const mbti = computeMbti();
   if (!mbti) {
-    renderError('결과를 계산하지 못했습니다.');
+    renderError("결과를 계산하지 못했습니다.");
     return;
   }
 
@@ -252,7 +239,7 @@ function renderResult() {
 
 async function shareCurrentTest(test) {
   const shareUrl = window.location.href;
-  const title = test?.title || 'MBTI ZOO 테스트';
+  const title = test?.title || "MBTI ZOO 테스트";
   try {
     if (navigator.share) {
       await navigator.share({
@@ -263,27 +250,26 @@ async function shareCurrentTest(test) {
       return;
     }
     await navigator.clipboard.writeText(shareUrl);
-    alert('링크가 클립보드에 복사되었습니다.');
+    alert("링크가 클립보드에 복사되었습니다.");
   } catch (err) {
-    console.error('공유하기 실패:', err);
-    alert('공유하기를 진행할 수 없습니다. 링크를 직접 복사해주세요.');
+    console.error("공유하기 실패:", err);
+    alert("공유하기를 진행할 수 없습니다. 링크를 직접 복사해주세요.");
   }
 }
 
 async function loadTestData() {
   const testId = getTestIdFromQuery();
   if (!testId) {
-    renderError('testId 파라미터가 없습니다.');
+    renderError("testId 파라미터가 없습니다.");
     return;
   }
 
   try {
-    const apiBase = window.API_TESTS_BASE || '/api/tests';
+    const apiBase = window.API_TESTS_BASE || "/api/tests";
     const dataRes = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
-    if (!dataRes.ok) throw new Error('테스트 데이터 로딩 실패');
+    if (!dataRes.ok) throw new Error("테스트 데이터 로딩 실패");
     const data = await dataRes.json();
 
-    state.baseDir = deriveBaseDir(data.path || '');
     state.test = data;
     state.totalQuestions = Array.isArray(state.test.questions)
       ? state.test.questions.length
@@ -293,15 +279,15 @@ async function loadTestData() {
     state.answers = [];
 
     if (!state.totalQuestions) {
-      renderError('문항이 없습니다.');
+      renderError("문항이 없습니다.");
       return;
     }
 
     renderQuestion();
   } catch (error) {
-    console.error('테스트 퀴즈 로딩 오류:', error);
-    renderError('테스트 정보를 불러오지 못했습니다.');
+    console.error("테스트 퀴즈 로딩 오류:", error);
+    renderError("테스트 정보를 불러오지 못했습니다.");
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadTestData);
+document.addEventListener("DOMContentLoaded", loadTestData);

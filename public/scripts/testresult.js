@@ -11,22 +11,10 @@ function getParam(name) {
   return value ? decodeURIComponent(value) : "";
 }
 
-function deriveBaseDir(path) {
-  if (!path) return "";
-  const clean = path.replace(/^\.?\/?assets\//, "").replace(/^\.\//, "");
-  const parts = clean.split("/");
-  parts.pop();
-  return parts.join("/");
-}
-
-function resolveAssetPath(relative, baseDir) {
+function resolveAssetPath(relative) {
   if (!relative) return "";
   if (/^https?:\/\//i.test(relative)) return relative;
-  if (/^\.?\/?assets\//i.test(relative)) return relative.replace(/^\.\//, "./");
-
-  const clean = relative.replace(/^\.\//, "");
-  const prefix = baseDir ? `${baseDir}/` : "";
-  return `./assets/${prefix}${clean}`;
+  return window.assetUrl(relative);
 }
 
 function renderError(message) {
@@ -65,14 +53,14 @@ async function shareResult({ mbti, title }) {
   alert("링크가 클립보드에 복사되었습니다.");
 }
 
-function renderResultPage(data, mbti, baseDir) {
+function renderResultPage(data, mbti) {
   if (!data || !mbti) {
     renderError("결과 정보를 불러오지 못했습니다.");
     return;
   }
 
   const resultData = data.results?.[mbti];
-  const resultImage = resolveAssetPath(resultData?.image, baseDir);
+  const resultImage = resolveAssetPath(resultData?.image);
 
   if (dom.thumbnailEl) {
     if (resultImage) dom.thumbnailEl.src = resultImage;
@@ -105,8 +93,7 @@ async function loadResultData() {
     if (!dataRes.ok) throw new Error("테스트 데이터 로딩 실패");
     const data = await dataRes.json();
 
-    const baseDir = deriveBaseDir(data.path || "");
-    renderResultPage(data, mbti, baseDir);
+    renderResultPage(data, mbti);
   } catch (err) {
     console.error("결과 페이지 로딩 오류:", err);
     renderError("결과 정보를 불러오지 못했습니다.");
