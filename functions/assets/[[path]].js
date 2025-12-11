@@ -33,9 +33,26 @@ export async function onRequestGet(context) {
   const tail = getPathParam(context.params).replace(/^\/+/, "");
   if (!tail) return new Response("Not Found", { status: 404 });
 
-  const key = `assets/${tail}`;
+  const candidateKeys = [
+    // Most common: keys stored under "assets/..."
+    `assets/${tail}`,
+    // Fallback: keys stored without "assets/" prefix
+    tail,
+    // Legacy: some setups store under "assets/data/..."
+    `assets/data/${tail}`,
+  ];
 
-  const obj = await bucket.get(key);
+  let obj = null;
+  let key = "";
+  for (const candidate of candidateKeys) {
+    // eslint-disable-next-line no-await-in-loop
+    const hit = await bucket.get(candidate);
+    if (hit) {
+      obj = hit;
+      key = candidate;
+      break;
+    }
+  }
   if (!obj) return new Response("Not Found", { status: 404 });
 
   const ifNoneMatch = context.request.headers.get("if-none-match");
@@ -56,6 +73,7 @@ export async function onRequestGet(context) {
     "Content-Type",
     obj.httpMetadata?.contentType || guessContentType(key),
   );
+  headers.set("X-MBTI-R2-Key", key);
 
   // R2의 httpMetadata/cacheControl이 있다면 존중
   if (obj.httpMetadata?.cacheControl)
