@@ -1,6 +1,7 @@
 const header = document.getElementById("header");
 const headerScroll = document.getElementById("headerScroll");
 const MainTop = document.getElementById("MainTop");
+const API_TESTS_URL = window.API_TESTS_BASE || "/api/tests";
 const ASSETS_BASE =
   window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
 const assetUrl =
@@ -66,21 +67,10 @@ function createTestCard(test, variantClass) {
   return shell;
 }
 
-// ----- 테스트 목록 불러오기 (R2 assets/index.json) -----
+// ----- 테스트 목록 불러오기 (/api/tests) -----
 async function fetchTestsAjax() {
-  if (typeof window.getTestIndex === "function") {
-    const data = await window.getTestIndex();
-    return Array.isArray(data?.tests) ? data.tests : [];
-  }
-
-  const indexUrl =
-    window.TEST_INDEX_URL ||
-    (typeof window.assetUrl === "function"
-      ? window.assetUrl("assets/index.json")
-      : `${ASSETS_BASE}/assets/index.json`);
-
-  const res = await fetch(indexUrl);
-  if (!res.ok) throw new Error(indexUrl + " 요청 실패: " + res.status);
+  const res = await fetch(API_TESTS_URL);
+  if (!res.ok) throw new Error("/api/tests 요청 실패: " + res.status);
   const data = await res.json();
   return Array.isArray(data?.tests) ? data.tests : [];
 }

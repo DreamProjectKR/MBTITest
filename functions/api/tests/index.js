@@ -1,0 +1,47 @@
+const JSON_HEADERS = {
+  "Content-Type": "application/json; charset=utf-8",
+};
+
+function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
+  const h = new Headers(headers);
+  h.set(
+    "Cache-Control",
+    `public, max-age=${maxAge}, stale-while-revalidate=${maxAge * 10}`,
+  );
+  if (etag) h.set("ETag", etag);
+  return h;
+}
+
+export async function onRequestGet(context) {
+  const bucket = context.env.MBTI_BUCKET;
+  if (!bucket) {
+    return new Response(
+      JSON.stringify({ error: "R2 binding MBTI_BUCKET is missing." }),
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
+    );
+  }
+
+  const key = "assets/index.json";
+  const obj = await bucket.get(key);
+  if (!obj) {
+    // Keep response shape compatible with existing frontend code.
+    return new Response(JSON.stringify({ tests: [] }), {
+      status: 200,
+      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 5 }),
+    });
+  }
+
+  const ifNoneMatch = context.request.headers.get("if-none-match");
+  if (ifNoneMatch && obj.etag && ifNoneMatch === obj.etag) {
+    return new Response(null, {
+      status: 304,
+      headers: withCacheHeaders(JSON_HEADERS, { etag: obj.etag, maxAge: 60 }),
+    });
+  }
+
+  const text = await obj.text();
+  return new Response(text, {
+    status: 200,
+    headers: withCacheHeaders(JSON_HEADERS, { etag: obj.etag, maxAge: 60 }),
+  });
+}

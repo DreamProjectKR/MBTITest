@@ -97,34 +97,9 @@ async function loadResultData() {
   }
 
   try {
-    const index =
-      typeof window.getTestIndex === "function"
-        ? await window.getTestIndex()
-        : await (async () => {
-            const indexUrl =
-              window.TEST_INDEX_URL ||
-              (typeof window.assetUrl === "function"
-                ? window.assetUrl("assets/index.json")
-                : `${ASSETS_BASE}/assets/index.json`);
-            const res = await fetch(indexUrl);
-            if (!res.ok)
-              throw new Error(indexUrl + " 요청 실패: " + res.status);
-            return res.json();
-          })();
-
-    const tests = Array.isArray(index?.tests) ? index.tests : [];
-    const meta = tests.find((t) => t?.id === testId);
-    if (!meta)
-      throw new Error("index.json에서 testId를 찾지 못했습니다: " + testId);
-
-    const testUrl =
-      typeof window.resolveTestDataUrl === "function"
-        ? window.resolveTestDataUrl(meta.path)
-        : assetUrl(`assets/${String(meta.path || "").replace(/^\.?\/+/, "")}`);
-
-    const dataRes = await fetch(testUrl);
-    if (!dataRes.ok)
-      throw new Error("테스트 데이터 로딩 실패: " + dataRes.status);
+    const apiBase = window.API_TESTS_BASE || "/api/tests";
+    const dataRes = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
+    if (!dataRes.ok) throw new Error("테스트 데이터 로딩 실패");
     const data = await dataRes.json();
 
     renderResultPage(data, mbti);

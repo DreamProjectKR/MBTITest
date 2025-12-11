@@ -1,10 +1,9 @@
 (function () {
-  const DEFAULT_ASSETS_BASE =
-    "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+  // Pages Functions로 /assets/* 를 R2에서 프록시하도록 구성하면
+  // 프런트는 같은 도메인(dreamp.org)만 바라보게 되어 CORS/CORP 이슈가 사라진다.
+  const DEFAULT_ASSETS_BASE = "";
   const DEFAULT_API_TESTS_BASE = "/api/tests";
   const DEFAULT_TEST_INDEX_PATH = "assets/index.json";
-  const DEFAULT_TEST_INDEX_URL =
-    "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev/assets/index.json";
 
   const ASSETS_BASE = window.ASSETS_BASE || DEFAULT_ASSETS_BASE;
   const API_TESTS_BASE = window.API_TESTS_BASE || DEFAULT_API_TESTS_BASE;
@@ -24,8 +23,9 @@
   // R2에 올라간 index.json URL (기본: `${ASSETS_BASE}/assets/index.json`)
   window.TEST_INDEX_URL =
     window.TEST_INDEX_URL ||
-    window.assetUrl(window.TEST_INDEX_PATH) ||
-    DEFAULT_TEST_INDEX_URL;
+    // Pages Functions 기반이면 /api/tests 가 테스트 인덱스 역할을 한다.
+    window.API_TESTS_BASE ||
+    DEFAULT_API_TESTS_BASE;
 
   function getIndexOrigin() {
     try {
