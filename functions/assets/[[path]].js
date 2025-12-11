@@ -1,6 +1,8 @@
 function getPathParam(params) {
   const v = params?.path;
-  // Pages Functions "multipath segments" param is a string that may include slashes.
+  // Pages Functions "multipath segments" (double brackets) returns an array of segments.
+  // Example: /assets/images/mainLogo.png -> ["images", "mainLogo.png"]
+  if (Array.isArray(v)) return v.join("/");
   return v ? String(v) : "";
 }
 
