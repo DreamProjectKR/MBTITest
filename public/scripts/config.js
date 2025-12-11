@@ -3,6 +3,8 @@
     "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
   const DEFAULT_API_TESTS_BASE = "/api/tests";
   const DEFAULT_TEST_INDEX_PATH = "assets/index.json";
+  const DEFAULT_TEST_INDEX_URL =
+    "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev/assets/index.json";
 
   const ASSETS_BASE = window.ASSETS_BASE || DEFAULT_ASSETS_BASE;
   const API_TESTS_BASE = window.API_TESTS_BASE || DEFAULT_API_TESTS_BASE;
@@ -21,7 +23,17 @@
 
   // R2에 올라간 index.json URL (기본: `${ASSETS_BASE}/assets/index.json`)
   window.TEST_INDEX_URL =
-    window.TEST_INDEX_URL || window.assetUrl(window.TEST_INDEX_PATH);
+    window.TEST_INDEX_URL ||
+    window.assetUrl(window.TEST_INDEX_PATH) ||
+    DEFAULT_TEST_INDEX_URL;
+
+  function getIndexOrigin() {
+    try {
+      return new URL(window.TEST_INDEX_URL).origin;
+    } catch (e) {
+      return "";
+    }
+  }
 
   // index.json 항목의 `path`(또는 파일 경로)를 테스트 JSON의 절대 URL로 변환한다.
   // - "test-summer/test.json" -> `${ASSETS_BASE}/assets/test-summer/test.json`
@@ -33,6 +45,8 @@
     if (/^https?:\/\//i.test(str)) return str;
     const clean = str.replace(/^\.?\/+/, "");
     const normalized = clean.startsWith("assets/") ? clean : `assets/${clean}`;
+    const origin = getIndexOrigin();
+    if (origin) return `${origin}/${normalized}`;
     return window.assetUrl(normalized);
   };
 
@@ -44,6 +58,22 @@
       const url = window.TEST_INDEX_URL;
       memo = fetch(url).then(async (res) => {
         if (!res.ok) throw new Error(url + " 요청 실패: " + res.status);
+        const contentType = (
+          res.headers.get("content-type") || ""
+        ).toLowerCase();
+        if (!contentType.includes("application/json")) {
+          const text = await res.text();
+          const head = text.slice(0, 80).replace(/\s+/g, " ");
+          throw new Error(
+            "index.json 응답이 JSON이 아닙니다: " +
+              url +
+              " (content-type: " +
+              contentType +
+              ', head: "' +
+              head +
+              '")',
+          );
+        }
         return res.json();
       });
       return memo;
