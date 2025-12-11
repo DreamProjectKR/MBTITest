@@ -1,43 +1,183 @@
 header {
-    background-image: var(--asset-header-bg);
-    padding: 20px 5px 80px;
-    background-size: cover;
-    background-position: center;
+  background-image: var(--asset-header-bg);
+  padding: 20px 5px 80px;
+  background-size: cover;
+  background-position: center;
 }
 
+/* 푸터 시작 */
+
 footer {
-    position: absolute;
-    width: 1230px;
-    bottom: 0;
+  position: absolute;
+  width: 1230px;
+  bottom: 0;
+}
+
+footer ul {
+  background-image: var(--asset-footer-bg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+footer ul li {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 0;
+}
+
+footer ul li a {
+  width: 48px;
+  height: 48px;
+  background-color: #fff;
+  text-align: center;
+  line-height: 48px;
+  font-size: 35px;
+  margin: 0 10px;
+  display: flex;
+  border-radius: 50%;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border: 3px solid #fff;
+  z-index: 1;
+}
+
+footer ul li a .icon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  color: #262626;
+  transition: .5s;
+  z-index: 3;
+}
+
+footer ul li a:hover .icon {
+  color: #fff;
+  transform: rotateY(360deg);
+}
+
+footer ul li a:before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f00;
+  transition: .5s;
+  z-index: 2;
+}
+
+footer ul li a:hover:before {
+  top: 0;
+}
+
+footer ul li a:nth-child(1):before {
+  background: #5851DB;
+}
+
+footer ul li a:nth-child(2):before {
+  background: #fae100;
+}
+
+footer ul li a:nth-child(3):before {
+  background: #03C75A;
+}
+
+footer ul li a:nth-child(4):before {
+  background: #dd4b39;
+}
+
+footer .FooterShell {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0 0 16px;
+}
+
+footer .FooterShell p {
+  margin-right: 12px;
+  color: #9d9d9d;
+}
+
+footer .FooterShell p:last-child {
+  margin-right: 0px;
+}
+
+footer .Copyright {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 12px;
+  color: #00ffff;
+  background-color: #000000;
 }
 
 /* 900px 이하: 카드 2개씩 보이도록 */
 @media (max-width: 900px) {
-    header {
-        padding: 28px 12px 20px;
-        background-image: var(--asset-header-bg);
-        background-size: 100% auto;
-        background-repeat: no-repeat;
-        background-position: top center;
-    }
+  header {
+    padding: 28px 12px 20px;
+    background-image: var(--asset-header-bg);
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: top center;
+  }
 
-    header .Head {
-        background-color: unset;
-    }
+  header .Head {
+    background-color: unset;
+  }
 
-    main .NewTestList .NewTestListShell {
-        flex-wrap: wrap;
-        gap: 12px;
-    }
+  main .NewTestList .NewTestListShell {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
 
-    main .NewTestList .NewTestListShell .NewTestShell {
-        flex: 0 0 calc(50% - 12px);
-        min-width: calc(50% - 12px);
-        padding: 12px;
-        margin-bottom: 12px;
-    }
+  main .NewTestList .NewTestListShell .NewTestShell {
+    flex: 0 0 calc(50% - 12px);
+    min-width: calc(50% - 12px);
+    padding: 12px;
+    margin-bottom: 12px;
+  }
 
-    main .NewTestList .NewTestListShell .NewTestShell .NewTest img {
-        height: auto;
-    }
+  main .NewTestList .NewTestListShell .NewTestShell .NewTest img {
+    height: auto;
+  }
+
+  footer {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+  }
+
+  footer ul {
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: top center;
+    padding: 12px 0;
+  }
+
+  footer ul li {
+    padding: 0;
+  }
+
+  footer ul li a {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    font-size: 18px;
+    margin: 0 4px;
+    border: 2px solid #fff;
+  }
+
+  footer ul li a .icon {
+    width: 12px;
+    height: 12px;
+  }
 }
