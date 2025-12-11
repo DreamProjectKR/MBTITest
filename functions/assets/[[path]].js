@@ -1,6 +1,6 @@
 function getPathParam(params) {
   const v = params?.path;
-  if (Array.isArray(v)) return v.join("/");
+  // Pages Functions "multipath segments" param is a string that may include slashes.
   return v ? String(v) : "";
 }
 
