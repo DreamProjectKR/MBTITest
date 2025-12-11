@@ -35,13 +35,23 @@ document.querySelector(".test1").onclick = function () {
 
 // index.json을 AJAX로 읽어와 테스트 카드 목록을 구성한다.
 (function () {
-  // ----- AJAX: /api/tests 로드 -----
+  // ----- AJAX: R2 assets/index.json 로드 -----
   async function fetchTestIndex() {
-    const apiUrl = window.API_TESTS_BASE || "/api/tests";
-    const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error(apiUrl + " 요청 실패: " + res.status);
+    if (typeof window.getTestIndex === "function") {
+      const data = await window.getTestIndex();
+      return Array.isArray(data?.tests) ? data.tests : [];
+    }
+
+    const indexUrl =
+      window.TEST_INDEX_URL ||
+      (typeof window.assetUrl === "function"
+        ? window.assetUrl("assets/index.json")
+        : `${ASSETS_BASE}/assets/index.json`);
+
+    const res = await fetch(indexUrl);
+    if (!res.ok) throw new Error(indexUrl + " 요청 실패: " + res.status);
     const data = await res.json();
-    return Array.isArray(data.tests) ? data.tests : [];
+    return Array.isArray(data?.tests) ? data.tests : [];
   }
 
   // ----- 데이터 정규화: 중복 제거 + 최신순 정렬 -----
