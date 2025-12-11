@@ -31,7 +31,15 @@ export async function onRequestGet(context) {
     return new Response("MBTI_BUCKET binding missing.", { status: 500 });
 
   const tail = getPathParam(context.params).replace(/^\/+/, "");
-  if (!tail) return new Response("Not Found", { status: 404 });
+  if (!tail) {
+    return new Response("Not Found", {
+      status: 404,
+      headers: {
+        "X-MBTI-Assets-Proxy": "1",
+        "Cache-Control": "no-store",
+      },
+    });
+  }
 
   const candidateKeys = [
     // Most common: keys stored under "assets/..."
@@ -53,7 +61,22 @@ export async function onRequestGet(context) {
       break;
     }
   }
-  if (!obj) return new Response("Not Found", { status: 404 });
+  if (!obj) {
+    return new Response(
+      `Not Found\nrequested=/assets/${tail}\ntried=${candidateKeys.join(
+        ",",
+      )}\n`,
+      {
+        status: 404,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "X-MBTI-Assets-Proxy": "1",
+          "X-MBTI-R2-Key": "MISS",
+          "Cache-Control": "no-store",
+        },
+      },
+    );
+  }
 
   const ifNoneMatch = context.request.headers.get("if-none-match");
   if (ifNoneMatch && obj.etag && ifNoneMatch === obj.etag) {
@@ -73,6 +96,7 @@ export async function onRequestGet(context) {
     "Content-Type",
     obj.httpMetadata?.contentType || guessContentType(key),
   );
+  headers.set("X-MBTI-Assets-Proxy", "1");
   headers.set("X-MBTI-R2-Key", key);
 
   // R2의 httpMetadata/cacheControl이 있다면 존중
