@@ -5,6 +5,17 @@ const dom = {
   shareBtn: document.querySelector(".ResultBtnShell .TestShare button"),
 };
 
+const ASSETS_BASE =
+  window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+const assetUrl =
+  window.assetUrl ||
+  ((path) => {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    const clean = String(path).replace(/^\.?\/+/, "");
+    return `${ASSETS_BASE}/${clean}`;
+  });
+
 function getParam(name) {
   const params = new URLSearchParams(window.location.search);
   const value = params.get(name);
@@ -12,9 +23,7 @@ function getParam(name) {
 }
 
 function resolveAssetPath(relative) {
-  if (!relative) return "";
-  if (/^https?:\/\//i.test(relative)) return relative;
-  return window.assetUrl(relative);
+  return assetUrl(relative);
 }
 
 function renderError(message) {

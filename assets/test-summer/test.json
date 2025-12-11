@@ -13,13 +13,13 @@
     "콕콕 알려드릴게요 💕"
   ],
   "author": "우애앵애",
-  "authorImg": "./assets/test-summer/images/author.png",
+  "authorImg": "assets/test-summer/images/author.png",
   "tags": ["여름", "여행", "휴가", "바캉스"],
-  "thumbnail": "./assets/test-summer/images/thumbnail.png",
+  "thumbnail": "assets/test-summer/images/thumbnail.png",
   "questions": [
     {
       "id": "q1",
-      "prompt": "./assets/test-summer/images/q1.png",
+      "prompt": "assets/test-summer/images/q1.png",
       "answers": [
         {
           "id": "q1_a",
@@ -37,7 +37,7 @@
     },
     {
       "id": "q2",
-      "prompt": "./assets/test-summer/images/q2.png",
+      "prompt": "assets/test-summer/images/q2.png",
       "answers": [
         {
           "id": "q2_a",
@@ -55,7 +55,7 @@
     },
     {
       "id": "q3",
-      "prompt": "./assets/test-summer/images/q3.png",
+      "prompt": "assets/test-summer/images/q3.png",
       "answers": [
         {
           "id": "q3_a",
@@ -73,7 +73,7 @@
     },
     {
       "id": "q4",
-      "prompt": "./assets/test-summer/images/q4.png",
+      "prompt": "assets/test-summer/images/q4.png",
       "answers": [
         {
           "id": "q4_a",
@@ -91,7 +91,7 @@
     },
     {
       "id": "q5",
-      "prompt": "./assets/test-summer/images/q5.png",
+      "prompt": "assets/test-summer/images/q5.png",
       "answers": [
         {
           "id": "q5_a",
@@ -109,7 +109,7 @@
     },
     {
       "id": "q6",
-      "prompt": "./assets/test-summer/images/q6.png",
+      "prompt": "assets/test-summer/images/q6.png",
       "answers": [
         {
           "id": "q6_a",
@@ -127,7 +127,7 @@
     },
     {
       "id": "q7",
-      "prompt": "./assets/test-summer/images/q7.png",
+      "prompt": "assets/test-summer/images/q7.png",
       "answers": [
         {
           "id": "q7_a",
@@ -145,7 +145,7 @@
     },
     {
       "id": "q8",
-      "prompt": "./assets/test-summer/images/q8.png",
+      "prompt": "assets/test-summer/images/q8.png",
       "answers": [
         {
           "id": "q8_a",
@@ -163,7 +163,7 @@
     },
     {
       "id": "q9",
-      "prompt": "./assets/test-summer/images/q9.png",
+      "prompt": "assets/test-summer/images/q9.png",
       "answers": [
         {
           "id": "q9_a",
@@ -181,7 +181,7 @@
     },
     {
       "id": "q10",
-      "prompt": "./assets/test-summer/images/q10.png",
+      "prompt": "assets/test-summer/images/q10.png",
       "answers": [
         {
           "id": "q10_a",
@@ -199,7 +199,7 @@
     },
     {
       "id": "q11",
-      "prompt": "./assets/test-summer/images/q11.png",
+      "prompt": "assets/test-summer/images/q11.png",
       "answers": [
         {
           "id": "q11_a",
@@ -217,7 +217,7 @@
     },
     {
       "id": "q12",
-      "prompt": "./assets/test-summer/images/q12.png",
+      "prompt": "assets/test-summer/images/q12.png",
       "answers": [
         {
           "id": "q12_a",
@@ -236,52 +236,52 @@
   ],
   "results": {
     "ISTJ": {
-      "image": "./assets/test-summer/images/ISTJ.png"
+      "image": "assets/test-summer/images/ISTJ.png"
     },
     "ISFJ": {
-      "image": "./assets/test-summer/images/ISFJ.png"
+      "image": "assets/test-summer/images/ISFJ.png"
     },
     "INFJ": {
-      "image": "./assets/test-summer/images/INFJ.png"
+      "image": "assets/test-summer/images/INFJ.png"
     },
     "INTJ": {
-      "image": "./assets/test-summer/images/INTJ.png"
+      "image": "assets/test-summer/images/INTJ.png"
     },
     "ISTP": {
-      "image": "./assets/test-summer/images/ISTP.png"
+      "image": "assets/test-summer/images/ISTP.png"
     },
     "ISFP": {
-      "image": "./assets/test-summer/images/ISFP.png"
+      "image": "assets/test-summer/images/ISFP.png"
     },
     "INFP": {
-      "image": "./assets/test-summer/images/INFP.png"
+      "image": "assets/test-summer/images/INFP.png"
     },
     "INTP": {
-      "image": "./assets/test-summer/images/INTP.png"
+      "image": "assets/test-summer/images/INTP.png"
     },
     "ESTP": {
-      "image": "./assets/test-summer/images/ESTP.png"
+      "image": "assets/test-summer/images/ESTP.png"
     },
     "ESFP": {
-      "image": "./assets/test-summer/images/ESFP.png"
+      "image": "assets/test-summer/images/ESFP.png"
     },
     "ENFP": {
-      "image": "./assets/test-summer/images/ENFP.png"
+      "image": "assets/test-summer/images/ENFP.png"
     },
     "ENTP": {
-      "image": "./assets/test-summer/images/ENTP.png"
+      "image": "assets/test-summer/images/ENTP.png"
     },
     "ESTJ": {
-      "image": "./assets/test-summer/images/ESTJ.png"
+      "image": "assets/test-summer/images/ESTJ.png"
     },
     "ESFJ": {
-      "image": "./assets/test-summer/images/ESFJ.png"
+      "image": "assets/test-summer/images/ESFJ.png"
     },
     "ENFJ": {
-      "image": "./assets/test-summer/images/ENFJ.png"
+      "image": "assets/test-summer/images/ENFJ.png"
     },
     "ENTJ": {
-      "image": "./assets/test-summer/images/ENTJ.png"
+      "image": "assets/test-summer/images/ENTJ.png"
     }
   }
 }

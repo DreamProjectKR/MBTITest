@@ -17,10 +17,12 @@ const ASSETS_BASE =
   window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
 const assetUrl =
   window.assetUrl ||
-  ((path) =>
-    `${ASSETS_BASE}/${path
-      .replace(/^\.?\/+/, "")
-      .replace(/^assets\//, "assets/")}`);
+  ((path) => {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    const clean = String(path).replace(/^\.?\/+/, "");
+    return `${ASSETS_BASE}/${clean}`;
+  });
 const ICONS = {
   instagram: assetUrl("assets/images/instagram.png"),
   katalk: assetUrl("assets/images/katalk.png"),
@@ -89,9 +91,7 @@ function getTestIdFromQuery() {
 }
 
 function resolveAssetPath(relative) {
-  if (!relative) return "";
-  if (/^https?:\/\//i.test(relative)) return relative;
-  return window.assetUrl(relative);
+  return assetUrl(relative);
 }
 
 function renderError(message) {

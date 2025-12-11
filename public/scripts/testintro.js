@@ -1,6 +1,16 @@
 const header = document.querySelector(".Head");
 const headerScroll = document.querySelector("header");
 const headerOffset = header ? header.offsetTop : 0;
+const ASSETS_BASE =
+  window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+const assetUrl =
+  window.assetUrl ||
+  ((path) => {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    const clean = String(path).replace(/^\.?\/+/, "");
+    return `${ASSETS_BASE}/${clean}`;
+  });
 
 window.addEventListener("scroll", () => {
   if (!header) return;
@@ -102,7 +112,7 @@ function renderIntro(data) {
   const descEl = document.querySelector(".IntroDescription");
 
   if (thumbnailEl) {
-    if (data.thumbnail) thumbnailEl.src = window.assetUrl(data.thumbnail);
+    if (data.thumbnail) thumbnailEl.src = assetUrl(data.thumbnail);
     if (data.title) thumbnailEl.alt = data.title;
   }
 
@@ -113,7 +123,7 @@ function renderIntro(data) {
   const authorName = data.author;
 
   if (authorImgEl) {
-    if (data.authorImg) authorImgEl.src = window.assetUrl(data.authorImg);
+    if (data.authorImg) authorImgEl.src = assetUrl(data.authorImg);
     if (authorName) authorImgEl.alt = `제작자 ${authorName}`;
   }
 

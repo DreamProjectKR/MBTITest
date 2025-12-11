@@ -3,7 +3,7 @@
     {
       "id": "test-summer",
       "title": "여름 바캉스 스타일 테스트",
-      "thumbnail": "./assets/test-summer/images/thumbnail.png",
+      "thumbnail": "assets/test-summer/images/thumbnail.png",
       "tags": ["여름", "여행", "휴가", "바캉스"],
       "path": "test-summer/test.json",
       "createdAt": "2025-12-08",

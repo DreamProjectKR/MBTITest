@@ -1,6 +1,16 @@
 const header = document.getElementById("header");
 const headerScroll = document.getElementById("headerScroll");
 const MainTop = document.getElementById("MainTop");
+const ASSETS_BASE =
+  window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+const assetUrl =
+  window.assetUrl ||
+  ((path) => {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    const clean = String(path).replace(/^\.?\/+/, "");
+    return `${ASSETS_BASE}/${clean}`;
+  });
 
 const headerOffset = header.offsetTop; // 헤더 원래 위치 저장
 
@@ -56,7 +66,7 @@ document.querySelector(".test1").onclick = function () {
   function resolveThumbnailPath(thumbnail) {
     if (!thumbnail) return "#";
     if (/^https?:\/\//i.test(thumbnail)) return thumbnail;
-    return window.assetUrl(thumbnail);
+    return assetUrl(thumbnail);
   }
 
   // ----- 태그 DOM 생성 -----
