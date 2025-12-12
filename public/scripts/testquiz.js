@@ -30,6 +30,46 @@ const ICONS = {
   mail: assetUrl("assets/images/mail.png"),
 };
 
+function randomInt(maxExclusive) {
+  const max = Math.floor(Number(maxExclusive));
+  if (!Number.isFinite(max) || max <= 0) return 0;
+
+  // Prefer cryptographically-strong randomness when available.
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.getRandomValues === "function"
+  ) {
+    const uint32 = new Uint32Array(1);
+    crypto.getRandomValues(uint32);
+    return uint32[0] % max;
+  }
+
+  return Math.floor(Math.random() * max);
+}
+
+function shuffleInPlace(list) {
+  if (!Array.isArray(list) || list.length <= 1) return list;
+  for (let i = list.length - 1; i > 0; i -= 1) {
+    const j = randomInt(i + 1);
+    const tmp = list[i];
+    list[i] = list[j];
+    list[j] = tmp;
+  }
+  return list;
+}
+
+function buildShuffledQuestions(questions) {
+  const base = Array.isArray(questions) ? questions : [];
+  const copied = base.map((q) => {
+    const answers = Array.isArray(q?.answers) ? [...q.answers] : [];
+    return { ...q, answers };
+  });
+
+  shuffleInPlace(copied);
+  copied.forEach((q) => shuffleInPlace(q.answers));
+  return copied;
+}
+
 function ensureResultFooter() {
   let footer = document.querySelector(".QuizFooter");
   if (footer) return footer;
@@ -271,6 +311,7 @@ async function loadTestData() {
     const data = await dataRes.json();
 
     state.test = data;
+    state.test.questions = buildShuffledQuestions(state.test?.questions);
     state.totalQuestions = Array.isArray(state.test.questions)
       ? state.test.questions.length
       : 0;
