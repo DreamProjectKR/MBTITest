@@ -125,6 +125,14 @@ function setProgressVisibility(show) {
   target.style.display = show ? "" : "none";
 }
 
+function toggleResultFooter(show) {
+  const shouldShow = Boolean(show);
+  const footer =
+    document.querySelector(".QuizFooter") || document.querySelector("footer");
+  if (!footer) return;
+  footer.style.display = shouldShow ? "" : "none";
+}
+
 function updateProgressBar(index, total) {
   const fill = ensureProgressFill();
   if (!fill || !dom.progress) return;
