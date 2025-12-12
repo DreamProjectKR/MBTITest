@@ -235,53 +235,69 @@
     }
   ],
   "results": {
-    "ISTJ": {
-      "image": "assets/test-summer/images/ISTJ.png"
-    },
-    "ISFJ": {
-      "image": "assets/test-summer/images/ISFJ.png"
-    },
-    "INFJ": {
-      "image": "assets/test-summer/images/INFJ.png"
-    },
-    "INTJ": {
-      "image": "assets/test-summer/images/INTJ.png"
-    },
-    "ISTP": {
-      "image": "assets/test-summer/images/ISTP.png"
-    },
-    "ISFP": {
-      "image": "assets/test-summer/images/ISFP.png"
-    },
-    "INFP": {
-      "image": "assets/test-summer/images/INFP.png"
-    },
-    "INTP": {
-      "image": "assets/test-summer/images/INTP.png"
-    },
-    "ESTP": {
-      "image": "assets/test-summer/images/ESTP.png"
-    },
-    "ESFP": {
-      "image": "assets/test-summer/images/ESFP.png"
+    "ENFJ": {
+      "image": "assets/test-summer/images/ENFJ.png",
+      "summary": "평화의 상징"
     },
     "ENFP": {
-      "image": "assets/test-summer/images/ENFP.png"
-    },
-    "ENTP": {
-      "image": "assets/test-summer/images/ENTP.png"
-    },
-    "ESTJ": {
-      "image": "assets/test-summer/images/ESTJ.png"
-    },
-    "ESFJ": {
-      "image": "assets/test-summer/images/ESFJ.png"
-    },
-    "ENFJ": {
-      "image": "assets/test-summer/images/ENFJ.png"
+      "image": "assets/test-summer/images/ENFP.png",
+      "summary": "호기심 천국 미어캣"
     },
     "ENTJ": {
-      "image": "assets/test-summer/images/ENTJ.png"
+      "image": "assets/test-summer/images/ENTJ.png",
+      "summary": "총명한 다람쥐 총무"
+    },
+    "ENTP": {
+      "image": "assets/test-summer/images/ENTP.png",
+      "summary": "즉흥 여행 P 퍼피"
+    },
+    "ESFJ": {
+      "image": "assets/test-summer/images/ESFJ.png",
+      "summary": "포토그래플라밍고"
+    },
+    "ESFP": {
+      "image": "assets/test-summer/images/ESFP.png",
+      "summary": "댄싱머신 앵무가"
+    },
+    "ESTJ": {
+      "image": "assets/test-summer/images/ESTJ.png",
+      "summary": "나를 따르낙타"
+    },
+    "ESTP": {
+      "image": "assets/test-summer/images/ESTP.png",
+      "summary": "바다의 야생마"
+    },
+    "INFJ": {
+      "image": "assets/test-summer/images/INFJ.png",
+      "summary": "유유자적 문학 해달"
+    },
+    "INFP": {
+      "image": "assets/test-summer/images/INFP.png",
+      "summary": "감성 충만 치즈냥"
+    },
+    "INTJ": {
+      "image": "assets/test-summer/images/INTJ.png",
+      "summary": "두등동선 짜두지"
+    },
+    "INTP": {
+      "image": "assets/test-summer/images/INTP.png",
+      "summary": "분석가오부엉"
+    },
+    "ISFJ": {
+      "image": "assets/test-summer/images/ISFJ.png",
+      "summary": "럭키비키 우파루파"
+    },
+    "ISFP": {
+      "image": "assets/test-summer/images/ISFP.png",
+      "summary": "조개 수집 하수달"
+    },
+    "ISTJ": {
+      "image": "assets/test-summer/images/ISTJ.png",
+      "summary": "철저햄 보부상"
+    },
+    "ISTP": {
+      "image": "assets/test-summer/images/ISTP.png",
+      "summary": "귄차니즘 숙소 조아"
     }
   }
 }
