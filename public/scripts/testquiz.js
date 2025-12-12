@@ -70,47 +70,6 @@ function buildShuffledQuestions(questions) {
   return copied;
 }
 
-function ensureResultFooter() {
-  let footer = document.querySelector(".QuizFooter");
-  if (footer) return footer;
-
-  footer = document.createElement("footer");
-  footer.className = "QuizFooter";
-  footer.innerHTML = `
-    <ul>
-      <li>
-        <a href="#">
-          <img class="icon" src="${ICONS.instagram}" alt="인스타그램 바로가기">
-        </a>
-        <a href="#">
-          <img class="icon" src="${ICONS.katalk}" alt="카카오톡 바로가기">
-        </a>
-        <a href="#">
-          <img class="icon" src="${ICONS.naver}" alt="네이버 바로가기">
-        </a>
-        <a href="#">
-          <img class="icon" src="${ICONS.mail}" alt="메일 바로가기">
-        </a>
-      </li>
-    </ul>
-    <div class="Copyright">
-      <span class="Copy">
-        Copyright &copy; 2025; Designed by DREAMPROJECT
-      </span>
-    </div>
-  `;
-  footer.style.display = "none";
-
-  const container = dom.pageShell || document.body;
-  container.appendChild(footer);
-  return footer;
-}
-
-function toggleResultFooter(show) {
-  const footer = ensureResultFooter();
-  footer.style.display = show ? "" : "none";
-}
-
 function goToResultPage(mbti) {
   const testId = state.test?.id;
   if (!testId || !mbti) {
