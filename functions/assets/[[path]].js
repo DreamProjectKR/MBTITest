@@ -32,6 +32,28 @@ export async function onRequestGet(context) {
   if (!bucket)
     return new Response("MBTI_BUCKET binding missing.", { status: 500 });
 
+  // Edge cache (Cloudflare Cache API)
+  // - Pages Functions 응답은 기본적으로 "동적"으로 취급될 수 있어 캐시가 약하게 동작한다.
+  // - caches.default를 쓰면 /assets/* 응답을 엣지에 저장해 TTFB와 체감 로딩이 크게 개선된다.
+  const cache = caches?.default;
+  const url = new URL(context.request.url);
+  const cacheKey = new Request(url.toString(), context.request);
+  const requestCacheControl = (context.request.headers.get("cache-control") || "")
+    .toLowerCase();
+  const bypassCache =
+    requestCacheControl.includes("no-cache") ||
+    requestCacheControl.includes("no-store") ||
+    context.request.headers.has("pragma");
+
+  if (!bypassCache && cache) {
+    const cached = await cache.match(cacheKey);
+    if (cached) {
+      const headers = new Headers(cached.headers);
+      headers.set("X-MBTI-Edge-Cache", "HIT");
+      return new Response(cached.body, { status: cached.status, headers });
+    }
+  }
+
   const tail = getPathParam(context.params).replace(/^\/+/, "");
   if (!tail) {
     return new Response("Not Found", {
@@ -100,10 +122,26 @@ export async function onRequestGet(context) {
   );
   headers.set("X-MBTI-Assets-Proxy", "1");
   headers.set("X-MBTI-R2-Key", key);
+  headers.set("X-MBTI-Edge-Cache", "MISS");
 
   // R2의 httpMetadata/cacheControl이 있다면 존중
   if (obj.httpMetadata?.cacheControl)
     headers.set("Cache-Control", obj.httpMetadata.cacheControl);
 
-  return new Response(obj.body, { status: 200, headers });
+  const response = new Response(obj.body, { status: 200, headers });
+
+  // 캐시 가능할 때만 엣지 캐시 저장
+  const respCacheControl = (response.headers.get("cache-control") || "").toLowerCase();
+  const shouldCache =
+    !bypassCache &&
+    cache &&
+    response.status === 200 &&
+    respCacheControl.includes("public") &&
+    !respCacheControl.includes("no-store");
+
+  if (shouldCache) {
+    context.waitUntil(cache.put(cacheKey, response.clone()));
+  }
+
+  return response;
 }

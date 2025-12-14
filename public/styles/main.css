@@ -5,6 +5,13 @@ body {
   font-family: 'Noto Sans', sans-serif;
 }
 
+:root {
+  /* JS(config.js)로도 주입되지만, 초기 렌더에서 이미지 로딩을 늦추지 않도록 기본값을 둔다 */
+  --asset-header-bg: url(/assets/images/HeaderBackgroundImg.png);
+  --asset-header-bg-non: url(/assets/images/HeaderBackgroundImgNon.png);
+  --asset-footer-bg: url(/assets/images/FooterBackgroundImg.png);
+}
+
 .PageShell {
   display: flex;
   flex-flow: column;

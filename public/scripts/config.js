@@ -99,30 +99,64 @@
   }
 
   // data-asset-* 속성 자동 주입 (img/src, link/href, bg)
-  function applyAssetAttributes() {
+  function applyAssetAttributes(root) {
+    if (typeof document === "undefined") return;
+    const scope = root && root.querySelectorAll ? root : document;
     const toUrl = (v) => (v ? window.assetUrl(v) : "");
 
-    document.querySelectorAll("[data-asset-src]").forEach((el) => {
-      const path = el.getAttribute("data-asset-src");
-      if (path) el.src = toUrl(path);
-    });
+    // root 자신이 타겟 엘리먼트일 수도 있어 별도 처리
+    const maybeApply = (el) => {
+      if (!el || el.nodeType !== 1) return;
+      if (el.hasAttribute && el.hasAttribute("data-asset-src")) {
+        const path = el.getAttribute("data-asset-src");
+        if (path && !el.getAttribute("src"))
+          el.setAttribute("src", toUrl(path));
+      }
+      if (el.hasAttribute && el.hasAttribute("data-asset-href")) {
+        const path = el.getAttribute("data-asset-href");
+        if (path && !el.getAttribute("href"))
+          el.setAttribute("href", toUrl(path));
+      }
+      if (el.hasAttribute && el.hasAttribute("data-asset-bg")) {
+        const path = el.getAttribute("data-asset-bg");
+        if (path && !el.style?.backgroundImage)
+          el.style.backgroundImage = `url(${toUrl(path)})`;
+      }
+    };
 
-    document.querySelectorAll("[data-asset-href]").forEach((el) => {
-      const path = el.getAttribute("data-asset-href");
-      if (path) el.href = toUrl(path);
-    });
-
-    document.querySelectorAll("[data-asset-bg]").forEach((el) => {
-      const path = el.getAttribute("data-asset-bg");
-      if (path) el.style.backgroundImage = `url(${toUrl(path)})`;
-    });
+    scope.querySelectorAll("[data-asset-src]").forEach((el) => maybeApply(el));
+    scope.querySelectorAll("[data-asset-href]").forEach((el) => maybeApply(el));
+    scope.querySelectorAll("[data-asset-bg]").forEach((el) => maybeApply(el));
+    maybeApply(root);
   }
 
+  // 가능한 한 빨리 src/href를 주입해야 브라우저가 이미지/리소스 다운로드를 빨리 시작한다.
+  // - defer 없이 <head>에서 실행되는 경우에도 MutationObserver로 파싱 중 생성되는 노드에 즉시 주입
   if (typeof document !== "undefined") {
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", applyAssetAttributes);
-    } else {
-      applyAssetAttributes();
+    applyAssetAttributes(document);
+
+    try {
+      const observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const node of m.addedNodes || []) {
+            if (!node || node.nodeType !== 1) continue;
+            applyAssetAttributes(node);
+          }
+        }
+      });
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
+    } catch (e) {
+      // 구형 브라우저 fallback
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () =>
+          applyAssetAttributes(document),
+        );
+      } else {
+        applyAssetAttributes(document);
+      }
     }
   }
 })();
