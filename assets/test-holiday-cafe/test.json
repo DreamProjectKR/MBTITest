@@ -1,0 +1,312 @@
+{
+  "id": "test-holiday-cafe",
+  "title": "연말 크리스마스 스페셜 메뉴 테스트",
+  "description": [
+    "반짝이는 시즌 한정 메뉴가 가득한 연말 🎄",
+    "사람들 취향도, 카페에서의 행동도 더 또렷해지는 시기!",
+    "12개의 질문으로",
+    "✔️ 어떤 분위기의 카페를 좋아하는지",
+    "✔️ 어떤 메뉴를 고를 때 내 성향이 드러나는지",
+    "귀여운 동물 캐릭터 감성으로 알려드릴게요 ☕️🍰"
+  ],
+  "author": "MBTI ZOO",
+  "authorImg": "assets/test-holiday-cafe/images/author.png",
+  "tags": ["연말", "크리스마스", "카페", "스페셜메뉴"],
+  "thumbnail": "assets/test-holiday-cafe/images/thumbnail.png",
+  "questions": [
+    {
+      "id": "q1",
+      "label": "연말에 한정 메뉴 팝업 카페를 발견했다! 내 첫 반응은?",
+      "prompt": "assets/test-holiday-cafe/images/1.png",
+      "answers": [
+        {
+          "id": "q1_a",
+          "label": "지금 바로 친구 소집! 같이 가야 더 신나지",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "q1_b",
+          "label": "혼자 조용히 다녀오고 싶어… 나만의 힐링 코스",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "label": "주문을 기다리는 동안 나는 보통?",
+      "prompt": "assets/test-holiday-cafe/images/q2.png",
+      "answers": [
+        {
+          "id": "q2_a",
+          "label": "옆 사람 메뉴도 구경하고, 추천도 하고, 수다도 살짝!",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "q2_b",
+          "label": "조용히 메뉴판/휴대폰 보면서 내 페이스 유지",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "q3",
+      "label": "연말 분위기를 느끼러 나간다면 더 끌리는 쪽은?",
+      "prompt": "assets/test-holiday-cafe/images/q3.png",
+      "answers": [
+        {
+          "id": "q3_a",
+          "label": "사람 많고 반짝이는 메인 거리! 북적북적이 좋아",
+          "mbtiAxis": "EI",
+          "direction": "E"
+        },
+        {
+          "id": "q3_b",
+          "label": "한적한 골목 카페에서 조용히 반짝임을 즐기기",
+          "mbtiAxis": "EI",
+          "direction": "I"
+        }
+      ]
+    },
+    {
+      "id": "q4",
+      "label": "한정 음료를 고를 때 내 스타일은?",
+      "prompt": "assets/test-holiday-cafe/images/q4.png",
+      "answers": [
+        {
+          "id": "q4_a",
+          "label": "검증된 시그니처가 최고! 실패 없는 맛으로 간다",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "q4_b",
+          "label": "이 조합은 뭐지…? 상상만 해도 재밌어! 일단 도전",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "q5",
+      "label": "디저트가 나오면 내가 먼저 보는 건?",
+      "prompt": "assets/test-holiday-cafe/images/q5.png",
+      "answers": [
+        {
+          "id": "q5_a",
+          "label": "크림 두께, 식감, 재료… 디테일 체크부터",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "q5_b",
+          "label": "전체 분위기, 컬러 조합, ‘컨셉’이 주는 무드",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "q6",
+      "label": "메뉴 설명을 읽을 때 더 눈이 가는 문장은?",
+      "prompt": "assets/test-holiday-cafe/images/q6.png",
+      "answers": [
+        {
+          "id": "q6_a",
+          "label": "원두/재료 정보, 당도, 추천 조합 같은 구체적인 안내",
+          "mbtiAxis": "SN",
+          "direction": "S"
+        },
+        {
+          "id": "q6_b",
+          "label": "“첫눈 같은 달콤함” 같은 컨셉 문장과 스토리",
+          "mbtiAxis": "SN",
+          "direction": "N"
+        }
+      ]
+    },
+    {
+      "id": "q7",
+      "label": "친구가 한정 메뉴를 시켰는데 ‘생각보다 별로’라고 한다면?",
+      "prompt": "assets/test-holiday-cafe/images/q7.png",
+      "answers": [
+        {
+          "id": "q7_a",
+          "label": "\"다음엔 이 조합으로 가자\" 하며 해결책부터 제안",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "q7_b",
+          "label": "\"괜찮아! 내가 더 맛있는 거 시켜줄게\" 위로가 먼저",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "q8",
+      "label": "대기줄이 너무 길다… 이때 나는?",
+      "prompt": "assets/test-holiday-cafe/images/q8.png",
+      "answers": [
+        {
+          "id": "q8_a",
+          "label": "시간 계산해서 대안 카페 찾기! 효율적으로 움직인다",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "q8_b",
+          "label": "기다리는 것도 추억이지! 같이 떠들며 즐긴다",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "q9",
+      "label": "바리스타가 추천 메뉴를 권할 때 더 설득되는 건?",
+      "prompt": "assets/test-holiday-cafe/images/q9.png",
+      "answers": [
+        {
+          "id": "q9_a",
+          "label": "\"후기 좋고, 단맛 밸런스가 이렇게 좋아요\" 같은 근거",
+          "mbtiAxis": "TF",
+          "direction": "T"
+        },
+        {
+          "id": "q9_b",
+          "label": "\"오늘 같은 날엔 이 무드가 딱이에요\" 같은 감성 추천",
+          "mbtiAxis": "TF",
+          "direction": "F"
+        }
+      ]
+    },
+    {
+      "id": "q10",
+      "label": "연말 약속을 잡을 때 내 스타일은?",
+      "prompt": "assets/test-holiday-cafe/images/q10.png",
+      "answers": [
+        {
+          "id": "q10_a",
+          "label": "미리 예약/동선/시간표까지 깔끔하게 확정!",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "q10_b",
+          "label": "그날 기분 따라! 마음 가는 대로가 베스트",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "q11",
+      "label": "한정 굿즈(스티커/컵홀더)가 있다면?",
+      "prompt": "assets/test-holiday-cafe/images/q11.png",
+      "answers": [
+        {
+          "id": "q11_a",
+          "label": "사기 전에 예산/필요도 체크! 계획적으로 겟",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "q11_b",
+          "label": "보이면 사야지… 지금 아니면 못 사!",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    },
+    {
+      "id": "q12",
+      "label": "새해를 앞두고 나는 어떤 모드가 더 가까워?",
+      "prompt": "assets/test-holiday-cafe/images/q12.png",
+      "answers": [
+        {
+          "id": "q12_a",
+          "label": "플래너 펼치고 목표/루틴 정리! 올해는 체계적으로",
+          "mbtiAxis": "JP",
+          "direction": "J"
+        },
+        {
+          "id": "q12_b",
+          "label": "일단 해보고 조정! 내년의 나는 내년의 내가 한다",
+          "mbtiAxis": "JP",
+          "direction": "P"
+        }
+      ]
+    }
+  ],
+  "results": {
+    "ENFJ": {
+      "image": "assets/test-holiday-cafe/images/ENFJ.png",
+      "summary": "시나몬 라떼 타입"
+    },
+    "ENFP": {
+      "image": "assets/test-holiday-cafe/images/ENFP.png",
+      "summary": "토핑 한가득 핫초코 타입"
+    },
+    "ENTJ": {
+      "image": "assets/test-holiday-cafe/images/ENTJ.png",
+      "summary": "에그노그 라떼(시즌 리더) 타입"
+    },
+    "ENTP": {
+      "image": "assets/test-holiday-cafe/images/ENTP.png",
+      "summary": "커스텀 시럽 실험 라떼 타입"
+    },
+    "ESFJ": {
+      "image": "assets/test-holiday-cafe/images/ESFJ.png",
+      "summary": "크리스마스 티타임 세트 타입"
+    },
+    "ESFP": {
+      "image": "assets/test-holiday-cafe/images/ESFP.png",
+      "summary": "페퍼민트 모카(파티무드) 타입"
+    },
+    "ESTJ": {
+      "image": "assets/test-holiday-cafe/images/ESTJ.png",
+      "summary": "플래너 아메리카노 타입"
+    },
+    "ESTP": {
+      "image": "assets/test-holiday-cafe/images/ESTP.png",
+      "summary": "샷추가 에스프레소 타입"
+    },
+    "INFJ": {
+      "image": "assets/test-holiday-cafe/images/INFJ.png",
+      "summary": "창가 얼그레이(무드) 타입"
+    },
+    "INFP": {
+      "image": "assets/test-holiday-cafe/images/INFP.png",
+      "summary": "마시멜로 코코아(감성) 타입"
+    },
+    "INTJ": {
+      "image": "assets/test-holiday-cafe/images/INTJ.png",
+      "summary": "드립 블랙(전략) 타입"
+    },
+    "INTP": {
+      "image": "assets/test-holiday-cafe/images/INTP.png",
+      "summary": "원두 노트(분석) 타입"
+    },
+    "ISFJ": {
+      "image": "assets/test-holiday-cafe/images/ISFJ.png",
+      "summary": "바닐라 라떼(포근) 타입"
+    },
+    "ISFP": {
+      "image": "assets/test-holiday-cafe/images/ISFP.png",
+      "summary": "라떼아트 말차(무드) 타입"
+    },
+    "ISTJ": {
+      "image": "assets/test-holiday-cafe/images/ISTJ.png",
+      "summary": "정석 아메리카노 타입"
+    },
+    "ISTP": {
+      "image": "assets/test-holiday-cafe/images/ISTP.png",
+      "summary": "원샷 픽업 콜드브루 타입"
+    }
+  }
+}

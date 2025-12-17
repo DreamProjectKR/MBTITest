@@ -20,6 +20,7 @@
   "questions": [
     {
       "id": "q1",
+      "label": "방학 첫날 아침, 눈을 뜨자마자 가장 먼저 하고 싶은 일은?",
       "prompt": "assets/test-summer/images/q1.png",
       "answers": [
         {
@@ -38,6 +39,7 @@
     },
     {
       "id": "q2",
+      "label": "여름 캠프에 간다면 어떤 게 더 설레나요?",
       "prompt": "assets/test-summer/images/q2.png",
       "answers": [
         {
@@ -56,6 +58,7 @@
     },
     {
       "id": "q3",
+      "label": "방학 계획을 세울 때 친구가 갑자기 놀러 오자고 하면?",
       "prompt": "assets/test-summer/images/q3.png",
       "answers": [
         {
@@ -74,6 +77,7 @@
     },
     {
       "id": "q4",
+      "label": "바닷가에 도착했을 때 가장 먼저 눈에 들어오는 것은?",
       "prompt": "assets/test-summer/images/q4.png",
       "answers": [
         {
@@ -92,6 +96,7 @@
     },
     {
       "id": "q5",
+      "label": "여름방학 일기장을 펼쳤을 때 어떤 내용을 더 적고 싶나요?",
       "prompt": "assets/test-summer/images/q5.png",
       "answers": [
         {
@@ -110,6 +115,7 @@
     },
     {
       "id": "q6",
+      "label": "해변에서 우연히 예쁜 조개껍데기를 발견했다면?",
       "prompt": "assets/test-summer/images/q6.png",
       "answers": [
         {
@@ -128,6 +134,7 @@
     },
     {
       "id": "q7",
+      "label": "친구와 물놀이 중 친구가 물에 빠뜨린 선글라스를 찾을 때?",
       "prompt": "assets/test-summer/images/q7.png",
       "answers": [
         {
@@ -146,6 +153,7 @@
     },
     {
       "id": "q8",
+      "label": "캠프파이어 시간에 누군가 실수로 불을 너무 크게 키웠다면?",
       "prompt": "assets/test-summer/images/q8.png",
       "answers": [
         {
@@ -164,6 +172,7 @@
     },
     {
       "id": "q9",
+      "label": "친구가 방학 숙제를 깜빡했다고 울먹일 때?",
       "prompt": "assets/test-summer/images/q9.png",
       "answers": [
         {
@@ -182,6 +191,7 @@
     },
     {
       "id": "q10",
+      "label": "방학 일정표를 만들 때 더 편한 방식은?",
       "prompt": "assets/test-summer/images/q10.png",
       "answers": [
         {
@@ -200,6 +210,7 @@
     },
     {
       "id": "q11",
+      "label": "여행 가방을 쌀 때 어떤 스타일인가요?",
       "prompt": "assets/test-summer/images/q11.png",
       "answers": [
         {
@@ -218,6 +229,7 @@
     },
     {
       "id": "q12",
+      "label": "방학 마지막 주가 되었을 때 남은 시간을 어떻게 쓰고 싶나요?",
       "prompt": "assets/test-summer/images/q12.png",
       "answers": [
         {
