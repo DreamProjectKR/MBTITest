@@ -1,8 +1,10 @@
 const header = document.querySelector(".Head");
 const headerScroll = document.querySelector("header");
 const headerOffset = header ? header.offsetTop : 0;
+// NOTE: config.js intentionally sets ASSETS_BASE to "" when using Pages Functions (/assets/* proxy).
+// Treat empty string as a valid value (don't fall back to R2 public URL).
 const ASSETS_BASE =
-  window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+  window.ASSETS_BASE ?? "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
 const assetUrl =
   window.assetUrl ||
   ((path) => {
@@ -11,6 +13,77 @@ const assetUrl =
     const clean = String(path).replace(/^\.?\/+/, "");
     return `${ASSETS_BASE}/${clean}`;
   });
+
+function isProbablyImagePath(v) {
+  if (!v) return false;
+  const s = String(v).trim();
+  // Keep this conservative: only preload known image extensions.
+  return /\.(png|jpe?g|gif|webp|svg)$/i.test(s);
+}
+
+function collectImagePathsDeep(value, out) {
+  if (!out) return;
+  if (!value) return;
+
+  if (typeof value === "string") {
+    if (isProbablyImagePath(value)) out.add(value);
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((v) => collectImagePathsDeep(v, out));
+    return;
+  }
+
+  if (typeof value === "object") {
+    Object.keys(value).forEach((k) => collectImagePathsDeep(value[k], out));
+  }
+}
+
+function scheduleIdle(fn) {
+  if (typeof window === "undefined") return;
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(fn, { timeout: 1200 });
+    return;
+  }
+  window.setTimeout(fn, 0);
+}
+
+function preloadImages(imagePaths, { limit = 60 } = {}) {
+  const list = Array.isArray(imagePaths) ? imagePaths : [];
+  if (!list.length) return;
+
+  // Keep strong references so the browser doesn't GC preloads before they start.
+  if (!window.__MBTI_PRELOADED_IMAGES__) window.__MBTI_PRELOADED_IMAGES__ = [];
+
+  const max = Math.min(limit, list.length);
+  for (let i = 0; i < max; i += 1) {
+    const raw = list[i];
+    const url = assetUrl(raw);
+    if (!url) continue;
+    const img = new Image();
+    img.decoding = "async";
+    try {
+      // Hint: these are warming the cache, not critical render.
+      img.fetchPriority = "low";
+    } catch (e) {
+      // Safari/older browsers
+    }
+    img.src = url;
+    window.__MBTI_PRELOADED_IMAGES__.push(img);
+  }
+}
+
+function warmTestImagesFromTestJson(testJson) {
+  // `testJson` is the parsed contents of `test.json` (fetched via /api/tests/:id on this page).
+  const set = new Set();
+  collectImagePathsDeep(testJson, set);
+  const paths = Array.from(set);
+  if (!paths.length) return;
+
+  // Stage the preload work so the intro UI renders smoothly first.
+  scheduleIdle(() => preloadImages(paths, { limit: 80 }));
+}
 
 window.addEventListener("scroll", () => {
   if (!header) return;
@@ -58,6 +131,9 @@ async function loadIntroData() {
 
     setupShareButton(data);
     renderIntro(data);
+    // When users land on the intro page, warm the images referenced inside test.json
+    // so quiz/result screens can render without cold image fetches.
+    warmTestImagesFromTestJson(data);
   } catch (err) {
     console.error("테스트 인트로 로딩 오류:", err);
     renderIntroError("테스트 정보를 불러오지 못했습니다.");
