@@ -65,7 +65,7 @@ The frontend renders:
 
 ### 2) Take a test
 
-- Intro (`public/testintro.html?testId=...`) fetches `/api/tests/:id` and renders meta (thumbnail/tags/author/description).
+- Intro (`public/testintro.html?testId=...`) fetches `/api/tests/:id` and renders meta (thumbnail/tags/author/description). It also warms the cache by preloading images referenced inside the returned test JSON (question prompts/result images), so quiz/result pages avoid cold image fetches.
 - Quiz (`public/testquiz.html?testId=...`) fetches `/api/tests/:id` and runs the question flow.
 - Quiz computes MBTI by summing per-axis scores from answers and sends user to:
   - `public/testresult.html?testId=...&result=ENFP` (example)

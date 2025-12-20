@@ -92,6 +92,9 @@
   - tags (`tags[]`)
   - author and author image (`author`, `authorImg`)
   - description (supports string or array-of-strings; array is rendered as multiple `<p>` lines)
+- Performance behavior:
+  - After rendering, the script warms the browser cache by preloading image assets referenced in the returned test JSON (e.g., `questions[].prompt`, `results[*].image`, plus any other image-like string paths found).
+  - Preloading is staged via `requestIdleCallback` (fallback `setTimeout`) and uses `Image().src` with a conservative file-extension filter; the implementation caps how many images are queued to avoid overwhelming the network.
 - Start button navigates to `testquiz.html?testId=...`.
 - Share uses Web Share API if available; otherwise copies URL to clipboard.
 
