@@ -1,14 +1,13 @@
 /**
- * Asset proxy: `GET /assets/*`
+ * Asset proxy: `GET /assets/*` (Cloudflare Pages Function)
  *
  * Why this exists:
- * - In production we want browsers to load images/JSON from `https://dreamp.org/assets/...` (same-origin)
- *   to avoid CORS headaches with the R2 public endpoint.
- * - This Pages Function reads objects from the bound R2 bucket (`MBTI_BUCKET`) and streams them back.
+ * - In production we want the browser to request assets from `https://dreamp.org/...` (same origin),
+ *   so images don't hit CORS issues.
+ * - R2 is accessed server-side via the Pages R2 binding (`MBTI_BUCKET`).
  *
- * Notes:
- * - We keep JSON TTL short (content changes), but cache images aggressively.
- * - We also use `caches.default` to improve TTFB for repeated requests.
+ * The frontend uses relative paths like `assets/...`, and `public/scripts/config.js` turns them into
+ * `/assets/...` URLs by default (same-origin).
  */
 
 /**
@@ -24,7 +23,7 @@ function getPathParam(params) {
 }
 
 /**
- * Guess Content-Type by file extension when R2 metadata is missing.
+ * Guess a Content-Type by file extension when R2 metadata is missing.
  * @param {string} key
  * @returns {string}
  */
@@ -43,23 +42,21 @@ function guessContentType(key) {
 }
 
 /**
- * Cache policy:
- * - JSON: short TTL (updates)
- * - Everything else: long TTL + immutable
+ * Cache-Control policy for proxied objects.
+ * - JSON: short TTL (can be updated)
+ * - Other static assets: long TTL + immutable with SWR/SIE for resilience
  * @param {string} key
  * @returns {string}
  */
 function cacheControlForKey(key) {
   const lower = key.toLowerCase();
-  // JSON changes more often: short TTL but allow SWR/SIE so the edge stays fast.
   if (lower.endsWith(".json"))
     return "public, max-age=60, stale-while-revalidate=600, stale-if-error=600";
-  // Images/fonts/etc: cache hard + immutable, with SWR/SIE for resilience.
   return "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400";
 }
 
 /**
- * Pages Function entrypoint.
+ * Cloudflare Pages Function entrypoint for `GET /assets/*`.
  * @param {{ request: Request, env: any, params?: any, waitUntil: (p: Promise<any>) => void }} context
  * @returns {Promise<Response>}
  */
@@ -68,14 +65,13 @@ export async function onRequestGet(context) {
   if (!bucket)
     return new Response("MBTI_BUCKET binding missing.", { status: 500 });
 
+  // Edge cache (Cloudflare Cache API). Pages Functions responses can otherwise behave "dynamic".
   const cache = caches?.default;
   const url = new URL(context.request.url);
-  // Stable cache key: avoid header-driven cache fragmentation.
+  // Normalize cache key: avoid header-driven fragmentation.
   const cacheKey = new Request(url.toString(), { method: "GET" });
-
-  const requestCacheControl = (
-    context.request.headers.get("cache-control") || ""
-  ).toLowerCase();
+  const requestCacheControl = (context.request.headers.get("cache-control") || "")
+    .toLowerCase();
   const bypassCache =
     requestCacheControl.includes("no-cache") ||
     requestCacheControl.includes("no-store") ||
@@ -83,14 +79,27 @@ export async function onRequestGet(context) {
 
   if (!bypassCache && cache) {
     const cached = await cache.match(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      const headers = new Headers(cached.headers);
+      headers.set("X-MBTI-Edge-Cache", "HIT");
+      return new Response(cached.body, { status: cached.status, headers });
+    }
   }
 
   const tail = getPathParam(context.params).replace(/^\/+/, "");
-  if (!tail) return new Response("Not Found", { status: 404 });
+  if (!tail) {
+    return new Response("Not Found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
 
-  // Support a few historical key layouts in the bucket.
-  const candidateKeys = [`assets/${tail}`, tail, `assets/data/${tail}`];
+  // We expect R2 keys to live under `assets/...` in the bucket.
+  const candidateKeys = [
+    `assets/${tail}`, // common: `assets/images/...`
+    tail, // fallback: key stored without `assets/` prefix
+    `assets/data/${tail}`, // legacy fallback
+  ];
 
   let obj = null;
   let key = "";
@@ -104,11 +113,12 @@ export async function onRequestGet(context) {
     }
   }
 
-  if (!obj)
+  if (!obj) {
     return new Response("Not Found", {
       status: 404,
       headers: { "Cache-Control": "no-store" },
     });
+  }
 
   const ifNoneMatch = context.request.headers.get("if-none-match");
   if (ifNoneMatch && obj.etag && ifNoneMatch === obj.etag) {
@@ -122,23 +132,24 @@ export async function onRequestGet(context) {
   }
 
   const headers = new Headers();
-  if (obj.etag) headers.set("ETag", obj.etag);
+  headers.set("ETag", obj.etag || "");
   headers.set("Cache-Control", cacheControlForKey(key));
   headers.set(
     "Content-Type",
     obj.httpMetadata?.contentType || guessContentType(key),
   );
-  if (obj.httpMetadata?.cacheControl)
-    headers.set("Cache-Control", obj.httpMetadata.cacheControl);
   headers.set("X-MBTI-Assets-Proxy", "1");
   headers.set("X-MBTI-R2-Key", key);
+  headers.set("X-MBTI-Edge-Cache", "MISS");
+
+  // Respect object metadata if present (lets operators control caching per-object).
+  if (obj.httpMetadata?.cacheControl)
+    headers.set("Cache-Control", obj.httpMetadata.cacheControl);
 
   const response = new Response(obj.body, { status: 200, headers });
 
-  // Cache only if response is explicitly cacheable.
-  const respCacheControl = (
-    response.headers.get("cache-control") || ""
-  ).toLowerCase();
+  // Store in edge cache only when cacheable.
+  const respCacheControl = (response.headers.get("cache-control") || "").toLowerCase();
   const shouldCache =
     !bypassCache &&
     cache &&
@@ -146,7 +157,11 @@ export async function onRequestGet(context) {
     respCacheControl.includes("public") &&
     !respCacheControl.includes("no-store");
 
-  if (shouldCache) context.waitUntil(cache.put(cacheKey, response.clone()));
+  if (shouldCache) {
+    context.waitUntil(cache.put(cacheKey, response.clone()));
+  }
 
   return response;
 }
+
+

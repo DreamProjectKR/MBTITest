@@ -1,18 +1,10 @@
 (function () {
-  /**
-   * Runtime config for frontend pages.
-   *
-   * Production strategy:
-   * - Browsers load assets from **same-origin**: `https://dreamp.org/assets/...`
-   * - A Pages Function (`GET /assets/*`) proxies these requests from the bound R2 bucket (MBTI_BUCKET).
-   * - This avoids CORS issues with the R2 public endpoint.
-   *
-   * Dev/debug strategy (optional):
-   * - You can set `window.ASSETS_BASE = "https://pub-...r2.dev"` before this script runs to bypass proxy.
-   *
-   * Important:
-   * - The S3-compatible R2 endpoint (`*.r2.cloudflarestorage.com`) is not intended to be used as a browser asset base.
-   */
+  // Pages Functions로 /assets/* 를 R2에서 프록시하도록 구성하면
+  // 프런트는 같은 도메인(dreamp.org)만 바라보게 되어 CORS/CORP 이슈가 사라진다.
+  // Public asset base URL (browser-facing).
+  // Production default: same-origin `/assets/*` (served by Pages Functions using the R2 binding).
+  // This avoids CORS issues when loading images from R2.
+  // You can override by setting `window.ASSETS_BASE` before this script runs.
   const DEFAULT_ASSETS_BASE = "";
   const DEFAULT_API_TESTS_BASE = "/api/tests";
   const DEFAULT_TEST_INDEX_PATH = "assets/index.json";
@@ -35,7 +27,8 @@
     return `${ASSETS_BASE}/${clean}`;
   };
 
-  // R2에 올라간 index.json URL (기본: `${ASSETS_BASE}/assets/index.json`)
+  // Test index source:
+  // - By default we use the same-origin API (`/api/tests`), not a direct R2 URL.
   window.TEST_INDEX_URL =
     window.TEST_INDEX_URL ||
     // Pages Functions 기반이면 /api/tests 가 테스트 인덱스 역할을 한다.
@@ -50,10 +43,8 @@
     }
   }
 
-  // index.json 항목의 `path`(또는 파일 경로)를 테스트 JSON의 절대 URL로 변환한다.
-  // - "test-summer/test.json" -> `${ASSETS_BASE}/assets/test-summer/test.json`
-  // - "assets/test-summer/test.json" -> `${ASSETS_BASE}/assets/test-summer/test.json`
-  // - "https://..." -> 그대로
+  // Convert an index `path` field into a usable URL.
+  // In current production, test JSON is fetched via the API, so this is mostly a utility.
   window.resolveTestDataUrl = function resolveTestDataUrl(rawPath) {
     if (!rawPath) return "";
     const str = String(rawPath).trim();

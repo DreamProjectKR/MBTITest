@@ -15,9 +15,8 @@ const dom = {
 };
 
 // `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
-const ASSETS_BASE =
-  // Prefer same-origin `/assets/*` in production (R2 proxy).
-  window.ASSETS_BASE || "";
+// Production default: same-origin `/assets/*` (served by Pages Functions proxy).
+const ASSETS_BASE = window.ASSETS_BASE || "";
 /**
  * Build an absolute URL for an asset path under `assets/`.
  * @param {string} path

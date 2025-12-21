@@ -11,9 +11,8 @@ const header = document.querySelector(".Head");
 const headerScroll = document.querySelector("header");
 const headerOffset = header ? header.offsetTop : 0;
 // NOTE: `config.js` defines `window.ASSETS_BASE` and `window.assetUrl()`.
-// In production we prefer same-origin `/assets/*` (R2 proxy) to avoid CORS.
-const ASSETS_BASE =
-  window.ASSETS_BASE ?? "";
+// Production default: same-origin `/assets/*` (served by Pages Functions proxy).
+const ASSETS_BASE = window.ASSETS_BASE ?? "";
 const assetUrl =
   window.assetUrl ||
   ((path) => {

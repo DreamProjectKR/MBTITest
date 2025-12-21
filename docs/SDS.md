@@ -39,9 +39,8 @@
 
 ## 1.3 Asset Loading (Current)
 
-- Browser loads images from same-origin `/assets/...`.
-- `functions/assets/[[path]].js` proxies `/assets/*` from R2 using the `MBTI_BUCKET` binding.
-- The frontend uses `public/scripts/config.js` (`window.assetUrl`) to build URLs from `assets/...` paths.
+- Production default is same-origin `/assets/*` served by `functions/assets/[[path]].js`.
+- The proxy reads from R2 via the binding (`MBTI_BUCKET`) so the browser stays same-origin.
 
 ## 2. Data Flow
 
