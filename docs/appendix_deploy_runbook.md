@@ -37,6 +37,7 @@ Frontend runtime defaults (in `public/scripts/config.js`):
 Both root `_routes.json` and `public/_routes.json` include:
 
 - `/api/*`
+- `/assets/*`
 
 This ensures the Functions routes are included in the build output.
 
@@ -60,9 +61,9 @@ This ensures the Functions routes are included in the build output.
 
 The frontend builds asset URLs using `window.assetUrl()` from `public/scripts/config.js`.
 
-- Direct public R2 domain (current)
-  - `public/scripts/config.js` defaults `window.ASSETS_BASE` to the public R2 base URL (e.g. `https://pub-...r2.dev`).
-  - Asset references like `assets/images/mainLogo.png` become `https://<public-r2-base>/assets/images/mainLogo.png`.
+- Same-origin (production default)
+  - Keep `window.ASSETS_BASE` empty (default).
+  - Asset references like `assets/images/mainLogo.png` become `/assets/images/mainLogo.png` and are served by `GET /assets/*`.
 
 ## 5. Deploy to Cloudflare Pages
 
@@ -100,7 +101,7 @@ The frontend builds asset URLs using `window.assetUrl()` from `public/scripts/co
 - If `/api/tests/:id` returns 404 "Test JSON not found":
   - Check that `assets/<path from index>` exists in R2 and matches the index entry.
 - If images fail to load:
-  - Confirm the public R2 base URL is correct and that the objects are publicly accessible.
+  - Confirm `MBTI_BUCKET` binding exists and `/assets/*` route is included.
 
 ## References
 

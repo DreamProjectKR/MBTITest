@@ -8,7 +8,7 @@ Document the current MBTI test hub project (frontend + Pages Functions) into sep
 
 - Document current code behavior for:
   - `public/` pages and scripts
-  - `functions/` endpoints (assets load via public R2 absolute URLs)
+  - `functions/` endpoints and R2 asset proxy
   - `assets/` data formats used by the API
 - Provide interface contracts (endpoints, headers, status codes) and data schema definitions.
 - Provide deployment/runbook guidance for Cloudflare Pages + R2.

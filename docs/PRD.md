@@ -52,7 +52,8 @@ A static MBTI test hub with a serverless content API (Pages Functions + R2). Use
 
 ### FR6: Asset delivery
 
-- Frontend shall resolve asset URLs using runtime config (absolute public R2 base URL).
+- Frontend shall resolve asset URLs using runtime config and/or same-origin proxy.
+- Backend shall proxy `/assets/*` from R2 with suitable caching headers.
 
 ## Non-Functional Requirements
 

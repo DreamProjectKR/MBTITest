@@ -70,8 +70,9 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   // Normalize cache key: avoid header-driven fragmentation.
   const cacheKey = new Request(url.toString(), { method: "GET" });
-  const requestCacheControl = (context.request.headers.get("cache-control") || "")
-    .toLowerCase();
+  const requestCacheControl = (
+    context.request.headers.get("cache-control") || ""
+  ).toLowerCase();
   const bypassCache =
     requestCacheControl.includes("no-cache") ||
     requestCacheControl.includes("no-store") ||
@@ -149,7 +150,9 @@ export async function onRequestGet(context) {
   const response = new Response(obj.body, { status: 200, headers });
 
   // Store in edge cache only when cacheable.
-  const respCacheControl = (response.headers.get("cache-control") || "").toLowerCase();
+  const respCacheControl = (
+    response.headers.get("cache-control") || ""
+  ).toLowerCase();
   const shouldCache =
     !bypassCache &&
     cache &&
@@ -163,5 +166,3 @@ export async function onRequestGet(context) {
 
   return response;
 }
-
-

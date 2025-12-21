@@ -9,7 +9,7 @@ Define the requirements for the MBTI test hub software as implemented in this re
 ### 1.2 System Context
 
 - Static frontend served from Cloudflare Pages (`public/`).
-- Serverless API served from Cloudflare Pages Functions (`functions/`).
+- Serverless API and R2 asset proxy served from Cloudflare Pages Functions (`functions/`).
 - Content stored in R2 under keys such as `assets/index.json` and `assets/<test>/...`.
 
 ## 2. Overall Description
@@ -51,8 +51,8 @@ The system is a content-driven frontend that fetches test definitions at runtime
 
 ### 3.3 Asset Loading
 
-- System shall load images and other assets using absolute URLs to the public R2 base URL.
-- Frontend shall resolve asset paths using runtime config (`window.assetUrl()`).
+- System shall provide an asset proxy at `GET /assets/*` for same-origin image loading.
+- Asset proxy shall set Content-Type and caching headers appropriately.
 
 ### 3.4 Frontend Pages
 

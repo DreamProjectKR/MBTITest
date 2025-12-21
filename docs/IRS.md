@@ -91,10 +91,10 @@ Primary interface is HTTP (same origin in Cloudflare Pages).
 - 500 missing R2 binding:
   - `{ "error": "R2 binding MBTI_BUCKET is missing." }`
 
-### 2.3 Asset Loading (No Proxy)
+### 2.3 `GET /assets/*`
 
-- Purpose: Load images and other assets directly from the public R2 base URL.
-- Implementation: frontend builds absolute URLs using `window.assetUrl()` in `public/scripts/config.js`.
+- Purpose: Same-origin proxy to read assets from R2.
+- Backend implementation: `functions/assets/[[path]].js`
 
 ## 3. Frontend Integration Contracts
 
