@@ -91,45 +91,10 @@ Primary interface is HTTP (same origin in Cloudflare Pages).
 - 500 missing R2 binding:
   - `{ "error": "R2 binding MBTI_BUCKET is missing." }`
 
-### 2.3 `GET /assets/*`
+### 2.3 Asset Loading (No Proxy)
 
-- Purpose: Same-origin proxy to read assets from R2.
-- Backend implementation: `functions/assets/[[path]].js`
-
-#### Request
-
-- Method: GET
-- Path params:
-  - `path`: multi-segment tail
-- Headers (optional):
-  - `If-None-Match`
-
-#### Resolution Behavior
-
-The proxy tries candidate keys in order:
-
-1. `assets/<tail>`
-2. `<tail>`
-3. `assets/data/<tail>`
-
-#### Response
-
-- Success (200)
-  - Body: R2 object body
-  - Headers:
-    - `Content-Type`: metadata content type or guessed by extension
-    - `ETag`: set to the R2 object's etag when available (may be empty string if unavailable)
-    - `Cache-Control`:
-      - JSON: `public, max-age=60`
-      - Other assets: `public, max-age=31536000, immutable`
-      - If R2 `httpMetadata.cacheControl` is set, it overrides the computed value
-    - `X-MBTI-Assets-Proxy: 1`
-    - `X-MBTI-R2-Key: <resolved key>`
-- Not Modified (304)
-  - If ETag matches `If-None-Match`
-- Not Found (404)
-  - Plaintext body describing attempted keys
-  - `X-MBTI-R2-Key: MISS`
+- Purpose: Load images and other assets directly from the public R2 base URL.
+- Implementation: frontend builds absolute URLs using `window.assetUrl()` in `public/scripts/config.js`.
 
 ## 3. Frontend Integration Contracts
 

@@ -11,7 +11,6 @@
 - Backend (Pages Functions)
   - Test index endpoint: `functions/api/tests/index.js`
   - Test detail endpoint: `functions/api/tests/[id].js`
-  - Asset proxy endpoint: `functions/assets/[[path]].js`
 - Content
   - `assets/index.json` and per-test JSON/images
 
@@ -37,16 +36,10 @@
   - Normalizes `tests[].path` to an R2 key (ensuring `assets/` prefix).
   - Fetches test JSON and returns with cache headers and optional ETag.
 
-- `functions/assets/[[path]].js`
-  - Serves as a same-origin proxy for R2 objects.
-  - Candidate key resolution order:
-    - `assets/<tail>`
-    - `<tail>`
-    - `assets/data/<tail>`
-  - Uses metadata content type if present, otherwise guesses by extension.
-  - Applies cache control:
-    - JSON: short TTL
-    - Other assets: long TTL + immutable
+## 1.3 Asset Loading (Current)
+
+- Images and other assets are loaded directly from the public R2 base URL (absolute URLs).
+- The frontend uses `public/scripts/config.js` (`window.assetUrl`) to build absolute URLs from `assets/...` paths.
 
 ## 2. Data Flow
 
@@ -142,7 +135,7 @@
 ## 4. Caching Design
 
 - API responses set `Cache-Control` and support `ETag` / `If-None-Match`.
-- Asset proxy sets long cache for immutable assets and short cache for JSON.
+- Public R2 asset caching is handled at the R2/public URL layer (outside this repo).
 
 ## 5. Error Handling
 

@@ -15,8 +15,8 @@ People want quick, shareable personality-style tests. For creators/operators, th
 
 ## Value Proposition
 
-- Lightweight static frontend with serverless delivery of dynamic content (tests/images) from R2.
-- Same-origin asset proxy reduces cross-origin constraints for images/JSON.
+- Lightweight static frontend with serverless delivery of dynamic content (tests) from R2.
+- Images are served via the public R2 base URL (absolute URLs) for fast loading and caching.
 
 ## Market/Context Assumptions
 
@@ -35,7 +35,7 @@ People want quick, shareable personality-style tests. For creators/operators, th
   - Result page showing MBTI result image and share/restart
 - Content delivery
   - Test index and test JSON served via Pages Functions backed by R2
-  - Asset proxy under `/assets/*`
+  - Images and other assets loaded directly from the public R2 base URL (absolute URLs)
 
 ## Non-Goals (Current Repo State)
 

@@ -37,7 +37,6 @@ Frontend runtime defaults (in `public/scripts/config.js`):
 Both root `_routes.json` and `public/_routes.json` include:
 
 - `/api/*`
-- `/assets/*`
 
 This ensures the Functions routes are included in the build output.
 
@@ -61,12 +60,9 @@ This ensures the Functions routes are included in the build output.
 
 The frontend builds asset URLs using `window.assetUrl()` from `public/scripts/config.js`.
 
-- Same-origin (recommended with the R2 proxy)
-  - Keep `window.ASSETS_BASE` empty (default).
-  - Asset references like `assets/images/mainLogo.png` become `/assets/images/mainLogo.png` and are served by `GET /assets/*`.
-- Direct public R2 domain (optional)
-  - Set `window.ASSETS_BASE` to something like `https://<your-public-r2-domain>`.
-  - You must inject this before `public/scripts/config.js` runs (e.g., inline `<script>` in HTML), or change `config.js` defaults.
+- Direct public R2 domain (current)
+  - `public/scripts/config.js` defaults `window.ASSETS_BASE` to the public R2 base URL (e.g. `https://pub-...r2.dev`).
+  - Asset references like `assets/images/mainLogo.png` become `https://<public-r2-base>/assets/images/mainLogo.png`.
 
 ## 5. Deploy to Cloudflare Pages
 
@@ -103,8 +99,8 @@ The frontend builds asset URLs using `window.assetUrl()` from `public/scripts/co
   - Check that `assets/index.json` exists in R2.
 - If `/api/tests/:id` returns 404 "Test JSON not found":
   - Check that `assets/<path from index>` exists in R2 and matches the index entry.
-- If images fail to load due to cross-origin:
-  - Prefer using `/assets/*` proxy or set `ASSETS_BASE`/asset mapping to same origin.
+- If images fail to load:
+  - Confirm the public R2 base URL is correct and that the objects are publicly accessible.
 
 ## References
 

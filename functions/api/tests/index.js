@@ -1,7 +1,21 @@
+/**
+ * API: `GET /api/tests`
+ *
+ * Reads `assets/index.json` from the bound R2 bucket and returns it verbatim.
+ * Designed to be cache-friendly (ETag + Cache-Control).
+ */
 const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
 };
 
+/**
+ * Add caching headers to a response.
+ * - `maxAge` is small because test metadata can change.
+ * - `stale-while-revalidate` allows edge to serve slightly stale content while refreshing.
+ * @param {Record<string, string> | Headers} headers
+ * @param {{ etag?: string, maxAge?: number }} [opts]
+ * @returns {Headers}
+ */
 function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
   const h = new Headers(headers);
   h.set(
@@ -12,6 +26,11 @@ function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
   return h;
 }
 
+/**
+ * Cloudflare Pages Function entrypoint for `GET /api/tests`.
+ * @param {{ request: Request, env: any }} context
+ * @returns {Promise<Response>}
+ */
 export async function onRequestGet(context) {
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket) {

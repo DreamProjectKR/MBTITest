@@ -1,3 +1,13 @@
+/**
+ * Quiz page controller (`public/testquiz.html` -> `public/scripts/testquiz.js`).
+ *
+ * High-level flow:
+ * - Load test JSON via `GET /api/tests/:id`
+ * - Shuffle questions/answers (optional)
+ * - Render question prompt image + two answer buttons
+ * - Track scores and compute MBTI
+ * - Navigate to `testresult.html?testId=...&result=MBTI`
+ */
 const state = {
   test: null,
   currentIndex: 0,
@@ -6,6 +16,10 @@ const state = {
   answers: [],
 };
 
+/**
+ * Cached DOM references for render/update.
+ * @type {{ progress: HTMLElement|null, image: HTMLImageElement|null, options: HTMLElement|null, pageShell: HTMLElement|null }}
+ */
 const dom = {
   progress: document.querySelector(".Progress"),
   image: document.querySelector(".TestImg img"),
@@ -13,8 +27,10 @@ const dom = {
   pageShell: document.querySelector(".PageShell"),
 };
 
+// `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
 const ASSETS_BASE =
-  window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+  window.ASSETS_BASE ||
+  "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
 const assetUrl =
   window.assetUrl ||
   ((path) => {
@@ -30,6 +46,12 @@ const ICONS = {
   mail: assetUrl("assets/images/mail.png"),
 };
 
+/**
+ * Generate a random integer in [0, maxExclusive).
+ * Uses `crypto.getRandomValues` when available for better randomness.
+ * @param {number} maxExclusive
+ * @returns {number}
+ */
 function randomInt(maxExclusive) {
   const max = Math.floor(Number(maxExclusive));
   if (!Number.isFinite(max) || max <= 0) return 0;
@@ -47,6 +69,12 @@ function randomInt(maxExclusive) {
   return Math.floor(Math.random() * max);
 }
 
+/**
+ * In-place Fisher-Yates shuffle.
+ * @template T
+ * @param {T[]} list
+ * @returns {T[]}
+ */
 function shuffleInPlace(list) {
   if (!Array.isArray(list) || list.length <= 1) return list;
   for (let i = list.length - 1; i > 0; i -= 1) {
@@ -58,6 +86,11 @@ function shuffleInPlace(list) {
   return list;
 }
 
+/**
+ * Clone questions/answers and shuffle them so each run feels fresh.
+ * @param {any[]} questions
+ * @returns {any[]}
+ */
 function buildShuffledQuestions(questions) {
   const base = Array.isArray(questions) ? questions : [];
   const copied = base.map((q) => {

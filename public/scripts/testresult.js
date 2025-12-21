@@ -1,3 +1,12 @@
+/**
+ * Result page controller (`public/testresult.html` -> `public/scripts/testresult.js`).
+ *
+ * What it does:
+ * - Reads `testId` and `result` (MBTI) from query string.
+ * - Fetches test JSON via `GET /api/tests/:id`.
+ * - Renders `results[MBTI].image`.
+ * - Provides Restart + Share interactions.
+ */
 const dom = {
   thumbnailEl: document.querySelector(".ResultShellImg img"),
   titleEl: document.querySelector(".ResultShellTextBox h2"),
@@ -5,8 +14,14 @@ const dom = {
   shareBtn: document.querySelector(".ResultBtnShell .TestShare button"),
 };
 
+// `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
 const ASSETS_BASE =
   window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+/**
+ * Build an absolute URL for an asset path under `assets/`.
+ * @param {string} path
+ * @returns {string}
+ */
 const assetUrl =
   window.assetUrl ||
   ((path) => {
@@ -16,16 +31,30 @@ const assetUrl =
     return `${ASSETS_BASE}/${clean}`;
   });
 
+/**
+ * Read a URL query parameter.
+ * @param {string} name
+ * @returns {string}
+ */
 function getParam(name) {
   const params = new URLSearchParams(window.location.search);
   const value = params.get(name);
   return value ? decodeURIComponent(value) : "";
 }
 
+/**
+ * Resolve a relative asset path into an absolute URL for use in <img src>.
+ * @param {string} relative
+ * @returns {string}
+ */
 function resolveAssetPath(relative) {
   return assetUrl(relative);
 }
 
+/**
+ * Render a user-visible error state.
+ * @param {string} message
+ */
 function renderError(message) {
   if (dom.titleEl) dom.titleEl.textContent = "결과를 불러올 수 없습니다.";
   if (dom.thumbnailEl) dom.thumbnailEl.removeAttribute("src");

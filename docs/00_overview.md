@@ -5,7 +5,7 @@
 This repository is a static MBTI-test hub (HTML/CSS/JS) deployed on Cloudflare Pages, with Pages Functions providing:
 
 - A small JSON API for listing tests and fetching a test by id
-- An R2-backed asset proxy so the frontend can load images/JSON from the same origin
+- R2-backed JSON reads for API responses; images are loaded directly from the public R2 base URL
 
 The frontend renders:
 
@@ -25,7 +25,6 @@ The frontend renders:
 
 - Test index: `GET /api/tests`
 - Test detail: `GET /api/tests/:id`
-- Asset proxy: `GET /assets/*`
 
 ### Runtime Building Blocks
 
@@ -49,7 +48,6 @@ The frontend renders:
 - `functions/`
   - `api/tests/index.js`: `GET /api/tests`
   - `api/tests/[id].js`: `GET /api/tests/:id`
-  - `assets/[[path]].js`: `GET /assets/*` (R2 proxy)
 - `assets/`
   - `index.json`: test index metadata used by the API
   - `assets/test-summer/test.json`: sample test definition (in this repo)
@@ -81,13 +79,12 @@ The frontend renders:
 ### 3) Load images and JSON safely
 
 - `public/scripts/config.js` provides `window.assetUrl()` and attribute injection so HTML can reference assets via `data-asset-src`/`data-asset-href`.
-- `functions/assets/[[path]].js` proxies `/assets/*` from R2, enabling same-origin loading for images/JSON.
+- Images are loaded directly from the public R2 base URL (absolute URLs), not via same-origin proxy.
 
 ## Routing
 
 - Root `_routes.json` and `public/_routes.json` currently include:
   - `/api/*`
-  - `/assets/*`
 
 ## Known Gaps / Notes
 

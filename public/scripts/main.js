@@ -1,9 +1,25 @@
+/**
+ * Home page controller (`public/index.html` -> `public/scripts/main.js`).
+ *
+ * What it does:
+ * - Fetches the test index from the API (`/api/tests`).
+ * - Renders two sections (newest/top) and wires up clicks to `testintro.html?testId=...`.
+ * - Handles the sticky header UI on scroll.
+ */
 const header = document.getElementById("header");
 const headerScroll = document.getElementById("headerScroll");
 const MainTop = document.getElementById("MainTop");
 const API_TESTS_URL = window.API_TESTS_BASE || "/api/tests";
+// `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
+// This fallback keeps the page working even if `config.js` fails to load.
 const ASSETS_BASE =
   window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+/**
+ * Build an absolute URL for assets (images/json) stored under `assets/` in R2.
+ * Accepts absolute URLs and returns them unchanged.
+ * @param {string} path
+ * @returns {string}
+ */
 const assetUrl =
   window.assetUrl ||
   ((path) => {
@@ -13,7 +29,8 @@ const assetUrl =
     return `${ASSETS_BASE}/${clean}`;
   });
 
-const headerOffset = header.offsetTop; // 헤더 원래 위치 저장
+// 헤더 원래 위치 저장 (스크롤로 fixed 전환 시 기준점)
+const headerOffset = header.offsetTop;
 
 window.addEventListener("scroll", () => {
   if (window.scrollY > headerOffset) {

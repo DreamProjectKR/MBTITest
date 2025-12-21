@@ -1,7 +1,23 @@
+/**
+ * API: `GET /api/tests/:id`
+ *
+ * Reads `assets/index.json` from R2, finds the matching test by `id`,
+ * then fetches that test's JSON (`assets/<test>/test.json`) and returns it.
+ *
+ * Cache behavior:
+ * - Supports ETag / If-None-Match
+ * - Uses conservative TTLs because content may change
+ */
 const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
 };
 
+/**
+ * Add caching headers to a response.
+ * @param {Record<string, string> | Headers} headers
+ * @param {{ etag?: string, maxAge?: number }} [opts]
+ * @returns {Headers}
+ */
 function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
   const h = new Headers(headers);
   h.set(
@@ -12,6 +28,14 @@ function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
   return h;
 }
 
+/**
+ * Convert an index.json `path` field into an R2 key.
+ * Examples:
+ * - `test-summer/test.json` -> `assets/test-summer/test.json`
+ * - `assets/test-summer/test.json` -> `assets/test-summer/test.json`
+ * @param {string} rawPath
+ * @returns {string}
+ */
 function normalizeR2KeyFromIndexPath(rawPath) {
   const str = String(rawPath || "").trim();
   if (!str) return "";
@@ -20,6 +44,11 @@ function normalizeR2KeyFromIndexPath(rawPath) {
   return clean.startsWith("assets/") ? clean : `assets/${clean}`;
 }
 
+/**
+ * Cloudflare Pages Function entrypoint for `GET /api/tests/:id`.
+ * @param {{ request: Request, env: any, params?: { id?: string } }} context
+ * @returns {Promise<Response>}
+ */
 export async function onRequestGet(context) {
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket) {

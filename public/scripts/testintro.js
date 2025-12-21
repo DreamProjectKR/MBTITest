@@ -1,8 +1,17 @@
+/**
+ * Test intro page controller (`public/testintro.html` -> `public/scripts/testintro.js`).
+ *
+ * What it does:
+ * - Reads `testId` from the query string.
+ * - Fetches test JSON via `GET /api/tests/:id`.
+ * - Renders thumbnail/tags/author/description and wires Start/Share buttons.
+ * - Warms browser cache by preloading images referenced in the test JSON.
+ */
 const header = document.querySelector(".Head");
 const headerScroll = document.querySelector("header");
 const headerOffset = header ? header.offsetTop : 0;
-// NOTE: config.js intentionally sets ASSETS_BASE to "" when using Pages Functions (/assets/* proxy).
-// Treat empty string as a valid value (don't fall back to R2 public URL).
+// NOTE: `config.js` defines `window.ASSETS_BASE` and `window.assetUrl()`.
+// If not provided, we fall back to the default public asset base.
 const ASSETS_BASE =
   window.ASSETS_BASE ?? "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
 const assetUrl =
@@ -21,6 +30,12 @@ function isProbablyImagePath(v) {
   return /\.(png|jpe?g|gif|webp|svg)$/i.test(s);
 }
 
+/**
+ * Collect any strings that look like image paths inside a nested JSON structure.
+ * This is used to preload question/result images after the intro renders.
+ * @param {any} value
+ * @param {Set<string>} out
+ */
 function collectImagePathsDeep(value, out) {
   if (!out) return;
   if (!value) return;
@@ -49,6 +64,12 @@ function scheduleIdle(fn) {
   window.setTimeout(fn, 0);
 }
 
+/**
+ * Preload a list of image paths by creating `new Image()` objects.
+ * This warms cache for later pages (quiz/result) without blocking initial render.
+ * @param {string[]} imagePaths
+ * @param {{ limit?: number }} [opts]
+ */
 function preloadImages(imagePaths, { limit = 60 } = {}) {
   const list = Array.isArray(imagePaths) ? imagePaths : [];
   if (!list.length) return;
@@ -72,6 +93,28 @@ function preloadImages(imagePaths, { limit = 60 } = {}) {
     img.src = url;
     window.__MBTI_PRELOADED_IMAGES__.push(img);
   }
+}
+
+/**
+ * Mark an <img> as critical so the browser prioritizes its fetch/decoding.
+ * Best-effort: different browsers support either the property or the attribute.
+ * @param {HTMLImageElement | null} imgEl
+ */
+function markHighPriorityImage(imgEl) {
+  if (!imgEl) return;
+  // Above-the-fold images: start early and decode off the main thread when possible.
+  try {
+    imgEl.loading = "eager";
+  } catch (e) {}
+  try {
+    imgEl.decoding = "async";
+  } catch (e) {}
+  try {
+    imgEl.fetchPriority = "high";
+  } catch (e) {}
+  try {
+    imgEl.setAttribute("fetchpriority", "high");
+  } catch (e) {}
 }
 
 function warmTestImagesFromTestJson(testJson) {
@@ -107,6 +150,10 @@ function getTestIdFromQuery() {
   return id ? decodeURIComponent(id) : "";
 }
 
+/**
+ * Render a user-visible error state on the intro page.
+ * @param {string} message
+ */
 function renderIntroError(message) {
   const titleEl = document.querySelector(".IntroShellTextBox h2");
   const descEl = document.querySelector(".IntroDescription");
@@ -188,6 +235,8 @@ function renderIntro(data) {
   const descEl = document.querySelector(".IntroDescription");
 
   if (thumbnailEl) {
+    // LCP candidate on this page.
+    markHighPriorityImage(thumbnailEl);
     if (data.thumbnail) thumbnailEl.src = assetUrl(data.thumbnail);
     if (data.title) thumbnailEl.alt = data.title;
   }
@@ -199,6 +248,8 @@ function renderIntro(data) {
   const authorName = data.author;
 
   if (authorImgEl) {
+    // Above-the-fold avatar: prioritize so the creator row doesn't pop in late.
+    markHighPriorityImage(authorImgEl);
     if (data.authorImg) authorImgEl.src = assetUrl(data.authorImg);
     if (authorName) authorImgEl.alt = `제작자 ${authorName}`;
   }
