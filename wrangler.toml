@@ -10,5 +10,7 @@ binding = "MBTI_BUCKET" # 또는 ASSETS
 bucket_name = "mbti-assets"
 
 [vars]
-ASSETS_BASE = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"
+# Production uses same-origin `/assets/*` (R2 proxy), so client-side ASSETS_BASE defaults to "".
+# If you want to bypass proxy in dev, set this to your R2 public URL (r2.dev) or inject `window.ASSETS_BASE` in HTML.
+ASSETS_BASE = ""
 R2_PUBLIC_BASE_URL = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"

@@ -29,8 +29,8 @@ const dom = {
 
 // `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
 const ASSETS_BASE =
-  window.ASSETS_BASE ||
-  "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+  // Prefer same-origin `/assets/*` in production (R2 proxy).
+  window.ASSETS_BASE || "";
 const assetUrl =
   window.assetUrl ||
   ((path) => {

@@ -13,7 +13,8 @@ const API_TESTS_URL = window.API_TESTS_BASE || "/api/tests";
 // `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
 // This fallback keeps the page working even if `config.js` fails to load.
 const ASSETS_BASE =
-  window.ASSETS_BASE || "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+  // Prefer same-origin `/assets/*` in production (R2 proxy).
+  window.ASSETS_BASE || "";
 /**
  * Build an absolute URL for assets (images/json) stored under `assets/` in R2.
  * Accepts absolute URLs and returns them unchanged.

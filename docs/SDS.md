@@ -11,6 +11,7 @@
 - Backend (Pages Functions)
   - Test index endpoint: `functions/api/tests/index.js`
   - Test detail endpoint: `functions/api/tests/[id].js`
+- Asset proxy endpoint: `functions/assets/[[path]].js`
 - Content
   - `assets/index.json` and per-test JSON/images
 
@@ -38,8 +39,9 @@
 
 ## 1.3 Asset Loading (Current)
 
-- Images and other assets are loaded directly from the public R2 base URL (absolute URLs).
-- The frontend uses `public/scripts/config.js` (`window.assetUrl`) to build absolute URLs from `assets/...` paths.
+- Browser loads images from same-origin `/assets/...`.
+- `functions/assets/[[path]].js` proxies `/assets/*` from R2 using the `MBTI_BUCKET` binding.
+- The frontend uses `public/scripts/config.js` (`window.assetUrl`) to build URLs from `assets/...` paths.
 
 ## 2. Data Flow
 
@@ -135,7 +137,7 @@
 ## 4. Caching Design
 
 - API responses set `Cache-Control` and support `ETag` / `If-None-Match`.
-- Public R2 asset caching is handled at the R2/public URL layer (outside this repo).
+- Asset proxy sets long cache for immutable assets and short cache for JSON.
 
 ## 5. Error Handling
 

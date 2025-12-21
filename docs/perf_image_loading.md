@@ -2,25 +2,26 @@
 
 ## What Changed
 
-This repo originally supported a same-origin asset proxy (`GET /assets/*`) via Pages Functions. That avoids CORS/CORP issues, but it can add latency because every image request pays the Functions hop.
+This repo uses a same-origin asset proxy (`GET /assets/*`) via Pages Functions so the browser can load images from `dreamp.org` without CORS issues.
 
-To reduce image TTFB and improve perceived performance:
+To reduce perceived image latency:
 
-- Frontend now builds **absolute public R2 URLs** (the `r2.dev` public endpoint) for assets by default (so images bypass the `/assets/*` proxy).
+- Frontend builds asset URLs as same-origin `/assets/...` by default (served by the proxy from R2).
 - The intro page's `thumbnail.png` and `author.png` are marked as **high priority** (best-effort `fetchpriority`/`loading`/`decoding` hints).
 - The list page's first card thumbnail is also marked as **high priority** (likely above the fold).
-- The `/assets/*` proxy was removed (files + routing) after switching all asset loads to absolute public R2 URLs.
+- The proxy sets cache headers and uses `caches.default` (edge cache) to reduce repeat TTFB.
+  - Response headers include `X-MBTI-Assets-Proxy: 1` and `X-MBTI-R2-Key: ...` for debugging.
 
 ## Where The Changes Live
 
 - `public/scripts/config.js`
-  - Default `ASSETS_BASE` is now the public R2 base (`r2.dev`), so `window.assetUrl("assets/...")` becomes `https://<r2-public-base>/assets/...`.
+  - Default `ASSETS_BASE` is empty string, so `window.assetUrl("assets/...")` becomes `/assets/...` (same-origin).
 - `public/styles/main.css`
-  - `:root` default background-image variables use the public R2 origin to avoid early `/assets/...` proxy fetches before JS runs.
+  - `:root` default background-image variables use `/assets/...` so initial render stays same-origin.
 - `public/index.html`
-  - Preloads for `mainLogo.png` and `mainbanner.png` use absolute R2 URLs and add `preconnect`/`dns-prefetch` for the R2 origin.
-- `public/testintro.html`, `public/testlist.html`, `public/testquiz.html`, `public/testresult.html`
-  - Add `preconnect`/`dns-prefetch` for the R2 origin.
+  - Preloads for `mainLogo.png` and `mainbanner.png` use `/assets/...` (same-origin).
+- `functions/assets/[[path]].js`
+  - Reads R2 objects via `MBTI_BUCKET` binding and serves them under `/assets/*`.
 - `public/scripts/testintro.js`
   - Adds a small helper (`markHighPriorityImage`) and applies it to the intro thumbnail and author image.
 - `public/scripts/testlist.js`
@@ -28,7 +29,7 @@ To reduce image TTFB and improve perceived performance:
 
 ## Notes
 
-- The asset proxy (`/assets/*`) is no longer part of this project. Any URLs under `https://dreamp.org/assets/...` must be updated to use the public R2 base.
+- You can still bypass the proxy for debugging by setting `window.ASSETS_BASE = "https://pub-...r2.dev"` before `config.js` loads, but you must configure R2 CORS to allow `https://dreamp.org`.
 
 ## How To Verify
 
@@ -37,20 +38,22 @@ In Chrome DevTools:
 1. Open the **Network** tab, filter by `Img`.
 2. Load `testintro.html?testId=...`.
 3. Confirm the `thumbnail.png` and `author.png` requests:
-   - Request URL host is the public R2 base (e.g. `pub-...r2.dev`), not your site origin.
+   - Request URL host is your site origin (`https://dreamp.org`) and paths start with `/assets/`.
+   - Response headers include `X-MBTI-Assets-Proxy: 1`.
+   - On repeat loads, you should see edge caching behavior (varies by browser/edge); you can compare TTFB and confirm Cache-Control includes SWR/SIE.
    - Priority is higher than other images (browser-dependent).
 
-If you still see `/assets/...` being requested from your site origin, it will now 404 unless you reintroduce the proxy.
+If you see requests going directly to `pub-...r2.dev` in production, it means something is bypassing the proxy and you may hit CORS depending on R2 settings.
 
-## Rollback Lever (Reintroduce Proxy)
+## Override Lever (Bypass Proxy)
 
-If you ever need to temporarily force same-origin asset loading (proxy mode), you can set `window.ASSETS_BASE` to your own origin *before* `scripts/config.js` runs (e.g., inline in the `<head>`):
+If you ever need to temporarily bypass same-origin asset loading, you can set `window.ASSETS_BASE` to a full public base URL *before* `scripts/config.js` runs (e.g., inline in the `<head>`):
 
 ```html
 <script>
-  window.ASSETS_BASE = window.location.origin;
+  window.ASSETS_BASE = "https://pub-...r2.dev";
 </script>
 <script src="./scripts/config.js" defer></script>
 ```
 
-That makes `window.assetUrl("assets/...")` resolve to `https://<your-site>/assets/...`. For it to work, you must reintroduce `/assets/*` routing and an asset proxy function.
+That makes `window.assetUrl("assets/...")` resolve to `https://pub-...r2.dev/assets/...` (direct cross-origin loads).

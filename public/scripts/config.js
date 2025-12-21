@@ -1,12 +1,19 @@
 (function () {
-  // Pages Functions로 /assets/* 를 R2에서 프록시하도록 구성하면
-  // 프런트는 같은 도메인(dreamp.org)만 바라보게 되어 CORS/CORP 이슈가 사라진다.
-  // Public asset base URL (browser-facing).
-  // - Use the R2 public URL (r2.dev) for direct asset loads.
-  // - Do NOT use the S3-compatible endpoint (r2.cloudflarestorage.com) for browser image URLs.
-  // Keep override support via `window.ASSETS_BASE` if you ever need same-origin proxy mode.
-  const DEFAULT_ASSETS_BASE =
-    "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev";
+  /**
+   * Runtime config for frontend pages.
+   *
+   * Production strategy:
+   * - Browsers load assets from **same-origin**: `https://dreamp.org/assets/...`
+   * - A Pages Function (`GET /assets/*`) proxies these requests from the bound R2 bucket (MBTI_BUCKET).
+   * - This avoids CORS issues with the R2 public endpoint.
+   *
+   * Dev/debug strategy (optional):
+   * - You can set `window.ASSETS_BASE = "https://pub-...r2.dev"` before this script runs to bypass proxy.
+   *
+   * Important:
+   * - The S3-compatible R2 endpoint (`*.r2.cloudflarestorage.com`) is not intended to be used as a browser asset base.
+   */
+  const DEFAULT_ASSETS_BASE = "";
   const DEFAULT_API_TESTS_BASE = "/api/tests";
   const DEFAULT_TEST_INDEX_PATH = "assets/index.json";
 
