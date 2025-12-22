@@ -47,7 +47,7 @@ This directory intentionally contains only one document: this file.
 
 ## Data Layout in R2 (Minimal Contract)
 
-### 1) Test Index: `assets/index.json`
+### 1 Test Index: `assets/index.json`
 
 - Required shape:
   - `tests`: array
@@ -57,7 +57,7 @@ This directory intentionally contains only one document: this file.
   - Recommended:
     - `title`, `thumbnail`, `tags`, `createdAt`, `updatedAt`
 
-### 2) Test Definition: `assets/<test-id>/test.json`
+### 2 Test Definition: `assets/<test-id>/test.json`
 
 - Required fields (as used by current frontend):
   - `id`, `title`
