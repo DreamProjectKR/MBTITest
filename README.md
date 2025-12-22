@@ -145,7 +145,7 @@ name = "mbti-admin"
 main = "functions/api/tests.js"
 compatibility_date = "2024-12-01"
 
-r2_buckets = [{ binding = "MBTI_BUCKET", bucket_name = "mbtitest" }]
+r2_buckets = [{ binding = "MBTI_BUCKET", bucket_name = "mbti-assets" }]
 
 # D1 (선택: 테스트 메타/로그 저장용)
 d1_databases = [{ binding = "MBTI_DB", database_name = "mbti-db", database_id = "<your-d1-id>" }]

@@ -25,6 +25,7 @@ This directory intentionally contains only one document: this file.
 - Frontend runtime config: `public/scripts/config.js`
   - `window.assetUrl(path)` builds an asset URL.
   - Production default uses same-origin `/assets/...` (so assets go through the proxy).
+  - `assetUrl()` accepts both `assets/...` (legacy) and `images/...` (cleaner) style paths.
 - API endpoints:
   - `functions/api/tests/index.js` -> `GET /api/tests`
   - `functions/api/tests/[id].js` -> `GET /api/tests/:id`
