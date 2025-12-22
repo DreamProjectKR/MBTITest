@@ -22,8 +22,9 @@ const assetUrl =
   ((path) => {
     if (!path) return "";
     if (/^https?:\/\//i.test(path)) return path;
-    const clean = String(path).replace(/^\.?\/+/, "");
-    return `${ASSETS_BASE}/${clean}`;
+    let clean = String(path).replace(/^\.?\/+/, "");
+    clean = clean.replace(/^assets\/+/i, "");
+    return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
   });
 
 const headerOffset = header.offsetTop; // 헤더 원래 위치 저장

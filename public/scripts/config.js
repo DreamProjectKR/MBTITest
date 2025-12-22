@@ -5,7 +5,8 @@
   // Production default: same-origin `/assets/*` (served by Pages Functions using the R2 binding).
   // This avoids CORS issues when loading images from R2.
   // You can override by setting `window.ASSETS_BASE` before this script runs.
-  const DEFAULT_ASSETS_BASE = "";
+  // Keep the default explicit so callers can pass clean paths like `images/x.png`.
+  const DEFAULT_ASSETS_BASE = "/assets";
   const DEFAULT_API_TESTS_BASE = "/api/tests";
   const DEFAULT_TEST_INDEX_PATH = "assets/index.json";
 
@@ -23,8 +24,13 @@
   window.assetUrl = function assetUrl(path) {
     if (!path) return "";
     if (/^https?:\/\//i.test(path)) return path;
-    const clean = path.replace(/^\.?\/+/, "");
-    return `${ASSETS_BASE}/${clean}`;
+    // Accept both:
+    // - `assets/images/x.png` (legacy in repo data)
+    // - `images/x.png` (cleaner new convention)
+    let clean = String(path).replace(/^\.?\/+/, "");
+    clean = clean.replace(/^assets\/+/i, "");
+    // Avoid accidental `//` joins when ASSETS_BASE is empty or ends with `/`.
+    return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
   };
 
   // Test index source:

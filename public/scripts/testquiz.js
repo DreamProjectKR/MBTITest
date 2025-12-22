@@ -35,8 +35,9 @@ const assetUrl =
   ((path) => {
     if (!path) return "";
     if (/^https?:\/\//i.test(path)) return path;
-    const clean = String(path).replace(/^\.?\/+/, "");
-    return `${ASSETS_BASE}/${clean}`;
+    let clean = String(path).replace(/^\.?\/+/, "");
+    clean = clean.replace(/^assets\/+/i, "");
+    return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
   });
 const ICONS = {
   instagram: assetUrl("assets/images/instagram.png"),
