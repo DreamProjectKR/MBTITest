@@ -86,9 +86,8 @@ header {
 }
 
 footer {
-    position: absolute;
+    position: static;
     width: 1230px;
-    bottom: 0;
 }
 
 /* Mobile (<=900px) */
