@@ -1,6 +1,15 @@
 {
   "tests": [
     {
+      "id": "test-root-vegetables",
+      "title": "뿌리채소 성향 테스트",
+      "thumbnail": "assets/test-root-vegetables/images/thumbnail.png",
+      "tags": ["뿌리채소", "MBTI", "캐릭터"],
+      "path": "test-root-vegetables/test.json",
+      "createdAt": "2025-12-24",
+      "updatedAt": "2025-12-24"
+    },
+    {
       "id": "test-summer",
       "title": "여름 바캉스 스타일 테스트",
       "thumbnail": "assets/test-summer/images/thumbnail.png",
