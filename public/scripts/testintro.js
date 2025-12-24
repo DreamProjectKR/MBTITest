@@ -23,6 +23,25 @@ const assetUrl =
     return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
   });
 
+const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
+
+function getTestCacheKey(testId) {
+  if (!testId) return "";
+  return `${TEST_JSON_CACHE_PREFIX}${testId}`;
+}
+
+function persistTestJson(testId, data) {
+  if (!testId || !data) return;
+  if (typeof window === "undefined") return;
+  try {
+    const storage = window.sessionStorage;
+    if (!storage) return;
+    storage.setItem(getTestCacheKey(testId), JSON.stringify(data));
+  } catch (err) {
+    // Ignore storage errors (private mode/quota)
+  }
+}
+
 function isProbablyImagePath(v) {
   if (!v) return false;
   const s = String(v).trim();
@@ -175,6 +194,8 @@ async function loadIntroData() {
     const res = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
     if (!res.ok) throw new Error("테스트 데이터 로딩 실패");
     const data = await res.json();
+
+    persistTestJson(testId, data);
 
     setupShareButton(data);
     renderIntro(data);

@@ -32,6 +32,37 @@ const assetUrl =
     return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
   });
 
+const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
+
+function getTestCacheKey(testId) {
+  if (!testId) return "";
+  return `${TEST_JSON_CACHE_PREFIX}${testId}`;
+}
+
+function readCachedTestJson(testId) {
+  if (!testId || typeof window === "undefined") return null;
+  try {
+    const storage = window.sessionStorage;
+    if (!storage) return null;
+    const raw = storage.getItem(getTestCacheKey(testId));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (err) {
+    return null;
+  }
+}
+
+function persistTestJson(testId, data) {
+  if (!testId || !data || typeof window === "undefined") return;
+  try {
+    const storage = window.sessionStorage;
+    if (!storage) return;
+    storage.setItem(getTestCacheKey(testId), JSON.stringify(data));
+  } catch (err) {
+    // Ignore private mode/quota issues
+  }
+}
+
 /**
  * Read a URL query parameter.
  * @param {string} name
@@ -126,11 +157,19 @@ async function loadResultData() {
     return;
   }
 
+  const cached = readCachedTestJson(testId);
+  if (cached) {
+    renderResultPage(cached, mbti);
+    return;
+  }
+
   try {
     const apiBase = window.API_TESTS_BASE || "/api/tests";
     const dataRes = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
     if (!dataRes.ok) throw new Error("테스트 데이터 로딩 실패");
     const data = await dataRes.json();
+
+    persistTestJson(testId, data);
 
     renderResultPage(data, mbti);
   } catch (err) {

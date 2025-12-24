@@ -46,6 +46,37 @@ const ICONS = {
   mail: assetUrl("assets/images/mail.png"),
 };
 
+const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
+
+function getTestCacheKey(testId) {
+  if (!testId) return "";
+  return `${TEST_JSON_CACHE_PREFIX}${testId}`;
+}
+
+function readCachedTestJson(testId) {
+  if (!testId || typeof window === "undefined") return null;
+  try {
+    const storage = window.sessionStorage;
+    if (!storage) return null;
+    const raw = storage.getItem(getTestCacheKey(testId));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (err) {
+    return null;
+  }
+}
+
+function persistTestJson(testId, data) {
+  if (!testId || !data || typeof window === "undefined") return;
+  try {
+    const storage = window.sessionStorage;
+    if (!storage) return;
+    storage.setItem(getTestCacheKey(testId), JSON.stringify(data));
+  } catch (err) {
+    // Ignore storage failures (quota/private mode)
+  }
+}
+
 /**
  * Generate a random integer in [0, maxExclusive).
  * Uses `crypto.getRandomValues` when available for better randomness.
@@ -139,6 +170,7 @@ function renderError(message) {
   }
 }
 
+
 function ensureProgressFill() {
   if (!dom.progress) return null;
   let fill = dom.progress.querySelector(".ProgressFill");
@@ -224,6 +256,30 @@ function renderQuestion() {
   dom.options.appendChild(frag);
 }
 
+function initializeStateFromTestJson(testJson) {
+  if (!testJson) {
+    renderError("테스트 데이터를 찾을 수 없습니다.");
+    return false;
+  }
+
+  const questions = buildShuffledQuestions(testJson.questions);
+  const total = Array.isArray(questions) ? questions.length : 0;
+
+  if (!total) {
+    renderError("문항이 없습니다.");
+    return false;
+  }
+
+  state.test = { ...testJson, questions };
+  state.totalQuestions = total;
+  state.currentIndex = 0;
+  state.scores = {};
+  state.answers = [];
+
+  renderQuestion();
+  return true;
+}
+
 function recordScore(answer) {
   const axis = answer.mbtiAxis;
   const dir = answer.direction;
@@ -304,27 +360,19 @@ async function loadTestData() {
     return;
   }
 
+  const cached = readCachedTestJson(testId);
+  if (cached && initializeStateFromTestJson(cached)) {
+    return;
+  }
+
   try {
     const apiBase = window.API_TESTS_BASE || "/api/tests";
     const dataRes = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
     if (!dataRes.ok) throw new Error("테스트 데이터 로딩 실패");
     const data = await dataRes.json();
 
-    state.test = data;
-    state.test.questions = buildShuffledQuestions(state.test?.questions);
-    state.totalQuestions = Array.isArray(state.test.questions)
-      ? state.test.questions.length
-      : 0;
-    state.currentIndex = 0;
-    state.scores = {};
-    state.answers = [];
-
-    if (!state.totalQuestions) {
-      renderError("문항이 없습니다.");
-      return;
-    }
-
-    renderQuestion();
+    persistTestJson(testId, data);
+    initializeStateFromTestJson(data);
   } catch (error) {
     console.error("테스트 퀴즈 로딩 오류:", error);
     renderError("테스트 정보를 불러오지 못했습니다.");
