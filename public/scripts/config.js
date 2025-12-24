@@ -33,6 +33,47 @@
     return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
   };
 
+  window.assetResizeUrl = function assetResizeUrl(path, options = {}) {
+    const base = window.assetUrl(path);
+    if (!base) return "";
+
+    const absoluteUrl = (() => {
+      try {
+        return new URL(base, window.location.origin).toString();
+      } catch (err) {
+        return base;
+      }
+    })();
+
+    const params = [];
+    const pushParam = (key, defaultValue) => {
+      const value = options[key] ?? defaultValue;
+      if (value != null) {
+        params.push(`${key}=${value}`);
+      }
+    };
+
+    pushParam("width", options.width || "auto");
+    pushParam("height", options.height || null);
+    pushParam("quality", options.quality || "auto");
+    pushParam("fit", options.fit || "cover");
+    pushParam("format", options.format || "auto");
+
+    // Allow passing additional options (e.g., `trim`, `background`).
+    if (options?.extra) {
+      Object.entries(options.extra).forEach(([key, value]) => {
+        if (value != null) {
+          params.push(`${key}=${value}`);
+        }
+      });
+    }
+
+    if (!params.length) return absoluteUrl;
+
+    const paramString = params.filter(Boolean).join(",");
+    return `/cdn-cgi/image/${paramString}/${absoluteUrl}`;
+  };
+
   // Test index source:
   // - By default we use the same-origin API (`/api/tests`), not a direct R2 URL.
   window.TEST_INDEX_URL =

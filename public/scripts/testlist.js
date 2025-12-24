@@ -92,10 +92,56 @@ document.querySelector(".test1").onclick = function () {
    * @param {string} thumbnail
    * @returns {string}
    */
-  function resolveThumbnailPath(thumbnail) {
+  function resolveThumbnailPath(thumbnail, resizeOptions = {}) {
     if (!thumbnail) return "#";
     if (/^https?:\/\//i.test(thumbnail)) return thumbnail;
+    if (window.assetResizeUrl) {
+      return window.assetResizeUrl(thumbnail, resizeOptions);
+    }
     return assetUrl(thumbnail);
+  }
+
+  const warmedImageUrls = new Set();
+
+  function preloadImage(url) {
+    if (!url || warmedImageUrls.has(url) || typeof document === "undefined") return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = url;
+    document.head.appendChild(link);
+    warmedImageUrls.add(url);
+  }
+
+  function prefetchImage(url) {
+    if (!url || warmedImageUrls.has(url)) return;
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
+    warmedImageUrls.add(url);
+  }
+
+  function warmCriticalImages(tests) {
+    const heroPaths = [
+      "assets/images/HeaderBackgroundImg.png",
+      "assets/images/HeaderBackgroundImgNon.png",
+      "assets/images/FooterBackgroundImg.png",
+    ];
+    heroPaths.forEach((path) => {
+      const resized = window.assetResizeUrl
+        ? window.assetResizeUrl(path, { width: 1600, quality: 85 })
+        : assetUrl(path);
+      preloadImage(resized);
+    });
+
+    tests.slice(0, 4).forEach((test) => {
+      const thumbUrl = resolveThumbnailPath(test.thumbnail, {
+        width: 780,
+        quality: 90,
+        fit: "cover",
+      });
+      prefetchImage(thumbUrl);
+    });
   }
 
   // ----- 태그 DOM 생성 -----
@@ -130,7 +176,12 @@ document.querySelector(".test1").onclick = function () {
     card.className = "NewTest";
 
     const img = document.createElement("img");
-    img.src = resolveThumbnailPath(test.thumbnail);
+    const sizeOptions = {
+      width: opts.isFirst ? 780 : 520,
+      quality: opts.isFirst ? 90 : 78,
+      fit: "cover",
+    };
+    img.src = resolveThumbnailPath(test.thumbnail, sizeOptions);
     img.alt = test.title || "테스트 이미지";
     img.decoding = "async";
     // First card is most likely above the fold: prioritize it.
@@ -198,7 +249,10 @@ document.querySelector(".test1").onclick = function () {
   function initTestList() {
     fetchTestIndex()
       .then(normalizeTests)
-      .then(renderTests)
+      .then((tests) => {
+        renderTests(tests);
+        warmCriticalImages(tests);
+      })
       .catch((err) => console.error("테스트 목록 로딩 실패:", err));
   }
 

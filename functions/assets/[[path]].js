@@ -51,8 +51,8 @@ function guessContentType(key) {
 function cacheControlForKey(key) {
   const lower = key.toLowerCase();
   if (lower.endsWith(".json"))
-    return "public, max-age=60, stale-while-revalidate=600, stale-if-error=600";
-  return "public, max-age=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400";
+    return "public, max-age=60, s-maxage=60, must-revalidate, stale-while-revalidate=600, stale-if-error=600";
+  return "public, max-age=31536000, s-maxage=86400, immutable, stale-while-revalidate=86400, stale-if-error=86400";
 }
 
 /**
@@ -134,11 +134,13 @@ export async function onRequestGet(context) {
 
   const headers = new Headers();
   headers.set("ETag", obj.etag || "");
-  headers.set("Cache-Control", cacheControlForKey(key));
-  headers.set(
-    "Content-Type",
-    obj.httpMetadata?.contentType || guessContentType(key),
-  );
+  const defaultCacheControl = cacheControlForKey(key);
+  const cacheControl = obj.httpMetadata?.cacheControl || defaultCacheControl;
+  headers.set("Cache-Control", cacheControl);
+    headers.set(
+      "Content-Type",
+      obj.httpMetadata?.contentType || guessContentType(key),
+    );
   headers.set("X-MBTI-Assets-Proxy", "1");
   headers.set("X-MBTI-R2-Key", key);
   headers.set("X-MBTI-Edge-Cache", "MISS");
