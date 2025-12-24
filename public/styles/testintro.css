@@ -86,8 +86,9 @@ header {
 }
 
 footer {
-    position: static;
+    position: absolute;
     width: 1230px;
+    bottom: 0;
 }
 
 /* Mobile (<=900px) */
@@ -173,7 +174,8 @@ footer {
     }
 
     footer {
-        position: static;
+        position: absolute;
         width: 100%;
+        bottom: 0;
     }
 }
