@@ -1,6 +1,3 @@
-@import url('../path_to_your_design_system/tokens.css');
-@import url('../path_to_your_design_system/components.css');
-
 *,
 *::before,
 *::after {
@@ -210,7 +207,7 @@ select {
   align-items: center;
 }
 
-.site-main[data-view='route'] > :not(.route-outlet) {
+.site-main[data-view='route']> :not(.route-outlet) {
   display: none;
 }
 
@@ -528,6 +525,7 @@ select {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
