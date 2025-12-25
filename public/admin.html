@@ -37,6 +37,10 @@
         <button class="ds-button ds-button--primary" type="button" data-export-json>
           JSON 내보내기
         </button>
+        <button class="ds-button ds-button--primary" type="button" data-save-test>
+          R2 저장
+        </button>
+        <span class="save-status" data-save-status>저장 준비</span>
       </div>
     </header>
 
@@ -130,10 +134,29 @@
           </div>
         </form>
         <ul class="result-list" data-result-list></ul>
+        <div class="result-image-upload">
+          <div class="result-image-upload__grid">
+            <label class="form-field">
+              <span>MBTI 코드</span>
+              <input type="text" placeholder="ENFP" data-result-image-code />
+            </label>
+            <label class="form-field">
+              <span>결과 이미지 파일</span>
+              <input type="file" accept="image/*" data-result-image-file />
+            </label>
+            <button class="ds-button ds-button--secondary" type="button" data-result-image-submit>
+              업로드
+            </button>
+          </div>
+        </div>
+        <div class="image-browser" data-image-browser aria-live="polite">
+          <p class="image-browser__empty">R2에서 이미지를 가져오면 목록이 여기에 표시됩니다.</p>
+        </div>
       </section>
     </main>
   </div>
 
+  <script src="./scripts/config.js"></script>
   <script type="module" src="./scripts/admin.js"></script>
 </body>
 
