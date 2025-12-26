@@ -6,8 +6,8 @@
       "thumbnail": "assets/test-root-vegetables/images/thumbnail.png",
       "tags": ["뿌리채소", "MBTI", "캐릭터"],
       "path": "test-root-vegetables/test.json",
-      "createdAt": "2025-12-24",
-      "updatedAt": "2025-12-24"
+      "createdAt": "2025-12-26",
+      "updatedAt": "2025-12-26"
     },
     {
       "id": "test-summer",
@@ -17,15 +17,6 @@
       "path": "test-summer/test.json",
       "createdAt": "2025-12-08",
       "updatedAt": "2025-12-08"
-    },
-    {
-      "id": "test-holiday-cafe",
-      "title": "연말 크리스마스 스페셜 메뉴 테스트",
-      "thumbnail": "assets/test-holiday-cafe/images/thumbnail.png",
-      "tags": ["연말", "크리스마스", "카페", "스페셜메뉴"],
-      "path": "test-holiday-cafe/test.json",
-      "createdAt": "2025-12-17",
-      "updatedAt": "2025-12-17"
     }
   ]
 }

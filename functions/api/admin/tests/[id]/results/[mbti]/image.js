@@ -7,7 +7,7 @@ import {
   createMetaFromTest,
   readTest,
   writeTest,
-} from "../../../../../utils/store.js";
+} from "../../../../utils/store.js";
 
 const MBTI_ORDER = [
   "INTJ",

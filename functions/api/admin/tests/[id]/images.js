@@ -1,4 +1,4 @@
-import { JSON_HEADERS, getImagesPrefix } from "../../../utils/store.js";
+import { JSON_HEADERS, getImagesPrefix } from "../../utils/store.js";
 
 function createJsonResponse(payload, status = 200) {
   return new Response(JSON.stringify(payload), {
