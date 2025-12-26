@@ -9,7 +9,6 @@
 const header = document.getElementById("header");
 const headerScroll = document.getElementById("headerScroll");
 const MainTop = document.getElementById("MainTop");
-const API_TESTS_URL = window.API_TESTS_BASE || "/api/tests";
 // `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
 // Production default: same-origin `/assets/*` (served by Pages Functions proxy).
 const ASSETS_BASE = window.ASSETS_BASE || "";
@@ -84,10 +83,15 @@ function createTestCard(test, variantClass) {
   return shell;
 }
 
-// ----- 테스트 목록 불러오기 (/api/tests) -----
+// ----- 테스트 목록 불러오기 (default: /assets/index.json) -----
 async function fetchTestsAjax() {
-  const res = await fetch(API_TESTS_URL);
-  if (!res.ok) throw new Error("/api/tests 요청 실패: " + res.status);
+  if (typeof window.getTestIndex === "function") {
+    const data = await window.getTestIndex();
+    return Array.isArray(data?.tests) ? data.tests : [];
+  }
+  const url = window.TEST_INDEX_URL || "/assets/index.json";
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(url + " 요청 실패: " + res.status);
   const data = await res.json();
   return Array.isArray(data?.tests) ? data.tests : [];
 }

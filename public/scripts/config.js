@@ -75,12 +75,10 @@
   };
 
   // Test index source:
-  // - By default we use the same-origin API (`/api/tests`), not a direct R2 URL.
-  window.TEST_INDEX_URL =
-    window.TEST_INDEX_URL ||
-    // Pages Functions 기반이면 /api/tests 가 테스트 인덱스 역할을 한다.
-    window.API_TESTS_BASE ||
-    DEFAULT_API_TESTS_BASE;
+  // - Default: same-origin `/assets/index.json` (served by Pages Functions proxy from R2).
+  // - You can override by setting `window.TEST_INDEX_URL` before this script runs.
+  const DEFAULT_TEST_INDEX_URL = window.assetUrl(DEFAULT_TEST_INDEX_PATH);
+  window.TEST_INDEX_URL = window.TEST_INDEX_URL || DEFAULT_TEST_INDEX_URL;
 
   function getIndexOrigin() {
     try {

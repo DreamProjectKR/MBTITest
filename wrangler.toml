@@ -7,5 +7,4 @@ binding = "MBTI_BUCKET" # 또는 ASSETS
 bucket_name = "mbti-assets"
 
 [vars]
-ASSETS_BASE = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"
 R2_PUBLIC_BASE_URL = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"

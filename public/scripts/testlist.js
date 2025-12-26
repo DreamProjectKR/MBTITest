@@ -56,9 +56,14 @@ document.querySelector(".test1").onclick = function () {
    * @returns {Promise<any[]>} Array of test metadata objects
    */
   async function fetchTestIndex() {
-    const apiUrl = window.API_TESTS_BASE || "/api/tests";
-    const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error(apiUrl + " 요청 실패: " + res.status);
+    if (typeof window.getTestIndex === "function") {
+      const data = await window.getTestIndex();
+      return Array.isArray(data?.tests) ? data.tests : [];
+    }
+
+    const url = window.TEST_INDEX_URL || "/assets/index.json";
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(url + " 요청 실패: " + res.status);
     const data = await res.json();
     return Array.isArray(data?.tests) ? data.tests : [];
   }
