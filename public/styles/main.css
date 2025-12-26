@@ -165,17 +165,19 @@ main .NewTestList .NewTestListTittle p {
 /* 새로운 테스트 리스트 카드 디자인 */
 main .NewTestList .NewTestListShell {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
   width: 100%;
 }
 
 main .NewTestList .NewTestListShell .NewTestShell {
-  width: 22%;
+  width: calc((100% - 60px) / 4);
   padding: 16px;
   border-radius: 15px;
   background-color: #ffffff;
   cursor: pointer;
-  margin-bottom: 20px
+  margin-bottom: 0;
 }
 
 main .NewTestList .NewTestListShell .NewTestShell:hover {

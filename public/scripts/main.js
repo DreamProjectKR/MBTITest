@@ -130,23 +130,6 @@ function renderSections(tests) {
 
   if (newShellContainer) newShellContainer.innerHTML = "";
   if (topShellContainer) topShellContainer.innerHTML = "";
-  // toptest: 레이아웃을 뷰포트에 따라 조정
-  if (topShellContainer) {
-    const mq = window.matchMedia("(max-width: 900px)");
-    const applyTopLayout = () => {
-      if (mq.matches) {
-        topShellContainer.style.flexWrap = "nowrap";
-        topShellContainer.style.rowGap = "";
-        topShellContainer.style.columnGap = "";
-      } else {
-        topShellContainer.style.flexWrap = "wrap";
-        topShellContainer.style.rowGap = "0px";
-        topShellContainer.style.columnGap = "0px";
-      }
-    };
-    applyTopLayout();
-    mq.addEventListener("change", applyTopLayout);
-  }
 
   // newtest 섹션: 최대 4개
   const newTests = tests.slice(0, Math.min(4, tests.length));
