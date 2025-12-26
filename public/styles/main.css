@@ -166,18 +166,16 @@ main .NewTestList .NewTestListTittle p {
 main .NewTestList .NewTestListShell {
   display: flex;
   justify-content: flex-start;
-  flex-wrap: wrap;
-  gap: 20px;
   width: 100%;
 }
 
 main .NewTestList .NewTestListShell .NewTestShell {
-  width: calc((100% - 60px) / 4);
+  width: 22%;
   padding: 16px;
   border-radius: 15px;
   background-color: #ffffff;
   cursor: pointer;
-  margin-bottom: 0;
+  margin-bottom: 20px
 }
 
 main .NewTestList .NewTestListShell .NewTestShell:hover {
