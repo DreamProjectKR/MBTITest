@@ -190,10 +190,41 @@ async function loadIntroData() {
   setupStartButton(testId);
 
   try {
+    // 1) Try API first (fast path when Functions routes are available)
+    // 2) If API is missing (404) or fails, fall back to index.json -> assets/<id>/test.json
     const apiBase = window.API_TESTS_BASE || "/api/tests";
-    const res = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
-    if (!res.ok) throw new Error("테스트 데이터 로딩 실패");
-    const data = await res.json();
+    let data = null;
+
+    try {
+      const res = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
+      if (res.ok) {
+        data = await res.json();
+      } else {
+        // If the API route isn't deployed (common Pages misconfig), fall back.
+        throw new Error(`API ${res.status}`);
+      }
+    } catch (e) {
+      // Fallback: index.json을 읽어서 test.json 경로를 찾고, /assets 프록시로 불러온다.
+      const index =
+        typeof window.getTestIndex === "function"
+          ? await window.getTestIndex()
+          : await fetch(window.TEST_INDEX_URL || "/assets/index.json").then((r) =>
+              r.json(),
+            );
+      const tests = Array.isArray(index?.tests) ? index.tests : [];
+      const meta = tests.find((t) => String(t?.id || "") === String(testId));
+      if (!meta?.path) throw new Error("index.json에 테스트가 없습니다: " + testId);
+
+      const resolveUrl =
+        typeof window.resolveTestDataUrl === "function"
+          ? window.resolveTestDataUrl
+          : (rawPath) => assetUrl(rawPath);
+      const url = resolveUrl(meta.path);
+
+      const res2 = await fetch(url);
+      if (!res2.ok) throw new Error(`테스트 데이터 로딩 실패: ${res2.status}`);
+      data = await res2.json();
+    }
 
     persistTestJson(testId, data);
 
