@@ -1,6 +1,8 @@
 body {
   display: flex;
   justify-content: center;
+  /* Ensure pages can pin footer to viewport bottom even when content is short */
+  min-height: 100vh;
   background-color: #DAF0F6;
   font-family: 'Noto Sans', sans-serif;
 }
@@ -16,6 +18,8 @@ body {
   display: flex;
   flex-flow: column;
   width: 1230px;
+  /* Sticky footer base: let the shell fill the viewport height */
+  min-height: 100vh;
   background-color: #ffffff;
 }
 
@@ -259,6 +263,11 @@ main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag>span 
 }
 
 /* 푸터 시작 */
+footer {
+  /* Sticky footer: keep footer at the bottom when content is short */
+  margin-top: auto;
+}
+
 footer ul {
   background-image: var(--asset-footer-bg);
   background-repeat: no-repeat;
