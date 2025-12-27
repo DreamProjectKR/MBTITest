@@ -82,8 +82,10 @@ header {
 }
 
 footer {
+    position: absolute;
     /* Keep footer in normal flow so it doesn't overlap content on short viewports */
     width: 1230px;
+    bottom: 0;
 }
 
 /* Mobile (<=900px) */
