@@ -27,8 +27,6 @@ header {
     background-color: aqua;
 }
 
-.TestIntroShell .IntroShellTextBox {}
-
 .TestIntroShell .IntroShellTextBox h2 {
     margin-bottom: 8px;
 }
@@ -79,16 +77,13 @@ header {
     width: 146px;
 }
 
-.IntroBtnShell .TestStart>button img {}
-
 .IntroBtnShell .TestShare>button {
     width: 146px;
 }
 
 footer {
-    position: absolute;
+    /* Keep footer in normal flow so it doesn't overlap content on short viewports */
     width: 1230px;
-    bottom: 0;
 }
 
 /* Mobile (<=900px) */
@@ -99,6 +94,8 @@ footer {
 
     .PageShell {
         width: 100%;
+        /* Sticky footer pattern: fill viewport, push footer to bottom when content is short */
+        min-height: 100vh;
     }
 
     header {
@@ -174,8 +171,8 @@ footer {
     }
 
     footer {
-        position: absolute;
+        position: static;
         width: 100%;
-        bottom: 0;
+        margin-top: auto;
     }
 }
