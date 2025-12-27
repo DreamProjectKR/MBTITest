@@ -409,9 +409,12 @@ footer .Copyright {
   }
 
   .fixed-header {
+    /* On mobile, prefer sticky to preserve layout flow (no JS margin hacks needed). */
+    position: sticky;
+    top: 0;
     width: 100%;
     max-width: none;
-    left: 0;
+    left: auto;
     transform: none;
   }
 
@@ -419,6 +422,8 @@ footer .Copyright {
     background-size: 100% auto;
     background-repeat: no-repeat;
     background-position: top center;
+    /* Override desktop's large padding (20px 5px 80px !important) on mobile */
+    padding: 8px 12px 12px !important;
   }
 
   header .Head {

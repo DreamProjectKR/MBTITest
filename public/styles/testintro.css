@@ -172,8 +172,8 @@ footer {
     }
 
     footer {
-        position: static;
+        position: absolute;
         width: 100%;
-        margin-top: auto;
+        bottom: 0;
     }
 }
