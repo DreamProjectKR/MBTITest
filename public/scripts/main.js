@@ -48,15 +48,24 @@ function createTestCard(test, variantClass) {
   return shell;
 }
 async function fetchTestsAjax() {
-  if (typeof window.getTestIndex === "function") {
-    const data2 = await window.getTestIndex();
-    return Array.isArray(data2?.tests) ? data2.tests : [];
+  const apiBase = window.API_TESTS_BASE || "/api/tests";
+  try {
+    const res = await fetch(apiBase);
+    if (!res.ok) throw new Error(apiBase + " \uC694\uCCAD \uC2E4\uD328: " + res.status);
+    const data = await res.json();
+    return Array.isArray(data?.tests) ? data.tests : [];
+  } catch (err) {
+    // Fallback (legacy): R2-backed index.json
+    if (typeof window.getTestIndex === "function") {
+      const data2 = await window.getTestIndex();
+      return Array.isArray(data2?.tests) ? data2.tests : [];
+    }
+    const url = window.TEST_INDEX_URL || "/assets/index.json";
+    const res2 = await fetch(url);
+    if (!res2.ok) throw new Error(url + " \uC694\uCCAD \uC2E4\uD328: " + res2.status);
+    const data3 = await res2.json();
+    return Array.isArray(data3?.tests) ? data3.tests : [];
   }
-  const url = window.TEST_INDEX_URL || "/assets/index.json";
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(url + " \uC694\uCCAD \uC2E4\uD328: " + res.status);
-  const data = await res.json();
-  return Array.isArray(data?.tests) ? data.tests : [];
 }
 function normalizeTests(tests) {
   const seen = /* @__PURE__ */ new Set();

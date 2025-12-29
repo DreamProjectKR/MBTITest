@@ -94,6 +94,25 @@ function inferMbtiFromAnswerId(answerId: string) {
   return null;
 }
 
+function plusLetterByAxis(axisRaw: string): string {
+  const axis = String(axisRaw || "").trim().toUpperCase();
+  if (axis === "EI") return "E";
+  if (axis === "SN") return "S";
+  if (axis === "TF") return "T";
+  if (axis === "JP") return "J";
+  return "";
+}
+
+function mbtiSideToDelta(axisRaw: string, sideRaw: string, weightRaw: number): number {
+  const axis = String(axisRaw || "").trim().toUpperCase();
+  const side = String(sideRaw || "").trim().toUpperCase();
+  const weight = Math.max(1, Math.floor(readNumber(weightRaw, 1)));
+  const plus = plusLetterByAxis(axis);
+  if (!axis || !side || !plus) return 0;
+  const sign = side === plus ? 1 : -1;
+  return sign * weight;
+}
+
 type GetParams = { id?: string };
 export async function onRequestGet(context: PagesContext<GetParams>) {
   if (context.request.method !== "GET") return methodNotAllowed();
@@ -129,7 +148,7 @@ export async function onRequestGet(context: PagesContext<GetParams>) {
 
     const answersRes = await db
       .prepare(
-        `SELECT answer_id, question_id, ord, answer, mbti_axis, mbti_dir, weight, score_key, score_value
+        `SELECT answer_id, question_id, ord, answer, pole_axis, pole_side, weight, score_key, score_value
          FROM answers
          WHERE test_id = ?
          ORDER BY question_id ASC, ord ASC`,
@@ -166,17 +185,15 @@ export async function onRequestGet(context: PagesContext<GetParams>) {
       const answers = answerRows
         .filter((a: Record<string, unknown>) => readString(a.question_id) === qid)
         .map((a: Record<string, unknown>) => {
-          const mbti =
-            readString(a.mbti_axis).trim()
-              ? { mbtiAxis: readString(a.mbti_axis), direction: "" }
-              : inferMbtiFromAnswerId(readString(a.answer_id));
+          const axis = readString(a.pole_axis).trim().toUpperCase();
+          const side = readString(a.pole_side).trim().toUpperCase();
+          const inferred =
+            axis && side ? { mbtiAxis: axis, direction: side } : inferMbtiFromAnswerId(readString(a.answer_id));
           return {
             id: readString(a.answer_id),
             label: readString(a.answer),
-            ...(mbti ? mbti : {}),
             weight: readNumber(a.weight, 1),
-            mbtiDir:
-              readString(a.mbti_dir).trim().toLowerCase() === "minus" ? "minus" : "plus",
+            ...(inferred ? inferred : {}),
             scoreKey: readString(a.score_key),
             scoreValue: readNumber(a.score_value, 0),
           };
@@ -308,16 +325,18 @@ export async function onRequestPut(context: PagesContext<GetParams>) {
         const aid = readString(a.id).trim() || `${qid}_a${aIndex + 1}`;
         const answerText = readString(a.answer || a.label).trim();
         const mbtiAxis = readString(a.mbtiAxis).trim().toUpperCase();
-        const mbtiDir =
-          readString(a.mbtiDir).trim().toLowerCase() === "minus" ? "minus" : "plus";
+        const direction = readString(a.direction).trim().toUpperCase();
+        const inferred = (!direction && mbtiAxis) ? inferMbtiFromAnswerId(readString(aid)) : null;
+        const poleAxis = mbtiAxis || inferred?.mbtiAxis || "";
+        const poleSide = direction || inferred?.direction || "";
         const weight = Math.max(1, Math.floor(readNumber(a.weight, 1)));
         const scoreKey = readString(a.scoreKey).trim();
         const scoreValue = Math.floor(readNumber(a.scoreValue, 0));
-        const delta = (mbtiDir === "minus" ? -1 : 1) * weight;
+        const delta = mbtiSideToDelta(poleAxis, poleSide, weight);
         statements.push(
           db
             .prepare(
-              `INSERT INTO answers (test_id, answer_id, question_id, ord, answer, mbti_axis, mbti_dir, weight, score_key, score_value, created_at, updated_at)
+              `INSERT INTO answers (test_id, answer_id, question_id, ord, answer, pole_axis, pole_side, weight, score_key, score_value, created_at, updated_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             )
             .bind(
@@ -326,8 +345,8 @@ export async function onRequestPut(context: PagesContext<GetParams>) {
               qid,
               aIndex,
               answerText,
-              mbtiAxis,
-              mbtiDir,
+              poleAxis,
+              poleSide,
               weight,
               scoreKey,
               scoreValue,
@@ -335,14 +354,14 @@ export async function onRequestPut(context: PagesContext<GetParams>) {
               updatedAt,
             ),
         );
-        if (mbtiAxis) {
+        if (poleAxis) {
           statements.push(
             db
               .prepare(
                 `INSERT INTO mbti_answer_effects (test_id, answer_id, axis, delta, created_at, updated_at)
                  VALUES (?, ?, ?, ?, ?, ?)`,
               )
-              .bind(testId, aid, mbtiAxis, delta, createdAt, updatedAt),
+              .bind(testId, aid, poleAxis, delta, createdAt, updatedAt),
           );
         }
       });

@@ -1,3 +1,0 @@
-import "./legacy/testquiz.js";
-
-

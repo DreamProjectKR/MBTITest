@@ -8,7 +8,7 @@
  * Evaluates selected answers and returns a result.
  *
  * Designers should not edit JSON. Evaluation inputs are stored in typed D1 columns:
- * - answers.mbti_axis / answers.mbti_dir / answers.weight
+ * - answers.pole_axis / answers.pole_side / answers.weight
  * - answers.score_key / answers.score_value
  */
 
@@ -136,29 +136,32 @@ async function loadMbtiItems(db: D1Database, testId: string, answerIds: string[]
   const placeholders = uniq.map(() => "?").join(",");
   const res = await db
     .prepare(
-      `SELECT answer_id, mbti_axis, mbti_dir, weight
+      `SELECT answer_id, pole_axis, pole_side, weight
        FROM answers
        WHERE test_id = ? AND answer_id IN (${placeholders})`,
     )
     .bind(testId, ...uniq)
-    .all<{ answer_id: string; mbti_axis: string | null; mbti_dir: string | null; weight: number | null }>();
+    .all<{ answer_id: string; pole_axis: string | null; pole_side: string | null; weight: number | null }>();
   const rows = Array.isArray(res?.results) ? res.results : [];
 
   const out: MbtiScoringItem[] = [];
   rows.forEach((r) => {
-    const axisRaw = String(r.mbti_axis ?? "").trim().toUpperCase();
+    const axisRaw = String(r.pole_axis ?? "").trim().toUpperCase();
     const axis = (axisRaw as MbtiAxis) || null;
     const weight = Math.max(1, Math.floor(readNumber(r.weight, 1)));
-    const dirRaw = String(r.mbti_dir ?? "").trim().toLowerCase();
+    const sideRaw = String(r.pole_side ?? "").trim().toUpperCase();
     if (axis && (axis === "EI" || axis === "SN" || axis === "TF" || axis === "JP")) {
-      if (dirRaw === "plus") out.push({ axis, delta: weight });
-      else if (dirRaw === "minus") out.push({ axis, delta: -weight });
-      else {
-        const fallback = inferMbtiFromAnswerId(String(r.answer_id ?? ""));
-        if (fallback) {
-          const pm = mbtiLetterToPlusMinus(fallback.mbtiAxis, fallback.direction);
-          out.push({ axis: fallback.mbtiAxis, delta: pm === "plus" ? weight : -weight });
-        }
+      const plusByAxis: Record<MbtiAxis, MbtiLetter> = { EI: "E", SN: "S", TF: "T", JP: "J" };
+      const plus = plusByAxis[axis];
+      if (sideRaw && (sideRaw === "E" || sideRaw === "I" || sideRaw === "S" || sideRaw === "N" || sideRaw === "T" || sideRaw === "F" || sideRaw === "J" || sideRaw === "P")) {
+        out.push({ axis, delta: sideRaw === plus ? weight : -weight });
+        return;
+      }
+      // Fallback: infer from encoded answer_id
+      const fallback = inferMbtiFromAnswerId(String(r.answer_id ?? ""));
+      if (fallback) {
+        const pm = mbtiLetterToPlusMinus(fallback.mbtiAxis, fallback.direction);
+        out.push({ axis: fallback.mbtiAxis, delta: pm === "plus" ? weight : -weight });
       }
     }
   });
@@ -232,15 +235,24 @@ async function loadMbtiItemsAggregated(
   const legacyAgg = await db
     .prepare(
       `SELECT
-         UPPER(TRIM(mbti_axis)) AS axis,
+         UPPER(TRIM(pole_axis)) AS axis,
          SUM(
-           (CASE WHEN LOWER(TRIM(COALESCE(mbti_dir, ''))) = 'minus' THEN -1 ELSE 1 END)
-           * ABS(COALESCE(weight, 1))
+           (CASE
+             WHEN UPPER(TRIM(pole_axis)) = 'EI' AND UPPER(TRIM(COALESCE(pole_side, ''))) = 'E' THEN 1
+             WHEN UPPER(TRIM(pole_axis)) = 'EI' AND UPPER(TRIM(COALESCE(pole_side, ''))) = 'I' THEN -1
+             WHEN UPPER(TRIM(pole_axis)) = 'SN' AND UPPER(TRIM(COALESCE(pole_side, ''))) = 'S' THEN 1
+             WHEN UPPER(TRIM(pole_axis)) = 'SN' AND UPPER(TRIM(COALESCE(pole_side, ''))) = 'N' THEN -1
+             WHEN UPPER(TRIM(pole_axis)) = 'TF' AND UPPER(TRIM(COALESCE(pole_side, ''))) = 'T' THEN 1
+             WHEN UPPER(TRIM(pole_axis)) = 'TF' AND UPPER(TRIM(COALESCE(pole_side, ''))) = 'F' THEN -1
+             WHEN UPPER(TRIM(pole_axis)) = 'JP' AND UPPER(TRIM(COALESCE(pole_side, ''))) = 'J' THEN 1
+             WHEN UPPER(TRIM(pole_axis)) = 'JP' AND UPPER(TRIM(COALESCE(pole_side, ''))) = 'P' THEN -1
+             ELSE 0
+           END) * ABS(COALESCE(weight, 1))
          ) AS total
        FROM answers
        WHERE test_id = ? AND answer_id IN (${placeholders})
-         AND TRIM(COALESCE(mbti_axis, '')) <> ''
-       GROUP BY UPPER(TRIM(mbti_axis))
+         AND TRIM(COALESCE(pole_axis, '')) <> ''
+       GROUP BY UPPER(TRIM(pole_axis))
        ORDER BY axis ASC`,
     )
     .bind(testId, ...uniq)

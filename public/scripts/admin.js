@@ -7,6 +7,7 @@ var AXIS_MAP = {
   TF: ["T", "F"],
   JP: ["J", "P"]
 };
+var MBTI_LETTERS = ["E", "I", "S", "N", "T", "F", "J", "P"];
 var MBTI_ORDER = [
   "INTJ",
   "INTP",
@@ -42,6 +43,8 @@ var elements = {
   resultImageCode: document.querySelector("[data-result-image-code]"),
   resultImageFile: document.querySelector("[data-result-image-file]"),
   resultImageSubmit: document.querySelector("[data-result-image-submit]"),
+  resultImageFileInline: document.querySelector("[data-result-image-file-inline]"),
+  questionDraftImageFile: document.querySelector("[data-question-draft-image-file]"),
   imageBrowser: document.querySelector("[data-image-browser]"),
   thumbnailFile: document.querySelector("[data-thumbnail-file]"),
   thumbnailUpload: document.querySelector("[data-thumbnail-upload]"),
@@ -57,7 +60,9 @@ var state = {
   isSaving: false,
   saveMessage: "",
   imageList: [],
-  draftAnswers: []
+  draftAnswers: [],
+  pendingQuestionImages: {},
+  pendingResultImages: {}
 };
 var isHydratingMeta = false;
 initAdmin();
@@ -102,8 +107,9 @@ function setupForms() {
     event.preventDefault();
     const data = new FormData(elements.questionForm);
     const questionLabel = String(data.get("label") || "").trim();
-    if (!questionLabel) {
-      alert("\uC9C8\uBB38\uC744 \uC785\uB825\uD558\uC138\uC694.");
+    const file = elements.questionDraftImageFile?.files?.[0] ?? null;
+    if (!questionLabel && !file) {
+      alert("\uC9C8\uBB38 \uD14D\uC2A4\uD2B8 \uB610\uB294 \uC774\uBBF8\uC9C0\uB97C \uC785\uB825/\uC120\uD0DD\uD558\uC138\uC694.");
       return;
     }
     const answers = normalizeDraftAnswersForQuestion();
@@ -121,6 +127,13 @@ function setupForms() {
     if (!activeTest) return;
     activeTest.questions = activeTest.questions ?? [];
     activeTest.questions.push(question);
+    if (file) {
+      state.pendingQuestionImages = {
+        ...state.pendingQuestionImages || {},
+        [question.id]: file
+      };
+      if (elements.questionDraftImageFile) elements.questionDraftImageFile.value = "";
+    }
     renderQuestions(activeTest.questions);
     elements.questionForm.reset();
     resetDraftAnswers();
@@ -156,11 +169,25 @@ function setupForms() {
     if (!activeTest) return;
     activeTest.results = activeTest.results ?? {};
     const existing = activeTest.results[code] ?? {};
+    const summaryText = String(data.get("summary") || "").trim();
     activeTest.results[code] = {
       // Image path is set by upload button (no manual input).
       image: existing.image || "",
-      summary: data.get("summary")
+      summary: summaryText
     };
+    const file = elements.resultImageFileInline?.files?.[0] ?? null;
+    const hasSomeContent = Boolean(summaryText) || Boolean(file) || Boolean(existing.image) || Boolean(existing.summary);
+    if (!hasSomeContent) {
+      alert("\uACB0\uACFC \uD14D\uC2A4\uD2B8 \uB610\uB294 \uC774\uBBF8\uC9C0\uB97C \uC785\uB825/\uC120\uD0DD\uD558\uC138\uC694.");
+      return;
+    }
+    if (file) {
+      state.pendingResultImages = {
+        ...state.pendingResultImages || {},
+        [code]: file
+      };
+      if (elements.resultImageFileInline) elements.resultImageFileInline.value = "";
+    }
     renderResults(activeTest.results);
     elements.resultForm.reset();
   });
@@ -386,22 +413,74 @@ async function handleSaveTest() {
   if (!testId || !test) return;
   setSavingState(true);
   try {
+    const payloadForSave = normalizeTestForSave(test);
     const response = await fetch(`${API_ADMIN_TESTS_BASE}/${testId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(test)
+      body: JSON.stringify(payloadForSave)
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || "\uC800\uC7A5 \uC2E4\uD328");
     state.loadedTests[testId] = payload.test;
     syncMetaEntry(payload.test);
     refreshActiveTest();
+    await flushPendingUploads(testId);
     setSaveStatus("\uC800\uC7A5 \uC644\uB8CC");
   } catch (error) {
     setSaveStatus(error.message || "\uC800\uC7A5 \uC2E4\uD328", true);
   } finally {
     setSavingState(false);
   }
+}
+async function flushPendingUploads(testId) {
+  const activeTest = getActiveTest();
+  if (!testId || !activeTest) return;
+  const pendingQ = state.pendingQuestionImages || {};
+  const qids = Object.keys(pendingQ);
+  for (const qid of qids) {
+    const file = pendingQ[qid];
+    if (!file) continue;
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch(
+        `${API_ADMIN_TESTS_BASE}/${testId}/questions/${encodeURIComponent(qid)}/prompt-image`,
+        { method: "PUT", body: formData }
+      );
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "\uC9C8\uBB38 \uC774\uBBF8\uC9C0 \uC5C5\uB85C\uB4DC \uC2E4\uD328");
+      const q = activeTest.questions?.find((qq) => qq.id === qid);
+      if (q) q.prompt = body.path;
+      delete pendingQ[qid];
+    } catch (e) {
+      console.warn("\uC9C8\uBB38 \uC774\uBBF8\uC9C0 \uC5C5\uB85C\uB4DC \uC2E4\uD328", qid, e);
+    }
+  }
+  state.pendingQuestionImages = pendingQ;
+  const pendingR = state.pendingResultImages || {};
+  const codes = Object.keys(pendingR);
+  for (const code of codes) {
+    const file = pendingR[code];
+    if (!file) continue;
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch(
+        `${API_ADMIN_TESTS_BASE}/${testId}/results/${encodeURIComponent(code)}/image`,
+        { method: "PUT", body: formData }
+      );
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "\uACB0\uACFC \uC774\uBBF8\uC9C0 \uC5C5\uB85C\uB4DC \uC2E4\uD328");
+      activeTest.results = activeTest.results ?? {};
+      activeTest.results[code] = { ...activeTest.results[code] ?? {}, image: body.path };
+      delete pendingR[code];
+    } catch (e) {
+      console.warn("\uACB0\uACFC \uC774\uBBF8\uC9C0 \uC5C5\uB85C\uB4DC \uC2E4\uD328", code, e);
+    }
+  }
+  state.pendingResultImages = pendingR;
+  renderQuestions(activeTest.questions ?? []);
+  renderResults(activeTest.results ?? {});
 }
 function setSavingState(isSaving) {
   state.isSaving = isSaving;
@@ -634,10 +713,10 @@ function renderQuestions(questions) {
       label.textContent = answer.label ?? answer.answer ?? "";
       const detail = document.createElement("small");
       const axis = String(answer.mbtiAxis || "").toUpperCase();
-      const dir = String(answer.mbtiDir || "").toLowerCase();
-      const weight = Number.isFinite(Number(answer.weight)) ? Number(answer.weight) : 1;
-      const delta = (dir === "minus" ? -1 : 1) * Math.max(1, weight);
-      detail.textContent = axis ? `${axis} ${dir || "plus"} x${Math.max(1, weight)} (\u0394 ${delta})` : "";
+      const resolved = resolveMbtiAxisDir(axis, answer.mbtiDir, answer.direction);
+      const delta = resolved.mbtiDir === "minus" ? -1 : 1;
+      const letter = resolved.letter || "";
+      detail.textContent = axis ? `${letter} (${axis} ${resolved.mbtiDir}) (\u0394 ${delta})` : "";
       chip.append(label, detail);
       chipRow.append(chip);
     });
@@ -741,9 +820,7 @@ function createEmptyDraftAnswer() {
   return {
     id: crypto.randomUUID?.() ?? `a-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     label: "",
-    mbtiAxis: "EI",
-    mbtiDir: "plus",
-    weight: 1
+    mbtiLetter: "E"
   };
 }
 function renderDraftAnswers() {
@@ -761,24 +838,10 @@ function renderDraftAnswers() {
           <input type="text" value="${escapeHtml(a.label || "")}" data-draft-field="label" />
         </label>
         <label class="form-field">
-          <span>MBTI \uCD95</span>
-          <select data-draft-field="mbtiAxis">
-            <option value="EI" ${a.mbtiAxis === "EI" ? "selected" : ""}>EI</option>
-            <option value="SN" ${a.mbtiAxis === "SN" ? "selected" : ""}>SN</option>
-            <option value="TF" ${a.mbtiAxis === "TF" ? "selected" : ""}>TF</option>
-            <option value="JP" ${a.mbtiAxis === "JP" ? "selected" : ""}>JP</option>
+          <span>MBTI \uBB38\uC790</span>
+          <select data-draft-field="mbtiLetter">
+            ${MBTI_LETTERS.map((l) => `<option value="${l}" ${String(a.mbtiLetter || "E").toUpperCase() === l ? "selected" : ""}>${l}</option>`).join("")}
           </select>
-        </label>
-        <label class="form-field">
-          <span>plus/minus</span>
-          <select data-draft-field="mbtiDir">
-            <option value="plus" ${a.mbtiDir === "plus" ? "selected" : ""}>plus</option>
-            <option value="minus" ${a.mbtiDir === "minus" ? "selected" : ""}>minus</option>
-          </select>
-        </label>
-        <label class="form-field">
-          <span>weight</span>
-          <input type="number" min="1" step="1" value="${Number.isFinite(Number(a.weight)) ? Number(a.weight) : 1}" data-draft-field="weight" />
         </label>
         <button class="ds-button ds-button--ghost ds-button--small" type="button" data-remove-draft-answer="${a.id}">
           \uC0AD\uC81C
@@ -790,21 +853,21 @@ function renderDraftAnswers() {
   });
 }
 function renderMbtiDeltaHint(a) {
-  const axis = String(a?.mbtiAxis || "").toUpperCase();
-  const dir = String(a?.mbtiDir || "plus").toLowerCase();
-  const w = Number.isFinite(Number(a?.weight)) ? Math.max(1, Math.floor(Number(a.weight))) : 1;
-  const delta = (dir === "minus" ? -1 : 1) * w;
+  const letter = String(a?.mbtiLetter || "E").toUpperCase();
+  const resolved = resolveMbtiAxisDir("", "", letter);
+  const axis = resolved.axis;
+  const dir = resolved.mbtiDir;
+  const delta = dir === "minus" ? -1 : 1;
   if (!axis) return "";
-  return `\uC800\uC7A5 \uC2DC: ${axis} \u0394 ${delta} (mbti_answer_effects.delta)`;
+  return `\uC800\uC7A5 \uC2DC: ${letter} \u2192 ${axis} \u0394 ${delta} (mbti_answer_effects.delta)`;
 }
 function normalizeDraftAnswersForQuestion() {
   const list = Array.isArray(state.draftAnswers) ? state.draftAnswers : [];
   return list.map((a) => ({
     id: a.id,
     label: String(a.label || "").trim(),
-    mbtiAxis: String(a.mbtiAxis || "").trim().toUpperCase(),
-    mbtiDir: String(a.mbtiDir || "plus").trim().toLowerCase() === "minus" ? "minus" : "plus",
-    weight: Number.isFinite(Number(a.weight)) ? Math.max(1, Math.floor(Number(a.weight))) : 1
+    ...deriveMbtiAxisDirFromLetter(String(a.mbtiLetter || "E")),
+    weight: 1
   })).filter((a) => a.label.length > 0);
 }
 function handleDraftAnswerInput(event) {
@@ -817,8 +880,7 @@ function handleDraftAnswerInput(event) {
   const idx = list.findIndex((a) => a.id === id);
   if (idx === -1) return;
   const next = { ...list[idx] };
-  if (field === "weight") next.weight = Number(event.target.value);
-  else next[field] = event.target.value;
+  next[field] = event.target.value;
   list[idx] = next;
   state.draftAnswers = list;
   renderDraftAnswers();
@@ -867,9 +929,8 @@ function toLegacyExportQuestion(q) {
 }
 function toLegacyExportAnswer(a) {
   const axis = String(a?.mbtiAxis || "").trim().toUpperCase();
-  const dir = String(a?.mbtiDir || "").trim().toLowerCase();
-  const [pos, neg] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
-  const direction = dir === "minus" ? neg : pos;
+  const resolved = resolveMbtiAxisDir(axis, a?.mbtiDir, a?.direction);
+  const direction = resolved.letter || "";
   return {
     ...a,
     mbtiAxis: axis,
@@ -877,5 +938,56 @@ function toLegacyExportAnswer(a) {
     // Keep admin-only fields out of legacy json
     mbtiDir: void 0
   };
+}
+function deriveMbtiAxisDirFromLetter(letterRaw) {
+  const letter = String(letterRaw || "").trim().toUpperCase();
+  if (letter === "E") return { mbtiAxis: "EI", mbtiDir: "plus" };
+  if (letter === "I") return { mbtiAxis: "EI", mbtiDir: "minus" };
+  if (letter === "S") return { mbtiAxis: "SN", mbtiDir: "plus" };
+  if (letter === "N") return { mbtiAxis: "SN", mbtiDir: "minus" };
+  if (letter === "T") return { mbtiAxis: "TF", mbtiDir: "plus" };
+  if (letter === "F") return { mbtiAxis: "TF", mbtiDir: "minus" };
+  if (letter === "J") return { mbtiAxis: "JP", mbtiDir: "plus" };
+  if (letter === "P") return { mbtiAxis: "JP", mbtiDir: "minus" };
+  return { mbtiAxis: "", mbtiDir: "plus" };
+}
+function resolveMbtiAxisDir(axisRaw, mbtiDirRaw, directionRaw) {
+  const axis = String(axisRaw || "").trim().toUpperCase();
+  const dirNorm = String(mbtiDirRaw || "").trim().toLowerCase();
+  const direction = String(directionRaw || "").trim().toUpperCase();
+  if (axis && (dirNorm === "plus" || dirNorm === "minus")) {
+    const [pos, neg] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
+    return { axis, mbtiDir: dirNorm, letter: dirNorm === "minus" ? neg : pos };
+  }
+  if (axis && direction) {
+    const [pos, neg] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
+    const mbtiDir = direction === neg ? "minus" : "plus";
+    const letter = direction === neg ? neg : pos;
+    return { axis, mbtiDir, letter };
+  }
+  if (direction) {
+    const derived = deriveMbtiAxisDirFromLetter(direction);
+    return { axis: derived.mbtiAxis, mbtiDir: derived.mbtiDir, letter: direction };
+  }
+  return { axis: axis || "", mbtiDir: "plus", letter: "" };
+}
+function normalizeTestForSave(test) {
+  const out = { ...test };
+  out.type = out.type || "mbti";
+  out.questions = Array.isArray(out.questions) ? out.questions.map((q) => {
+    const qq = { ...q };
+    qq.answers = Array.isArray(qq.answers) ? qq.answers.map((a) => {
+      const aa = { ...a };
+      const axis = String(aa.mbtiAxis || "").trim().toUpperCase();
+      const resolved = resolveMbtiAxisDir(axis, aa.mbtiDir, aa.direction);
+      if (resolved.axis) aa.mbtiAxis = resolved.axis;
+      aa.mbtiDir = resolved.mbtiDir;
+      aa.weight = Number.isFinite(Number(aa.weight)) ? Math.max(1, Math.floor(Number(aa.weight))) : 1;
+      delete aa.direction;
+      return aa;
+    }) : [];
+    return qq;
+  }) : [];
+  return out;
 }
 //# sourceMappingURL=admin.js.map

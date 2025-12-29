@@ -40,8 +40,8 @@ type AnswerRow = {
   question_id: string;
   ord: number;
   answer: string | null;
-  mbti_axis: string | null;
-  mbti_dir: string | null;
+  pole_axis: string | null;
+  pole_side: string | null;
   weight: number | null;
 };
 
@@ -97,7 +97,7 @@ export async function onRequestGet(context: PagesContext<{ id?: string }>) {
 
   const aRes = await db
     .prepare(
-      `SELECT answer_id, question_id, ord, answer, mbti_axis, mbti_dir, weight
+      `SELECT answer_id, question_id, ord, answer, pole_axis, pole_side, weight
        FROM answers
        WHERE test_id = ?
        ORDER BY question_id ASC, ord ASC`,
@@ -118,8 +118,8 @@ export async function onRequestGet(context: PagesContext<{ id?: string }>) {
     if (!answersByQuestion.has(qid)) answersByQuestion.set(qid, []);
     const list = answersByQuestion.get(qid);
     if (!list) return;
-    const axis = String(r.mbti_axis ?? "").trim().toUpperCase();
-    const dir = String(r.mbti_dir ?? "").trim().toUpperCase();
+    const axis = String(r.pole_axis ?? "").trim().toUpperCase();
+    const dir = String(r.pole_side ?? "").trim().toUpperCase();
     const inferred =
       axis && dir ? { mbtiAxis: axis, direction: dir } : inferMbtiFromAnswerId(String(r.answer_id || ""));
     list.push({

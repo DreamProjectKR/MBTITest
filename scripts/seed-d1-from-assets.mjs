@@ -132,12 +132,11 @@ for (const meta of selected) {
       const aText = String(a?.label || "");
       const axis = String(a?.mbtiAxis || "").trim().toUpperCase();
       const dir = String(a?.direction || "").trim().toUpperCase();
-      const mbtiDir = mbtiLetterToPlusMinus(axis, dir);
       const weight = 1;
-      const delta = (mbtiDir === "minus" ? -1 : 1) * weight;
+      const delta = mbtiSideToDelta(axis, dir, weight);
       statements.push(
         [
-          "INSERT INTO answers (test_id, answer_id, question_id, ord, answer, mbti_axis, mbti_dir, weight, score_key, score_value, created_at, updated_at)",
+          "INSERT INTO answers (test_id, answer_id, question_id, ord, answer, pole_axis, pole_side, weight, score_key, score_value, created_at, updated_at)",
           "VALUES (",
           sqlString(id),
           ",",
@@ -151,7 +150,7 @@ for (const meta of selected) {
           ",",
           sqlString(axis),
           ",",
-          sqlString(mbtiDir),
+          sqlString(dir),
           ",",
           String(weight),
           ",",
@@ -262,6 +261,17 @@ function mbtiLetterToPlusMinus(axis, letter) {
   const plus = plusByAxis[ax];
   if (!plus) return "plus";
   return l === plus ? "plus" : "minus";
+}
+
+function mbtiSideToDelta(axis, side, weightRaw) {
+  const ax = String(axis || "").trim().toUpperCase();
+  const s = String(side || "").trim().toUpperCase();
+  const weight = Math.max(1, Math.floor(Number.isFinite(weightRaw) ? weightRaw : 1));
+  if (!ax || !s) return 0;
+  const plusByAxis = { EI: "E", SN: "S", TF: "T", JP: "J" };
+  const plus = plusByAxis[ax];
+  if (!plus) return 0;
+  return (s === plus ? 1 : -1) * weight;
 }
 
 function encodeDescriptionText(input) {

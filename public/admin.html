@@ -103,7 +103,14 @@
         </div>
         <form class="question-form" data-question-form>
           <div class="form-field">
-            <label>질문 <input type="text" name="label" required /></label>
+            <label>질문(텍스트) <input type="text" name="label" /></label>
+          </div>
+          <div class="form-field">
+            <span>질문 이미지 (기본)</span>
+            <div class="admin-upload-row">
+              <input type="file" accept="image/*" data-question-draft-image-file />
+            </div>
+            <small class="form-hint">텍스트/이미지 중 하나는 필요합니다. D1 저장 후 자동으로 R2에 업로드되며, 질문 이미지로 연결됩니다.</small>
           </div>
           <div class="answer-builder">
             <div class="answer-builder__header">
@@ -133,9 +140,16 @@
             <span>결과 코드 (code)</span>
             <input type="text" name="code" placeholder="예: ENFP" required />
           </label>
+          <div class="form-field">
+            <span>결과 이미지 (선택)</span>
+            <div class="admin-upload-row">
+              <input type="file" accept="image/*" data-result-image-file-inline />
+            </div>
+            <small class="form-hint">D1 저장 후 자동으로 R2에 업로드되며, 결과 이미지로 연결됩니다.</small>
+          </div>
           <label class="form-field">
-            <span>설명 (summary)</span>
-            <textarea name="summary" rows="3" required></textarea>
+            <span>설명(텍스트)</span>
+            <textarea name="summary" rows="3"></textarea>
           </label>
           <div class="form-field">
             <button class="ds-button ds-button--secondary" type="submit">결과 저장/업데이트</button>

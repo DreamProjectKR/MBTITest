@@ -304,16 +304,15 @@ async function upsertTestIntoD1(
       const aText = readString(a?.label).trim();
       const axis = readString(a?.mbtiAxis).trim().toUpperCase();
       const dir = readString(a?.direction).trim().toUpperCase();
-      const mbtiDir = mbtiLetterToPlusMinus(axis, dir);
       const weight = 1;
-      const delta = (mbtiDir === "minus" ? -1 : 1) * weight;
+      const delta = mbtiSideToDelta(axis, dir, weight);
       statements.push(
         db
           .prepare(
-            `INSERT INTO answers (test_id, answer_id, question_id, ord, answer, mbti_axis, mbti_dir, weight, score_key, score_value)
+            `INSERT INTO answers (test_id, answer_id, question_id, ord, answer, pole_axis, pole_side, weight, score_key, score_value)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           )
-          .bind(testId, aid, qid, aIndex, aText, axis, mbtiDir, weight, "", 0),
+          .bind(testId, aid, qid, aIndex, aText, axis, dir, weight, "", 0),
       );
       if (axis) {
         statements.push(
@@ -360,6 +359,17 @@ function mbtiLetterToPlusMinus(axis: string, letter: string) {
   const plus = plusByAxis[ax];
   if (!plus) return "plus";
   return l === plus ? "plus" : "minus";
+}
+
+function mbtiSideToDelta(axis: string, side: string, weightRaw: number) {
+  const ax = String(axis || "").trim().toUpperCase();
+  const s = String(side || "").trim().toUpperCase();
+  const weight = Math.max(1, Math.floor(Number.isFinite(weightRaw) ? weightRaw : 1));
+  if (!ax || !s) return 0;
+  const plusByAxis: Record<string, string> = { EI: "E", SN: "S", TF: "T", JP: "J" };
+  const plus = plusByAxis[ax];
+  if (!plus) return 0;
+  return (s === plus ? 1 : -1) * weight;
 }
 
 
