@@ -6,12 +6,15 @@ pages_build_output_dir = "./public"
 binding = "MBTI_BUCKET" # 또는 ASSETS
 bucket_name = "mbti-assets"
 
+## NOTE (D1):
+## - This repo uses `env.MBTI_DB` in Pages Functions.
+## - For deployment: bind D1 in Cloudflare Pages dashboard (Settings -> Functions -> D1 bindings).
+## - For local: run `npm run pages:dev:d1` (uses wrangler's local D1 binding flag).
+
 [[d1_databases]]
-# D1 binding for test data (create with: `wrangler d1 create mbti-db`)
 binding = "MBTI_DB"
 database_name = "mbti-db"
-# Set this to your actual D1 database id (from `wrangler d1 list` / dashboard).
-database_id = "<your-d1-id>"
+database_id = "b904ea49-34be-44e9-b952-1987259df974"
 
 [vars]
 ASSETS_BASE = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"

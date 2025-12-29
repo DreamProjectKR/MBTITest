@@ -1,6 +1,6 @@
 import { JSON_HEADERS, getImagesPrefix } from "../../utils/store.js";
 
-function createJsonResponse(payload, status = 200) {
+function createJsonResponse(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
     headers: JSON_HEADERS,
@@ -11,7 +11,7 @@ function methodNotAllowed() {
   return createJsonResponse({ error: "Method not allowed." }, 405);
 }
 
-export async function onRequestGet(context) {
+export async function onRequestGet(context: any) {
   if (context.request.method !== "GET") return methodNotAllowed();
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket)
@@ -27,7 +27,7 @@ export async function onRequestGet(context) {
     const prefix = getImagesPrefix(testId);
     const listing = await bucket.list({ prefix });
     const objects = Array.isArray(listing.objects) ? listing.objects : [];
-    const items = objects.map((obj) => {
+    const items = objects.map((obj: any) => {
       const key = obj?.key ?? "";
       const path = key.replace(/^assets\/?/i, "");
       return {

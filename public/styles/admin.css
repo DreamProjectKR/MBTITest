@@ -296,6 +296,113 @@ select {
   align-items: flex-end;
 }
 
+.admin-upload-row {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-upload-row input[type="file"] {
+  max-width: 320px;
+}
+
+.answer-builder {
+  border: 1px solid #000;
+  border-radius: 18px;
+  padding: var(--space-sm);
+  background: #ffffff;
+}
+
+.answer-builder__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.answer-builder__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.answer-row {
+  border: 1px solid #000;
+  border-radius: 14px;
+  padding: var(--space-sm);
+  background: #ffffff;
+}
+
+.answer-row__grid {
+  display: grid;
+  grid-template-columns: 1fr 110px 110px 90px auto;
+  gap: var(--space-xs);
+  align-items: start;
+}
+
+.answer-row--score .answer-row__grid {
+  grid-template-columns: 1fr 1fr 120px auto;
+}
+
+.question-editor {
+  margin-top: var(--space-sm);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xs);
+}
+
+.question-editor textarea {
+  resize: vertical;
+}
+
+.answers-editor {
+  margin-top: var(--space-sm);
+  border-top: 1px solid #000;
+  padding-top: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.answers-editor__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.answers-editor__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.ds-badge__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+@media (max-width: 900px) {
+  .answer-row__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-hint {
+  display: block;
+  margin-top: 8px;
+  color: var(--color-text-secondary, #6b7280);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .image-browser {
   margin-top: var(--space-md);
   display: grid;

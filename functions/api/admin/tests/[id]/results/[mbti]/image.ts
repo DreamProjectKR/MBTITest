@@ -1,34 +1,6 @@
-import {
-  JSON_HEADERS,
-  getImagesPrefix,
-  readIndex,
-  writeIndex,
-  buildIndexWithMeta,
-  createMetaFromTest,
-  readTest,
-  writeTest,
-} from "../../../../utils/store.js";
+import { JSON_HEADERS, getImagesPrefix } from "../../../../utils/store.js";
 
-const MBTI_ORDER = [
-  "INTJ",
-  "INTP",
-  "ENTJ",
-  "ENTP",
-  "INFJ",
-  "INFP",
-  "ENFJ",
-  "ENFP",
-  "ISTJ",
-  "ISTP",
-  "ESTJ",
-  "ESTP",
-  "ISFJ",
-  "ISFP",
-  "ESFJ",
-  "ESFP",
-];
-
-function createJsonResponse(payload, status = 200) {
+function createJsonResponse(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
     headers: JSON_HEADERS,
@@ -39,7 +11,7 @@ function methodNotAllowed() {
   return createJsonResponse({ error: "Method not allowed." }, 405);
 }
 
-function badRequest(message) {
+function badRequest(message: string) {
   return createJsonResponse({ error: message }, 400);
 }
 
@@ -51,7 +23,7 @@ function extensionFromMime(mimeType = "") {
   return "png";
 }
 
-async function extractUpload(context) {
+async function extractUpload(context: any) {
   const contentType = context.request.headers.get("content-type") || "";
   const isMultipart = contentType
     .toLowerCase()
@@ -69,7 +41,7 @@ async function extractUpload(context) {
   return { buffer, contentType: contentType || "image/png" };
 }
 
-export async function onRequestPut(context) {
+export async function onRequestPut(context: any) {
   if (context.request.method !== "PUT") return methodNotAllowed();
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket)
@@ -77,14 +49,16 @@ export async function onRequestPut(context) {
       { error: "R2 binding MBTI_BUCKET is missing." },
       500,
     );
+  const db = context.env.MBTI_DB;
+  if (!db)
+    return createJsonResponse({ error: "D1 binding MBTI_DB is missing." }, 500);
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
-  const mbtiRaw = context.params?.mbti
+  const codeRaw = context.params?.mbti
     ? String(context.params.mbti).trim().toUpperCase()
     : "";
-  if (!mbtiRaw || !MBTI_ORDER.includes(mbtiRaw))
-    return badRequest("Invalid MBTI code.");
+  if (!codeRaw) return badRequest("Invalid outcome code.");
 
   let upload;
   try {
@@ -97,7 +71,7 @@ export async function onRequestPut(context) {
 
   const bytes = new Uint8Array(upload.buffer);
   const extension = extensionFromMime(upload.contentType);
-  const fileName = `${mbtiRaw}.${extension}`;
+  const fileName = `${codeRaw}.${extension}`;
   const key = `${getImagesPrefix(testId)}${fileName}`;
 
   try {
@@ -118,33 +92,25 @@ export async function onRequestPut(context) {
   }
 
   try {
-    const testJson = await readTest(bucket, testId);
-    if (!testJson)
-      return createJsonResponse(
-        { error: "Test JSON not found while updating image." },
-        404,
-      );
-
-    testJson.results = testJson.results || {};
-    testJson.results[mbtiRaw] = {
-      ...(testJson.results[mbtiRaw] || {}),
-      image: `${getImagesPrefix(testId)}${fileName}`,
-    };
-
-    await writeTest(bucket, testId, testJson);
-
-    const index = await readIndex(bucket);
-    const existingMeta = Array.isArray(index.tests)
-      ? index.tests.find((entry) => entry?.id === testId)
-      : undefined;
-    const meta = createMetaFromTest(testJson, existingMeta);
-    const updatedIndex = buildIndexWithMeta(index, meta);
-    await writeIndex(bucket, updatedIndex);
+    const now = new Date().toISOString();
+    // Ensure row exists, then update image.
+    await db.batch([
+      db
+        .prepare(
+          `INSERT OR IGNORE INTO results (test_id, result, result_image, summary, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+        )
+        .bind(testId, codeRaw, key, "", now, now),
+      db
+        .prepare(`UPDATE results SET result_image = ?, updated_at = ? WHERE test_id = ? AND result = ?`)
+        .bind(key, now, testId, codeRaw),
+      db.prepare(`UPDATE tests SET updated_at = ? WHERE id = ?`).bind(now, testId),
+    ]);
 
     return createJsonResponse({
       ok: true,
-      mbti: mbtiRaw,
-      path: `${getImagesPrefix(testId)}${fileName}`,
+      code: codeRaw,
+      path: key,
       url: `/assets/${getImagesPrefix(testId).replace(
         /^assets\/?/i,
         "",
@@ -153,8 +119,7 @@ export async function onRequestPut(context) {
   } catch (err) {
     return createJsonResponse(
       {
-        error:
-          err instanceof Error ? err.message : "Unable to update test JSON.",
+        error: err instanceof Error ? err.message : "Unable to update outcome image.",
       },
       500,
     );

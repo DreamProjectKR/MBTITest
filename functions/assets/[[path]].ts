@@ -16,7 +16,7 @@
  * @param {any} params
  * @returns {string}
  */
-function getPathParam(params) {
+function getPathParam(params: any): string {
   const v = params?.path;
   if (Array.isArray(v)) return v.join("/");
   return v ? String(v) : "";
@@ -27,7 +27,7 @@ function getPathParam(params) {
  * @param {string} key
  * @returns {string}
  */
-function guessContentType(key) {
+function guessContentType(key: string): string {
   const lower = key.toLowerCase();
   if (lower.endsWith(".png")) return "image/png";
   if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
@@ -48,7 +48,7 @@ function guessContentType(key) {
  * @param {string} key
  * @returns {string}
  */
-function cacheControlForKey(key) {
+function cacheControlForKey(key: string): string {
   const lower = key.toLowerCase();
   if (lower.endsWith(".json"))
     return "public, max-age=60, s-maxage=60, must-revalidate, stale-while-revalidate=600, stale-if-error=600";
@@ -60,13 +60,13 @@ function cacheControlForKey(key) {
  * @param {{ request: Request, env: any, params?: any, waitUntil: (p: Promise<any>) => void }} context
  * @returns {Promise<Response>}
  */
-export async function onRequestGet(context) {
+export async function onRequestGet(context: any) {
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket)
     return new Response("MBTI_BUCKET binding missing.", { status: 500 });
 
   // Edge cache (Cloudflare Cache API). Pages Functions responses can otherwise behave "dynamic".
-  const cache = caches?.default;
+  const cache = (caches as any)?.default as Cache | undefined;
   const url = new URL(context.request.url);
   // Normalize cache key: avoid header-driven fragmentation.
   const cacheKey = new Request(url.toString(), { method: "GET" });

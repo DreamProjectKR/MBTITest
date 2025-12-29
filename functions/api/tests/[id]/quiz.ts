@@ -8,7 +8,10 @@ const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
 };
 
-function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
+function withCacheHeaders(
+  headers: HeadersInit,
+  { etag, maxAge = 60 }: { etag?: string; maxAge?: number } = {},
+): Headers {
   const h = new Headers(headers);
   h.set(
     "Cache-Control",
@@ -18,7 +21,7 @@ function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
   return h;
 }
 
-export async function onRequestGet(context) {
+export async function onRequestGet(context: any) {
   const db = context.env.MBTI_DB;
   if (!db) {
     return new Response(JSON.stringify({ error: "D1 binding MBTI_DB is missing." }), {
@@ -49,7 +52,7 @@ export async function onRequestGet(context) {
 
   const qRes = await db
     .prepare(
-      `SELECT question_id, ord, label, prompt_image, prompt_text, prompt_meta_json
+      `SELECT question_id, ord, question, question_image
        FROM questions
        WHERE test_id = ?
        ORDER BY ord ASC`,
@@ -58,13 +61,13 @@ export async function onRequestGet(context) {
     .all();
 
   const questionsRows = Array.isArray(qRes?.results) ? qRes.results : [];
-  const questions = [];
+  const questions: any[] = [];
 
   if (questionsRows.length) {
     // Fetch all answers in one query and group in JS.
     const aRes = await db
       .prepare(
-        `SELECT answer_id, question_id, ord, label
+        `SELECT answer_id, question_id, ord, answer
          FROM answers
          WHERE test_id = ?
          ORDER BY question_id ASC, ord ASC`,
@@ -73,26 +76,23 @@ export async function onRequestGet(context) {
       .all();
     const answerRows = Array.isArray(aRes?.results) ? aRes.results : [];
     const answersByQuestion = new Map();
-    answerRows.forEach((r) => {
+    answerRows.forEach((r: any) => {
       const qid = String(r.question_id || "");
       if (!qid) return;
       if (!answersByQuestion.has(qid)) answersByQuestion.set(qid, []);
       answersByQuestion.get(qid).push({
         id: r.answer_id,
-        label: r.label ?? "",
+        label: r.answer ?? "",
       });
     });
 
-    questionsRows.forEach((r) => {
+    questionsRows.forEach((r: any) => {
       const qid = String(r.question_id || "");
       questions.push({
         id: qid,
-        label: r.label ?? "",
-        prompt: {
-          image: r.prompt_image ?? "",
-          text: r.prompt_text ?? "",
-          meta: r.prompt_meta_json ? safeJsonParse(r.prompt_meta_json) : null,
-        },
+        label: r.question ?? "",
+        // Legacy-friendly: client supports string or {image}; keep it simple.
+        prompt: r.question_image ?? "",
         answers: answersByQuestion.get(qid) || [],
       });
     });
@@ -120,13 +120,3 @@ export async function onRequestGet(context) {
     headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 60 }),
   });
 }
-
-function safeJsonParse(raw) {
-  try {
-    return JSON.parse(String(raw));
-  } catch (e) {
-    return null;
-  }
-}
-
-

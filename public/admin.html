@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MBTI 테스트 관리자</title>
+  <title>테스트 관리자</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -38,7 +38,7 @@
           JSON 내보내기
         </button>
         <button class="ds-button ds-button--primary" type="button" data-save-test>
-          R2 저장
+          D1 저장
         </button>
         <span class="save-status" data-save-status>저장 준비</span>
       </div>
@@ -50,6 +50,14 @@
           <h2 id="test-meta-heading">테스트 기본 정보</h2>
         </div>
         <form class="form-grid" data-test-meta-form>
+          <label class="form-field">
+            <span>테스트 타입</span>
+            <select name="type">
+              <option value="generic">generic</option>
+              <option value="mbti">mbti</option>
+              <option value="score">score</option>
+            </select>
+          </label>
           <label class="form-field">
             <span>테스트 제목</span>
             <input type="text" name="title" required />
@@ -63,49 +71,49 @@
             <input type="text" name="tags" />
           </label>
           <label class="form-field">
-            <span>썸네일 URL</span>
-            <input type="url" name="thumbnail" />
+            <span>작성자</span>
+            <input type="text" name="author" />
           </label>
+          <div class="form-field">
+            <span>작성자 이미지 업로드 (R2)</span>
+            <div class="admin-upload-row">
+              <input type="file" accept="image/*" data-author-image-file />
+              <button class="ds-button ds-button--secondary" type="button" data-author-image-upload>
+                업로드
+              </button>
+            </div>
+            <small class="form-hint" data-author-image-path>업로드하면 D1에 자동 저장됩니다.</small>
+          </div>
+          <div class="form-field">
+            <span>썸네일 업로드 (R2)</span>
+            <div class="admin-upload-row">
+              <input type="file" accept="image/*" data-thumbnail-file />
+              <button class="ds-button ds-button--secondary" type="button" data-thumbnail-upload>
+                업로드
+              </button>
+            </div>
+            <small class="form-hint" data-thumbnail-path>업로드하면 D1에 자동 저장됩니다.</small>
+          </div>
         </form>
       </section>
 
       <section class="admin-panel" aria-labelledby="question-builder-heading">
         <div class="section__header">
-          <h2 id="question-builder-heading">문항 작성 (2지선다)</h2>
+          <h2 id="question-builder-heading">문항 작성 (N지선다)</h2>
         </div>
         <form class="question-form" data-question-form>
           <div class="form-field">
-            <label>질문 내용 <input type="text" name="prompt" required /></label>
+            <label>질문 <input type="text" name="label" required /></label>
           </div>
-          <div class="answer-grid">
-            <fieldset>
-              <legend>답변 A</legend>
-              <input type="text" name="answerAText" placeholder="답변 텍스트" required />
-              <select name="answerAMbti" aria-label="MBTI 요소">
-                <option value="EI">E / I</option>
-                <option value="SN">S / N</option>
-                <option value="TF">T / F</option>
-                <option value="JP">J / P</option>
-              </select>
-              <select name="answerAPole" aria-label="MBTI 극">
-                <option value="positive">앞 글자</option>
-                <option value="negative">뒷 글자</option>
-              </select>
-            </fieldset>
-            <fieldset>
-              <legend>답변 B</legend>
-              <input type="text" name="answerBText" placeholder="답변 텍스트" required />
-              <select name="answerBMbti" aria-label="MBTI 요소">
-                <option value="EI">E / I</option>
-                <option value="SN">S / N</option>
-                <option value="TF">T / F</option>
-                <option value="JP">J / P</option>
-              </select>
-              <select name="answerBPole" aria-label="MBTI 극">
-                <option value="positive">앞 글자</option>
-                <option value="negative">뒷 글자</option>
-              </select>
-            </fieldset>
+          <div class="answer-builder">
+            <div class="answer-builder__header">
+              <strong>답변 목록</strong>
+              <button class="ds-button ds-button--secondary ds-button--small" type="button" data-add-draft-answer>
+                답변 추가
+              </button>
+            </div>
+            <div class="answer-builder__list" data-answer-draft-list></div>
+            <small class="form-hint">최소 2개 답변이 필요합니다.</small>
           </div>
           <button class="ds-button ds-button--primary" type="submit">문항 추가</button>
         </form>
@@ -114,19 +122,15 @@
 
       <section class="admin-panel" aria-labelledby="result-heading">
         <div class="section__header">
-          <h2 id="result-heading">MBTI 결과 콘텐츠</h2>
+          <h2 id="result-heading">결과(results) 콘텐츠</h2>
         </div>
         <form class="form-grid" data-result-form>
           <label class="form-field">
-            <span>MBTI 유형 (예: ENFP)</span>
-            <input type="text" name="code" pattern="[EI][NS][FT][JP]" required />
+            <span>결과 코드 (code)</span>
+            <input type="text" name="code" placeholder="예: ENFP" required />
           </label>
           <label class="form-field">
-            <span>대표 이미지 URL</span>
-            <input type="url" name="image" />
-          </label>
-          <label class="form-field">
-            <span>설명</span>
+            <span>설명 (summary)</span>
             <textarea name="summary" rows="3" required></textarea>
           </label>
           <div class="form-field">
@@ -137,7 +141,7 @@
         <div class="result-image-upload">
           <div class="result-image-upload__grid">
             <label class="form-field">
-              <span>MBTI 코드</span>
+              <span>결과 코드</span>
               <input type="text" placeholder="ENFP" data-result-image-code />
             </label>
             <label class="form-field">

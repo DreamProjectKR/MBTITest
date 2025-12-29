@@ -1,0 +1,3 @@
+import "./legacy/testresult.js";
+
+

@@ -12,14 +12,24 @@
   },
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "wrangler dev"
+    "test": "node --test --import tsx",
+    "typecheck": "tsc -p tsconfig.functions.json && tsc -p tsconfig.scripts.json",
+    "build:scripts": "node scripts/build-scripts.mjs",
+    "build:scripts:watch": "node scripts/build-scripts.mjs --watch",
+    "build": "npm run build:scripts",
+    "pages:dev": "wrangler pages dev ./public --compatibility-date=2024-12-08",
+    "pages:dev:d1": "wrangler pages dev ./public --compatibility-date=2024-12-08 --d1 MBTI_DB=mbti-db --persist-to .wrangler/state",
+    "pages:deploy": "wrangler pages deploy ./public",
+    "dev": "node scripts/dev.mjs",
+    "dev:d1": "node scripts/dev.mjs --d1",
+    "d1:seed:assets": "node scripts/seed-d1-from-assets.mjs",
+    "d1:seed:assets:remote": "node scripts/seed-d1-from-assets.mjs --remote"
   },
   "dependencies": {
     "acorn": "^8.14.0",
@@ -56,6 +66,9 @@
     "zod": "^3.22.3"
   },
   "devDependencies": {
+    "@types/node": "^24.3.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
     "wrangler": "^4.56.0"
   }
 }

@@ -1,16 +1,36 @@
-// src/scripts/legacy/main.js
-var header = document.getElementById("header");
-var headerScroll = document.getElementById("headerScroll");
-var MainTop = document.getElementById("MainTop");
-var ASSETS_BASE = window.ASSETS_BASE || "";
-var assetUrl = window.assetUrl || ((path) => {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
-  let clean = String(path).replace(/^\.?\/+/, "");
-  clean = clean.replace(/^assets\/+/i, "");
-  return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
-});
-var headerOffset = header.offsetTop;
+/**
+ * Home page controller (`public/index.html` -> `public/scripts/main.js`).
+ *
+ * What it does:
+ * - Fetches the test index from the API (`/api/tests`).
+ * - Renders two sections (newest/top) and wires up clicks to `testintro.html?testId=...`.
+ * - Handles the sticky header UI on scroll.
+ */
+const header = document.getElementById("header");
+const headerScroll = document.getElementById("headerScroll");
+const MainTop = document.getElementById("MainTop");
+// `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
+// Production default: same-origin `/assets/*` (served by Pages Functions proxy).
+const ASSETS_BASE = window.ASSETS_BASE || "";
+/**
+ * Build an absolute URL for assets (images/json) stored under `assets/` in R2.
+ * Accepts absolute URLs and returns them unchanged.
+ * @param {string} path
+ * @returns {string}
+ */
+const assetUrl =
+  window.assetUrl ||
+  ((path) => {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    let clean = String(path).replace(/^\.?\/+/, "");
+    clean = clean.replace(/^assets\/+/i, "");
+    return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
+  });
+
+// 헤더 원래 위치 저장 (스크롤로 fixed 전환 시 기준점)
+const headerOffset = header.offsetTop;
+
 window.addEventListener("scroll", () => {
   if (window.scrollY > headerOffset) {
     header.classList.add("fixed-header", "bg-on");
@@ -18,48 +38,67 @@ window.addEventListener("scroll", () => {
     header.classList.remove("fixed-header", "bg-on");
   }
 });
+
+// ----- 유틸: 썸네일 경로 보정 -----
 function resolveThumbnailPath(thumbnail) {
   if (!thumbnail) return "#";
   if (thumbnail.startsWith("http")) return thumbnail;
   return assetUrl(thumbnail);
 }
+
+// ----- 카드 DOM 생성 -----
 function createTestCard(test, variantClass) {
   const shell = document.createElement("div");
   shell.className = `NewTestShell ${variantClass}`;
+
   const card = document.createElement("div");
   card.className = "NewTest";
+
   const img = document.createElement("img");
   img.src = resolveThumbnailPath(test.thumbnail);
-  img.alt = test.title || "\uD14C\uC2A4\uD2B8 \uC774\uBBF8\uC9C0";
+  img.alt = test.title || "테스트 이미지";
+
   const title = document.createElement("h4");
-  title.textContent = test.title || "\uD14C\uC2A4\uD2B8 \uC774\uB984";
+  title.textContent = test.title || "테스트 이름";
+
   const tagBox = document.createElement("div");
   tagBox.className = "NewTestHashTag";
   const tags = Array.isArray(test.tags) ? test.tags : [];
-  tagBox.innerHTML = tags.slice(0, 3).map((tag) => `<span class="HashTag">#${tag}</span>`).join("");
+  tagBox.innerHTML = tags
+    .slice(0, 3)
+    .map((tag) => `<span class="HashTag">#${tag}</span>`)
+    .join("");
+
   card.appendChild(img);
   card.appendChild(title);
   card.appendChild(tagBox);
   shell.appendChild(card);
+
+  // 카드 클릭 시 이동
   shell.onclick = () => {
     const dest = `testintro.html?testId=${encodeURIComponent(test.id || "")}`;
     window.location.href = dest;
   };
+
   return shell;
 }
+
+// ----- 테스트 목록 불러오기 (default: /assets/index.json) -----
 async function fetchTestsAjax() {
   if (typeof window.getTestIndex === "function") {
-    const data2 = await window.getTestIndex();
-    return Array.isArray(data2?.tests) ? data2.tests : [];
+    const data = await window.getTestIndex();
+    return Array.isArray(data?.tests) ? data.tests : [];
   }
   const url = window.TEST_INDEX_URL || "/assets/index.json";
   const res = await fetch(url);
-  if (!res.ok) throw new Error(url + " \uC694\uCCAD \uC2E4\uD328: " + res.status);
+  if (!res.ok) throw new Error(url + " 요청 실패: " + res.status);
   const data = await res.json();
   return Array.isArray(data?.tests) ? data.tests : [];
 }
+
+// ----- 중복 제거 + 최신순 정렬 -----
 function normalizeTests(tests) {
-  const seen = /* @__PURE__ */ new Set();
+  const seen = new Set();
   const deduped = [];
   for (const t of tests) {
     const key = `${t.id}-${t.path}`;
@@ -70,28 +109,37 @@ function normalizeTests(tests) {
   deduped.sort((a, b) => {
     const ad = new Date(a.updatedAt || a.createdAt || 0);
     const bd = new Date(b.updatedAt || b.createdAt || 0);
-    return bd - ad;
+    return bd - ad; // 최신 우선
   });
   return deduped.map((t) => ({
     ...t,
-    thumbnail: resolveThumbnailPath(t.thumbnail)
+    thumbnail: resolveThumbnailPath(t.thumbnail),
   }));
 }
+
+// ----- 섹션별로 순서대로 채우기 -----
 function renderSections(tests) {
   const newTestLists = document.querySelectorAll(".NewTestList");
   const newSection = newTestLists[0];
   const topSection = newTestLists[1];
+
   if (!newSection || !topSection) return;
+
   const newShellContainer = newSection.querySelector(".NewTestListShell");
   const topShellContainer = topSection.querySelector(".NewTestListShell");
+
   if (newShellContainer) newShellContainer.innerHTML = "";
   if (topShellContainer) topShellContainer.innerHTML = "";
+
+  // newtest 섹션: 최대 4개
   const newTests = tests.slice(0, Math.min(4, tests.length));
   newTests.forEach((test) => {
     if (newShellContainer) {
       newShellContainer.appendChild(createTestCard(test, "newtest"));
     }
   });
+
+  // toptest 섹션: 최대 8개
   const topTests = tests.slice(0, Math.min(8, tests.length));
   topTests.forEach((test) => {
     if (topShellContainer) {
@@ -99,8 +147,13 @@ function renderSections(tests) {
     }
   });
 }
+
+// ----- 초기화 -----
 function initTestSectionsAjax() {
-  fetchTestsAjax().then(normalizeTests).then(renderSections).catch((err) => console.error("\uD14C\uC2A4\uD2B8 \uBAA9\uB85D \uB85C\uB529 \uC2E4\uD328:", err));
+  fetchTestsAjax()
+    .then(normalizeTests)
+    .then(renderSections)
+    .catch((err) => console.error("테스트 목록 로딩 실패:", err));
 }
+
 document.addEventListener("DOMContentLoaded", initTestSectionsAjax);
-//# sourceMappingURL=main.js.map

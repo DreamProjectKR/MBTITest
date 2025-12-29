@@ -10,7 +10,10 @@ const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
 };
 
-function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
+function withCacheHeaders(
+  headers: HeadersInit,
+  { etag, maxAge = 60 }: { etag?: string; maxAge?: number } = {},
+): Headers {
   const h = new Headers(headers);
   h.set(
     "Cache-Control",
@@ -20,7 +23,7 @@ function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
   return h;
 }
 
-export async function onRequestGet(context) {
+export async function onRequestGet(context: any) {
   const db = context.env.MBTI_DB;
   if (!db) {
     return new Response(JSON.stringify({ error: "D1 binding MBTI_DB is missing." }), {

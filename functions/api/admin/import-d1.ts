@@ -11,7 +11,7 @@ const JSON_HEADERS = {
 
 import { encodeDescriptionText, encodeTagsText } from "../utils/codecs.js";
 
-function json(status, payload) {
+function json(status: number, payload: unknown) {
   return new Response(JSON.stringify(payload), { status, headers: JSON_HEADERS });
 }
 
@@ -19,7 +19,7 @@ function unauthorized() {
   return json(401, { error: "Unauthorized" });
 }
 
-function hasValidAuth(request, token) {
+function hasValidAuth(request: Request, token: string) {
   if (!token) return false;
   const raw = request.headers.get("authorization") || "";
   const m = raw.match(/^Bearer\s+(.+)$/i);
@@ -27,7 +27,7 @@ function hasValidAuth(request, token) {
   return m[1] === token;
 }
 
-export async function onRequestPost(context) {
+export async function onRequestPost(context: any) {
   const token = context.env.ADMIN_TOKEN || "";
   if (!hasValidAuth(context.request, token)) return unauthorized();
 
@@ -65,7 +65,7 @@ export async function onRequestPost(context) {
 
   const tests = Array.isArray(index?.tests) ? index.tests : [];
   const selected = onlyTestId
-    ? tests.filter((t) => String(t?.id || "") === onlyTestId)
+    ? tests.filter((t: any) => String(t?.id || "") === onlyTestId)
     : tests;
 
   const report = [];
@@ -151,13 +151,13 @@ export async function onRequestPost(context) {
   });
 }
 
-function normalizeIndexPathToR2Key(rawPath) {
+function normalizeIndexPathToR2Key(rawPath: unknown): string {
   const str = String(rawPath || "").trim().replace(/^\.?\/+/, "");
   if (!str) return "";
   return str.startsWith("assets/") ? str : `assets/${str}`;
 }
 
-function validateTestJsonShape(test) {
+function validateTestJsonShape(test: any): string[] {
   const errs = [];
   if (!test || typeof test !== "object") return ["test.json must be an object."];
   if (!test.id) errs.push("Missing test.id");
@@ -168,7 +168,7 @@ function validateTestJsonShape(test) {
     errs.push("Missing results{} (MBTI-style).");
 
   if (Array.isArray(test.questions)) {
-    test.questions.forEach((q, idx) => {
+    test.questions.forEach((q: any, idx: number) => {
       if (!q?.id) errs.push(`Question ${idx + 1}: missing id`);
       if (!q?.prompt && !q?.label)
         errs.push(`Question ${idx + 1}: missing prompt/label`);
@@ -180,7 +180,7 @@ function validateTestJsonShape(test) {
   return errs;
 }
 
-async function upsertTestIntoD1(db, metaEntry, testJson) {
+async function upsertTestIntoD1(db: any, metaEntry: any, testJson: any) {
   const testId = String(testJson.id || metaEntry.id || "").trim();
   if (!testId) throw new Error("Missing test id for upsert.");
 
@@ -190,11 +190,6 @@ async function upsertTestIntoD1(db, metaEntry, testJson) {
   const thumbnail = String(testJson.thumbnail || "").trim();
 
   const type = "mbti";
-  const rulesJson = JSON.stringify({
-    mode: "mbtiAxes",
-    axisOrder: ["EI", "SN", "TF", "JP"],
-    axisDefaults: { EI: "I", SN: "S", TF: "T", JP: "J" },
-  });
 
   const descriptionText = encodeDescriptionText(testJson.description || "");
   const tagsText = encodeTagsText(testJson.tags || []);
@@ -209,14 +204,14 @@ async function upsertTestIntoD1(db, metaEntry, testJson) {
   // Clear existing rows for idempotent import
   statements.push(db.prepare("DELETE FROM answers WHERE test_id = ?").bind(testId));
   statements.push(db.prepare("DELETE FROM questions WHERE test_id = ?").bind(testId));
-  statements.push(db.prepare("DELETE FROM outcomes WHERE test_id = ?").bind(testId));
+  statements.push(db.prepare("DELETE FROM results WHERE test_id = ?").bind(testId));
   statements.push(db.prepare("DELETE FROM tests WHERE id = ?").bind(testId));
 
   statements.push(
     db
       .prepare(
-        `INSERT INTO tests (id, title, type, description_text, tags_text, author, author_img, thumbnail, rules_json, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO tests (id, title, type, description_text, tags_text, author, author_img, thumbnail, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         testId,
@@ -227,40 +222,39 @@ async function upsertTestIntoD1(db, metaEntry, testJson) {
         author,
         authorImg,
         thumbnail,
-        rulesJson,
         createdAtValue,
         updatedAtValue,
       ),
   );
 
   const questions = Array.isArray(testJson.questions) ? testJson.questions : [];
-  questions.forEach((q, qIndex) => {
+  questions.forEach((q: any, qIndex: number) => {
     const qid = String(q?.id || "").trim() || `q${qIndex + 1}`;
-    const label = String(q?.label || "").trim();
-    const promptImage = String(q?.prompt || "").trim();
+    const questionText = String(q?.label || "").trim();
+    const questionImage = String(q?.prompt || "").trim();
     statements.push(
       db
         .prepare(
-          `INSERT INTO questions (test_id, question_id, ord, label, prompt_image, prompt_text, prompt_meta_json)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO questions (test_id, question_id, ord, question, question_image)
+           VALUES (?, ?, ?, ?, ?)`,
         )
-        .bind(testId, qid, qIndex, label, promptImage, "", ""),
+        .bind(testId, qid, qIndex, questionText, questionImage),
     );
 
     const answers = Array.isArray(q?.answers) ? q.answers : [];
-    answers.forEach((a, aIndex) => {
+    answers.forEach((a: any, aIndex: number) => {
       const aid = String(a?.id || "").trim() || `${qid}_a${aIndex + 1}`;
-      const aLabel = String(a?.label || "").trim();
-      const axis = String(a?.mbtiAxis || "").trim();
-      const dir = String(a?.direction || "").trim();
-      const payload = axis && dir ? { mbtiAxis: axis, direction: dir, axis, dir, weight: 1 } : {};
+      const aText = String(a?.label || "").trim();
+      const axis = String(a?.mbtiAxis || "").trim().toUpperCase();
+      const dir = String(a?.direction || "").trim().toUpperCase();
+      const weight = 1;
       statements.push(
         db
           .prepare(
-            `INSERT INTO answers (test_id, answer_id, question_id, ord, label, payload_json)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO answers (test_id, answer_id, question_id, ord, answer, mbti_axis, mbti_dir, weight, score_key, score_value)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           )
-          .bind(testId, aid, qid, aIndex, aLabel, JSON.stringify(payload)),
+          .bind(testId, aid, qid, aIndex, aText, axis, dir, weight, "", 0),
       );
     });
   });
@@ -271,16 +265,14 @@ async function upsertTestIntoD1(db, metaEntry, testJson) {
     statements.push(
       db
         .prepare(
-          `INSERT INTO outcomes (test_id, code, title, image, summary, meta_json)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO results (test_id, result, result_image, summary)
+           VALUES (?, ?, ?, ?)`,
         )
         .bind(
           testId,
           String(code),
-          "",
           String(r.image || ""),
           String(r.summary || ""),
-          "",
         ),
     );
   });

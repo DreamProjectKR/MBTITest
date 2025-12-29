@@ -5,7 +5,7 @@
  * - tags_text: CSV-quoted list -> string[]
  */
 
-export function encodeDescriptionText(input) {
+export function encodeDescriptionText(input: unknown): string {
   if (Array.isArray(input)) {
     return input
       .map((v) => String(v ?? "").replace(/\r?\n/g, "\n"))
@@ -16,7 +16,7 @@ export function encodeDescriptionText(input) {
   return s.replace(/\r?\n/g, "\n");
 }
 
-export function decodeDescriptionText(descriptionText) {
+export function decodeDescriptionText(descriptionText: unknown): string[] {
   const s = String(descriptionText ?? "");
   if (!s) return [];
   return s
@@ -25,7 +25,7 @@ export function decodeDescriptionText(descriptionText) {
     .filter((v) => v.length > 0);
 }
 
-export function encodeTagsText(tags) {
+export function encodeTagsText(tags: unknown): string {
   const list = Array.isArray(tags)
     ? tags
     : typeof tags === "string"
@@ -39,20 +39,20 @@ export function encodeTagsText(tags) {
     .join(",");
 }
 
-export function decodeTagsText(tagsText) {
+export function decodeTagsText(tagsText: unknown): string[] {
   const s = String(tagsText ?? "").trim();
   if (!s) return [];
   return parseCsvQuotedList(s);
 }
 
-function csvQuote(value) {
+function csvQuote(value: unknown): string {
   const s = String(value ?? "");
   // CSV rule: double quotes are escaped by doubling them.
   const escaped = s.replace(/"/g, '""');
   return `"${escaped}"`;
 }
 
-function splitLooseTags(input) {
+function splitLooseTags(input: string): string[] {
   // Used when admin sends a comma-separated string; not used for storage.
   return String(input ?? "")
     .split(",")
@@ -60,7 +60,7 @@ function splitLooseTags(input) {
     .filter((v) => v.length > 0);
 }
 
-function parseCsvQuotedList(input) {
+function parseCsvQuotedList(input: string): string[] {
   const out = [];
   let i = 0;
   const s = String(input ?? "");

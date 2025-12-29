@@ -8,7 +8,10 @@ const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
 };
 
-function withCacheHeaders(headers, { etag, maxAge = 120 } = {}) {
+function withCacheHeaders(
+  headers: HeadersInit,
+  { etag, maxAge = 120 }: { etag?: string; maxAge?: number } = {},
+): Headers {
   const h = new Headers(headers);
   h.set(
     "Cache-Control",
@@ -18,7 +21,7 @@ function withCacheHeaders(headers, { etag, maxAge = 120 } = {}) {
   return h;
 }
 
-export async function onRequestGet(context) {
+export async function onRequestGet(context: any) {
   const db = context.env.MBTI_DB;
   if (!db) {
     return new Response(JSON.stringify({ error: "D1 binding MBTI_DB is missing." }), {
@@ -29,9 +32,10 @@ export async function onRequestGet(context) {
 
   const id = context.params?.id ? String(context.params.id) : "";
   const url = new URL(context.request.url);
-  const code = (url.searchParams.get("code") || "").trim();
+  const code =
+    (url.searchParams.get("code") || url.searchParams.get("result") || "").trim();
   if (!id || !code) {
-    return new Response(JSON.stringify({ error: "Missing test id or outcome code." }), {
+    return new Response(JSON.stringify({ error: "Missing test id or result code." }), {
       status: 400,
       headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
     });
@@ -50,9 +54,9 @@ export async function onRequestGet(context) {
 
   const outRow = await db
     .prepare(
-      `SELECT code, title, image, summary, meta_json, updated_at
-       FROM outcomes
-       WHERE test_id = ? AND code = ?`,
+      `SELECT result, result_image, summary, updated_at
+       FROM results
+       WHERE test_id = ? AND result = ?`,
     )
     .bind(id, code)
     .first();
@@ -69,11 +73,11 @@ export async function onRequestGet(context) {
     title: testRow.title ?? "",
     type: testRow.type ?? "generic",
     outcome: {
-      code: outRow.code,
-      title: outRow.title ?? "",
-      image: outRow.image ?? "",
+      code: outRow.result,
+      title: "",
+      image: outRow.result_image ?? "",
       summary: outRow.summary ?? "",
-      meta: outRow.meta_json ? safeJsonParse(outRow.meta_json) : null,
+      meta: null,
     },
   };
 
@@ -92,13 +96,3 @@ export async function onRequestGet(context) {
     headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 300 }),
   });
 }
-
-function safeJsonParse(raw) {
-  try {
-    return JSON.parse(String(raw));
-  } catch (e) {
-    return null;
-  }
-}
-
-

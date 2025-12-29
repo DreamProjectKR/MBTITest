@@ -21,7 +21,10 @@ import { decodeTagsText } from "../utils/codecs.js";
  * @param {{ etag?: string, maxAge?: number }} [opts]
  * @returns {Headers}
  */
-function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
+function withCacheHeaders(
+  headers: HeadersInit,
+  { etag, maxAge = 60 }: { etag?: string; maxAge?: number } = {},
+): Headers {
   const h = new Headers(headers);
   h.set(
     "Cache-Control",
@@ -36,7 +39,7 @@ function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
  * @param {{ request: Request, env: any }} context
  * @returns {Promise<Response>}
  */
-export async function onRequestGet(context) {
+export async function onRequestGet(context: any) {
   const db = context.env.MBTI_DB;
   if (!db) {
     return new Response(
@@ -54,7 +57,7 @@ export async function onRequestGet(context) {
     .all();
 
   const rows = Array.isArray(res?.results) ? res.results : [];
-  const tests = rows.map((r) => ({
+  const tests = rows.map((r: any) => ({
     id: r.id,
     title: r.title ?? "",
     thumbnail: r.thumbnail ?? "",
