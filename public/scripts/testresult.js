@@ -2,9 +2,9 @@
  * Result page controller (`public/testresult.html` -> `public/scripts/testresult.js`).
  *
  * What it does:
- * - Reads `testId` and `result` (MBTI) from query string.
- * - Fetches test JSON via `GET /api/tests/:id`.
- * - Renders `results[MBTI].image`.
+ * - Reads `testId` and `code` from query string.
+ * - Fetches outcome via `GET /api/tests/:id/outcome?code=...`.
+ * - Renders `outcome.image`.
  * - Provides Restart + Share interactions.
  */
 const dom = {
@@ -124,31 +124,32 @@ async function shareResult({ mbti, title }) {
 }
 
 function renderResultPage(data, mbti) {
-  if (!data || !mbti) {
+  const code = mbti;
+  if (!data || !code) {
     renderError("결과 정보를 불러오지 못했습니다.");
     return;
   }
 
-  const resultData = data.results?.[mbti];
+  const resultData = data.outcome;
   const resultImage = resolveAssetPath(resultData?.image);
 
   if (dom.thumbnailEl) {
     if (resultImage) dom.thumbnailEl.src = resultImage;
-    dom.thumbnailEl.alt = mbti ? `${mbti} 결과` : "결과 이미지";
+    dom.thumbnailEl.alt = code ? `${code} 결과` : "결과 이미지";
   }
 
   if (dom.titleEl) {
-    const titleText = data.title ? `${data.title} - ${mbti}` : `결과 ${mbti}`;
+    const titleText = data.title ? `${data.title} - ${code}` : `결과 ${code}`;
     dom.titleEl.textContent = titleText;
     document.title = titleText;
   }
 
-  setupButtons(data.id, mbti, data.title);
+  setupButtons(data.id, code, data.title);
 }
 
 async function loadResultData() {
   const testId = getParam("testId");
-  const mbti = getParam("result")?.toUpperCase();
+  const mbti = (getParam("code") || getParam("result") || "").trim();
 
   document.body.classList.add("ResultPage");
 
@@ -157,19 +158,13 @@ async function loadResultData() {
     return;
   }
 
-  const cached = readCachedTestJson(testId);
-  if (cached) {
-    renderResultPage(cached, mbti);
-    return;
-  }
-
   try {
     const apiBase = window.API_TESTS_BASE || "/api/tests";
-    const dataRes = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
+    const url = new URL(`${apiBase}/${encodeURIComponent(testId)}/outcome`, window.location.href);
+    url.searchParams.set("code", mbti);
+    const dataRes = await fetch(url.toString());
     if (!dataRes.ok) throw new Error("테스트 데이터 로딩 실패");
     const data = await dataRes.json();
-
-    persistTestJson(testId, data);
 
     renderResultPage(data, mbti);
   } catch (err) {

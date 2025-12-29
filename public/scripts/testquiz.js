@@ -2,18 +2,17 @@
  * Quiz page controller (`public/testquiz.html` -> `public/scripts/testquiz.js`).
  *
  * High-level flow:
- * - Load test JSON via `GET /api/tests/:id`
+ * - Load quiz payload via `GET /api/tests/:id/quiz`
  * - Shuffle questions/answers (optional)
- * - Render question prompt image + two answer buttons
- * - Track scores and compute MBTI
- * - Navigate to `testresult.html?testId=...&result=MBTI`
+ * - Render question prompt image + N answer buttons
+ * - POST selections to `POST /api/tests/:id/evaluate`
+ * - Navigate to `testresult.html?testId=...&code=OUTCOME`
  */
 const state = {
   test: null,
   currentIndex: 0,
   totalQuestions: 0,
-  scores: {},
-  answers: [],
+  selectedAnswerIds: [],
 };
 
 /**
@@ -134,16 +133,16 @@ function buildShuffledQuestions(questions) {
   return copied;
 }
 
-function goToResultPage(mbti) {
+function goToResultPage(code) {
   const testId = state.test?.id;
-  if (!testId || !mbti) {
+  if (!testId || !code) {
     renderError("결과를 계산하지 못했습니다.");
     return;
   }
 
   const url = new URL("./testresult.html", window.location.href);
   url.searchParams.set("testId", testId);
-  url.searchParams.set("result", mbti);
+  url.searchParams.set("code", code);
   window.location.href = url.toString();
 }
 
@@ -228,7 +227,9 @@ function renderQuestion() {
   updateProgressBar(state.currentIndex, state.totalQuestions);
 
   if (dom.image) {
-    dom.image.src = resolveAssetPath(question.prompt) || "#";
+    const prompt =
+      typeof question.prompt === "string" ? question.prompt : question.prompt?.image;
+    dom.image.src = resolveAssetPath(prompt) || "#";
     dom.image.alt = question.id || `문항 ${state.currentIndex + 1}`;
   }
 
@@ -273,25 +274,15 @@ function initializeStateFromTestJson(testJson) {
   state.test = { ...testJson, questions };
   state.totalQuestions = total;
   state.currentIndex = 0;
-  state.scores = {};
-  state.answers = [];
+  state.selectedAnswerIds = [];
 
   renderQuestion();
   return true;
 }
 
-function recordScore(answer) {
-  const axis = answer.mbtiAxis;
-  const dir = answer.direction;
-  if (!axis || !dir) return;
-
-  if (!state.scores[axis]) state.scores[axis] = {};
-  state.scores[axis][dir] = (state.scores[axis][dir] || 0) + 1;
-}
-
 function handleAnswer(answer) {
-  state.answers.push(answer);
-  recordScore(answer);
+  const id = String(answer?.id || "").trim();
+  if (id) state.selectedAnswerIds.push(id);
 
   const nextIndex = state.currentIndex + 1;
   if (nextIndex >= state.totalQuestions) {
@@ -303,34 +294,28 @@ function handleAnswer(answer) {
   renderQuestion();
 }
 
-function computeMbti() {
-  const axes = [
-    ["E", "I"],
-    ["S", "N"],
-    ["T", "F"],
-    ["J", "P"],
-  ];
+async function renderResult() {
+  const testId = state.test?.id;
+  if (!testId) return renderError("테스트 정보를 찾지 못했습니다.");
+  if (!state.selectedAnswerIds.length)
+    return renderError("선택된 답변이 없습니다.");
 
-  let result = "";
-  axes.forEach(([first, second]) => {
-    const key = `${first}${second}`;
-    const scores = state.scores[key] || {};
-    const firstScore = scores[first] || 0;
-    const secondScore = scores[second] || 0;
-    result += firstScore >= secondScore ? first : second;
-  });
-
-  return result;
-}
-
-function renderResult() {
-  const mbti = computeMbti();
-  if (!mbti) {
+  try {
+    const apiBase = window.API_TESTS_BASE || "/api/tests";
+    const res = await fetch(`${apiBase}/${encodeURIComponent(testId)}/evaluate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ answers: state.selectedAnswerIds }),
+    });
+    if (!res.ok) throw new Error(`evaluate ${res.status}`);
+    const data = await res.json();
+    const code = data?.outcome?.code;
+    if (!code) throw new Error("missing outcome.code");
+    goToResultPage(String(code));
+  } catch (err) {
+    console.error("결과 계산 실패:", err);
     renderError("결과를 계산하지 못했습니다.");
-    return;
   }
-
-  goToResultPage(mbti);
 }
 
 async function shareCurrentTest(test) {
@@ -367,7 +352,7 @@ async function loadTestData() {
 
   try {
     const apiBase = window.API_TESTS_BASE || "/api/tests";
-    const dataRes = await fetch(`${apiBase}/${encodeURIComponent(testId)}`);
+    const dataRes = await fetch(`${apiBase}/${encodeURIComponent(testId)}/quiz`);
     if (!dataRes.ok) throw new Error("테스트 데이터 로딩 실패");
     const data = await dataRes.json();
 

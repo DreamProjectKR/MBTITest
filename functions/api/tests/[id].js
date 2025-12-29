@@ -1,16 +1,18 @@
 /**
- * API: `GET /api/tests/:id`
+ * API: `GET /api/tests/:id` (legacy)
  *
- * Reads `assets/index.json` from R2, finds the matching test by `id`,
- * then fetches that test's JSON (`assets/<test>/test.json`) and returns it.
- *
- * Cache behavior:
- * - Supports ETag / If-None-Match
- * - Uses conservative TTLs because content may change
+ * D1-backed endpoint that assembles a best-effort legacy `test.json` shape for compatibility.
+ * New clients should prefer:
+ * - `GET /api/tests/:id/meta`
+ * - `GET /api/tests/:id/quiz`
+ * - `POST /api/tests/:id/evaluate`
+ * - `GET /api/tests/:id/outcome?code=...`
  */
 const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
 };
+
+import { decodeDescriptionText, decodeTagsText } from "../utils/codecs.js";
 
 /**
  * Add caching headers to a response.
@@ -29,33 +31,17 @@ function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
 }
 
 /**
- * Convert an index.json `path` field into an R2 key.
- * Examples:
- * - `test-summer/test.json` -> `assets/test-summer/test.json`
- * - `assets/test-summer/test.json` -> `assets/test-summer/test.json`
- * @param {string} rawPath
- * @returns {string}
- */
-function normalizeR2KeyFromIndexPath(rawPath) {
-  const str = String(rawPath || "").trim();
-  if (!str) return "";
-  // index.json은 보통 "test-summer/test.json" 형태로 내려오므로 "assets/"를 보정한다.
-  const clean = str.replace(/^\.?\/+/, "");
-  return clean.startsWith("assets/") ? clean : `assets/${clean}`;
-}
-
-/**
  * Cloudflare Pages Function entrypoint for `GET /api/tests/:id`.
  * @param {{ request: Request, env: any, params?: { id?: string } }} context
  * @returns {Promise<Response>}
  */
 export async function onRequestGet(context) {
-  const bucket = context.env.MBTI_BUCKET;
-  if (!bucket) {
-    return new Response(
-      JSON.stringify({ error: "R2 binding MBTI_BUCKET is missing." }),
-      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
-    );
+  const db = context.env.MBTI_DB;
+  if (!db) {
+    return new Response(JSON.stringify({ error: "D1 binding MBTI_DB is missing." }), {
+      status: 500,
+      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
+    });
   }
 
   const id = context.params?.id ? String(context.params.id) : "";
@@ -66,72 +52,118 @@ export async function onRequestGet(context) {
     });
   }
 
-  const indexObj = await bucket.get("assets/index.json");
-  if (!indexObj) {
-    return new Response(
-      JSON.stringify({ error: "index.json not found in R2." }),
-      {
-        status: 404,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 5 }),
-      },
-    );
-  }
+  const testRow = await db
+    .prepare(
+      `SELECT id, title, type, description_text, tags_text, author, author_img, thumbnail, updated_at
+       FROM tests
+       WHERE id = ?`,
+    )
+    .bind(id)
+    .first();
 
-  let index;
-  try {
-    index = JSON.parse(await indexObj.text());
-  } catch (e) {
-    return new Response(
-      JSON.stringify({ error: "index.json is invalid JSON." }),
-      {
-        status: 500,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-      },
-    );
-  }
-
-  const tests = Array.isArray(index?.tests) ? index.tests : [];
-  const meta = tests.find((t) => t?.id === id);
-  if (!meta) {
+  if (!testRow) {
     return new Response(JSON.stringify({ error: "Test not found: " + id }), {
       status: 404,
       headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
     });
   }
 
-  const key = normalizeR2KeyFromIndexPath(meta.path);
-  if (!key) {
-    return new Response(
-      JSON.stringify({ error: "Test meta has empty path: " + id }),
-      {
-        status: 500,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-      },
-    );
-  }
-
-  const obj = await bucket.get(key);
-  if (!obj) {
-    return new Response(
-      JSON.stringify({ error: "Test JSON not found in R2.", key }),
-      {
-        status: 404,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
-      },
-    );
-  }
-
   const ifNoneMatch = context.request.headers.get("if-none-match");
-  if (ifNoneMatch && obj.etag && ifNoneMatch === obj.etag) {
+  const etagBase = testRow.updated_at ?? "";
+  const etag = etagBase ? `"d1-test-legacy-${id}-${etagBase}"` : "";
+  if (etag && ifNoneMatch && ifNoneMatch === etag) {
     return new Response(null, {
       status: 304,
-      headers: withCacheHeaders(JSON_HEADERS, { etag: obj.etag, maxAge: 120 }),
+      headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 120 }),
     });
   }
 
-  const text = await obj.text();
-  return new Response(text, {
-    status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, { etag: obj.etag, maxAge: 120 }),
+  const qRes = await db
+    .prepare(
+      `SELECT question_id, ord, label, prompt_image
+       FROM questions
+       WHERE test_id = ?
+       ORDER BY ord ASC`,
+    )
+    .bind(id)
+    .all();
+  const questionsRows = Array.isArray(qRes?.results) ? qRes.results : [];
+
+  const aRes = await db
+    .prepare(
+      `SELECT answer_id, question_id, ord, label, payload_json
+       FROM answers
+       WHERE test_id = ?
+       ORDER BY question_id ASC, ord ASC`,
+    )
+    .bind(id)
+    .all();
+  const answerRows = Array.isArray(aRes?.results) ? aRes.results : [];
+  const answersByQuestion = new Map();
+  answerRows.forEach((r) => {
+    const qid = String(r.question_id || "");
+    if (!qid) return;
+    if (!answersByQuestion.has(qid)) answersByQuestion.set(qid, []);
+    const payload = safeJsonParse(r.payload_json) || {};
+    answersByQuestion.get(qid).push({
+      id: r.answer_id,
+      label: r.label ?? "",
+      // Legacy compatibility: try to surface mbtiAxis/direction when present.
+      mbtiAxis: payload.mbtiAxis || payload.axis || "",
+      direction: payload.direction || payload.dir || "",
+    });
   });
+
+  const questions = questionsRows.map((r) => {
+    const qid = String(r.question_id || "");
+    return {
+      id: qid,
+      label: r.label ?? "",
+      prompt: r.prompt_image ?? "",
+      answers: answersByQuestion.get(qid) || [],
+    };
+  });
+
+  const outRes = await db
+    .prepare(
+      `SELECT code, image, summary
+       FROM outcomes
+       WHERE test_id = ?`,
+    )
+    .bind(id)
+    .all();
+  const outcomeRows = Array.isArray(outRes?.results) ? outRes.results : [];
+  const results = {};
+  outcomeRows.forEach((r) => {
+    if (!r?.code) return;
+    results[String(r.code)] = {
+      image: r.image ?? "",
+      summary: r.summary ?? "",
+    };
+  });
+
+  const payload = {
+    id: testRow.id,
+    title: testRow.title ?? "",
+    description: decodeDescriptionText(testRow.description_text ?? ""),
+    author: testRow.author ?? "",
+    authorImg: testRow.author_img ?? "",
+    tags: decodeTagsText(testRow.tags_text ?? ""),
+    thumbnail: testRow.thumbnail ?? "",
+    questions,
+    results,
+  };
+
+  return new Response(JSON.stringify(payload), {
+    status: 200,
+    headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 120 }),
+  });
+}
+
+function safeJsonParse(raw) {
+  try {
+    return JSON.parse(String(raw));
+  } catch (e) {
+    return null;
+  }
 }

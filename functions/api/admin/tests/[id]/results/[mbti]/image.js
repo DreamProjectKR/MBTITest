@@ -102,7 +102,11 @@ export async function onRequestPut(context) {
 
   try {
     await bucket.put(key, bytes, {
-      httpMetadata: { contentType: upload.contentType },
+      httpMetadata: {
+        contentType: upload.contentType,
+        // Result images are effectively static; cache aggressively.
+        cacheControl: "public, max-age=31536000, immutable",
+      },
     });
   } catch (err) {
     return createJsonResponse(

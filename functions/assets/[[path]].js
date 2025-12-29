@@ -95,24 +95,10 @@ export async function onRequestGet(context) {
     });
   }
 
-  // We expect R2 keys to live under `assets/...` in the bucket.
-  const candidateKeys = [
-    `assets/${tail}`, // common: `assets/images/...`
-    tail, // fallback: key stored without `assets/` prefix
-    `assets/data/${tail}`, // legacy fallback
-  ];
-
-  let obj = null;
-  let key = "";
-  for (const candidate of candidateKeys) {
-    // eslint-disable-next-line no-await-in-loop
-    const hit = await bucket.get(candidate);
-    if (hit) {
-      obj = hit;
-      key = candidate;
-      break;
-    }
-  }
+  // Canonical key: always serve from `assets/...` to keep a single R2 lookup per request.
+  // If callers accidentally include `assets/` in the URL, keep it stable.
+  const key = tail.startsWith("assets/") ? tail : `assets/${tail}`;
+  const obj = await bucket.get(key);
 
   if (!obj) {
     return new Response("Not Found", {
@@ -137,10 +123,7 @@ export async function onRequestGet(context) {
   const defaultCacheControl = cacheControlForKey(key);
   const cacheControl = obj.httpMetadata?.cacheControl || defaultCacheControl;
   headers.set("Cache-Control", cacheControl);
-    headers.set(
-      "Content-Type",
-      obj.httpMetadata?.contentType || guessContentType(key),
-    );
+  headers.set("Content-Type", obj.httpMetadata?.contentType || guessContentType(key));
   headers.set("X-MBTI-Assets-Proxy", "1");
   headers.set("X-MBTI-R2-Key", key);
   headers.set("X-MBTI-Edge-Cache", "MISS");
