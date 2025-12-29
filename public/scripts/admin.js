@@ -863,12 +863,23 @@ function renderMbtiDeltaHint(a) {
 }
 function normalizeDraftAnswersForQuestion() {
   const list = Array.isArray(state.draftAnswers) ? state.draftAnswers : [];
-  return list.map((a) => ({
-    id: a.id,
-    label: String(a.label || "").trim(),
-    ...deriveMbtiAxisDirFromLetter(String(a.mbtiLetter || "E")),
-    weight: 1
-  })).filter((a) => a.label.length > 0);
+  return list.map((a) => {
+    const letter = String(a.mbtiLetter || "E").trim().toUpperCase();
+    const derived = deriveMbtiAxisDirFromLetter(letter);
+    return {
+      id: a.id,
+      label: String(a.label || "").trim(),
+      // For the generalized pole schema, we store:
+      // - mbtiAxis (=> answers.pole_axis)
+      // - direction letter (=> answers.pole_side)
+      mbtiAxis: derived.mbtiAxis,
+      direction: letter,
+      // weight UI removed; keep magnitude at 1
+      weight: 1,
+      // ensure legacy-only fields don't leak into save payload
+      mbtiDir: void 0
+    };
+  }).filter((a) => a.label.length > 0);
 }
 function handleDraftAnswerInput(event) {
   const row = event.target.closest("[data-draft-answer-id]");

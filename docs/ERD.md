@@ -44,8 +44,8 @@ erDiagram
     TEXT question_id FK
     INT ord
     TEXT answer
-    TEXT mbti_axis
-    TEXT mbti_dir
+    TEXT pole_axis
+    TEXT pole_side
     INT weight
     TEXT score_key
     INT score_value
@@ -107,10 +107,10 @@ erDiagram
 - **주요 컬럼**
   - **`ord`**: 선택지 순서
   - **`answer`**: 선택지 텍스트
-  - **MBTI 입력(디자이너 친화형)**
-    - **`mbti_axis`**: `EI | SN | TF | JP`
-    - **`mbti_dir`**: `plus | minus` (더하기/빼기)
-    - **`weight`**: 더/빼는 수치(양수)
+  - **Pole 입력(디자이너 친화형, 범용)**
+    - **`pole_axis`**: pole(양극) “영역/축” 식별자 (예: `EI | SN | TF | JP` 또는 기타 축 ID)
+    - **`pole_side`**: pole “세부 영역/편향” 식별자 (예: `E/I/S/N/T/F/J/P` 또는 기타 side ID)
+    - **`weight`**: 점수 크기(양수). MBTI의 +/−는 `(pole_axis, pole_side)`로 부호를 유도합니다.
   - **Score 테스트 입력(디자이너 친화형)**
     - **`score_key`**: 점수를 줄 결과 키(예: `A`, `summer`)
     - **`score_value`**: 더할 점수(정수)
@@ -154,7 +154,7 @@ erDiagram
   - `id/title/type/description/tags/author/authorImg/thumbnail` → `tests.*`
   - `questions[].id/label/prompt` → `questions.(question_id, question, question_image)`
   - `questions[].answers[].id/label` → `answers.(answer_id, answer)`
-  - `questions[].answers[].mbtiAxis + direction(+weight)` → `answers.(mbti_axis, mbti_dir, weight)` 및 `mbti_answer_effects.(axis, delta)`
+  - `questions[].answers[].mbtiAxis + direction(+weight)` → `answers.(pole_axis, pole_side, weight)` 및 `mbti_answer_effects.(axis, delta)`
   - `results{ CODE: { image, summary } }` → `results.(result_id, result_image, result_text)`
 
 ---
