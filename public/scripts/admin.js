@@ -46,9 +46,7 @@ var elements = {
   authorImageFile: document.querySelector("[data-author-image-file]"),
   authorImageUpload: document.querySelector("[data-author-image-upload]"),
   authorImagePath: document.querySelector("[data-author-image-path]"),
-  thumbnailPath: document.querySelector("[data-thumbnail-path]"),
-  answerDraftList: document.querySelector("[data-answer-draft-list]"),
-  addDraftAnswer: document.querySelector("[data-add-draft-answer]")
+  thumbnailPath: document.querySelector("[data-thumbnail-path]")
 };
 var state = {
   tests: [],
@@ -56,8 +54,7 @@ var state = {
   activeTestId: null,
   isSaving: false,
   saveMessage: "",
-  imageList: [],
-  questionDraftAnswers: []
+  imageList: []
 };
 var isHydratingMeta = false;
 initAdmin();
@@ -66,7 +63,6 @@ async function initAdmin() {
   wireStaticEvents();
   setSaveStatus("\uC800\uC7A5 \uC900\uBE44");
   setupForms();
-  resetQuestionDraft();
   try {
     const payload = await fetchJson(API_TESTS_BASE);
     applyIndex(payload);
@@ -83,10 +79,6 @@ function wireStaticEvents() {
     setActiveTest(event.target.value);
   });
   elements.saveButton?.addEventListener("click", handleSaveTest);
-  elements.addDraftAnswer?.addEventListener("click", () => {
-    state.questionDraftAnswers.push(createEmptyAnswer());
-    renderDraftAnswerBuilder();
-  });
   elements.resultImageSubmit?.addEventListener(
     "click",
     handleResultImageUpload
@@ -97,21 +89,14 @@ function wireStaticEvents() {
 }
 function setupForms() {
   elements.metaForm?.addEventListener("input", handleMetaInput);
-  elements.answerDraftList?.addEventListener("input", handleDraftAnswerInput);
-  elements.answerDraftList?.addEventListener("click", handleDraftAnswerClick);
   elements.questionForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(elements.questionForm);
-    const answers = state.questionDraftAnswers.map(normalizeAnswerForSave).filter((a) => a.label && String(a.label).trim());
-    if (answers.length < 2) {
-      alert("\uB2F5\uBCC0\uC740 \uCD5C\uC18C 2\uAC1C\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4.");
-      return;
-    }
     const question = {
       id: crypto.randomUUID?.() ?? `q-${Date.now()}`,
       label: data.get("label")?.trim() ?? "",
       prompt: "",
-      answers
+      answers: [buildAnswer("answerA", data), buildAnswer("answerB", data)]
     };
     const activeTest = getActiveTest();
     if (!activeTest) return;
@@ -119,7 +104,6 @@ function setupForms() {
     activeTest.questions.push(question);
     renderQuestions(activeTest.questions);
     elements.questionForm.reset();
-    resetQuestionDraft();
   });
   elements.questionList?.addEventListener("click", (event) => {
     const uploadButton = event.target.closest("[data-upload-question-image]");
@@ -128,30 +112,6 @@ function setupForms() {
         uploadButton.dataset.uploadQuestionImage,
         uploadButton.closest("[data-question-item]")
       );
-      return;
-    }
-    const addAnswerButton = event.target.closest("[data-add-answer]");
-    if (addAnswerButton) {
-      const qid = addAnswerButton.dataset.addAnswer;
-      const activeTest = getActiveTest();
-      const q = activeTest?.questions?.find((qq) => qq.id === qid);
-      if (q) {
-        q.answers = q.answers ?? [];
-        q.answers.push(createEmptyAnswer());
-        renderQuestions(activeTest.questions);
-      }
-      return;
-    }
-    const removeAnswerButton = event.target.closest("[data-remove-answer]");
-    if (removeAnswerButton) {
-      const qid = removeAnswerButton.dataset.questionId;
-      const aid = removeAnswerButton.dataset.removeAnswer;
-      const activeTest = getActiveTest();
-      const q = activeTest?.questions?.find((qq) => qq.id === qid);
-      if (q?.answers) {
-        q.answers = q.answers.filter((a) => a.id !== aid);
-        renderQuestions(activeTest.questions);
-      }
       return;
     }
     const removeButton = event.target.closest("[data-remove-question]");
@@ -167,8 +127,6 @@ function setupForms() {
       );
     }
   });
-  elements.questionList?.addEventListener("input", handleQuestionListInput);
-  elements.questionList?.addEventListener("change", handleQuestionListInput);
   elements.resultForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(elements.resultForm);
@@ -195,212 +153,6 @@ function setupForms() {
     delete activeTest.results[code];
     renderResults(activeTest.results);
   });
-}
-
-function createEmptyAnswer() {
-  return {
-    id: crypto.randomUUID?.() ?? `a-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    label: "",
-    mbtiAxis: "",
-    mbtiDir: "plus",
-    weight: 1,
-    scoreKey: "",
-    scoreValue: 0
-  };
-}
-
-function normalizeAnswerForSave(answer) {
-  if (!answer || typeof answer !== "object") return createEmptyAnswer();
-  return {
-    id: answer.id || crypto.randomUUID?.() ?? `a-${Date.now()}`,
-    label: answer.label ?? "",
-    mbtiAxis: answer.mbtiAxis ?? "",
-    mbtiDir: answer.mbtiDir ?? "plus",
-    weight: Number.isFinite(Number(answer.weight)) ? Number(answer.weight) : 1,
-    scoreKey: answer.scoreKey ?? "",
-    scoreValue: Number.isFinite(Number(answer.scoreValue)) ? Number(answer.scoreValue) : 0
-  };
-}
-
-function resetQuestionDraft() {
-  state.questionDraftAnswers = [createEmptyAnswer(), createEmptyAnswer()];
-  renderDraftAnswerBuilder();
-}
-
-function renderDraftAnswerBuilder() {
-  if (!elements.answerDraftList) return;
-  if (!state.questionDraftAnswers.length) {
-    elements.answerDraftList.innerHTML = "";
-    return;
-  }
-  const fragment = document.createDocumentFragment();
-  state.questionDraftAnswers.forEach((answer, idx) => {
-    fragment.append(createAnswerEditorRow({ answer, idx, questionId: null, isDraft: true }));
-  });
-  elements.answerDraftList.innerHTML = "";
-  elements.answerDraftList.append(fragment);
-}
-
-function handleDraftAnswerInput(event) {
-  const row = event.target.closest("[data-answer-row]");
-  if (!row) return;
-  const idx = Number(row.dataset.answerIndex);
-  if (!Number.isFinite(idx)) return;
-  const answer = state.questionDraftAnswers[idx];
-  if (!answer) return;
-  applyAnswerFieldChange({ answer, target: event.target });
-}
-
-function handleDraftAnswerClick(event) {
-  const removeBtn = event.target.closest("[data-remove-draft-answer]");
-  if (!removeBtn) return;
-  const idx = Number(removeBtn.dataset.removeDraftAnswer);
-  if (!Number.isFinite(idx)) return;
-  state.questionDraftAnswers.splice(idx, 1);
-  renderDraftAnswerBuilder();
-}
-
-function handleQuestionListInput(event) {
-  const qItem = event.target.closest("[data-question-item]");
-  if (!qItem) return;
-  const qid = qItem.dataset.questionId;
-  const activeTest = getActiveTest();
-  const q = activeTest?.questions?.find((qq) => qq.id === qid);
-  if (!q) return;
-
-  const qFieldEl = event.target.closest("[data-q-field]");
-  if (qFieldEl) {
-    const field = qFieldEl.dataset.qField;
-    if (field === "label") q.label = qFieldEl.value;
-    return;
-  }
-
-  const aRow = event.target.closest("[data-answer-row]");
-  if (aRow) {
-    const aid = aRow.dataset.answerId;
-    const ans = (q.answers ?? []).find((a) => a.id === aid);
-    if (!ans) return;
-    applyAnswerFieldChange({ answer: ans, target: event.target });
-  }
-}
-
-function applyAnswerFieldChange({ answer, target }) {
-  if (!target) return;
-  const fieldEl = target.closest("[data-a-field]");
-  if (!fieldEl) return;
-  const field = fieldEl.dataset.aField;
-  if (field === "label") answer.label = fieldEl.value;
-  if (field === "mbtiAxis") {
-    answer.mbtiAxis = fieldEl.value;
-  }
-  if (field === "mbtiDir") {
-    answer.mbtiDir = fieldEl.value === "minus" ? "minus" : "plus";
-  }
-  if (field === "weight") {
-    const w = Number(fieldEl.value);
-    answer.weight = Number.isFinite(w) && w > 0 ? w : 1;
-  }
-  if (field === "scoreKey") {
-    answer.scoreKey = fieldEl.value;
-  }
-  if (field === "scoreValue") {
-    const v = Number(fieldEl.value);
-    answer.scoreValue = Number.isFinite(v) ? v : 0;
-  }
-}
-
-function createAnswerEditorRow({ answer, idx, questionId, isDraft }) {
-  const activeTest = getActiveTest();
-  const testType = String(activeTest?.type || "generic").toLowerCase();
-  const row = document.createElement("div");
-  row.className = `answer-row ${testType.includes("score") ? "answer-row--score" : "answer-row--mbti"}`;
-  row.dataset.answerRow = "1";
-  row.dataset.answerIndex = String(idx);
-  if (answer?.id) row.dataset.answerId = answer.id;
-
-  const grid = document.createElement("div");
-  grid.className = "answer-row__grid";
-
-  const label = document.createElement("input");
-  label.type = "text";
-  label.placeholder = "\uB2F5\uBCC0 \uD14D\uC2A4\uD2B8";
-  label.value = answer?.label ?? "";
-  label.setAttribute("data-a-field", "label");
-
-  const controls = [];
-  if (testType.includes("score")) {
-    const key = document.createElement("select");
-    key.setAttribute("data-a-field", "scoreKey");
-    const resultKeys = Object.keys(activeTest?.results || {}).sort();
-    key.innerHTML = [
-      `<option value="">(\uACB0\uACFC \uC120\uD0DD)</option>`,
-      ...resultKeys.map((k) => `<option value="${escapeHtmlAttr(k)}">${escapeHtml(k)}</option>`),
-    ].join("");
-    key.value = answer?.scoreKey ?? "";
-
-    const value = document.createElement("input");
-    value.type = "number";
-    value.step = "1";
-    value.placeholder = "\uC810\uC218";
-    value.value = String(Number.isFinite(Number(answer?.scoreValue)) ? Number(answer.scoreValue) : 0);
-    value.setAttribute("data-a-field", "scoreValue");
-
-    controls.push(key, value);
-  } else {
-    const axis = document.createElement("select");
-    axis.setAttribute("data-a-field", "mbtiAxis");
-    axis.innerHTML = `
-      <option value="">(EI/SN/TF/JP)</option>
-      <option value="EI">EI</option>
-      <option value="SN">SN</option>
-      <option value="TF">TF</option>
-      <option value="JP">JP</option>
-    `;
-    axis.value = answer?.mbtiAxis ?? "";
-
-    const dir = document.createElement("select");
-    dir.setAttribute("data-a-field", "mbtiDir");
-    dir.innerHTML = `
-      <option value="plus">\uB354\uD558\uAE30 (+)</option>
-      <option value="minus">\uBE7C\uAE30 (-)</option>
-    `;
-    dir.value = answer?.mbtiDir === "minus" ? "minus" : "plus";
-
-    const weight = document.createElement("input");
-    weight.type = "number";
-    weight.step = "1";
-    weight.min = "1";
-    weight.placeholder = "\uC218\uCE58";
-    weight.value = String(Number.isFinite(Number(answer?.weight)) ? Number(answer.weight) : 1);
-    weight.setAttribute("data-a-field", "weight");
-
-    controls.push(axis, dir, weight);
-  }
-
-  const remove = document.createElement("button");
-  remove.type = "button";
-  remove.className = "ds-button ds-button--ghost ds-button--small";
-  remove.textContent = "\uC0AD\uC81C";
-  if (isDraft) {
-    remove.dataset.removeDraftAnswer = String(idx);
-    remove.setAttribute("data-remove-draft-answer", String(idx));
-  } else {
-    remove.dataset.removeAnswer = answer.id;
-    remove.dataset.questionId = questionId;
-    remove.setAttribute("data-remove-answer", answer.id);
-  }
-
-  grid.append(label, ...controls, remove);
-  row.append(grid);
-  return row;
-}
-
-function escapeHtmlAttr(value) {
-  return String(value ?? "").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function escapeHtml(value) {
-  return String(value ?? "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 async function handleJsonUpload(event) {
   const [file] = event.target.files ?? [];
@@ -511,7 +263,7 @@ async function loadTest(testId) {
     return;
   }
   try {
-    const test = await fetchJson(`${API_ADMIN_TESTS_BASE}/${testId}`);
+    const test = await fetchJson(`${API_TESTS_BASE}/${testId}`);
     state.loadedTests = { ...state.loadedTests, [testId]: test };
     syncMetaEntry(test);
     refreshActiveTest();
@@ -539,11 +291,8 @@ function createTest() {
   const newTest = {
     id: `test-${rawId.slice(0, 8)}`,
     title: "\uC0C8 \uD14C\uC2A4\uD2B8",
-    type: "mbti",
     description: "",
     tags: [],
-    author: "",
-    authorImg: "",
     thumbnail: "",
     questions: [],
     results: {}
@@ -559,9 +308,6 @@ function hydrateForms(test) {
   if (!elements.metaForm) return;
   const form = elements.metaForm;
   isHydratingMeta = true;
-  if (form.elements["type"]) {
-    form.elements["type"].value = test?.type ?? "generic";
-  }
   form.elements["title"].value = test?.title ?? "";
   form.elements["description"].value = formatDescriptionForInput(
     test?.description
@@ -595,9 +341,6 @@ function handleMetaInput() {
   const activeTest = getActiveTest();
   if (!activeTest) return;
   const form = elements.metaForm;
-  if (form.elements["type"]) {
-    activeTest.type = form.elements["type"].value;
-  }
   activeTest.title = form.elements["title"].value;
   activeTest.description = parseDescriptionInput(
     form.elements["description"].value
@@ -853,43 +596,19 @@ function renderQuestions(questions) {
     const imgText = question.prompt ? ` / \uC774\uBBF8\uC9C0: ${question.prompt}` : "";
     title.textContent = `${index + 1}. ${labelText}${imgText}`;
     content.append(title);
-    const editor = document.createElement("div");
-    editor.className = "question-editor";
-    const labelInput = document.createElement("input");
-    labelInput.type = "text";
-    labelInput.value = question.label ?? "";
-    labelInput.placeholder = "\uC9C8\uBB38 \uD14D\uC2A4\uD2B8";
-    labelInput.setAttribute("data-q-field", "label");
-    editor.append(labelInput);
-
-    const answersWrap = document.createElement("div");
-    answersWrap.className = "answers-editor";
-    const answersHeader = document.createElement("div");
-    answersHeader.className = "answers-editor__header";
-    const answersTitle = document.createElement("strong");
-    answersTitle.textContent = "\uB2F5\uBCC0";
-    const addBtn = document.createElement("button");
-    addBtn.type = "button";
-    addBtn.className = "ds-button ds-button--secondary ds-button--small";
-    addBtn.textContent = "\uB2F5\uBCC0 \uCD94\uAC00";
-    addBtn.dataset.addAnswer = question.id;
-    answersHeader.append(answersTitle, addBtn);
-    answersWrap.append(answersHeader);
-
-    const answersList = document.createElement("div");
-    answersList.className = "answers-editor__list";
-    (question.answers ?? []).forEach((answer, aIndex) => {
-      answersList.append(
-        createAnswerEditorRow({
-          answer,
-          idx: aIndex,
-          questionId: question.id,
-          isDraft: false
-        })
-      );
+    const chipRow = document.createElement("div");
+    chipRow.className = "ds-chip-row";
+    (question.answers ?? []).forEach((answer) => {
+      const chip = document.createElement("span");
+      chip.className = "ds-chip";
+      const label = document.createElement("span");
+      label.textContent = answer.label;
+      const detail = document.createElement("small");
+      detail.textContent = `${answer.mbtiAxis} \u2192 ${answer.direction}`;
+      chip.append(label, detail);
+      chipRow.append(chip);
     });
-    answersWrap.append(answersList);
-    content.append(editor, answersWrap);
+    content.append(chipRow);
     item.append(content);
     const imageControls = document.createElement("div");
     imageControls.className = "admin-upload-row";
@@ -920,9 +639,11 @@ function renderQuestions(questions) {
 }
 function renderResults(results = {}) {
   if (!elements.resultList) return;
-  const entries = Object.keys(results).sort().map((code) => [code, results[code]]);
+  const entries = MBTI_ORDER.filter((code) => Boolean(results[code])).map(
+    (code) => [code, results[code]]
+  );
   if (!entries.length) {
-    elements.resultList.innerHTML = '<li><div class="ds-alert">\uB4F1\uB85D\uB41C \uACB0\uACFC(results)\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4. code/summary\uB97C \uCD94\uAC00\uD574\uC8FC\uC138\uC694.</div></li>';
+    elements.resultList.innerHTML = '<li><div class="ds-alert">\uB4F1\uB85D\uB41C \uACB0\uACFC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4. 16\uAC1C MBTI\uB97C \uBAA8\uB450 \uCC44\uC6CC\uC8FC\uC138\uC694.</div></li>';
     return;
   }
   elements.resultList.innerHTML = "";
@@ -933,18 +654,11 @@ function renderResults(results = {}) {
     badge.className = "ds-badge";
     const media = document.createElement("div");
     media.className = "ds-badge__media";
-    if (detail.image) {
-      const img = document.createElement("img");
-      img.src = window.assetUrl ? window.assetUrl(detail.image) : detail.image;
-      img.alt = `${code} \uC774\uBBF8\uC9C0`;
-      img.loading = "lazy";
-      media.append(img);
-    } else {
-      const placeholder = document.createElement("div");
-      placeholder.className = "ds-badge__placeholder";
-      placeholder.textContent = "\uC774\uBBF8\uC9C0 \uC5C6\uC74C";
-      media.append(placeholder);
-    }
+    const img = document.createElement("img");
+    img.src = window.assetUrl ? window.assetUrl(detail.image) : detail.image;
+    img.alt = `${code} \uC774\uBBF8\uC9C0`;
+    img.loading = "lazy";
+    media.append(img);
     badge.append(media);
     const textWrap = document.createElement("div");
     const strong = document.createElement("strong");
@@ -990,8 +704,7 @@ function buildAnswer(prefix, data) {
     id: crypto.randomUUID?.() ?? `${prefix}-${Date.now()}`,
     label: data.get(`${prefix}Text`),
     mbtiAxis: axis,
-    direction: directionPref === "positive" ? positive : negative,
-    payloadJson: ""
+    direction: directionPref === "positive" ? positive : negative
   };
 }
 function fetchJson(url) {

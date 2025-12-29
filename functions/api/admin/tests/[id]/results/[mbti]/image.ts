@@ -1,81 +1,40 @@
-import { JSON_HEADERS, getImagesPrefix } from "../../../../utils/store.js";
+import type { PagesContext } from "../../../../../types/bindings.d.ts";
+import { getImagesPrefix } from "../../../../utils/store.js";
+import { requireBucket, requireDb } from "../../../../../utils/bindings.js";
+import { errorResponse, jsonResponse, methodNotAllowed } from "../../../../../utils/http.js";
+import { extensionFromMime, readUploadBytes } from "../../../../../utils/upload.js";
 
-function createJsonResponse(payload: unknown, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: JSON_HEADERS,
-  });
-}
-
-function methodNotAllowed() {
-  return createJsonResponse({ error: "Method not allowed." }, 405);
-}
-
-function badRequest(message: string) {
-  return createJsonResponse({ error: message }, 400);
-}
-
-function extensionFromMime(mimeType = "") {
-  const type = mimeType.toLowerCase();
-  if (type === "image/jpeg" || type === "image/jpg") return "jpg";
-  if (type === "image/webp") return "webp";
-  if (type === "image/gif") return "gif";
-  return "png";
-}
-
-async function extractUpload(context: any) {
-  const contentType = context.request.headers.get("content-type") || "";
-  const isMultipart = contentType
-    .toLowerCase()
-    .startsWith("multipart/form-data");
-  if (isMultipart) {
-    const formData = await context.request.formData();
-    const file = formData.get("file");
-    if (!file || typeof file.arrayBuffer !== "function") return null;
-    const buffer = await file.arrayBuffer();
-    return { buffer, contentType: file.type || contentType };
-  }
-
-  const buffer = await context.request.arrayBuffer();
-  if (!buffer || buffer.byteLength === 0) return null;
-  return { buffer, contentType: contentType || "image/png" };
-}
-
-export async function onRequestPut(context: any) {
+export async function onRequestPut(
+  context: PagesContext<{ id?: string; mbti?: string }>,
+) {
   if (context.request.method !== "PUT") return methodNotAllowed();
-  const bucket = context.env.MBTI_BUCKET;
-  if (!bucket)
-    return createJsonResponse(
-      { error: "R2 binding MBTI_BUCKET is missing." },
-      500,
-    );
-  const db = context.env.MBTI_DB;
-  if (!db)
-    return createJsonResponse({ error: "D1 binding MBTI_DB is missing." }, 500);
+  const bucket = requireBucket(context);
+  if (bucket instanceof Response) return bucket;
+  const db = requireDb(context);
+  if (db instanceof Response) return db;
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
-  if (!testId) return badRequest("Missing test id.");
+  if (!testId) return errorResponse("Missing test id.", 400);
   const codeRaw = context.params?.mbti
     ? String(context.params.mbti).trim().toUpperCase()
     : "";
-  if (!codeRaw) return badRequest("Invalid outcome code.");
+  if (!codeRaw) return errorResponse("Invalid outcome code.", 400);
 
   let upload;
   try {
-    upload = await extractUpload(context);
-  } catch (err) {
-    return badRequest("Unable to parse uploaded file.");
+    upload = await readUploadBytes(context);
+  } catch {
+    return errorResponse("Unable to parse uploaded file.", 400);
   }
 
-  if (!upload) return badRequest("File upload required.");
+  if (!upload) return errorResponse("File upload required.", 400);
 
-  const bytes = new Uint8Array(upload.buffer);
   const extension = extensionFromMime(upload.contentType);
   const fileName = `${codeRaw}.${extension}`;
   const key = `${getImagesPrefix(testId)}${fileName}`;
 
   try {
-    await bucket.put(key, bytes, {
+    await bucket.put(key, upload.bytes, {
       httpMetadata: {
         contentType: upload.contentType,
         // Result images are effectively static; cache aggressively.
@@ -83,10 +42,8 @@ export async function onRequestPut(context: any) {
       },
     });
   } catch (err) {
-    return createJsonResponse(
-      {
-        error: err instanceof Error ? err.message : "Failed to upload image.",
-      },
+    return errorResponse(
+      err instanceof Error ? err.message : "Failed to upload image.",
       500,
     );
   }
@@ -97,17 +54,21 @@ export async function onRequestPut(context: any) {
     await db.batch([
       db
         .prepare(
-          `INSERT OR IGNORE INTO results (test_id, result, result_image, summary, created_at, updated_at)
+          `INSERT OR IGNORE INTO results (test_id, result_id, result_image, result_text, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, ?)`,
         )
         .bind(testId, codeRaw, key, "", now, now),
       db
-        .prepare(`UPDATE results SET result_image = ?, updated_at = ? WHERE test_id = ? AND result = ?`)
+        .prepare(
+          `UPDATE results
+           SET result_image = ?, updated_at = ?
+           WHERE test_id = ? AND result_id = ?`,
+        )
         .bind(key, now, testId, codeRaw),
       db.prepare(`UPDATE tests SET updated_at = ? WHERE id = ?`).bind(now, testId),
     ]);
 
-    return createJsonResponse({
+    return jsonResponse({
       ok: true,
       code: codeRaw,
       path: key,
@@ -117,10 +78,8 @@ export async function onRequestPut(context: any) {
       )}${fileName}`,
     });
   } catch (err) {
-    return createJsonResponse(
-      {
-        error: err instanceof Error ? err.message : "Unable to update outcome image.",
-      },
+    return errorResponse(
+      err instanceof Error ? err.message : "Unable to update outcome image.",
       500,
     );
   }

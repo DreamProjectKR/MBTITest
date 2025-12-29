@@ -1,53 +1,62 @@
-import { JSON_HEADERS } from "../utils/store.js";
 import {
   encodeDescriptionText,
   encodeTagsText,
   decodeTagsText,
   decodeDescriptionText,
 } from "../../utils/codecs.js";
+import type { D1Database, PagesContext, R2Bucket } from "../../types/bindings.d.ts";
+import { requireDb } from "../../utils/bindings.js";
+import { errorResponse, jsonResponse, methodNotAllowed } from "../../utils/http.js";
+import { isRecord, readNumber, readString, readStringArray } from "../../utils/guards.js";
 
-function createJsonResponse(payload: unknown, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: JSON_HEADERS,
-  });
-}
+type AdminAnswerPayload = Record<string, unknown>;
+type AdminQuestionPayload = Record<string, unknown>;
+type AdminResultsPayload = Record<string, unknown>;
 
-function badRequest(message: string) {
-  return createJsonResponse({ error: message }, 400);
-}
+type AdminTestPayload = Record<string, unknown> & {
+  id: string;
+  title: string;
+  type?: string;
+  description?: string | string[];
+  tags?: string | string[];
+  author?: string;
+  authorImg?: string;
+  thumbnail?: string;
+  questions?: unknown;
+  results?: unknown;
+};
 
-function methodNotAllowed() {
-  return createJsonResponse({ error: "Method not allowed." }, 405);
-}
-
-function validateTestPayload(test: any): string | null {
-  if (!test.id) return "Missing test id.";
-  if (!test.title || !String(test.title).trim()) return "Test title required.";
+function validateTestPayload(test: unknown): string | null {
+  if (!isRecord(test)) return "Invalid payload.";
+  const id = readString(test.id).trim();
+  const title = readString(test.title).trim();
+  if (!id) return "Missing test id.";
+  if (!title) return "Test title required.";
   // Allow drafts (empty questions/outcomes) while editing in admin.
 
-  const questions = Array.isArray(test.questions) ? test.questions : [];
+  const questionsValue = test.questions;
+  const questions = Array.isArray(questionsValue) ? questionsValue : [];
   for (let i = 0; i < questions.length; i += 1) {
-    const question = test.questions[i];
-    if (!question || typeof question !== "object")
-      return `Question ${i + 1} is invalid.`;
+    const question = questions[i];
+    if (!isRecord(question)) return `Question ${i + 1} is invalid.`;
     if (
-      !question.question &&
-      !question.label &&
-      !question.question_image &&
-      !question.questionImage &&
-      !question.prompt
+      !readString(question.question).trim() &&
+      !readString(question.label).trim() &&
+      !readString(question.question_image).trim() &&
+      !readString(question.questionImage).trim() &&
+      !readString(question.prompt).trim()
     )
       return `Question ${i + 1} needs question text or image.`;
-    const answers = Array.isArray(question.answers) ? question.answers : [];
+    const answersValue = question.answers;
+    const answers = Array.isArray(answersValue) ? answersValue : [];
     if (answers.length && answers.length < 2)
       return `Question ${i + 1} needs at least two answers.`;
 
     for (let j = 0; j < answers.length; j += 1) {
       const answer = answers[j];
-      if (!answer || typeof answer !== "object")
+      if (!isRecord(answer))
         return `Question ${i + 1} answer ${j + 1} is invalid.`;
-      if (!answer.answer && !answer.label)
+      if (!readString(answer.answer).trim() && !readString(answer.label).trim())
         return `Question ${i + 1} answer ${j + 1} needs a label.`;
     }
   }
@@ -55,7 +64,7 @@ function validateTestPayload(test: any): string | null {
   return null;
 }
 
-function safeJsonStringify(input: any): string {
+function safeJsonStringify(input: unknown): string {
   if (!input) return "";
   if (typeof input === "string") return input.trim();
   try {
@@ -65,7 +74,7 @@ function safeJsonStringify(input: any): string {
   }
 }
 
-function safeJsonParse(input: any): any {
+function safeJsonParse(input: unknown): unknown {
   if (!input || typeof input !== "string") return null;
   const trimmed = input.trim();
   if (!trimmed) return null;
@@ -85,14 +94,14 @@ function inferMbtiFromAnswerId(answerId: string) {
   return null;
 }
 
-export async function onRequestGet(context: any) {
+type GetParams = { id?: string };
+export async function onRequestGet(context: PagesContext<GetParams>) {
   if (context.request.method !== "GET") return methodNotAllowed();
-  const db = context.env.MBTI_DB;
-  if (!db)
-    return createJsonResponse({ error: "D1 binding MBTI_DB is missing." }, 500);
+  const db = requireDb(context);
+  if (db instanceof Response) return db;
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
-  if (!testId) return badRequest("Missing test id.");
+  if (!testId) return errorResponse("Missing test id.", 400);
 
   try {
     const testRow = await db
@@ -103,7 +112,7 @@ export async function onRequestGet(context: any) {
       .bind(testId)
       .first();
 
-    if (!testRow) return createJsonResponse({ error: "Not found." }, 404);
+    if (!testRow) return errorResponse("Not found.", 404);
 
     const questionsRes = await db
       .prepare(
@@ -131,10 +140,10 @@ export async function onRequestGet(context: any) {
 
     const outcomesRes = await db
       .prepare(
-        `SELECT result, result_image, summary
+        `SELECT result_id, result_image, result_text
          FROM results
          WHERE test_id = ?
-         ORDER BY result ASC`,
+         ORDER BY result_id ASC`,
       )
       .bind(testId)
       .all();
@@ -142,40 +151,40 @@ export async function onRequestGet(context: any) {
       ? outcomesRes.results
       : [];
 
-    const results: any = {};
-    outcomeRows.forEach((o: any) => {
-      results[String(o.result)] = {
+    const results: Record<string, { title: string; image: string; summary: string; metaJson: string }> = {};
+    outcomeRows.forEach((o: Record<string, unknown>) => {
+      results[readString(o.result_id)] = {
         title: "",
-        image: String(o.result_image ?? ""),
-        summary: String(o.summary ?? ""),
+        image: readString(o.result_image),
+        summary: readString(o.result_text),
         metaJson: "",
       };
     });
 
-    const questions = questionRows.map((q: any) => {
-      const qid = String(q.question_id);
+    const questions = questionRows.map((q: Record<string, unknown>) => {
+      const qid = readString(q.question_id);
       const answers = answerRows
-        .filter((a: any) => String(a.question_id) === qid)
-        .map((a: any) => {
+        .filter((a: Record<string, unknown>) => readString(a.question_id) === qid)
+        .map((a: Record<string, unknown>) => {
           const mbti =
-            a.mbti_axis
-              ? { mbtiAxis: String(a.mbti_axis), direction: "" }
-              : inferMbtiFromAnswerId(String(a.answer_id ?? ""));
+            readString(a.mbti_axis).trim()
+              ? { mbtiAxis: readString(a.mbti_axis), direction: "" }
+              : inferMbtiFromAnswerId(readString(a.answer_id));
           return {
-            id: String(a.answer_id),
-            label: String(a.answer ?? ""),
+            id: readString(a.answer_id),
+            label: readString(a.answer),
             ...(mbti ? mbti : {}),
-            weight: Number.isFinite(Number(a.weight)) ? Number(a.weight) : 1,
+            weight: readNumber(a.weight, 1),
             mbtiDir:
-              String(a.mbti_dir ?? "").trim().toLowerCase() === "minus" ? "minus" : "plus",
-            scoreKey: String(a.score_key ?? ""),
-            scoreValue: Number.isFinite(Number(a.score_value)) ? Number(a.score_value) : 0,
+              readString(a.mbti_dir).trim().toLowerCase() === "minus" ? "minus" : "plus",
+            scoreKey: readString(a.score_key),
+            scoreValue: readNumber(a.score_value, 0),
           };
         });
       return {
         id: qid,
-        label: String(q.question ?? ""),
-        prompt: String(q.question_image ?? ""),
+        label: readString(q.question),
+        prompt: readString(q.question_image),
         promptText: "",
         promptMetaJson: "",
         answers,
@@ -198,50 +207,50 @@ export async function onRequestGet(context: any) {
       results,
     };
 
-    return createJsonResponse(payload);
+    return jsonResponse(payload);
   } catch (err) {
-    return createJsonResponse(
-      { error: err instanceof Error ? err.message : "Failed to load test." },
+    return errorResponse(
+      err instanceof Error ? err.message : "Failed to load test.",
       500,
     );
   }
 }
 
-export async function onRequestPut(context: any) {
+export async function onRequestPut(context: PagesContext<GetParams>) {
   if (context.request.method !== "PUT") return methodNotAllowed();
-  const db = context.env.MBTI_DB;
-  if (!db)
-    return createJsonResponse({ error: "D1 binding MBTI_DB is missing." }, 500);
+  const db = requireDb(context);
+  if (db instanceof Response) return db;
   const bucket = context.env.MBTI_BUCKET;
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
-  if (!testId) return badRequest("Missing test id.");
+  if (!testId) return errorResponse("Missing test id.", 400);
 
-  let payload;
+  let payload: unknown;
   try {
     payload = await context.request.json();
-  } catch (err) {
-    return badRequest("Request body must be valid JSON.");
+  } catch {
+    return errorResponse("Request body must be valid JSON.", 400);
   }
 
-  if (payload.id && payload.id !== testId)
-    return badRequest("Payload id must match the URL parameter.");
+  if (!isRecord(payload)) return errorResponse("Invalid payload.", 400);
+  if (readString(payload.id) && readString(payload.id) !== testId)
+    return errorResponse("Payload id must match the URL parameter.", 400);
 
-  const testPayload = { ...payload, id: testId };
+  const testPayload = { ...payload, id: testId } as AdminTestPayload;
   const validationError = validateTestPayload(testPayload);
-  if (validationError) return badRequest(validationError);
+  if (validationError) return errorResponse(validationError, 400);
 
   try {
     const existing = await db
       .prepare(`SELECT created_at FROM tests WHERE id = ?`)
       .bind(testId)
-      .first();
+      .first<{ created_at: string | null }>();
 
     const nowIso = new Date().toISOString();
-    const createdAt = existing?.created_at || nowIso;
+    const createdAt = (existing?.created_at ?? "") || nowIso;
     const updatedAt = nowIso;
 
-    const statements = [];
+    const statements: ReturnType<D1Database["prepare"]>[] = [];
     statements.push(db.prepare("DELETE FROM answers WHERE test_id = ?").bind(testId));
     statements.push(db.prepare("DELETE FROM questions WHERE test_id = ?").bind(testId));
     statements.push(db.prepare("DELETE FROM results WHERE test_id = ?").bind(testId));
@@ -270,10 +279,11 @@ export async function onRequestPut(context: any) {
     );
 
     const questions = Array.isArray(testPayload.questions) ? testPayload.questions : [];
-    questions.forEach((q: any, qIndex: number) => {
-      const qid = String(q?.id || "").trim() || `q${qIndex + 1}`;
-      const questionText = String(q?.question || q?.label || "").trim();
-      const questionImage = String(q?.questionImage || q?.question_image || q?.prompt || "").trim();
+    questions.forEach((qUnknown: unknown, qIndex: number) => {
+      const q = isRecord(qUnknown) ? qUnknown : {};
+      const qid = readString(q.id).trim() || `q${qIndex + 1}`;
+      const questionText = readString(q.question || q.label).trim();
+      const questionImage = readString(q.questionImage || q.question_image || q.prompt).trim();
       statements.push(
         db
           .prepare(
@@ -291,18 +301,17 @@ export async function onRequestPut(context: any) {
           ),
       );
 
-      const answers = Array.isArray(q?.answers) ? q.answers : [];
-      answers.forEach((a: any, aIndex: number) => {
-        const aid = String(a?.id || "").trim() || `${qid}_a${aIndex + 1}`;
-        const answerText = String(a?.answer || a?.label || "").trim();
-        const mbtiAxis = String(a?.mbtiAxis || "").trim().toUpperCase();
+      const answers = Array.isArray(q.answers) ? (q.answers as unknown[]) : [];
+      answers.forEach((aUnknown: unknown, aIndex: number) => {
+        const a = isRecord(aUnknown) ? (aUnknown as AdminAnswerPayload) : {};
+        const aid = readString(a.id).trim() || `${qid}_a${aIndex + 1}`;
+        const answerText = readString(a.answer || a.label).trim();
+        const mbtiAxis = readString(a.mbtiAxis).trim().toUpperCase();
         const mbtiDir =
-          String(a?.mbtiDir || "").trim().toLowerCase() === "minus" ? "minus" : "plus";
-        const weight = Number.isFinite(Number(a?.weight)) ? Number(a.weight) : 1;
-        const scoreKey = String(a?.scoreKey || "").trim();
-        const scoreValue = Number.isFinite(Number(a?.scoreValue))
-          ? Number(a.scoreValue)
-          : 0;
+          readString(a.mbtiDir).trim().toLowerCase() === "minus" ? "minus" : "plus";
+        const weight = Math.max(1, Math.floor(readNumber(a.weight, 1)));
+        const scoreKey = readString(a.scoreKey).trim();
+        const scoreValue = Math.floor(readNumber(a.scoreValue, 0));
         statements.push(
           db
             .prepare(
@@ -327,23 +336,21 @@ export async function onRequestPut(context: any) {
       });
     });
 
-    const results =
-      testPayload.results && typeof testPayload.results === "object"
-        ? testPayload.results
-        : {};
+    const results = isRecord(testPayload.results) ? (testPayload.results as AdminResultsPayload) : {};
     Object.keys(results).forEach((code) => {
-      const details = results[code] || {};
+      const detailsRaw = results[code];
+      const details = isRecord(detailsRaw) ? detailsRaw : {};
       statements.push(
         db
           .prepare(
-            `INSERT INTO results (test_id, result, result_image, summary, created_at, updated_at)
+            `INSERT INTO results (test_id, result_id, result_image, result_text, created_at, updated_at)
              VALUES (?, ?, ?, ?, ?, ?)`,
           )
           .bind(
             testId,
             String(code),
-            String(details.result_image || details.resultImage || details.image || ""),
-            String(details.summary || ""),
+            readString(details.result_image || details.resultImage || details.image),
+            readString(details.summary),
             createdAt,
             updatedAt,
           ),
@@ -360,24 +367,24 @@ export async function onRequestPut(context: any) {
 
     const meta = {
       id: testId,
-      title: testPayload.title || "제목 없는 테스트",
-      thumbnail: testPayload.thumbnail || "",
-      tags: Array.isArray(testPayload.tags) ? [...testPayload.tags] : [],
+      title: readString(testPayload.title) || "제목 없는 테스트",
+      thumbnail: readString(testPayload.thumbnail),
+      tags: readStringArray(testPayload.tags),
       path: `${testId}/test.json`,
       createdAt: createdAt.split("T")[0],
       updatedAt: updatedAt.split("T")[0],
     };
 
-    return createJsonResponse({ ok: true, test: testPayload, meta });
+    return jsonResponse({ ok: true, test: testPayload, meta });
   } catch (err) {
-    return createJsonResponse(
-      { error: err instanceof Error ? err.message : "Failed to save test." },
+    return errorResponse(
+      err instanceof Error ? err.message : "Failed to save test.",
       500,
     );
   }
 }
 
-async function emitIndexJsonToR2({ db, bucket }: { db: any; bucket: any }) {
+async function emitIndexJsonToR2({ db, bucket }: { db: D1Database; bucket: R2Bucket }) {
   const res = await db
     .prepare(
       `SELECT id, title, thumbnail, tags_text, created_at, updated_at
@@ -385,8 +392,16 @@ async function emitIndexJsonToR2({ db, bucket }: { db: any; bucket: any }) {
        ORDER BY updated_at DESC`,
     )
     .all();
-  const rows = Array.isArray(res?.results) ? res.results : [];
-  const tests = rows.map((r: any) => ({
+  type TestIndexRow = {
+    id: string;
+    title: string | null;
+    thumbnail: string | null;
+    tags_text: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+  };
+  const rows = (Array.isArray(res?.results) ? res.results : []) as TestIndexRow[];
+  const tests = rows.map((r) => ({
     id: r.id,
     title: r.title ?? "",
     thumbnail: r.thumbnail ?? "",

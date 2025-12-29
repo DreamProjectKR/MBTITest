@@ -5,19 +5,11 @@
  * (Implementation is filled in subsequent steps.)
  */
 
-const JSON_HEADERS = {
-  "Content-Type": "application/json; charset=utf-8",
-};
-
 import { encodeDescriptionText, encodeTagsText } from "../utils/codecs.js";
-
-function json(status: number, payload: unknown) {
-  return new Response(JSON.stringify(payload), { status, headers: JSON_HEADERS });
-}
-
-function unauthorized() {
-  return json(401, { error: "Unauthorized" });
-}
+import type { D1Database, PagesContext, R2Bucket } from "../types/bindings.d.ts";
+import { requireBucket, requireDb } from "../utils/bindings.js";
+import { JSON_HEADERS, errorResponse, jsonResponse, withCacheHeaders } from "../utils/http.js";
+import { isRecord, readString } from "../utils/guards.js";
 
 function hasValidAuth(request: Request, token: string) {
   if (!token) return false;
@@ -27,15 +19,65 @@ function hasValidAuth(request: Request, token: string) {
   return m[1] === token;
 }
 
-export async function onRequestPost(context: any) {
+type LegacyAnswerJson = {
+  id?: string;
+  label?: string;
+  mbtiAxis?: string;
+  direction?: string;
+};
+
+type LegacyQuestionJson = {
+  id?: string;
+  label?: string;
+  prompt?: string;
+  answers?: LegacyAnswerJson[];
+};
+
+type LegacyResultJson = { image?: string; summary?: string };
+
+type LegacyTestJson = {
+  id?: string;
+  title?: string;
+  author?: string;
+  authorImg?: string;
+  thumbnail?: string;
+  description?: string | string[];
+  tags?: string | string[];
+  questions?: LegacyQuestionJson[];
+  results?: Record<string, LegacyResultJson>;
+};
+
+type ImportReportEntry = {
+  id: string;
+  ok: boolean;
+  key: string;
+  title?: string;
+  metaCreatedAt?: string;
+  metaUpdatedAt?: string;
+  questionCount?: number;
+  outcomeCount?: number;
+  errors: string[];
+  _testJson?: LegacyTestJson | null;
+};
+
+export async function onRequestPost(context: PagesContext) {
   const token = context.env.ADMIN_TOKEN || "";
-  if (!hasValidAuth(context.request, token)) return unauthorized();
+  if (!hasValidAuth(context.request, token))
+    return jsonResponse({ error: "Unauthorized" }, { status: 401 });
 
-  const bucket = context.env.MBTI_BUCKET;
-  if (!bucket) return json(500, { error: "R2 binding MBTI_BUCKET is missing." });
+  const bucket = requireBucket(context);
+  if (bucket instanceof Response)
+    return jsonResponse(
+      { error: "R2 binding MBTI_BUCKET is missing." },
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
+    );
 
-  const db = context.env.MBTI_DB;
-  if (!db) return json(500, { error: "D1 binding MBTI_DB is missing." });
+  const db = requireDb(context);
+  if (db instanceof Response)
+    return jsonResponse(
+      { error: "D1 binding MBTI_DB is missing." },
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
+    );
 
   const url = new URL(context.request.url);
   const onlyTestId = (url.searchParams.get("testId") || "").trim();
@@ -43,48 +85,54 @@ export async function onRequestPost(context: any) {
     url.searchParams.get("apply") === "1" ||
     url.searchParams.get("apply") === "true";
 
-  let body = null;
+  let body: unknown = null;
   try {
     body = await context.request.json();
-  } catch (e) {
+  } catch {
     // allow empty body
   }
-  const shouldApply = Boolean(apply || body?.apply === true);
+  const shouldApply =
+    Boolean(apply) || (isRecord(body) && body.apply === true);
 
   // Step 1: scan R2 and validate payloads (no DB writes yet).
   const indexObj = await bucket.get("assets/index.json");
   if (!indexObj)
-    return json(404, { error: "index.json not found in R2 (assets/index.json)." });
+    return jsonResponse(
+      { error: "index.json not found in R2 (assets/index.json)." },
+      { status: 404 },
+    );
 
-  let index;
+  let index: unknown;
   try {
     index = JSON.parse(await indexObj.text());
-  } catch (e) {
-    return json(500, { error: "index.json is invalid JSON." });
+  } catch {
+    return jsonResponse({ error: "index.json is invalid JSON." }, { status: 500 });
   }
 
-  const tests = Array.isArray(index?.tests) ? index.tests : [];
+  const testsValue = isRecord(index) ? index.tests : null;
+  const tests = Array.isArray(testsValue) ? testsValue : [];
   const selected = onlyTestId
-    ? tests.filter((t: any) => String(t?.id || "") === onlyTestId)
+    ? tests.filter((t) => isRecord(t) && readString(t.id) === onlyTestId)
     : tests;
 
-  const report = [];
-  for (const meta of selected) {
-    const id = String(meta?.id || "").trim();
+  const report: ImportReportEntry[] = [];
+  for (const metaUnknown of selected) {
+    const meta = isRecord(metaUnknown) ? metaUnknown : {};
+    const id = readString(meta.id).trim();
     if (!id) continue;
-    const key = normalizeIndexPathToR2Key(meta?.path || `${id}/test.json`);
+    const key = normalizeIndexPathToR2Key(meta.path || `${id}/test.json`);
     // eslint-disable-next-line no-await-in-loop
     const obj = await bucket.get(key);
     if (!obj) {
-      report.push({ id, ok: false, key, error: "Missing test.json in R2." });
+      report.push({ id, ok: false, key, errors: ["Missing test.json in R2."] });
       continue;
     }
-    let testJson;
+    let testJson: unknown;
     try {
       // eslint-disable-next-line no-await-in-loop
       testJson = JSON.parse(await obj.text());
     } catch (e) {
-      report.push({ id, ok: false, key, error: "test.json is invalid JSON." });
+      report.push({ id, ok: false, key, errors: ["test.json is invalid JSON."] });
       continue;
     }
 
@@ -93,16 +141,19 @@ export async function onRequestPost(context: any) {
       id,
       ok: errors.length === 0,
       key,
-      title: testJson?.title || "",
-      metaCreatedAt: meta?.createdAt || "",
-      metaUpdatedAt: meta?.updatedAt || "",
-      questionCount: Array.isArray(testJson?.questions) ? testJson.questions.length : 0,
+      title: isRecord(testJson) ? readString(testJson.title) : "",
+      metaCreatedAt: readString(meta.createdAt),
+      metaUpdatedAt: readString(meta.updatedAt),
+      questionCount:
+        isRecord(testJson) && Array.isArray(testJson.questions)
+          ? testJson.questions.length
+          : 0,
       outcomeCount:
-        testJson?.results && typeof testJson.results === "object"
+        isRecord(testJson) && isRecord(testJson.results)
           ? Object.keys(testJson.results).length
           : 0,
       errors,
-      _testJson: errors.length === 0 ? testJson : null,
+      _testJson: errors.length === 0 ? (testJson as LegacyTestJson) : null,
     });
   }
 
@@ -111,7 +162,7 @@ export async function onRequestPost(context: any) {
   if (!shouldApply) {
     // strip large payloads from response
     const cleaned = report.map(({ _testJson, ...rest }) => rest);
-    return json(200, {
+    return jsonResponse({
       ok: true,
       applied: false,
       scanned: report.length,
@@ -124,7 +175,7 @@ export async function onRequestPost(context: any) {
 
   // Step 2: Upsert normalized rows into D1.
   let imported = 0;
-  const importErrors = [];
+  const importErrors: Array<{ id: string; error: string }> = [];
   for (const entry of report) {
     if (!entry.ok || !entry._testJson) continue;
     try {
@@ -140,7 +191,7 @@ export async function onRequestPost(context: any) {
   }
 
   const cleaned = report.map(({ _testJson, ...rest }) => rest);
-  return json(200, {
+  return jsonResponse({
     ok: importErrors.length === 0,
     applied: true,
     scanned: report.length,
@@ -157,22 +208,23 @@ function normalizeIndexPathToR2Key(rawPath: unknown): string {
   return str.startsWith("assets/") ? str : `assets/${str}`;
 }
 
-function validateTestJsonShape(test: any): string[] {
-  const errs = [];
-  if (!test || typeof test !== "object") return ["test.json must be an object."];
-  if (!test.id) errs.push("Missing test.id");
-  if (!test.title) errs.push("Missing test.title");
+function validateTestJsonShape(test: unknown): string[] {
+  const errs: string[] = [];
+  if (!isRecord(test)) return ["test.json must be an object."];
+  if (!readString(test.id)) errs.push("Missing test.id");
+  if (!readString(test.title)) errs.push("Missing test.title");
   if (!Array.isArray(test.questions) || test.questions.length === 0)
     errs.push("Missing or empty questions[]");
-  if (!test.results || typeof test.results !== "object")
+  if (!isRecord(test.results))
     errs.push("Missing results{} (MBTI-style).");
 
   if (Array.isArray(test.questions)) {
-    test.questions.forEach((q: any, idx: number) => {
-      if (!q?.id) errs.push(`Question ${idx + 1}: missing id`);
-      if (!q?.prompt && !q?.label)
+    test.questions.forEach((qUnknown, idx: number) => {
+      const q = isRecord(qUnknown) ? qUnknown : {};
+      if (!readString(q.id)) errs.push(`Question ${idx + 1}: missing id`);
+      if (!readString(q.prompt) && !readString(q.label))
         errs.push(`Question ${idx + 1}: missing prompt/label`);
-      if (!Array.isArray(q?.answers) || q.answers.length < 2)
+      if (!Array.isArray(q.answers) || q.answers.length < 2)
         errs.push(`Question ${idx + 1}: answers must be an array (>=2)`);
     });
   }
@@ -180,26 +232,30 @@ function validateTestJsonShape(test: any): string[] {
   return errs;
 }
 
-async function upsertTestIntoD1(db: any, metaEntry: any, testJson: any) {
-  const testId = String(testJson.id || metaEntry.id || "").trim();
+async function upsertTestIntoD1(
+  db: D1Database,
+  metaEntry: ImportReportEntry,
+  testJson: LegacyTestJson,
+) {
+  const testId = readString(testJson.id || metaEntry.id).trim();
   if (!testId) throw new Error("Missing test id for upsert.");
 
-  const title = String(testJson.title || metaEntry.title || "").trim();
-  const author = String(testJson.author || "").trim();
-  const authorImg = String(testJson.authorImg || "").trim();
-  const thumbnail = String(testJson.thumbnail || "").trim();
+  const title = readString(testJson.title || metaEntry.title).trim();
+  const author = readString(testJson.author).trim();
+  const authorImg = readString(testJson.authorImg).trim();
+  const thumbnail = readString(testJson.thumbnail).trim();
 
   const type = "mbti";
 
   const descriptionText = encodeDescriptionText(testJson.description || "");
   const tagsText = encodeTagsText(testJson.tags || []);
-  const createdAt = String(metaEntry.metaCreatedAt || "").trim();
-  const updatedAt = String(metaEntry.metaUpdatedAt || "").trim();
+  const createdAt = readString(metaEntry.metaCreatedAt).trim();
+  const updatedAt = readString(metaEntry.metaUpdatedAt).trim();
   const nowIso = new Date().toISOString();
   const createdAtValue = createdAt || nowIso;
   const updatedAtValue = updatedAt || createdAtValue;
 
-  const statements = [];
+  const statements: Array<ReturnType<D1Database["prepare"]>> = [];
 
   // Clear existing rows for idempotent import
   statements.push(db.prepare("DELETE FROM answers WHERE test_id = ?").bind(testId));
@@ -228,10 +284,10 @@ async function upsertTestIntoD1(db: any, metaEntry: any, testJson: any) {
   );
 
   const questions = Array.isArray(testJson.questions) ? testJson.questions : [];
-  questions.forEach((q: any, qIndex: number) => {
-    const qid = String(q?.id || "").trim() || `q${qIndex + 1}`;
-    const questionText = String(q?.label || "").trim();
-    const questionImage = String(q?.prompt || "").trim();
+  questions.forEach((q: LegacyQuestionJson, qIndex: number) => {
+    const qid = readString(q?.id).trim() || `q${qIndex + 1}`;
+    const questionText = readString(q?.label).trim();
+    const questionImage = readString(q?.prompt).trim();
     statements.push(
       db
         .prepare(
@@ -242,11 +298,12 @@ async function upsertTestIntoD1(db: any, metaEntry: any, testJson: any) {
     );
 
     const answers = Array.isArray(q?.answers) ? q.answers : [];
-    answers.forEach((a: any, aIndex: number) => {
-      const aid = String(a?.id || "").trim() || `${qid}_a${aIndex + 1}`;
-      const aText = String(a?.label || "").trim();
-      const axis = String(a?.mbtiAxis || "").trim().toUpperCase();
-      const dir = String(a?.direction || "").trim().toUpperCase();
+    answers.forEach((a: LegacyAnswerJson, aIndex: number) => {
+      const aid = readString(a?.id).trim() || `${qid}_a${aIndex + 1}`;
+      const aText = readString(a?.label).trim();
+      const axis = readString(a?.mbtiAxis).trim().toUpperCase();
+      const dir = readString(a?.direction).trim().toUpperCase();
+      const mbtiDir = mbtiLetterToPlusMinus(axis, dir);
       const weight = 1;
       statements.push(
         db
@@ -254,25 +311,25 @@ async function upsertTestIntoD1(db: any, metaEntry: any, testJson: any) {
             `INSERT INTO answers (test_id, answer_id, question_id, ord, answer, mbti_axis, mbti_dir, weight, score_key, score_value)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           )
-          .bind(testId, aid, qid, aIndex, aText, axis, dir, weight, "", 0),
+          .bind(testId, aid, qid, aIndex, aText, axis, mbtiDir, weight, "", 0),
       );
     });
   });
 
-  const results = testJson.results && typeof testJson.results === "object" ? testJson.results : {};
+  const results = isRecord(testJson.results) ? testJson.results : {};
   Object.keys(results).forEach((code) => {
     const r = results[code] || {};
     statements.push(
       db
         .prepare(
-          `INSERT INTO results (test_id, result, result_image, summary)
+          `INSERT INTO results (test_id, result_id, result_image, result_text)
            VALUES (?, ?, ?, ?)`,
         )
         .bind(
           testId,
           String(code),
-          String(r.image || ""),
-          String(r.summary || ""),
+          readString(r.image),
+          readString(r.summary),
         ),
     );
   });
@@ -281,6 +338,16 @@ async function upsertTestIntoD1(db: any, metaEntry: any, testJson: any) {
   // Best-effort: ensure batch succeeded
   if (!Array.isArray(resultsArr))
     throw new Error("D1 batch did not return results.");
+}
+
+function mbtiLetterToPlusMinus(axis: string, letter: string) {
+  const ax = String(axis || "").trim().toUpperCase();
+  const l = String(letter || "").trim().toUpperCase();
+  if (!ax || !l) return "plus";
+  const plusByAxis: Record<string, string> = { EI: "E", SN: "S", TF: "T", JP: "J" };
+  const plus = plusByAxis[ax];
+  if (!plus) return "plus";
+  return l === plus ? "plus" : "minus";
 }
 
 

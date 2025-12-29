@@ -130,6 +130,7 @@ for (const meta of selected) {
       const aText = String(a?.label || "");
       const axis = String(a?.mbtiAxis || "").trim().toUpperCase();
       const dir = String(a?.direction || "").trim().toUpperCase();
+      const mbtiDir = mbtiLetterToPlusMinus(axis, dir);
       const weight = 1;
       statements.push(
         [
@@ -147,7 +148,7 @@ for (const meta of selected) {
           ",",
           sqlString(axis),
           ",",
-          sqlString(dir),
+          sqlString(mbtiDir),
           ",",
           String(weight),
           ",",
@@ -171,7 +172,7 @@ for (const meta of selected) {
     const summary = String(r.summary || "");
     statements.push(
       [
-        "INSERT INTO results (test_id, result, result_image, summary, created_at, updated_at)",
+        "INSERT INTO results (test_id, result_id, result_image, result_text, created_at, updated_at)",
         "VALUES (",
         sqlString(id),
         ",",
@@ -227,6 +228,17 @@ function canonicalAssetKey(path) {
   if (/^https?:\/\//i.test(s)) return s;
   const clean = s.replace(/^\.?\/+/, "").replace(/^assets\/+/i, "");
   return `assets/${clean}`;
+}
+
+function mbtiLetterToPlusMinus(axis, letter) {
+  const ax = String(axis || "").trim().toUpperCase();
+  const l = String(letter || "").trim().toUpperCase();
+  if (!ax || !l) return "plus";
+  // plus letters per axis: EI->E, SN->S, TF->T, JP->J
+  const plusByAxis = { EI: "E", SN: "S", TF: "T", JP: "J" };
+  const plus = plusByAxis[ax];
+  if (!plus) return "plus";
+  return l === plus ? "plus" : "minus";
 }
 
 function encodeDescriptionText(input) {

@@ -8,52 +8,60 @@
  * - `POST /api/tests/:id/evaluate`
  * - `GET /api/tests/:id/outcome?code=...`
  */
-const JSON_HEADERS = {
-  "Content-Type": "application/json; charset=utf-8",
-};
-
+import type { PagesContext } from "../types/bindings.d.ts";
 import { decodeDescriptionText, decodeTagsText } from "../utils/codecs.js";
-
-/**
- * Add caching headers to a response.
- * @param {Record<string, string> | Headers} headers
- * @param {{ etag?: string, maxAge?: number }} [opts]
- * @returns {Headers}
- */
-function withCacheHeaders(
-  headers: HeadersInit,
-  { etag, maxAge = 60 }: { etag?: string; maxAge?: number } = {},
-): Headers {
-  const h = new Headers(headers);
-  h.set(
-    "Cache-Control",
-    `public, max-age=${maxAge}, stale-while-revalidate=${maxAge * 10}`,
-  );
-  if (etag) h.set("ETag", etag);
-  return h;
-}
+import { requireDb } from "../utils/bindings.js";
+import { JSON_HEADERS, errorResponse, jsonResponse, withCacheHeaders } from "../utils/http.js";
 
 /**
  * Cloudflare Pages Function entrypoint for `GET /api/tests/:id`.
- * @param {{ request: Request, env: any, params?: { id?: string } }} context
- * @returns {Promise<Response>}
  */
-export async function onRequestGet(context: any) {
-  const db = context.env.MBTI_DB;
-  if (!db) {
-    return new Response(JSON.stringify({ error: "D1 binding MBTI_DB is missing." }), {
-      status: 500,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
+type TestRow = {
+  id: string;
+  title: string | null;
+  type: string | null;
+  description_text: string | null;
+  tags_text: string | null;
+  author: string | null;
+  author_img: string | null;
+  thumbnail: string | null;
+  updated_at: string | null;
+};
+
+type QuestionRow = {
+  question_id: string;
+  ord: number;
+  question: string | null;
+  question_image: string | null;
+};
+
+type AnswerRow = {
+  answer_id: string;
+  question_id: string;
+  ord: number;
+  answer: string | null;
+  mbti_axis: string | null;
+  mbti_dir: string | null;
+  weight: number | null;
+};
+
+type ResultRow = {
+  result_id: string;
+  result_image: string | null;
+  result_text: string | null;
+};
+
+export async function onRequestGet(context: PagesContext<{ id?: string }>) {
+  const db = requireDb(context);
+  if (db instanceof Response) {
+    return jsonResponse(
+      { error: "D1 binding MBTI_DB is missing." },
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
+    );
   }
 
   const id = context.params?.id ? String(context.params.id) : "";
-  if (!id) {
-    return new Response(JSON.stringify({ error: "Missing test id." }), {
-      status: 400,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
-  }
+  if (!id) return errorResponse("Missing test id.", 400);
 
   const testRow = await db
     .prepare(
@@ -64,12 +72,7 @@ export async function onRequestGet(context: any) {
     .bind(id)
     .first();
 
-  if (!testRow) {
-    return new Response(JSON.stringify({ error: "Test not found: " + id }), {
-      status: 404,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
-    });
-  }
+  if (!testRow) return errorResponse("Test not found: " + id, 404);
 
   const ifNoneMatch = context.request.headers.get("if-none-match");
   const etagBase = testRow.updated_at ?? "";
@@ -90,7 +93,7 @@ export async function onRequestGet(context: any) {
     )
     .bind(id)
     .all();
-  const questionsRows = Array.isArray(qRes?.results) ? qRes.results : [];
+  const questionsRows = (Array.isArray(qRes?.results) ? qRes.results : []) as QuestionRow[];
 
   const aRes = await db
     .prepare(
@@ -101,9 +104,15 @@ export async function onRequestGet(context: any) {
     )
     .bind(id)
     .all();
-  const answerRows = Array.isArray(aRes?.results) ? aRes.results : [];
-  const answersByQuestion = new Map<string, any[]>();
-  answerRows.forEach((r: any) => {
+  const answerRows = (Array.isArray(aRes?.results) ? aRes.results : []) as AnswerRow[];
+  type LegacyAnswer = {
+    id: string;
+    label: string;
+    mbtiAxis: string;
+    direction: string;
+  };
+  const answersByQuestion = new Map<string, LegacyAnswer[]>();
+  answerRows.forEach((r) => {
     const qid = String(r.question_id || "");
     if (!qid) return;
     if (!answersByQuestion.has(qid)) answersByQuestion.set(qid, []);
@@ -122,7 +131,7 @@ export async function onRequestGet(context: any) {
     });
   });
 
-  const questions = questionsRows.map((r: any) => {
+  const questions = questionsRows.map((r) => {
     const qid = String(r.question_id || "");
     return {
       id: qid,
@@ -134,38 +143,33 @@ export async function onRequestGet(context: any) {
 
   const outRes = await db
     .prepare(
-      `SELECT result, result_image, summary
+      `SELECT result_id, result_image, result_text
        FROM results
        WHERE test_id = ?`,
     )
     .bind(id)
     .all();
-  const outcomeRows = Array.isArray(outRes?.results) ? outRes.results : [];
+  const outcomeRows = (Array.isArray(outRes?.results) ? outRes.results : []) as ResultRow[];
   const results: Record<string, { image: string; summary: string }> = {};
-  outcomeRows.forEach((r: any) => {
-    if (!r?.result) return;
-    results[String(r.result)] = {
-      image: r.result_image ?? "",
-      summary: r.summary ?? "",
-    };
+  outcomeRows.forEach((r) => {
+    if (!r?.result_id) return;
+    results[String(r.result_id)] = { image: r.result_image ?? "", summary: r.result_text ?? "" };
   });
 
+  const test = testRow as TestRow;
   const payload = {
-    id: testRow.id,
-    title: testRow.title ?? "",
-    description: decodeDescriptionText(testRow.description_text ?? ""),
-    author: testRow.author ?? "",
-    authorImg: testRow.author_img ?? "",
-    tags: decodeTagsText(testRow.tags_text ?? ""),
-    thumbnail: testRow.thumbnail ?? "",
+    id: test.id,
+    title: test.title ?? "",
+    description: decodeDescriptionText(test.description_text ?? ""),
+    author: test.author ?? "",
+    authorImg: test.author_img ?? "",
+    tags: decodeTagsText(test.tags_text ?? ""),
+    thumbnail: test.thumbnail ?? "",
     questions,
     results,
   };
 
-  return new Response(JSON.stringify(payload), {
-    status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 120 }),
-  });
+  return jsonResponse(payload, { status: 200, headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 120 }) });
 }
 
 function inferMbtiFromAnswerId(answerId: string) {

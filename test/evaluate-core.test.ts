@@ -2,9 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
-  evaluateMbtiAxes,
   evaluateScoreOutcomes,
   normalizeAnswerIds,
+  summarizeMbtiPlusMinus,
 } from "../functions/api/tests/utils/evaluate-core.ts";
 
 test("normalizeAnswerIds supports answers[]", () => {
@@ -23,24 +23,27 @@ test("normalizeAnswerIds supports selections[]", () => {
   );
 });
 
-test("evaluateMbtiAxes returns deterministic MBTI code", () => {
-  const payloads = [
-    { axis: "EI", dir: "E" },
-    { axis: "EI", dir: "E" },
-    { axis: "SN", dir: "N" },
-    { axis: "TF", dir: "F" },
-    { axis: "JP", dir: "P" },
-  ];
-  const code = evaluateMbtiAxes(payloads, {
+test("summarizeMbtiPlusMinus returns deterministic MBTI code", () => {
+  const items = [
+    { axis: "EI", delta: 2 },  // E wins
+    { axis: "SN", delta: -1 }, // N wins
+    { axis: "TF", delta: -1 }, // F wins
+    { axis: "JP", delta: -1 }, // P wins
+  ] as const;
+  const summary = summarizeMbtiPlusMinus(items, {
+    mode: "mbtiAxes",
     axisOrder: ["EI", "SN", "TF", "JP"],
     axisDefaults: { EI: "I", SN: "S", TF: "T", JP: "J" },
   });
-  assert.equal(code, "ENFP");
+  assert.equal(summary.code, "ENFP");
 });
 
 test("evaluateScoreOutcomes chooses best score and respects tieBreakOrder", () => {
   const payloads = [{ scores: { A: 1, B: 1 } }];
-  const code = evaluateScoreOutcomes(payloads, { tieBreakOrder: ["B", "A"] });
+  const code = evaluateScoreOutcomes(payloads, {
+    mode: "scoreOutcomes",
+    tieBreakOrder: ["B", "A"],
+  });
   assert.equal(code, "B");
 });
 

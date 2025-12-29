@@ -4,40 +4,20 @@
  * Returns intro/SEO metadata only (no questions/results).
  */
 
+import type { PagesContext } from "../../types/bindings.d.ts";
 import { decodeDescriptionText, decodeTagsText } from "../../utils/codecs.js";
+import { requireDb } from "../../utils/bindings.js";
+import { JSON_HEADERS, errorResponse, jsonResponse, withCacheHeaders } from "../../utils/http.js";
 
-const JSON_HEADERS = {
-  "Content-Type": "application/json; charset=utf-8",
-};
-
-function withCacheHeaders(
-  headers: HeadersInit,
-  { etag, maxAge = 60 }: { etag?: string; maxAge?: number } = {},
-): Headers {
-  const h = new Headers(headers);
-  h.set(
-    "Cache-Control",
-    `public, max-age=${maxAge}, stale-while-revalidate=${maxAge * 10}`,
-  );
-  if (etag) h.set("ETag", etag);
-  return h;
-}
-
-export async function onRequestGet(context: any) {
-  const db = context.env.MBTI_DB;
-  if (!db) {
-    return new Response(JSON.stringify({ error: "D1 binding MBTI_DB is missing." }), {
-      status: 500,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
+export async function onRequestGet(context: PagesContext<{ id?: string }>) {
+  const db = requireDb(context);
+  if (db instanceof Response) {
+    return jsonResponse({ error: "D1 binding MBTI_DB is missing." }, { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) });
   }
 
   const id = context.params?.id ? String(context.params.id) : "";
   if (!id) {
-    return new Response(JSON.stringify({ error: "Missing test id." }), {
-      status: 400,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
+    return errorResponse("Missing test id.", 400);
   }
 
   const rowRes = await db
@@ -49,25 +29,33 @@ export async function onRequestGet(context: any) {
     .bind(id)
     .first();
 
-  if (!rowRes) {
-    return new Response(JSON.stringify({ error: "Test not found: " + id }), {
-      status: 404,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
-    });
-  }
+  if (!rowRes) return errorResponse("Test not found: " + id, 404);
 
+  type TestRow = {
+    id: string;
+    title: string | null;
+    type: string | null;
+    description_text: string | null;
+    tags_text: string | null;
+    author: string | null;
+    author_img: string | null;
+    thumbnail: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+  };
+  const row = rowRes as TestRow;
   const payload = {
-    id: rowRes.id,
-    title: rowRes.title ?? "",
-    type: rowRes.type ?? "generic",
-    description: decodeDescriptionText(rowRes.description_text ?? ""),
-    tags: decodeTagsText(rowRes.tags_text ?? ""),
-    author: rowRes.author ?? "",
-    authorImg: rowRes.author_img ?? "",
-    thumbnail: rowRes.thumbnail ?? "",
-    createdAt: rowRes.created_at ?? "",
-    updatedAt: rowRes.updated_at ?? "",
-    path: `${String(rowRes.id || "")}/test.json`,
+    id: row.id,
+    title: row.title ?? "",
+    type: row.type ?? "generic",
+    description: decodeDescriptionText(row.description_text ?? ""),
+    tags: decodeTagsText(row.tags_text ?? ""),
+    author: row.author ?? "",
+    authorImg: row.author_img ?? "",
+    thumbnail: row.thumbnail ?? "",
+    createdAt: row.created_at ?? "",
+    updatedAt: row.updated_at ?? "",
+    path: `${String(row.id || "")}/test.json`,
   };
 
   const etagBase = payload.updatedAt || "";
@@ -80,10 +68,7 @@ export async function onRequestGet(context: any) {
     });
   }
 
-  return new Response(JSON.stringify(payload), {
-    status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 60 }),
-  });
+  return jsonResponse(payload, { status: 200, headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 60 }) });
 }
 
 

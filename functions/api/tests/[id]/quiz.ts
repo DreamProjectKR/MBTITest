@@ -4,51 +4,42 @@
  * Returns quiz payload only (questions + answers, N answers supported).
  */
 
-const JSON_HEADERS = {
-  "Content-Type": "application/json; charset=utf-8",
+import type { PagesContext } from "../../types/bindings.d.ts";
+import { requireDb } from "../../utils/bindings.js";
+import { JSON_HEADERS, errorResponse, jsonResponse, withCacheHeaders } from "../../utils/http.js";
+
+type QuestionRow = {
+  question_id: string;
+  ord: number;
+  question: string | null;
+  question_image: string | null;
 };
 
-function withCacheHeaders(
-  headers: HeadersInit,
-  { etag, maxAge = 60 }: { etag?: string; maxAge?: number } = {},
-): Headers {
-  const h = new Headers(headers);
-  h.set(
-    "Cache-Control",
-    `public, max-age=${maxAge}, stale-while-revalidate=${maxAge * 10}`,
-  );
-  if (etag) h.set("ETag", etag);
-  return h;
-}
+type AnswerRow = {
+  answer_id: string;
+  question_id: string;
+  ord: number;
+  answer: string | null;
+};
 
-export async function onRequestGet(context: any) {
-  const db = context.env.MBTI_DB;
-  if (!db) {
-    return new Response(JSON.stringify({ error: "D1 binding MBTI_DB is missing." }), {
-      status: 500,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
+export async function onRequestGet(context: PagesContext<{ id?: string }>) {
+  const db = requireDb(context);
+  if (db instanceof Response) {
+    return jsonResponse(
+      { error: "D1 binding MBTI_DB is missing." },
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
+    );
   }
 
   const id = context.params?.id ? String(context.params.id) : "";
-  if (!id) {
-    return new Response(JSON.stringify({ error: "Missing test id." }), {
-      status: 400,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
-  }
+  if (!id) return errorResponse("Missing test id.", 400);
 
   const testRow = await db
     .prepare(`SELECT id, title, type, updated_at FROM tests WHERE id = ?`)
     .bind(id)
     .first();
 
-  if (!testRow) {
-    return new Response(JSON.stringify({ error: "Test not found: " + id }), {
-      status: 404,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
-    });
-  }
+  if (!testRow) return errorResponse("Test not found: " + id, 404);
 
   const qRes = await db
     .prepare(
@@ -60,8 +51,13 @@ export async function onRequestGet(context: any) {
     .bind(id)
     .all();
 
-  const questionsRows = Array.isArray(qRes?.results) ? qRes.results : [];
-  const questions: any[] = [];
+  const questionsRows = (Array.isArray(qRes?.results) ? qRes.results : []) as QuestionRow[];
+  const questions: Array<{
+    id: string;
+    label: string;
+    prompt: string;
+    answers: Array<{ id: string; label: string }>;
+  }> = [];
 
   if (questionsRows.length) {
     // Fetch all answers in one query and group in JS.
@@ -74,19 +70,18 @@ export async function onRequestGet(context: any) {
       )
       .bind(id)
       .all();
-    const answerRows = Array.isArray(aRes?.results) ? aRes.results : [];
-    const answersByQuestion = new Map();
-    answerRows.forEach((r: any) => {
+    const answerRows = (Array.isArray(aRes?.results) ? aRes.results : []) as AnswerRow[];
+    const answersByQuestion = new Map<string, Array<{ id: string; label: string }>>();
+    answerRows.forEach((r) => {
       const qid = String(r.question_id || "");
       if (!qid) return;
       if (!answersByQuestion.has(qid)) answersByQuestion.set(qid, []);
-      answersByQuestion.get(qid).push({
-        id: r.answer_id,
-        label: r.answer ?? "",
-      });
+      const list = answersByQuestion.get(qid);
+      if (!list) return;
+      list.push({ id: r.answer_id, label: r.answer ?? "" });
     });
 
-    questionsRows.forEach((r: any) => {
+    questionsRows.forEach((r) => {
       const qid = String(r.question_id || "");
       questions.push({
         id: qid,
@@ -115,8 +110,5 @@ export async function onRequestGet(context: any) {
     });
   }
 
-  return new Response(JSON.stringify(payload), {
-    status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 60 }),
-  });
+  return jsonResponse(payload, { status: 200, headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 60 }) });
 }

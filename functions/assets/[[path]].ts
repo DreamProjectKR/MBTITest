@@ -13,10 +13,13 @@
 /**
  * Pages Functions "multipath segments" (double brackets) returns an array of segments.
  * Example: `/assets/images/mainLogo.png` -> `["images","mainLogo.png"]`
- * @param {any} params
  * @returns {string}
  */
-function getPathParam(params: any): string {
+import type { PagesContext } from "../api/types/bindings.d.ts";
+
+type AssetParams = { path?: string[] | string };
+
+function getPathParam(params: AssetParams): string {
   const v = params?.path;
   if (Array.isArray(v)) return v.join("/");
   return v ? String(v) : "";
@@ -57,16 +60,14 @@ function cacheControlForKey(key: string): string {
 
 /**
  * Cloudflare Pages Function entrypoint for `GET /assets/*`.
- * @param {{ request: Request, env: any, params?: any, waitUntil: (p: Promise<any>) => void }} context
- * @returns {Promise<Response>}
  */
-export async function onRequestGet(context: any) {
+export async function onRequestGet(context: PagesContext<AssetParams>) {
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket)
     return new Response("MBTI_BUCKET binding missing.", { status: 500 });
 
   // Edge cache (Cloudflare Cache API). Pages Functions responses can otherwise behave "dynamic".
-  const cache = (caches as any)?.default as Cache | undefined;
+  const cache = (caches as CacheStorage & { default?: Cache }).default;
   const url = new URL(context.request.url);
   // Normalize cache key: avoid header-driven fragmentation.
   const cacheKey = new Request(url.toString(), { method: "GET" });

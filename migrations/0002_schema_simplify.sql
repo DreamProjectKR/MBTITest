@@ -112,19 +112,19 @@ ALTER TABLE answers__new
 -- Outcomes -> Results
 CREATE TABLE IF NOT EXISTS results (
     test_id TEXT NOT NULL,
-    result TEXT NOT NULL,
+    result_id TEXT NOT NULL,
     result_image TEXT NOT NULL DEFAULT '',
-    summary TEXT NOT NULL DEFAULT '',
+    result_text TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-    PRIMARY KEY (test_id, result),
+    PRIMARY KEY (test_id, result_id),
     FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
 );
 INSERT INTO results (
         test_id,
-        result,
+        result_id,
         result_image,
-        summary,
+        result_text,
         created_at,
         updated_at
     )
@@ -143,5 +143,5 @@ DROP INDEX IF EXISTS idx_outcomes_test_code;
 DROP INDEX IF EXISTS idx_results_test_result;
 CREATE INDEX IF NOT EXISTS idx_questions_test_ord ON questions(test_id, ord);
 CREATE INDEX IF NOT EXISTS idx_answers_test_question_ord ON answers(test_id, question_id, ord);
-CREATE INDEX IF NOT EXISTS idx_results_test_result ON results(test_id, result);
+CREATE INDEX IF NOT EXISTS idx_results_test_result_id ON results(test_id, result_id);
 PRAGMA foreign_keys = ON;

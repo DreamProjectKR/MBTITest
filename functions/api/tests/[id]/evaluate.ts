@@ -13,185 +13,300 @@
  */
 
 import {
-  evaluateMbtiAxes,
   evaluateScoreOutcomes,
   normalizeAnswerIds,
   summarizeMbtiPlusMinus,
 } from "../utils/evaluate-core.js";
+import type { MbtiAnalysis, MbtiAxis, MbtiLetter, MbtiRules, MbtiScoringItem, ScoreItem, ScoreRules } from "../utils/evaluate-core.js";
+import type { D1Database, PagesContext } from "../../types/bindings.d.ts";
+import { requireDb } from "../../utils/bindings.js";
+import { errorResponse, jsonResponse, methodNotAllowed } from "../../utils/http.js";
+import { isRecord, readNumber, readString } from "../../utils/guards.js";
 
-const JSON_HEADERS = { "Content-Type": "application/json; charset=utf-8" };
-
-function withCacheHeaders(
-  headers: HeadersInit,
-  { maxAge = 0 }: { maxAge?: number } = {},
-): Headers {
-  const h = new Headers(headers);
-  h.set("Cache-Control", `no-store, max-age=${maxAge}`);
-  return h;
-}
-
-function json(status: number, payload: unknown) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-  });
-}
-
-export async function onRequestPost(context: any) {
-  const db = context.env.MBTI_DB;
-  if (!db) return json(500, { error: "D1 binding MBTI_DB is missing." });
+export async function onRequestPost(context: PagesContext<{ id?: string }>) {
+  if (context.request.method !== "POST") return methodNotAllowed();
+  const db = requireDb(context);
+  if (db instanceof Response) return db;
 
   const testId = context.params?.id ? String(context.params.id) : "";
-  if (!testId) return json(400, { error: "Missing test id." });
+  if (!testId) return errorResponse("Missing test id.", 400);
 
-  let body = null;
+  let body: unknown;
   try {
     body = await context.request.json();
-  } catch (e) {
-    return json(400, { error: "Request body must be valid JSON." });
+  } catch {
+    return errorResponse("Request body must be valid JSON.", 400);
   }
 
   const answerIds = normalizeAnswerIds(body);
-  if (!answerIds.length) return json(400, { error: "No answers provided." });
-  if (answerIds.length > 200)
-    return json(400, { error: "Too many answers." });
+  if (!answerIds.length) return errorResponse("No answers provided.", 400);
+  if (answerIds.length > 200) return errorResponse("Too many answers.", 400);
 
   const testRow = await db
     .prepare(`SELECT id, title, type FROM tests WHERE id = ?`)
     .bind(testId)
-    .first();
-  if (!testRow) return json(404, { error: "Test not found: " + testId });
+    .first<{ id: string; title: string | null; type: string | null }>();
+  if (!testRow) return errorResponse("Test not found: " + testId, 404);
 
   const type = String(testRow.type || "generic").trim() || "generic";
-  const payloads = await loadAnswerPayloads(db, testId, answerIds, type);
-  if (!payloads.length) {
-    return json(400, { error: "No valid answer scoring data found." });
-  }
 
   let outcomeCode = "";
-  let analysis: any = null;
+  let analysis: MbtiAnalysis | null = null;
   try {
     if (type === "mbti") {
-      const summary = summarizeMbtiPlusMinus(payloads, DEFAULT_MBTI_RULES);
+      const items = await loadMbtiItemsAggregated(db, testId, answerIds);
+      if (!items.length) return errorResponse("No valid answer scoring data found.", 400);
+      const summary = summarizeMbtiPlusMinus(items, DEFAULT_MBTI_RULES);
       outcomeCode = summary.code;
       analysis = summary;
+    } else if (type === "score") {
+      const items = await loadScoreItemsAggregated(db, testId, answerIds);
+      if (!items.length) return errorResponse("No valid answer scoring data found.", 400);
+      outcomeCode = evaluateScoreOutcomes(items, DEFAULT_SCORE_RULES);
+    } else {
+      // Generic fallback: auto-detect based on which scoring columns exist for the selected answers.
+      const mbtiItems = await loadMbtiItemsAggregated(db, testId, answerIds);
+      if (mbtiItems.length) {
+        const summary = summarizeMbtiPlusMinus(mbtiItems, DEFAULT_MBTI_RULES);
+        outcomeCode = summary.code;
+        analysis = summary;
+      } else {
+        const scoreItems = await loadScoreItemsAggregated(db, testId, answerIds);
+        if (scoreItems.length) {
+          outcomeCode = evaluateScoreOutcomes(scoreItems, DEFAULT_SCORE_RULES);
+        } else {
+          return jsonResponse({ error: "Unsupported test type for evaluation.", type }, { status: 400 });
+        }
+      }
     }
-    else if (type === "score") outcomeCode = evaluateScoreOutcomes(payloads, {});
-    else return json(400, { error: "Unsupported test type for evaluation.", type });
   } catch (e) {
-    return json(400, {
-      error: "Failed to evaluate test rules.",
-      detail: e instanceof Error ? e.message : String(e),
-    });
+    return jsonResponse(
+      {
+        error: "Failed to evaluate test rules.",
+        detail: e instanceof Error ? e.message : String(e),
+      },
+      { status: 400 },
+    );
   }
 
-  if (!outcomeCode)
-    return json(400, { error: "Could not determine outcome." });
+  if (!outcomeCode) return errorResponse("Could not determine outcome.", 400);
 
   const outRow = await db
     .prepare(
-      `SELECT result, result_image, summary
+      `SELECT result_id, result_image, result_text
        FROM results
-       WHERE test_id = ? AND result = ?`,
+       WHERE test_id = ? AND result_id = ?`,
     )
     .bind(testId, outcomeCode)
-    .first();
+    .first<{ result_id: string; result_image: string | null; result_text: string | null }>();
 
   if (!outRow) {
-    return json(404, {
-      error: "Outcome not found for computed code.",
-      code: outcomeCode,
-    });
+    return jsonResponse(
+      { error: "Outcome not found for computed code.", code: outcomeCode },
+      { status: 404 },
+    );
   }
 
-  const payload = {
+  return jsonResponse({
     id: testRow.id,
     title: testRow.title ?? "",
     type: testRow.type ?? "generic",
     outcome: {
-      code: outRow.result,
+      code: outRow.result_id,
       title: "",
       image: outRow.result_image ?? "",
-      summary: outRow.summary ?? "",
+      summary: outRow.result_text ?? "",
       meta: null,
     },
     analysis,
-  };
-
-  return json(200, payload);
+  });
 }
 
-const DEFAULT_MBTI_RULES = {
+const DEFAULT_MBTI_RULES: MbtiRules = {
   mode: "mbtiAxes",
   axisOrder: ["EI", "SN", "TF", "JP"],
   axisDefaults: { EI: "I", SN: "S", TF: "T", JP: "J" },
 };
 
-function inferMbtiFromAnswerId(answerId: string) {
-  // Supported formats inside answer_id (case-insensitive):
-  // - "EI:E" or "EI_E" or "EI-E"
-  // - "axis=EI;dir=E" (very loose)
-  const raw = String(answerId || "");
-  const upper = raw.toUpperCase();
+const DEFAULT_SCORE_RULES: ScoreRules = { mode: "scoreOutcomes" };
 
+function inferMbtiFromAnswerId(answerId: string): { mbtiAxis: MbtiAxis; direction: MbtiLetter } | null {
+  const upper = String(answerId || "").toUpperCase();
   const m1 = upper.match(
     /(?:^|[^A-Z0-9])(EI|SN|TF|JP)[_:\-](E|I|S|N|T|F|J|P)(?:$|[^A-Z0-9])/,
   );
-  if (m1) return { mbtiAxis: m1[1], direction: m1[2], weight: 1 };
-
+  if (m1) return { mbtiAxis: m1[1] as MbtiAxis, direction: m1[2] as MbtiLetter };
   const axis = upper.match(/\bAXIS\s*=\s*(EI|SN|TF|JP)\b/);
   const dir = upper.match(/\b(DIR|DIRECTION)\s*=\s*(E|I|S|N|T|F|J|P)\b/);
-  if (axis && dir) return { mbtiAxis: axis[1], direction: dir[2], weight: 1 };
-
+  if (axis && dir) return { mbtiAxis: axis[1] as MbtiAxis, direction: dir[2] as MbtiLetter };
   return null;
 }
 
-async function loadAnswerPayloads(db: any, testId: string, answerIds: string[], type: string) {
+function mbtiLetterToPlusMinus(axis: MbtiAxis, letter: MbtiLetter): "plus" | "minus" {
+  const plusByAxis: Record<MbtiAxis, MbtiLetter> = { EI: "E", SN: "S", TF: "T", JP: "J" };
+  return letter === plusByAxis[axis] ? "plus" : "minus";
+}
+
+// Legacy (per-answer) loader kept for backward compatibility and edge cases.
+// New path should use `loadMbtiItemsAggregated` for performance.
+async function loadMbtiItems(db: D1Database, testId: string, answerIds: string[]): Promise<MbtiScoringItem[]> {
   const uniq = Array.from(new Set(answerIds.map((v) => String(v || "").trim()))).filter(Boolean);
   if (!uniq.length) return [];
   const placeholders = uniq.map(() => "?").join(",");
   const res = await db
     .prepare(
-      `SELECT answer_id, mbti_axis, mbti_dir, weight, score_key, score_value
+      `SELECT answer_id, mbti_axis, mbti_dir, weight
        FROM answers
        WHERE test_id = ? AND answer_id IN (${placeholders})`,
     )
     .bind(testId, ...uniq)
-    .all();
+    .all<{ answer_id: string; mbti_axis: string | null; mbti_dir: string | null; weight: number | null }>();
   const rows = Array.isArray(res?.results) ? res.results : [];
 
-  if (type === "mbti") {
-    return rows
-      .map((r: any) => {
-        const axis = String(r.mbti_axis ?? "").trim().toUpperCase();
-        const rawDir = String(r.mbti_dir ?? "").trim().toLowerCase();
-        const weight = Number.isFinite(Number(r.weight)) ? Number(r.weight) : 1;
-        const sign =
-          rawDir === "plus" || rawDir === "positive" || rawDir === "+"
-            ? 1
-            : rawDir === "minus" || rawDir === "negative" || rawDir === "-"
-              ? -1
-              : 0;
-        if (axis && sign) return { axis, delta: sign * Math.max(1, weight) };
-        // Fallback: older data might still encode letters inside answer_id
+  const out: MbtiScoringItem[] = [];
+  rows.forEach((r) => {
+    const axisRaw = String(r.mbti_axis ?? "").trim().toUpperCase();
+    const axis = (axisRaw as MbtiAxis) || null;
+    const weight = Math.max(1, Math.floor(readNumber(r.weight, 1)));
+    const dirRaw = String(r.mbti_dir ?? "").trim().toLowerCase();
+    if (axis && (axis === "EI" || axis === "SN" || axis === "TF" || axis === "JP")) {
+      if (dirRaw === "plus") out.push({ axis, delta: weight });
+      else if (dirRaw === "minus") out.push({ axis, delta: -weight });
+      else {
         const fallback = inferMbtiFromAnswerId(String(r.answer_id ?? ""));
-        return fallback ? { axis: fallback.mbtiAxis, dir: fallback.direction, weight } : null;
-      })
-      .filter(Boolean);
-  }
+        if (fallback) {
+          const pm = mbtiLetterToPlusMinus(fallback.mbtiAxis, fallback.direction);
+          out.push({ axis: fallback.mbtiAxis, delta: pm === "plus" ? weight : -weight });
+        }
+      }
+    }
+  });
+  return out;
+}
 
-  if (type === "score") {
-    return rows
-      .map((r: any) => {
-        const key = String(r.score_key ?? "").trim();
-        const value = Number(r.score_value);
-        if (!key || !Number.isFinite(value) || value === 0) return null;
-        return { scores: { [key]: value } };
-      })
-      .filter(Boolean);
-  }
+// Legacy (per-answer) loader kept for backward compatibility and edge cases.
+// New path should use `loadScoreItemsAggregated` for performance.
+async function loadScoreItems(db: D1Database, testId: string, answerIds: string[]): Promise<ScoreItem[]> {
+  const uniq = Array.from(new Set(answerIds.map((v) => String(v || "").trim()))).filter(Boolean);
+  if (!uniq.length) return [];
+  const placeholders = uniq.map(() => "?").join(",");
+  const res = await db
+    .prepare(
+      `SELECT score_key, score_value
+       FROM answers
+       WHERE test_id = ? AND answer_id IN (${placeholders})`,
+    )
+    .bind(testId, ...uniq)
+    .all<{ score_key: string | null; score_value: number | null }>();
+  const rows = Array.isArray(res?.results) ? res.results : [];
+  const out: ScoreItem[] = [];
+  rows.forEach((r) => {
+    const key = String(r.score_key ?? "").trim();
+    const value = Math.floor(readNumber(r.score_value, 0));
+    if (!key || value === 0) return;
+    out.push({ scores: { [key]: value } });
+  });
+  return out;
+}
 
-  return [];
+async function loadMbtiItemsAggregated(
+  db: D1Database,
+  testId: string,
+  answerIds: string[],
+): Promise<MbtiScoringItem[]> {
+  const uniq = Array.from(new Set(answerIds.map((v) => String(v || "").trim()))).filter(Boolean);
+  if (!uniq.length) return [];
+  const placeholders = uniq.map(() => "?").join(",");
+
+  // Aggregate by axis in D1 (return <= 4 rows).
+  const res = await db
+    .prepare(
+      `SELECT
+         UPPER(TRIM(mbti_axis)) AS axis,
+         SUM(CASE WHEN LOWER(TRIM(mbti_dir)) = 'plus' THEN COALESCE(weight, 1) ELSE 0 END) AS plus_total,
+         SUM(CASE WHEN LOWER(TRIM(mbti_dir)) = 'minus' THEN COALESCE(weight, 1) ELSE 0 END) AS minus_total
+       FROM answers
+       WHERE test_id = ? AND answer_id IN (${placeholders})
+         AND TRIM(COALESCE(mbti_axis, '')) <> ''
+       GROUP BY UPPER(TRIM(mbti_axis))
+       ORDER BY axis ASC`,
+    )
+    .bind(testId, ...uniq)
+    .all<{ axis: string | null; plus_total: number | null; minus_total: number | null }>();
+
+  const rows = Array.isArray(res?.results) ? res.results : [];
+  const out: MbtiScoringItem[] = [];
+  rows.forEach((r) => {
+    const axis = String(r.axis ?? "").trim().toUpperCase() as MbtiAxis;
+    if (!(axis === "EI" || axis === "SN" || axis === "TF" || axis === "JP")) return;
+    const plus = Math.max(0, Math.floor(readNumber(r.plus_total, 0)));
+    const minus = Math.max(0, Math.floor(readNumber(r.minus_total, 0)));
+    if (plus) out.push({ axis, delta: plus });
+    if (minus) out.push({ axis, delta: -minus });
+  });
+
+  // Legacy fallback: if no structured mbti_axis rows exist, try answer_id encoding.
+  if (out.length) return out;
+
+  const legacy = await db
+    .prepare(
+      `SELECT answer_id, COALESCE(weight, 1) AS weight
+       FROM answers
+       WHERE test_id = ? AND answer_id IN (${placeholders})
+       ORDER BY answer_id ASC`,
+    )
+    .bind(testId, ...uniq)
+    .all<{ answer_id: string; weight: number | null }>();
+
+  const legacyRows = Array.isArray(legacy?.results) ? legacy.results : [];
+  legacyRows.forEach((r) => {
+    const fallback = inferMbtiFromAnswerId(String(r.answer_id ?? ""));
+    if (!fallback) return;
+    const w = Math.max(1, Math.floor(readNumber(r.weight, 1)));
+    const pm = mbtiLetterToPlusMinus(fallback.mbtiAxis, fallback.direction);
+    out.push({ axis: fallback.mbtiAxis, delta: pm === "plus" ? w : -w });
+  });
+
+  return out;
+}
+
+async function loadScoreItemsAggregated(
+  db: D1Database,
+  testId: string,
+  answerIds: string[],
+): Promise<ScoreItem[]> {
+  const uniq = Array.from(new Set(answerIds.map((v) => String(v || "").trim()))).filter(Boolean);
+  if (!uniq.length) return [];
+  const placeholders = uniq.map(() => "?").join(",");
+
+  // Aggregate in D1 (returns <= number of distinct score_key).
+  const res = await db
+    .prepare(
+      `SELECT
+         TRIM(COALESCE(score_key, '')) AS score_key,
+         SUM(COALESCE(score_value, 0)) AS total
+       FROM answers
+       WHERE test_id = ? AND answer_id IN (${placeholders})
+         AND TRIM(COALESCE(score_key, '')) <> ''
+       GROUP BY TRIM(COALESCE(score_key, ''))
+       ORDER BY score_key ASC`,
+    )
+    .bind(testId, ...uniq)
+    .all<{ score_key: string | null; total: number | null }>();
+
+  const rows = Array.isArray(res?.results) ? res.results : [];
+  if (!rows.length) return [];
+
+  // Build a single "totals" score object so we don't re-sum per-answer in JS.
+  const scores: Record<string, number> = {};
+  rows.forEach((r) => {
+    const key = String(r.score_key ?? "").trim();
+    if (!key) return;
+    const total = Math.floor(readNumber(r.total, 0));
+    if (total === 0) return;
+    scores[key] = total;
+  });
+  return Object.keys(scores).length ? [{ scores }] : [];
 }
 
 

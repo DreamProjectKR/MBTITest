@@ -7,43 +7,16 @@
  *
  * Images remain in R2; we store only their object keys (usually `assets/...`) in D1.
  */
-const JSON_HEADERS = {
-  "Content-Type": "application/json; charset=utf-8",
-};
-
+import type { PagesContext } from "../types/bindings.d.ts";
 import { decodeTagsText } from "../utils/codecs.js";
+import { requireDb } from "../utils/bindings.js";
+import { JSON_HEADERS, jsonResponse, withCacheHeaders } from "../utils/http.js";
 
-/**
- * Add caching headers to a response.
- * - `maxAge` is small because test metadata can change.
- * - `stale-while-revalidate` allows edge to serve slightly stale content while refreshing.
- * @param {Record<string, string> | Headers} headers
- * @param {{ etag?: string, maxAge?: number }} [opts]
- * @returns {Headers}
- */
-function withCacheHeaders(
-  headers: HeadersInit,
-  { etag, maxAge = 60 }: { etag?: string; maxAge?: number } = {},
-): Headers {
-  const h = new Headers(headers);
-  h.set(
-    "Cache-Control",
-    `public, max-age=${maxAge}, stale-while-revalidate=${maxAge * 10}`,
-  );
-  if (etag) h.set("ETag", etag);
-  return h;
-}
-
-/**
- * Cloudflare Pages Function entrypoint for `GET /api/tests`.
- * @param {{ request: Request, env: any }} context
- * @returns {Promise<Response>}
- */
-export async function onRequestGet(context: any) {
-  const db = context.env.MBTI_DB;
-  if (!db) {
-    return new Response(
-      JSON.stringify({ error: "D1 binding MBTI_DB is missing." }),
+export async function onRequestGet(context: PagesContext) {
+  const db = requireDb(context);
+  if (db instanceof Response) {
+    return jsonResponse(
+      { error: "D1 binding MBTI_DB is missing." },
       { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
@@ -57,15 +30,22 @@ export async function onRequestGet(context: any) {
     .all();
 
   const rows = Array.isArray(res?.results) ? res.results : [];
-  const tests = rows.map((r: any) => ({
+  type TestRow = {
+    id: string;
+    title: string | null;
+    thumbnail: string | null;
+    tags_text: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+  };
+  const typedRows = rows as TestRow[];
+  const tests = typedRows.map((r) => ({
     id: r.id,
     title: r.title ?? "",
     thumbnail: r.thumbnail ?? "",
     tags: decodeTagsText(r.tags_text ?? ""),
-    // Keep legacy-ish date strings if present (YYYY-MM-DD...); consumers treat as opaque.
     createdAt: r.created_at ?? "",
     updatedAt: r.updated_at ?? "",
-    // Keep path for legacy compatibility; not used by new clients.
     path: `${String(r.id || "")}/test.json`,
   }));
 
@@ -80,8 +60,5 @@ export async function onRequestGet(context: any) {
     });
   }
 
-  return new Response(JSON.stringify({ tests }), {
-    status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 30 }),
-  });
+  return jsonResponse({ tests }, { status: 200, headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 30 }) });
 }

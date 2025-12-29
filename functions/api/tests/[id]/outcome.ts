@@ -4,84 +4,66 @@
  * Returns a single outcome payload for the result screen (share/direct access).
  */
 
-const JSON_HEADERS = {
-  "Content-Type": "application/json; charset=utf-8",
+import type { PagesContext } from "../../types/bindings.d.ts";
+import { requireDb } from "../../utils/bindings.js";
+import { JSON_HEADERS, errorResponse, jsonResponse, withCacheHeaders } from "../../utils/http.js";
+
+type TestRow = { id: string; title: string | null; type: string | null; updated_at: string | null };
+type ResultRow = {
+  result_id: string;
+  result_image: string | null;
+  result_text: string | null;
+  updated_at: string | null;
 };
 
-function withCacheHeaders(
-  headers: HeadersInit,
-  { etag, maxAge = 120 }: { etag?: string; maxAge?: number } = {},
-): Headers {
-  const h = new Headers(headers);
-  h.set(
-    "Cache-Control",
-    `public, max-age=${maxAge}, stale-while-revalidate=${maxAge * 10}`,
-  );
-  if (etag) h.set("ETag", etag);
-  return h;
-}
-
-export async function onRequestGet(context: any) {
-  const db = context.env.MBTI_DB;
-  if (!db) {
-    return new Response(JSON.stringify({ error: "D1 binding MBTI_DB is missing." }), {
-      status: 500,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
+export async function onRequestGet(context: PagesContext<{ id?: string }>) {
+  const db = requireDb(context);
+  if (db instanceof Response) {
+    return jsonResponse(
+      { error: "D1 binding MBTI_DB is missing." },
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
+    );
   }
 
   const id = context.params?.id ? String(context.params.id) : "";
   const url = new URL(context.request.url);
   const code =
     (url.searchParams.get("code") || url.searchParams.get("result") || "").trim();
-  if (!id || !code) {
-    return new Response(JSON.stringify({ error: "Missing test id or result code." }), {
-      status: 400,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
-  }
+  if (!id || !code) return errorResponse("Missing test id or result code.", 400);
 
   const testRow = await db
     .prepare(`SELECT id, title, type, updated_at FROM tests WHERE id = ?`)
     .bind(id)
     .first();
-  if (!testRow) {
-    return new Response(JSON.stringify({ error: "Test not found: " + id }), {
-      status: 404,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
-    });
-  }
+  if (!testRow) return errorResponse("Test not found: " + id, 404);
 
   const outRow = await db
     .prepare(
-      `SELECT result, result_image, summary, updated_at
+      `SELECT result_id, result_image, result_text, updated_at
        FROM results
-       WHERE test_id = ? AND result = ?`,
+       WHERE test_id = ? AND result_id = ?`,
     )
     .bind(id, code)
     .first();
 
-  if (!outRow) {
-    return new Response(JSON.stringify({ error: "Outcome not found.", code }), {
-      status: 404,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
-    });
-  }
+  if (!outRow) return jsonResponse({ error: "Outcome not found.", code }, { status: 404 });
 
+  const test = testRow as TestRow;
+  const out = outRow as ResultRow;
   const payload = {
-    id: testRow.id,
-    title: testRow.title ?? "",
-    type: testRow.type ?? "generic",
+    id: test.id,
+    title: test.title ?? "",
+    type: test.type ?? "generic",
     outcome: {
-      code: outRow.result,
+      code: out.result_id,
       title: "",
-      image: outRow.result_image ?? "",
-      summary: outRow.summary ?? "",
+      image: out.result_image ?? "",
+      summary: out.result_text ?? "",
       meta: null,
     },
   };
 
-  const etagBase = outRow.updated_at ?? testRow.updated_at ?? "";
+  const etagBase = out.updated_at ?? test.updated_at ?? "";
   const etag = etagBase ? `"d1-test-outcome-${id}-${code}-${etagBase}"` : "";
   const ifNoneMatch = context.request.headers.get("if-none-match");
   if (etag && ifNoneMatch && ifNoneMatch === etag) {
@@ -91,8 +73,5 @@ export async function onRequestGet(context: any) {
     });
   }
 
-  return new Response(JSON.stringify(payload), {
-    status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 300 }),
-  });
+  return jsonResponse(payload, { status: 200, headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 300 }) });
 }
