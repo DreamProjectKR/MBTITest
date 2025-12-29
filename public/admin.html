@@ -113,7 +113,11 @@
               </button>
             </div>
             <div class="answer-builder__list" data-answer-draft-list></div>
-            <small class="form-hint">최소 2개 답변이 필요합니다.</small>
+            <small class="form-hint">
+              최소 2개 답변이 필요합니다. MBTI는 답변마다 <code>E/I/S/N/T/F/J/P</code> 중 하나를 선택하면,
+              서버가 자동으로 <code>mbti_axis(EI/SN/TF/JP)</code>와 <code>mbti_dir(plus/minus)</code>로 변환해 저장하고,
+              추가로 <code>mbti_answer_effects.delta</code>(부호 포함 점수)로 집계 최적화합니다.
+            </small>
           </div>
           <button class="ds-button ds-button--primary" type="submit">문항 추가</button>
         </form>

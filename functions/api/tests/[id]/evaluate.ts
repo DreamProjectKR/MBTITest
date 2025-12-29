@@ -91,32 +91,13 @@ export async function onRequestPost(context: PagesContext<{ id?: string }>) {
 
   if (!outcomeCode) return errorResponse("Could not determine outcome.", 400);
 
-  const outRow = await db
-    .prepare(
-      `SELECT result_id, result_image, result_text
-       FROM results
-       WHERE test_id = ? AND result_id = ?`,
-    )
-    .bind(testId, outcomeCode)
-    .first<{ result_id: string; result_image: string | null; result_text: string | null }>();
-
-  if (!outRow) {
-    return jsonResponse(
-      { error: "Outcome not found for computed code.", code: outcomeCode },
-      { status: 404 },
-    );
-  }
-
+  // IMPORTANT: quiz page only needs the code. Result page will fetch details via `/outcome`.
   return jsonResponse({
     id: testRow.id,
     title: testRow.title ?? "",
     type: testRow.type ?? "generic",
     outcome: {
-      code: outRow.result_id,
-      title: "",
-      image: outRow.result_image ?? "",
-      summary: outRow.result_text ?? "",
-      meta: null,
+      code: outcomeCode,
     },
     analysis,
   });
@@ -218,13 +199,44 @@ async function loadMbtiItemsAggregated(
   if (!uniq.length) return [];
   const placeholders = uniq.map(() => "?").join(",");
 
-  // Aggregate by axis in D1 (return <= 4 rows).
+  // Prefer MBTI effect table if present: aggregate by axis in D1 (return <= 4 rows).
+  // NOTE: For older DBs without the table, this query will fail; we catch and fallback.
   const res = await db
     .prepare(
       `SELECT
+         UPPER(TRIM(axis)) AS axis,
+         SUM(COALESCE(delta, 0)) AS total
+       FROM mbti_answer_effects
+       WHERE test_id = ? AND answer_id IN (${placeholders})
+         AND TRIM(COALESCE(axis, '')) <> ''
+       GROUP BY UPPER(TRIM(axis))
+       ORDER BY axis ASC`,
+    )
+    .bind(testId, ...uniq)
+    .all<{ axis: string | null; total: number | null }>()
+    .catch(() => null);
+
+  const rows = Array.isArray(res?.results) ? res.results : [];
+  const out: MbtiScoringItem[] = [];
+  rows.forEach((r) => {
+    const axis = String(r.axis ?? "").trim().toUpperCase() as MbtiAxis;
+    if (!(axis === "EI" || axis === "SN" || axis === "TF" || axis === "JP")) return;
+    const total = Math.trunc(readNumber(r.total, 0));
+    if (total !== 0) out.push({ axis, delta: total });
+  });
+
+  // Legacy fallback: if no structured mbti_axis rows exist, try answer_id encoding.
+  if (out.length) return out;
+
+  // Next fallback: aggregate from legacy columns on `answers` (for DBs before mbti_answer_effects migration).
+  const legacyAgg = await db
+    .prepare(
+      `SELECT
          UPPER(TRIM(mbti_axis)) AS axis,
-         SUM(CASE WHEN LOWER(TRIM(mbti_dir)) = 'plus' THEN COALESCE(weight, 1) ELSE 0 END) AS plus_total,
-         SUM(CASE WHEN LOWER(TRIM(mbti_dir)) = 'minus' THEN COALESCE(weight, 1) ELSE 0 END) AS minus_total
+         SUM(
+           (CASE WHEN LOWER(TRIM(COALESCE(mbti_dir, ''))) = 'minus' THEN -1 ELSE 1 END)
+           * ABS(COALESCE(weight, 1))
+         ) AS total
        FROM answers
        WHERE test_id = ? AND answer_id IN (${placeholders})
          AND TRIM(COALESCE(mbti_axis, '')) <> ''
@@ -232,20 +244,15 @@ async function loadMbtiItemsAggregated(
        ORDER BY axis ASC`,
     )
     .bind(testId, ...uniq)
-    .all<{ axis: string | null; plus_total: number | null; minus_total: number | null }>();
+    .all<{ axis: string | null; total: number | null }>();
 
-  const rows = Array.isArray(res?.results) ? res.results : [];
-  const out: MbtiScoringItem[] = [];
-  rows.forEach((r) => {
+  const legacyAggRows = Array.isArray(legacyAgg?.results) ? legacyAgg.results : [];
+  legacyAggRows.forEach((r) => {
     const axis = String(r.axis ?? "").trim().toUpperCase() as MbtiAxis;
     if (!(axis === "EI" || axis === "SN" || axis === "TF" || axis === "JP")) return;
-    const plus = Math.max(0, Math.floor(readNumber(r.plus_total, 0)));
-    const minus = Math.max(0, Math.floor(readNumber(r.minus_total, 0)));
-    if (plus) out.push({ axis, delta: plus });
-    if (minus) out.push({ axis, delta: -minus });
+    const total = Math.trunc(readNumber(r.total, 0));
+    if (total !== 0) out.push({ axis, delta: total });
   });
-
-  // Legacy fallback: if no structured mbti_axis rows exist, try answer_id encoding.
   if (out.length) return out;
 
   const legacy = await db

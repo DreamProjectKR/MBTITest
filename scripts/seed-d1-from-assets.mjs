@@ -42,6 +42,7 @@ if (!testIdArg) {
   statements.push("DELETE FROM answers;");
   statements.push("DELETE FROM questions;");
   statements.push("DELETE FROM results;");
+  statements.push("DELETE FROM mbti_answer_effects;");
   statements.push("DELETE FROM tests;");
 }
 
@@ -52,6 +53,7 @@ for (const meta of selected) {
     statements.push(`DELETE FROM answers WHERE test_id = ${sqlString(id)};`);
     statements.push(`DELETE FROM questions WHERE test_id = ${sqlString(id)};`);
     statements.push(`DELETE FROM results WHERE test_id = ${sqlString(id)};`);
+    statements.push(`DELETE FROM mbti_answer_effects WHERE test_id = ${sqlString(id)};`);
     statements.push(`DELETE FROM tests WHERE id = ${sqlString(id)};`);
   }
 
@@ -132,6 +134,7 @@ for (const meta of selected) {
       const dir = String(a?.direction || "").trim().toUpperCase();
       const mbtiDir = mbtiLetterToPlusMinus(axis, dir);
       const weight = 1;
+      const delta = (mbtiDir === "minus" ? -1 : 1) * weight;
       statements.push(
         [
           "INSERT INTO answers (test_id, answer_id, question_id, ord, answer, mbti_axis, mbti_dir, weight, score_key, score_value, created_at, updated_at)",
@@ -162,6 +165,26 @@ for (const meta of selected) {
           ");",
         ].join(" "),
       );
+      if (axis) {
+        statements.push(
+          [
+            "INSERT INTO mbti_answer_effects (test_id, answer_id, axis, delta, created_at, updated_at)",
+            "VALUES (",
+            sqlString(id),
+            ",",
+            sqlString(aid),
+            ",",
+            sqlString(axis),
+            ",",
+            String(delta),
+            ",",
+            sqlString(createdIso),
+            ",",
+            sqlString(updatedIso),
+            ");",
+          ].join(" "),
+        );
+      }
     });
   });
 

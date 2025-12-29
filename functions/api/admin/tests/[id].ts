@@ -251,6 +251,7 @@ export async function onRequestPut(context: PagesContext<GetParams>) {
     const updatedAt = nowIso;
 
     const statements: ReturnType<D1Database["prepare"]>[] = [];
+    statements.push(db.prepare("DELETE FROM mbti_answer_effects WHERE test_id = ?").bind(testId));
     statements.push(db.prepare("DELETE FROM answers WHERE test_id = ?").bind(testId));
     statements.push(db.prepare("DELETE FROM questions WHERE test_id = ?").bind(testId));
     statements.push(db.prepare("DELETE FROM results WHERE test_id = ?").bind(testId));
@@ -312,6 +313,7 @@ export async function onRequestPut(context: PagesContext<GetParams>) {
         const weight = Math.max(1, Math.floor(readNumber(a.weight, 1)));
         const scoreKey = readString(a.scoreKey).trim();
         const scoreValue = Math.floor(readNumber(a.scoreValue, 0));
+        const delta = (mbtiDir === "minus" ? -1 : 1) * weight;
         statements.push(
           db
             .prepare(
@@ -333,6 +335,16 @@ export async function onRequestPut(context: PagesContext<GetParams>) {
               updatedAt,
             ),
         );
+        if (mbtiAxis) {
+          statements.push(
+            db
+              .prepare(
+                `INSERT INTO mbti_answer_effects (test_id, answer_id, axis, delta, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+              )
+              .bind(testId, aid, mbtiAxis, delta, createdAt, updatedAt),
+          );
+        }
       });
     });
 

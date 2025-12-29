@@ -33,7 +33,7 @@ type LegacyQuestionJson = {
   answers?: LegacyAnswerJson[];
 };
 
-type LegacyResultJson = { image?: string; summary?: string };
+type LegacyResultJson = { image?: string; summary?: string; };
 
 type LegacyTestJson = {
   id?: string;
@@ -175,7 +175,7 @@ export async function onRequestPost(context: PagesContext) {
 
   // Step 2: Upsert normalized rows into D1.
   let imported = 0;
-  const importErrors: Array<{ id: string; error: string }> = [];
+  const importErrors: Array<{ id: string; error: string; }> = [];
   for (const entry of report) {
     if (!entry.ok || !entry._testJson) continue;
     try {
@@ -261,6 +261,7 @@ async function upsertTestIntoD1(
   statements.push(db.prepare("DELETE FROM answers WHERE test_id = ?").bind(testId));
   statements.push(db.prepare("DELETE FROM questions WHERE test_id = ?").bind(testId));
   statements.push(db.prepare("DELETE FROM results WHERE test_id = ?").bind(testId));
+  statements.push(db.prepare("DELETE FROM mbti_answer_effects WHERE test_id = ?").bind(testId));
   statements.push(db.prepare("DELETE FROM tests WHERE id = ?").bind(testId));
 
   statements.push(
@@ -305,6 +306,7 @@ async function upsertTestIntoD1(
       const dir = readString(a?.direction).trim().toUpperCase();
       const mbtiDir = mbtiLetterToPlusMinus(axis, dir);
       const weight = 1;
+      const delta = (mbtiDir === "minus" ? -1 : 1) * weight;
       statements.push(
         db
           .prepare(
@@ -313,6 +315,16 @@ async function upsertTestIntoD1(
           )
           .bind(testId, aid, qid, aIndex, aText, axis, mbtiDir, weight, "", 0),
       );
+      if (axis) {
+        statements.push(
+          db
+            .prepare(
+              `INSERT INTO mbti_answer_effects (test_id, answer_id, axis, delta)
+               VALUES (?, ?, ?, ?)`,
+            )
+            .bind(testId, aid, axis, delta),
+        );
+      }
     });
   });
 

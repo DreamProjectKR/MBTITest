@@ -29,6 +29,8 @@ var elements = {
   metaForm: document.querySelector("[data-test-meta-form]"),
   questionForm: document.querySelector("[data-question-form]"),
   questionList: document.querySelector("[data-question-list]"),
+  answerDraftList: document.querySelector("[data-answer-draft-list]"),
+  addDraftAnswer: document.querySelector("[data-add-draft-answer]"),
   resultForm: document.querySelector("[data-result-form]"),
   resultList: document.querySelector("[data-result-list]"),
   jsonInput: document.querySelector("[data-json-input]"),
@@ -54,7 +56,8 @@ var state = {
   activeTestId: null,
   isSaving: false,
   saveMessage: "",
-  imageList: []
+  imageList: [],
+  draftAnswers: []
 };
 var isHydratingMeta = false;
 initAdmin();
@@ -63,6 +66,7 @@ async function initAdmin() {
   wireStaticEvents();
   setSaveStatus("\uC800\uC7A5 \uC900\uBE44");
   setupForms();
+  resetDraftAnswers();
   try {
     const payload = await fetchJson(API_TESTS_BASE);
     applyIndex(payload);
@@ -79,6 +83,9 @@ function wireStaticEvents() {
     setActiveTest(event.target.value);
   });
   elements.saveButton?.addEventListener("click", handleSaveTest);
+  elements.addDraftAnswer?.addEventListener("click", () => {
+    addDraftAnswer();
+  });
   elements.resultImageSubmit?.addEventListener(
     "click",
     handleResultImageUpload
@@ -89,14 +96,26 @@ function wireStaticEvents() {
 }
 function setupForms() {
   elements.metaForm?.addEventListener("input", handleMetaInput);
+  elements.answerDraftList?.addEventListener("input", handleDraftAnswerInput);
+  elements.answerDraftList?.addEventListener("click", handleDraftAnswerClick);
   elements.questionForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(elements.questionForm);
+    const questionLabel = String(data.get("label") || "").trim();
+    if (!questionLabel) {
+      alert("\uC9C8\uBB38\uC744 \uC785\uB825\uD558\uC138\uC694.");
+      return;
+    }
+    const answers = normalizeDraftAnswersForQuestion();
+    if (answers.length < 2) {
+      alert("\uB2F5\uBCC0\uC740 \uCD5C\uC18C 2\uAC1C\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4.");
+      return;
+    }
     const question = {
       id: crypto.randomUUID?.() ?? `q-${Date.now()}`,
-      label: data.get("label")?.trim() ?? "",
+      label: questionLabel,
       prompt: "",
-      answers: [buildAnswer("answerA", data), buildAnswer("answerB", data)]
+      answers
     };
     const activeTest = getActiveTest();
     if (!activeTest) return;
@@ -104,6 +123,7 @@ function setupForms() {
     activeTest.questions.push(question);
     renderQuestions(activeTest.questions);
     elements.questionForm.reset();
+    resetDraftAnswers();
   });
   elements.questionList?.addEventListener("click", (event) => {
     const uploadButton = event.target.closest("[data-upload-question-image]");
@@ -263,7 +283,7 @@ async function loadTest(testId) {
     return;
   }
   try {
-    const test = await fetchJson(`${API_TESTS_BASE}/${testId}`);
+    const test = await fetchJson(`${API_ADMIN_TESTS_BASE}/${testId}`);
     state.loadedTests = { ...state.loadedTests, [testId]: test };
     syncMetaEntry(test);
     refreshActiveTest();
@@ -291,8 +311,11 @@ function createTest() {
   const newTest = {
     id: `test-${rawId.slice(0, 8)}`,
     title: "\uC0C8 \uD14C\uC2A4\uD2B8",
+    type: "mbti",
     description: "",
     tags: [],
+    author: "",
+    authorImg: "",
     thumbnail: "",
     questions: [],
     results: {}
@@ -308,6 +331,9 @@ function hydrateForms(test) {
   if (!elements.metaForm) return;
   const form = elements.metaForm;
   isHydratingMeta = true;
+  if (form.elements["type"]) {
+    form.elements["type"].value = test?.type ?? "mbti";
+  }
   form.elements["title"].value = test?.title ?? "";
   form.elements["description"].value = formatDescriptionForInput(
     test?.description
@@ -341,6 +367,9 @@ function handleMetaInput() {
   const activeTest = getActiveTest();
   if (!activeTest) return;
   const form = elements.metaForm;
+  if (form.elements["type"]) {
+    activeTest.type = form.elements["type"].value || "mbti";
+  }
   activeTest.title = form.elements["title"].value;
   activeTest.description = parseDescriptionInput(
     form.elements["description"].value
@@ -602,9 +631,13 @@ function renderQuestions(questions) {
       const chip = document.createElement("span");
       chip.className = "ds-chip";
       const label = document.createElement("span");
-      label.textContent = answer.label;
+      label.textContent = answer.label ?? answer.answer ?? "";
       const detail = document.createElement("small");
-      detail.textContent = `${answer.mbtiAxis} \u2192 ${answer.direction}`;
+      const axis = String(answer.mbtiAxis || "").toUpperCase();
+      const dir = String(answer.mbtiDir || "").toLowerCase();
+      const weight = Number.isFinite(Number(answer.weight)) ? Number(answer.weight) : 1;
+      const delta = (dir === "minus" ? -1 : 1) * Math.max(1, weight);
+      detail.textContent = axis ? `${axis} ${dir || "plus"} x${Math.max(1, weight)} (\u0394 ${delta})` : "";
       chip.append(label, detail);
       chipRow.append(chip);
     });
@@ -696,16 +729,110 @@ function createRemoveQuestionButton(questionId) {
   button.dataset.removeQuestion = questionId;
   return button;
 }
-function buildAnswer(prefix, data) {
-  const axis = data.get(`${prefix}Mbti`) || "EI";
-  const directionPref = data.get(`${prefix}Pole`) || "positive";
-  const [positive, negative] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
+function resetDraftAnswers() {
+  state.draftAnswers = [createEmptyDraftAnswer(), createEmptyDraftAnswer()];
+  renderDraftAnswers();
+}
+function addDraftAnswer() {
+  state.draftAnswers = [...state.draftAnswers || [], createEmptyDraftAnswer()];
+  renderDraftAnswers();
+}
+function createEmptyDraftAnswer() {
   return {
-    id: crypto.randomUUID?.() ?? `${prefix}-${Date.now()}`,
-    label: data.get(`${prefix}Text`),
-    mbtiAxis: axis,
-    direction: directionPref === "positive" ? positive : negative
+    id: crypto.randomUUID?.() ?? `a-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    label: "",
+    mbtiAxis: "EI",
+    mbtiDir: "plus",
+    weight: 1
   };
+}
+function renderDraftAnswers() {
+  if (!elements.answerDraftList) return;
+  const list = Array.isArray(state.draftAnswers) ? state.draftAnswers : [];
+  elements.answerDraftList.innerHTML = "";
+  list.forEach((a, idx) => {
+    const row = document.createElement("div");
+    row.className = "answer-row";
+    row.dataset.draftAnswerId = a.id;
+    row.innerHTML = `
+      <div class="answer-row__grid">
+        <label class="form-field">
+          <span>\uB2F5\uBCC0 ${idx + 1}</span>
+          <input type="text" value="${escapeHtml(a.label || "")}" data-draft-field="label" />
+        </label>
+        <label class="form-field">
+          <span>MBTI \uCD95</span>
+          <select data-draft-field="mbtiAxis">
+            <option value="EI" ${a.mbtiAxis === "EI" ? "selected" : ""}>EI</option>
+            <option value="SN" ${a.mbtiAxis === "SN" ? "selected" : ""}>SN</option>
+            <option value="TF" ${a.mbtiAxis === "TF" ? "selected" : ""}>TF</option>
+            <option value="JP" ${a.mbtiAxis === "JP" ? "selected" : ""}>JP</option>
+          </select>
+        </label>
+        <label class="form-field">
+          <span>plus/minus</span>
+          <select data-draft-field="mbtiDir">
+            <option value="plus" ${a.mbtiDir === "plus" ? "selected" : ""}>plus</option>
+            <option value="minus" ${a.mbtiDir === "minus" ? "selected" : ""}>minus</option>
+          </select>
+        </label>
+        <label class="form-field">
+          <span>weight</span>
+          <input type="number" min="1" step="1" value="${Number.isFinite(Number(a.weight)) ? Number(a.weight) : 1}" data-draft-field="weight" />
+        </label>
+        <button class="ds-button ds-button--ghost ds-button--small" type="button" data-remove-draft-answer="${a.id}">
+          \uC0AD\uC81C
+        </button>
+      </div>
+      <small class="form-hint">${renderMbtiDeltaHint(a)}</small>
+    `;
+    elements.answerDraftList.append(row);
+  });
+}
+function renderMbtiDeltaHint(a) {
+  const axis = String(a?.mbtiAxis || "").toUpperCase();
+  const dir = String(a?.mbtiDir || "plus").toLowerCase();
+  const w = Number.isFinite(Number(a?.weight)) ? Math.max(1, Math.floor(Number(a.weight))) : 1;
+  const delta = (dir === "minus" ? -1 : 1) * w;
+  if (!axis) return "";
+  return `\uC800\uC7A5 \uC2DC: ${axis} \u0394 ${delta} (mbti_answer_effects.delta)`;
+}
+function normalizeDraftAnswersForQuestion() {
+  const list = Array.isArray(state.draftAnswers) ? state.draftAnswers : [];
+  return list.map((a) => ({
+    id: a.id,
+    label: String(a.label || "").trim(),
+    mbtiAxis: String(a.mbtiAxis || "").trim().toUpperCase(),
+    mbtiDir: String(a.mbtiDir || "plus").trim().toLowerCase() === "minus" ? "minus" : "plus",
+    weight: Number.isFinite(Number(a.weight)) ? Math.max(1, Math.floor(Number(a.weight))) : 1
+  })).filter((a) => a.label.length > 0);
+}
+function handleDraftAnswerInput(event) {
+  const row = event.target.closest("[data-draft-answer-id]");
+  if (!row) return;
+  const id = row.dataset.draftAnswerId;
+  const field = event.target.dataset.draftField;
+  if (!id || !field) return;
+  const list = Array.isArray(state.draftAnswers) ? [...state.draftAnswers] : [];
+  const idx = list.findIndex((a) => a.id === id);
+  if (idx === -1) return;
+  const next = { ...list[idx] };
+  if (field === "weight") next.weight = Number(event.target.value);
+  else next[field] = event.target.value;
+  list[idx] = next;
+  state.draftAnswers = list;
+  renderDraftAnswers();
+}
+function handleDraftAnswerClick(event) {
+  const remove = event.target.closest("[data-remove-draft-answer]");
+  if (!remove) return;
+  const id = remove.dataset.removeDraftAnswer;
+  const list = Array.isArray(state.draftAnswers) ? state.draftAnswers : [];
+  state.draftAnswers = list.filter((a) => a.id !== id);
+  renderDraftAnswers();
+}
+function escapeHtml(text) {
+  return String(text || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
 function fetchJson(url) {
   return fetch(url).then((response) => {
@@ -716,7 +843,7 @@ function fetchJson(url) {
   });
 }
 function exportJson() {
-  const tests = Object.values(state.loadedTests);
+  const tests = Object.values(state.loadedTests).map(toLegacyExportTest);
   const exportPayload = { tests };
   const blob = new Blob([JSON.stringify(exportPayload, null, 2)], {
     type: "application/json"
@@ -727,5 +854,28 @@ function exportJson() {
   anchor.download = "mbti-tests.json";
   anchor.click();
   URL.revokeObjectURL(url);
+}
+function toLegacyExportTest(test) {
+  const out = { ...test };
+  out.questions = Array.isArray(test?.questions) ? test.questions.map(toLegacyExportQuestion) : [];
+  return out;
+}
+function toLegacyExportQuestion(q) {
+  const out = { ...q };
+  out.answers = Array.isArray(q?.answers) ? q.answers.map(toLegacyExportAnswer) : [];
+  return out;
+}
+function toLegacyExportAnswer(a) {
+  const axis = String(a?.mbtiAxis || "").trim().toUpperCase();
+  const dir = String(a?.mbtiDir || "").trim().toLowerCase();
+  const [pos, neg] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
+  const direction = dir === "minus" ? neg : pos;
+  return {
+    ...a,
+    mbtiAxis: axis,
+    direction,
+    // Keep admin-only fields out of legacy json
+    mbtiDir: void 0
+  };
 }
 //# sourceMappingURL=admin.js.map

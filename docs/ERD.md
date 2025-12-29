@@ -13,6 +13,7 @@ erDiagram
   TESTS ||--o{ ANSWERS : has
   QUESTIONS ||--o{ ANSWERS : has
   TESTS ||--o{ RESULTS : has
+  ANSWERS ||--o{ MBTI_ANSWER_EFFECTS : has
 
   TESTS {
     TEXT id PK
@@ -48,6 +49,15 @@ erDiagram
     INT weight
     TEXT score_key
     INT score_value
+    TEXT created_at
+    TEXT updated_at
+  }
+
+  MBTI_ANSWER_EFFECTS {
+    TEXT test_id FK
+    TEXT answer_id FK
+    TEXT axis
+    INT delta
     TEXT created_at
     TEXT updated_at
   }
@@ -116,6 +126,37 @@ erDiagram
   - **`result_image`**: 결과 이미지 R2 key
   - **`result_text`**: 결과 설명 텍스트
 
+## `mbti_answer_effects`
+
+- **역할**: MBTI 결과 계산을 “DB 집계 1번”으로 끝내기 위한 최적화 테이블
+- **PK**: `(test_id, answer_id)`
+- **FK**
+  - `(test_id, answer_id) → answers(test_id, answer_id)` (ON DELETE CASCADE)
+- **주요 컬럼**
+  - **`axis`**: `EI | SN | TF | JP`
+  - **`delta`**: 축에 더할 점수(부호 포함 정수)
+    - 예: `EI`에서 `+2`면 E 쪽으로 2점, `-1`이면 I 쪽으로 1점
+
+---
+
+## assets JSON → D1 정규화 매핑(현재 repo 기준)
+
+`assets/index.json`과 각 `assets/<testId>/test.json`을 아래 테이블로 정규화합니다.
+
+- **`assets/index.json`**
+  - `tests[].id` → `tests.id`
+  - `tests[].title` → `tests.title` (fallback)
+  - `tests[].thumbnail` → `tests.thumbnail` (fallback)
+  - `tests[].tags[]` → `tests.tags_text` (encode)
+  - `tests[].createdAt/updatedAt` → `tests.created_at/updated_at` (ISO로 변환)
+
+- **`assets/<testId>/test.json`**
+  - `id/title/type/description/tags/author/authorImg/thumbnail` → `tests.*`
+  - `questions[].id/label/prompt` → `questions.(question_id, question, question_image)`
+  - `questions[].answers[].id/label` → `answers.(answer_id, answer)`
+  - `questions[].answers[].mbtiAxis + direction(+weight)` → `answers.(mbti_axis, mbti_dir, weight)` 및 `mbti_answer_effects.(axis, delta)`
+  - `results{ CODE: { image, summary } }` → `results.(result_id, result_image, result_text)`
+
 ---
 
 ## 인덱스
@@ -125,3 +166,4 @@ erDiagram
 - `idx_questions_test_ord` on `questions(test_id, ord)`
 - `idx_answers_test_question_ord` on `answers(test_id, question_id, ord)`
 - `idx_results_test_result_id` on `results(test_id, result_id)`
+- `idx_mbti_effects_test_axis` on `mbti_answer_effects(test_id, axis)` (migration `0006`)
