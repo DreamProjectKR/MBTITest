@@ -134,15 +134,15 @@ Pages 프로젝트 → **Settings → Variables and secrets**
 
 ---
 
-## 7) 로컬 개발(권장 커맨드)
+## 7 로컬 개발(권장 커맨드)
 
-### 7-1) 설치
+### 7-1 설치
 
 ```bash
 npm install
 ```
 
-### 7-2) 타입체크/테스트/빌드
+### 7-2 타입체크/테스트/빌드
 
 ```bash
 npm run typecheck
@@ -150,7 +150,7 @@ npm test
 npm run build
 ```
 
-### 7-3) 로컬 실행
+### 7-3 로컬 실행
 
 - 기본(번들 watch + pages dev):
 
@@ -166,12 +166,12 @@ npm run dev:d1
 
 ---
 
-## 7-A) (중요) 로컬에서 “API가 어떤 로컬 D1 파일을 보고 있는지” 추적/고정 체크리스트
+## 7-A (중요) 로컬에서 “API가 어떤 로컬 D1 파일을 보고 있는지” 추적/고정 체크리스트
 
 로컬 D1은 **상태 디렉토리(persist directory)** 가 다르면 완전히 다른 DB로 취급됩니다.  
 그래서 아래 3가지를 “항상 같은 `--persist-to .wrangler/state`”로 고정하면 재발을 막을 수 있습니다.
 
-### A-1) Pages dev를 반드시 persist-to로 실행
+### A-1 Pages dev를 반드시 persist-to로 실행
 
 - 권장:
 
@@ -185,14 +185,14 @@ npm run dev:d1
 npx wrangler pages dev ./public --compatibility-date=2024-12-08 --d1 MBTI_DB=mbti-db --persist-to .wrangler/state
 ```
 
-### A-2) migrations/seed도 동일한 persist-to로 실행
+### A-2 migrations/seed도 동일한 persist-to로 실행
 
 ```bash
 npx wrangler d1 migrations apply mbti-db --local --persist-to .wrangler/state
 npm run d1:seed:assets
 ```
 
-### A-3) “API가 보는 DB”와 “CLI가 보는 DB”가 같은지 마지막 확인(가장 확실)
+### A-3 “API가 보는 DB”와 “CLI가 보는 DB”가 같은지 마지막 확인(가장 확실)
 
 1) CLI로 테이블/행 확인:
 
@@ -208,7 +208,7 @@ curl -sS http://localhost:8788/api/tests
 
 > 위 2개가 동시에 정상이고 `tests` 개수가 맞으면, **로컬에서 API는 D1을 정상 조회 중**입니다.
 
-### A-4) 로컬에서 `no such table: tests`가 다시 뜨면(재발 해결 루틴)
+### A-4 로컬에서 `no such table: tests`가 다시 뜨면(재발 해결 루틴)
 
 1. 실행 중인 `wrangler pages dev`를 종료(Ctrl+C)
 2. 로컬 상태 DB 초기화(삭제):
@@ -223,7 +223,7 @@ npm run dev:d1
 
 ---
 
-## 8) (운영) R2 → D1 Import 사용법
+## 8 (운영) R2 → D1 Import 사용법
 
 1. 먼저 D1 마이그레이션 적용이 되어 있어야 합니다.
 2. Admin import endpoint 호출:
@@ -245,7 +245,7 @@ curl -X POST \\
 
 ---
 
-## 9) 트러블슈팅
+## 9 트러블슈팅
 
 ### D1이 “missing binding”으로 뜰 때
 
