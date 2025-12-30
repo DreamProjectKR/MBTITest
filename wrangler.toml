@@ -12,7 +12,7 @@ bucket_name = "mbti-assets"
 ## - For local: run `npm run pages:dev:d1` (uses wrangler's local D1 binding flag).
 
 [[d1_databases]]
-binding = "mbti_db"
+binding = "MBTI_DB"
 database_name = "mbti-db"
 database_id = "7b6f1cb7-c7af-4bf6-a24a-401a86b87289"
 
