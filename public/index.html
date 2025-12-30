@@ -31,8 +31,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/reset.css">
   <link rel="stylesheet" href="styles/main.css">
-  <link rel="preload" as="image" href="/assets/images/mainLogo.png" fetchpriority="high">
-  <link rel="preload" as="image" href="/assets/images/mainbanner.png" fetchpriority="high">
+  <link rel="preload" as="image" href="/assets/images/mainLogo.png" fetchpriority="high" data-preload-asset="assets/images/mainLogo.png" data-preload-width="256" data-preload-quality="90">
+  <link rel="preload" as="image" href="/assets/images/mainbanner.png" fetchpriority="high" data-preload-asset="assets/images/mainbanner.png" data-preload-width="1600" data-preload-quality="85" data-preload-fit="cover">
+  <script>
+    (function () {
+      try {
+        var origin = window.location && window.location.origin ? window.location.origin : "";
+        var links = document.querySelectorAll('link[rel="preload"][as="image"][data-preload-asset]');
+        for (var i = 0; i < links.length; i += 1) {
+          var el = links[i];
+          var asset = el.getAttribute("data-preload-asset");
+          if (!asset) continue;
+          var width = el.getAttribute("data-preload-width") || "auto";
+          var height = el.getAttribute("data-preload-height");
+          var quality = el.getAttribute("data-preload-quality") || "auto";
+          var fit = el.getAttribute("data-preload-fit") || "cover";
+          var format = el.getAttribute("data-preload-format") || "auto";
+          var absolute = asset.replace(/^\.?\/+/, "");
+          if (!/^assets\//i.test(absolute)) absolute = "assets/" + absolute;
+          var src = (origin ? origin + "/" : "") + absolute;
+          var params = ["width=" + width, "quality=" + quality, "fit=" + fit, "format=" + format];
+          if (height) params.splice(1, 0, "height=" + height);
+          el.href = "/cdn-cgi/image/" + params.join(",") + "/" + src;
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link rel="shortcut icon" data-asset-href="assets/images/favicon.png" type="image/x-icon">
   <script src="./scripts/config.js" defer></script>
 </head>
@@ -43,7 +67,7 @@
       <div id="header" class="Head">
         <div class="Logo">
           <a href="index.html">
-            <img data-asset-src="assets/images/mainLogo.png" alt="MBTIZOO바로가기">
+            <img data-asset-src="assets/images/mainLogo.png" data-asset-width="256" data-asset-quality="90" data-asset-fit="contain" data-asset-format="auto" alt="MBTIZOO바로가기">
           </a>
         </div>
         <div class="HeaderGnb holographic-container">
@@ -56,7 +80,7 @@
     <main id="MainTop">
       <div class="MainBanner">
         <a href="./testlist.html">
-          <img data-asset-src="assets/images/mainbanner.png" alt="테스트 리스트로 바로가기">
+          <img data-asset-src="assets/images/mainbanner.png" data-asset-width="1600" data-asset-quality="85" data-asset-fit="cover" data-asset-format="auto" alt="테스트 리스트로 바로가기">
         </a>
       </div>
       <div class="NewTestList">

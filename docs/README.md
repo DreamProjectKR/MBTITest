@@ -63,7 +63,7 @@ This directory intentionally contains only one document: this file.
 - Required fields (as used by current frontend):
   - `id`, `title`
   - `thumbnail`, `author`, `authorImg`, `tags`, `description`
-  - `questions[]` where `prompt` is an image path and each answer has `mbtiAxis` + `direction`
+  - `questions[]` where `questionImage` is an image path and each answer has `mbtiAxis` + `direction`
   - `results` map keyed by MBTI (e.g. `INTJ`) containing `image`
 
 ## Troubleshooting

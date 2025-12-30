@@ -11,13 +11,18 @@
   ],
   "author": "MBTI ZOO",
   "authorImg": "assets/test-holiday-cafe/images/author.png",
-  "tags": ["연말", "크리스마스", "카페", "스페셜메뉴"],
+  "tags": [
+    "연말",
+    "크리스마스",
+    "카페",
+    "스페셜메뉴"
+  ],
   "thumbnail": "assets/test-holiday-cafe/images/thumbnail.png",
   "questions": [
     {
       "id": "q1",
       "label": "연말에 한정 메뉴 팝업 카페를 발견했다! 내 첫 반응은?",
-      "prompt": "assets/test-holiday-cafe/images/1.png",
+      "questionImage": "assets/test-holiday-cafe/images/1.png",
       "answers": [
         {
           "id": "q1_a",
@@ -36,7 +41,7 @@
     {
       "id": "q2",
       "label": "주문을 기다리는 동안 나는 보통?",
-      "prompt": "assets/test-holiday-cafe/images/q2.png",
+      "questionImage": "assets/test-holiday-cafe/images/q2.png",
       "answers": [
         {
           "id": "q2_a",
@@ -55,7 +60,7 @@
     {
       "id": "q3",
       "label": "연말 분위기를 느끼러 나간다면 더 끌리는 쪽은?",
-      "prompt": "assets/test-holiday-cafe/images/q3.png",
+      "questionImage": "assets/test-holiday-cafe/images/q3.png",
       "answers": [
         {
           "id": "q3_a",
@@ -74,7 +79,7 @@
     {
       "id": "q4",
       "label": "한정 음료를 고를 때 내 스타일은?",
-      "prompt": "assets/test-holiday-cafe/images/q4.png",
+      "questionImage": "assets/test-holiday-cafe/images/q4.png",
       "answers": [
         {
           "id": "q4_a",
@@ -93,7 +98,7 @@
     {
       "id": "q5",
       "label": "디저트가 나오면 내가 먼저 보는 건?",
-      "prompt": "assets/test-holiday-cafe/images/q5.png",
+      "questionImage": "assets/test-holiday-cafe/images/q5.png",
       "answers": [
         {
           "id": "q5_a",
@@ -112,7 +117,7 @@
     {
       "id": "q6",
       "label": "메뉴 설명을 읽을 때 더 눈이 가는 문장은?",
-      "prompt": "assets/test-holiday-cafe/images/q6.png",
+      "questionImage": "assets/test-holiday-cafe/images/q6.png",
       "answers": [
         {
           "id": "q6_a",
@@ -131,7 +136,7 @@
     {
       "id": "q7",
       "label": "친구가 한정 메뉴를 시켰는데 ‘생각보다 별로’라고 한다면?",
-      "prompt": "assets/test-holiday-cafe/images/q7.png",
+      "questionImage": "assets/test-holiday-cafe/images/q7.png",
       "answers": [
         {
           "id": "q7_a",
@@ -150,7 +155,7 @@
     {
       "id": "q8",
       "label": "대기줄이 너무 길다… 이때 나는?",
-      "prompt": "assets/test-holiday-cafe/images/q8.png",
+      "questionImage": "assets/test-holiday-cafe/images/q8.png",
       "answers": [
         {
           "id": "q8_a",
@@ -169,7 +174,7 @@
     {
       "id": "q9",
       "label": "바리스타가 추천 메뉴를 권할 때 더 설득되는 건?",
-      "prompt": "assets/test-holiday-cafe/images/q9.png",
+      "questionImage": "assets/test-holiday-cafe/images/q9.png",
       "answers": [
         {
           "id": "q9_a",
@@ -188,7 +193,7 @@
     {
       "id": "q10",
       "label": "연말 약속을 잡을 때 내 스타일은?",
-      "prompt": "assets/test-holiday-cafe/images/q10.png",
+      "questionImage": "assets/test-holiday-cafe/images/q10.png",
       "answers": [
         {
           "id": "q10_a",
@@ -207,7 +212,7 @@
     {
       "id": "q11",
       "label": "한정 굿즈(스티커/컵홀더)가 있다면?",
-      "prompt": "assets/test-holiday-cafe/images/q11.png",
+      "questionImage": "assets/test-holiday-cafe/images/q11.png",
       "answers": [
         {
           "id": "q11_a",
@@ -226,7 +231,7 @@
     {
       "id": "q12",
       "label": "새해를 앞두고 나는 어떤 모드가 더 가까워?",
-      "prompt": "assets/test-holiday-cafe/images/q12.png",
+      "questionImage": "assets/test-holiday-cafe/images/q12.png",
       "answers": [
         {
           "id": "q12_a",

@@ -4,7 +4,7 @@
  * High-level flow:
  * - Load test JSON via `GET /api/tests/:id`
  * - Shuffle questions/answers (optional)
- * - Render question prompt image + two answer buttons
+ * - Render question questionImage image + two answer buttons
  * - Track scores and compute MBTI
  * - Navigate to `testresult.html?testId=...&result=MBTI`
  */
@@ -228,7 +228,7 @@ function renderQuestion() {
   updateProgressBar(state.currentIndex, state.totalQuestions);
 
   if (dom.image) {
-    dom.image.src = resolveAssetPath(question.prompt) || "#";
+    dom.image.src = resolveAssetPath(question.questionImage) || "#";
     dom.image.alt = question.id || `문항 ${state.currentIndex + 1}`;
   }
 

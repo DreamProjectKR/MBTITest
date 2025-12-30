@@ -52,8 +52,8 @@ function validateTestPayload(test) {
     const question = test.questions[i];
     if (!question || typeof question !== "object")
       return `Question ${i + 1} is invalid.`;
-    if (!question.prompt && !question.label)
-      return `Question ${i + 1} needs prompt or label.`;
+    if (!question.questionImage && !question.label)
+      return `Question ${i + 1} needs questionImage or label.`;
     if (!Array.isArray(question.answers) || question.answers.length < 2)
       return `Question ${i + 1} needs at least two answers.`;
 

@@ -74,6 +74,39 @@
     return `/cdn-cgi/image/${paramString}/${absoluteUrl}`;
   };
 
+  function parseAssetResizeOptionsFromElement(el) {
+    if (!el || !el.getAttribute) return null;
+    const hasAny =
+      el.hasAttribute("data-asset-width") ||
+      el.hasAttribute("data-asset-height") ||
+      el.hasAttribute("data-asset-quality") ||
+      el.hasAttribute("data-asset-fit") ||
+      el.hasAttribute("data-asset-format");
+    if (!hasAny) return null;
+
+    const read = (name) => {
+      const v = el.getAttribute(name);
+      if (v == null) return null;
+      const s = String(v).trim();
+      return s.length ? s : null;
+    };
+
+    const options = {};
+    const width = read("data-asset-width");
+    const height = read("data-asset-height");
+    const quality = read("data-asset-quality");
+    const fit = read("data-asset-fit");
+    const format = read("data-asset-format");
+
+    if (width) options.width = width;
+    if (height) options.height = height;
+    if (quality) options.quality = quality;
+    if (fit) options.fit = fit;
+    if (format) options.format = format;
+
+    return options;
+  }
+
   // Test index source:
   // - Default: same-origin `/assets/index.json` (served by Pages Functions proxy from R2).
   // - You can override by setting `window.TEST_INDEX_URL` before this script runs.
@@ -137,15 +170,15 @@
     root.setProperty("--ASSETS_BASE", ASSETS_BASE);
     root.setProperty(
       "--asset-header-bg",
-      `url(${window.assetUrl("assets/images/HeaderBackgroundImg.png")})`,
+      `url(${window.assetResizeUrl("assets/images/HeaderBackgroundImg.png", { width: 1600, quality: 85, fit: "cover", format: "auto" })})`,
     );
     root.setProperty(
       "--asset-header-bg-non",
-      `url(${window.assetUrl("assets/images/HeaderBackgroundImgNon.png")})`,
+      `url(${window.assetResizeUrl("assets/images/HeaderBackgroundImgNon.png", { width: 1600, quality: 85, fit: "cover", format: "auto" })})`,
     );
     root.setProperty(
       "--asset-footer-bg",
-      `url(${window.assetUrl("assets/images/FooterBackgroundImg.png")})`,
+      `url(${window.assetResizeUrl("assets/images/FooterBackgroundImg.png", { width: 1600, quality: 85, fit: "cover", format: "auto" })})`,
     );
   }
 
@@ -154,6 +187,11 @@
     if (typeof document === "undefined") return;
     const scope = root && root.querySelectorAll ? root : document;
     const toUrl = (v) => (v ? window.assetUrl(v) : "");
+    const toResizeUrl = (el, v) => {
+      const opts = parseAssetResizeOptionsFromElement(el);
+      if (!opts) return toUrl(v);
+      return window.assetResizeUrl(v, opts);
+    };
 
     // root 자신이 타겟 엘리먼트일 수도 있어 별도 처리
     const maybeApply = (el) => {
@@ -161,7 +199,7 @@
       if (el.hasAttribute && el.hasAttribute("data-asset-src")) {
         const path = el.getAttribute("data-asset-src");
         if (path && !el.getAttribute("src"))
-          el.setAttribute("src", toUrl(path));
+          el.setAttribute("src", toResizeUrl(el, path));
       }
       if (el.hasAttribute && el.hasAttribute("data-asset-href")) {
         const path = el.getAttribute("data-asset-href");

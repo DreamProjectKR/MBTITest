@@ -37,7 +37,7 @@ assets/data/mbti-tests.json # 샘플 테스트 및 결과 데이터
       "questions": [
         {
           "id": "q1",
-          "prompt": "질문",
+          "questionImage": "질문",
           "answers": [
             {
               "id": "q1a",

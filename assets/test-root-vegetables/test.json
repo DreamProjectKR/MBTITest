@@ -1,7 +1,6 @@
 {
   "id": "test-root-vegetables",
   "title": "뿌리채소 성향 테스트",
-
   "description": [
     "뿌리뿌리 뿌리채소 유형 ✨",
     "뿌리채소 농장에서 친구들 이끌고 신나게 돌아다니고 싶은지,",
@@ -16,23 +15,27 @@
   ],
   "author": "라푸",
   "authorImg": "assets/test-root-vegetables/images/author.png",
-  "tags": ["뿌리채소", "캐릭터", "MBTI"],
+  "tags": [
+    "뿌리채소",
+    "캐릭터",
+    "MBTI"
+  ],
   "thumbnail": "assets/test-root-vegetables/images/thumbnail.png",
   "questions": [
     {
       "id": "q1",
-      "label": "뿌리채소 농장을 방문하면 나는?",
-      "prompt": "assets/test-root-vegetables/images/Q1.png",
+      "question": "뿌리채소 농장을 방문하면 나는?",
+      "questionImage": "assets/test-root-vegetables/images/Q1.png",
       "answers": [
         {
           "id": "q1_a",
-          "label": "친구들을 이끌고 돌아보며 뿌리마다 특징을 설명해준다",
+          "answer": "친구들을 이끌고 돌아보며 뿌리마다 특징을 설명해준다",
           "mbtiAxis": "EI",
           "direction": "E"
         },
         {
           "id": "q1_b",
-          "label": "혼자 조용히 걸으며 뿌리의 굵기와 색을 음미한다",
+          "answer": "혼자 조용히 걸으며 뿌리의 굵기와 색을 음미한다",
           "mbtiAxis": "EI",
           "direction": "I"
         }
@@ -40,18 +43,18 @@
     },
     {
       "id": "q2",
-      "label": "새로운 뿌리채소를 소개할 때 나는?",
-      "prompt": "assets/test-root-vegetables/images/Q2.png",
+      "question": "새로운 뿌리채소를 소개할 때 나는?",
+      "questionImage": "assets/test-root-vegetables/images/Q2.png",
       "answers": [
         {
           "id": "q2_a",
-          "label": "즉시 사진을 찍어 사람들에게 공유하고 반응을 본다",
+          "answer": "즉시 사진을 찍어 사람들에게 공유하고 반응을 본다",
           "mbtiAxis": "EI",
           "direction": "E"
         },
         {
           "id": "q2_b",
-          "label": "조용히 노트에 감상과 느낌을 기록한 뒤 천천히 이야기한다",
+          "answer": "조용히 노트에 감상과 느낌을 기록한 뒤 천천히 이야기한다",
           "mbtiAxis": "EI",
           "direction": "I"
         }
@@ -59,18 +62,18 @@
     },
     {
       "id": "q3",
-      "label": "뿌리채소 파티에서 내 역할은?",
-      "prompt": "assets/test-root-vegetables/images/Q3.png",
+      "question": "뿌리채소 파티에서 내 역할은?",
+      "questionImage": "assets/test-root-vegetables/images/Q3.png",
       "answers": [
         {
           "id": "q3_a",
-          "label": "가장 시끌벅적하게 이야기를 시작하고 타이밍을 조율한다",
+          "answer": "가장 시끌벅적하게 이야기를 시작하고 타이밍을 조율한다",
           "mbtiAxis": "EI",
           "direction": "E"
         },
         {
           "id": "q3_b",
-          "label": "작은 그룹에서 느긋하게 대화를 이어간다",
+          "answer": "작은 그룹에서 느긋하게 대화를 이어간다",
           "mbtiAxis": "EI",
           "direction": "I"
         }
@@ -78,18 +81,18 @@
     },
     {
       "id": "q4",
-      "label": "뿌리채소를 손질할 때 먼저 무엇을 살펴보나요?",
-      "prompt": "assets/test-root-vegetables/images/Q4.png",
+      "question": "뿌리채소를 손질할 때 먼저 무엇을 살펴보나요?",
+      "questionImage": "assets/test-root-vegetables/images/Q4.png",
       "answers": [
         {
           "id": "q4_a",
-          "label": "껍질의 질감, 단단함, 수분감 같은 구체적 특징",
+          "answer": "껍질의 질감, 단단함, 수분감 같은 구체적 특징",
           "mbtiAxis": "SN",
           "direction": "S"
         },
         {
           "id": "q4_b",
-          "label": "이 색이 어떤 이야기를 품을지, 어떤 요리에 어울릴지 상상한다",
+          "answer": "이 색이 어떤 이야기를 품을지, 어떤 요리에 어울릴지 상상한다",
           "mbtiAxis": "SN",
           "direction": "N"
         }
@@ -97,18 +100,18 @@
     },
     {
       "id": "q5",
-      "label": "뿌리채소 요리를 준비할 때 내 스타일은?",
-      "prompt": "assets/test-root-vegetables/images/Q5.png",
+      "question": "뿌리채소 요리를 준비할 때 내 스타일은?",
+      "questionImage": "assets/test-root-vegetables/images/Q5.png",
       "answers": [
         {
           "id": "q5_a",
-          "label": "재료의 무게와 질감, 시간을 정확히 맞춘다",
+          "answer": "재료의 무게와 질감, 시간을 정확히 맞춘다",
           "mbtiAxis": "SN",
           "direction": "S"
         },
         {
           "id": "q5_b",
-          "label": "어떤 무드와 색감이 나올까를 먼저 떠올린다",
+          "answer": "어떤 무드와 색감이 나올까를 먼저 떠올린다",
           "mbtiAxis": "SN",
           "direction": "N"
         }
@@ -116,18 +119,18 @@
     },
     {
       "id": "q6",
-      "label": "뿌리채소 이야기를 들을 때 더 끌리는 정보는?",
-      "prompt": "assets/test-root-vegetables/images/Q6.png",
+      "question": "뿌리채소 이야기를 들을 때 더 끌리는 정보는?",
+      "questionImage": "assets/test-root-vegetables/images/Q6.png",
       "answers": [
         {
           "id": "q6_a",
-          "label": "보관법, 영양, 재배 방식 같은 사실",
+          "answer": "보관법, 영양, 재배 방식 같은 사실",
           "mbtiAxis": "SN",
           "direction": "S"
         },
         {
           "id": "q6_b",
-          "label": "전통, 전설, 그 뿌리채소가 품은 상징",
+          "answer": "전통, 전설, 그 뿌리채소가 품은 상징",
           "mbtiAxis": "SN",
           "direction": "N"
         }
@@ -135,18 +138,18 @@
     },
     {
       "id": "q7",
-      "label": "친구에게 뿌리채소를 추천할 때 나는?",
-      "prompt": "assets/test-root-vegetables/images/Q7.png",
+      "question": "친구에게 뿌리채소를 추천할 때 나는?",
+      "questionImage": "assets/test-root-vegetables/images/Q7.png",
       "answers": [
         {
           "id": "q7_a",
-          "label": "맛과 영양, 가성비를 짚으며 객관적으로 비교한다",
+          "answer": "맛과 영양, 가성비를 짚으며 객관적으로 비교한다",
           "mbtiAxis": "TF",
           "direction": "T"
         },
         {
           "id": "q7_b",
-          "label": "친구의 오늘 기분과 어울리는 감정을 먼저 살핀다",
+          "answer": "친구의 오늘 기분과 어울리는 감정을 먼저 살핀다",
           "mbtiAxis": "TF",
           "direction": "F"
         }
@@ -154,18 +157,18 @@
     },
     {
       "id": "q8",
-      "label": "뿌리채소 저장 계획이 틀어지면?",
-      "prompt": "assets/test-root-vegetables/images/Q8.png",
+      "question": "뿌리채소 저장 계획이 틀어지면?",
+      "questionImage": "assets/test-root-vegetables/images/Q8.png",
       "answers": [
         {
           "id": "q8_a",
-          "label": "표를 다시 계산해 최적의 위치와 순서를 정리한다",
+          "answer": "표를 다시 계산해 최적의 위치와 순서를 정리한다",
           "mbtiAxis": "TF",
           "direction": "T"
         },
         {
           "id": "q8_b",
-          "label": "모두의 마음을 다독이며 넘어진 감정부터 챙긴다",
+          "answer": "모두의 마음을 다독이며 넘어진 감정부터 챙긴다",
           "mbtiAxis": "TF",
           "direction": "F"
         }
@@ -173,18 +176,18 @@
     },
     {
       "id": "q9",
-      "label": "누군가 뿌리채소와 관련된 고민을 털어놓으면?",
-      "prompt": "assets/test-root-vegetables/images/Q9.png",
+      "question": "누군가 뿌리채소와 관련된 고민을 털어놓으면?",
+      "questionImage": "assets/test-root-vegetables/images/Q9.png",
       "answers": [
         {
           "id": "q9_a",
-          "label": "논리적으로 원인과 해법을 짚으며 분석한다",
+          "answer": "논리적으로 원인과 해법을 짚으며 분석한다",
           "mbtiAxis": "TF",
           "direction": "T"
         },
         {
           "id": "q9_b",
-          "label": "감정을 함께 느끼고 편안한 위로를 건넨다",
+          "answer": "감정을 함께 느끼고 편안한 위로를 건넨다",
           "mbtiAxis": "TF",
           "direction": "F"
         }
@@ -192,18 +195,18 @@
     },
     {
       "id": "q10",
-      "label": "다가오는 뿌리채소 장터 준비는?",
-      "prompt": "assets/test-root-vegetables/images/Q10.png",
+      "question": "다가오는 뿌리채소 장터 준비는?",
+      "questionImage": "assets/test-root-vegetables/images/Q10.png",
       "answers": [
         {
           "id": "q10_a",
-          "label": "타임라인과 체크리스트로 일정을 딱 맞춘다",
+          "answer": "타임라인과 체크리스트로 일정을 딱 맞춘다",
           "mbtiAxis": "JP",
           "direction": "J"
         },
         {
           "id": "q10_b",
-          "label": "기분과 날씨에 맡겨 유연하게 움직인다",
+          "answer": "기분과 날씨에 맡겨 유연하게 움직인다",
           "mbtiAxis": "JP",
           "direction": "P"
         }
@@ -211,18 +214,18 @@
     },
     {
       "id": "q11",
-      "label": "냉장고에 뿌리채소가 잔뜩 있다면?",
-      "prompt": "assets/test-root-vegetables/images/Q11.png",
+      "question": "냉장고에 뿌리채소가 잔뜩 있다면?",
+      "questionImage": "assets/test-root-vegetables/images/Q11.png",
       "answers": [
         {
           "id": "q11_a",
-          "label": "영역을 나누고 라벨로 꼼꼼하게 정리한다",
+          "answer": "영역을 나누고 라벨로 꼼꼼하게 정리한다",
           "mbtiAxis": "JP",
           "direction": "J"
         },
         {
           "id": "q11_b",
-          "label": "필요할 때마다 꺼내 쓰며 흐름대로 챙긴다",
+          "answer": "필요할 때마다 꺼내 쓰며 흐름대로 챙긴다",
           "mbtiAxis": "JP",
           "direction": "P"
         }
@@ -230,18 +233,18 @@
     },
     {
       "id": "q12",
-      "label": "초대받은 뿌리채소 전시에서 나는?",
-      "prompt": "assets/test-root-vegetables/images/Q12.png",
+      "question": "초대받은 뿌리채소 전시에서 나는?",
+      "questionImage": "assets/test-root-vegetables/images/Q12.png",
       "answers": [
         {
           "id": "q12_a",
-          "label": "사전에 연설과 동선을 준비해 숨은 실수를 막는다",
+          "answer": "사전에 연설과 동선을 준비해 숨은 실수를 막는다",
           "mbtiAxis": "JP",
           "direction": "J"
         },
         {
           "id": "q12_b",
-          "label": "그날 분위기에 따라 즉흥적인 멘트와 움직임을 펼친다",
+          "answer": "그날 분위기에 따라 즉흥적인 멘트와 움직임을 펼친다",
           "mbtiAxis": "JP",
           "direction": "P"
         }
@@ -251,67 +254,67 @@
   "results": {
     "ISTJ": {
       "image": "assets/test-root-vegetables/images/ISTJ.png",
-      "summary": "감자: 계획대로, 한 발씩. 꾸준하고 실용적인 존재감."
+      "description": "감자: 계획대로, 한 발씩. 꾸준하고 실용적인 존재감."
     },
     "ISFJ": {
       "image": "assets/test-root-vegetables/images/ISFJ.png",
-      "summary": "순무: 괜찮아, 내가 할게. 배려 깊고 따뜻한 보호자."
+      "description": "순무: 괜찮아, 내가 할게. 배려 깊고 따뜻한 보호자."
     },
     "INFJ": {
       "image": "assets/test-root-vegetables/images/INFJ.png",
-      "summary": "연근: 보이는 것 너머를 본다. 상징과 의미에 집중하는 신비주의자."
+      "description": "연근: 보이는 것 너머를 본다. 상징과 의미에 집중하는 신비주의자."
     },
     "INTJ": {
       "image": "assets/test-root-vegetables/images/INTJ.png",
-      "summary": "우엉: 계획은 곧 권력이다. 전략적으로 큰 그림을 그리는 냉정한 기획자."
+      "description": "우엉: 계획은 곧 권력이다. 전략적으로 큰 그림을 그리는 냉정한 기획자."
     },
     "ISTP": {
       "image": "assets/test-root-vegetables/images/ISTP.png",
-      "summary": "생강: 바로 해보자 — 방법은 찾는다. 즉흥과 손재주가 살아있는 해결사."
+      "description": "생강: 바로 해보자 — 방법은 찾는다. 즉흥과 손재주가 살아있는 해결사."
     },
     "ISFP": {
       "image": "assets/test-root-vegetables/images/ISFP.png",
-      "summary": "토란: 느낌대로, 지금. 감각적인 색감과 부드러운 온기로 채색하는 아티스트."
+      "description": "토란: 느낌대로, 지금. 감각적인 색감과 부드러운 온기로 채색하는 아티스트."
     },
     "INFP": {
       "image": "assets/test-root-vegetables/images/INFP.png",
-      "summary": "비트: 마음의 색을 믿어. 이상과 감정이 풍부한 꿈꾸는 감성파."
+      "description": "비트: 마음의 색을 믿어. 이상과 감정이 풍부한 꿈꾸는 감성파."
     },
     "INTP": {
       "image": "assets/test-root-vegetables/images/INTP.png",
-      "summary": "마: 한 번 더 따져보자. 개념과 호기심을 조심스럽게 탐색하는 분석가."
+      "description": "마: 한 번 더 따져보자. 개념과 호기심을 조심스럽게 탐색하는 분석가."
     },
     "ESTP": {
       "image": "assets/test-root-vegetables/images/ESTP.png",
-      "summary": "당근: 해보자, 지금! 즉전력 행동주의자."
+      "description": "당근: 해보자, 지금! 즉전력 행동주의자."
     },
     "ESFP": {
       "image": "assets/test-root-vegetables/images/ESFP.png",
-      "summary": "양파: 같이 즐기자! 감정을 넉넉히 표현하는 무대의 꽃."
+      "description": "양파: 같이 즐기자! 감정을 넉넉히 표현하는 무대의 꽃."
     },
     "ENFP": {
       "image": "assets/test-root-vegetables/images/ENFP.png",
-      "summary": "파스닙: 아이디어, 무한대! 낙천적인 가능성 메이커."
+      "description": "파스닙: 아이디어, 무한대! 낙천적인 가능성 메이커."
     },
     "ENTP": {
       "image": "assets/test-root-vegetables/images/ENTP.png",
-      "summary": "마늘: 또 다른 각도는? 발상 전환과 트릭을 즐기는 유쾌한 전략가."
+      "description": "마늘: 또 다른 각도는? 발상 전환과 트릭을 즐기는 유쾌한 전략가."
     },
     "ESTJ": {
       "image": "assets/test-root-vegetables/images/ESTJ.png",
-      "summary": "무: 체계가 답이다. 조직적이고 책임감 넘치는 리더."
+      "description": "무: 체계가 답이다. 조직적이고 책임감 넘치는 리더."
     },
     "ESFJ": {
       "image": "assets/test-root-vegetables/images/ESFJ.png",
-      "summary": "고구마: 다 함께라서 좋아. 따뜻하고 사교적으로 사람을 챙기는 중심."
+      "description": "고구마: 다 함께라서 좋아. 따뜻하고 사교적으로 사람을 챙기는 중심."
     },
     "ENFJ": {
       "image": "assets/test-root-vegetables/images/ENFJ.png",
-      "summary": "콜라비: 너의 가능성을 보여줘. 카리스마 있는 인도자."
+      "description": "콜라비: 너의 가능성을 보여줘. 카리스마 있는 인도자."
     },
     "ENTJ": {
       "image": "assets/test-root-vegetables/images/ENTJ.png",
-      "summary": "와사비: 속도와 정확성으로 돌파한다. 단호하게 결과를 밀어붙이는 추진자."
+      "description": "와사비: 속도와 정확성으로 돌파한다. 단호하게 결과를 밀어붙이는 추진자."
     }
   }
 }

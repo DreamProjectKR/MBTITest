@@ -95,7 +95,7 @@ function setupForms() {
     const data = new FormData(elements.questionForm);
     const question = {
       id: crypto.randomUUID?.() ?? `q-${Date.now()}`,
-      prompt: data.get("prompt")?.trim() ?? "",
+      questionImage: data.get("questionImage")?.trim() ?? "",
       answers: [buildAnswer("answerA", data), buildAnswer("answerB", data)],
     };
 
@@ -546,7 +546,7 @@ function renderQuestions(questions) {
 
     const content = document.createElement("div");
     const title = document.createElement("strong");
-    title.textContent = `${index + 1}. ${question.prompt}`;
+    title.textContent = `${index + 1}. ${question.questionImage}`;
     content.append(title);
 
     const chipRow = document.createElement("div");
