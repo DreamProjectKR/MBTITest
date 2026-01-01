@@ -135,33 +135,100 @@
   if (typeof document !== "undefined") {
     const root = document.documentElement.style;
     root.setProperty("--ASSETS_BASE", ASSETS_BASE);
+    const resizedHeader = window.assetResizeUrl("assets/images/HeaderBackgroundImg.png", {
+      width: 1600,
+      quality: 80,
+      fit: "cover",
+      format: "auto",
+    });
+    const resizedHeaderNon = window.assetResizeUrl(
+      "assets/images/HeaderBackgroundImgNon.png",
+      {
+        width: 1600,
+        quality: 80,
+        fit: "cover",
+        format: "auto",
+      },
+    );
+    const resizedFooter = window.assetResizeUrl("assets/images/FooterBackgroundImg.png", {
+      width: 1600,
+      quality: 80,
+      fit: "cover",
+      format: "auto",
+    });
     root.setProperty(
       "--asset-header-bg",
-      `url(${window.assetUrl("assets/images/HeaderBackgroundImg.png")})`,
+      `url(${resizedHeader})`,
     );
     root.setProperty(
       "--asset-header-bg-non",
-      `url(${window.assetUrl("assets/images/HeaderBackgroundImgNon.png")})`,
+      `url(${resizedHeaderNon})`,
     );
     root.setProperty(
       "--asset-footer-bg",
-      `url(${window.assetUrl("assets/images/FooterBackgroundImg.png")})`,
+      `url(${resizedFooter})`,
     );
   }
 
   // data-asset-* 속성 자동 주입 (img/src, link/href, bg)
+  /**
+   * Parse a resize option string like:
+   * - "width=1230,quality=85,fit=cover,format=auto"
+   * @param {string} raw
+   * @returns {{ width?: number, height?: number, quality?: number|string, fit?: string, format?: string }}
+   */
+  function parseResizeOptions(raw) {
+    const out = {};
+    const str = String(raw || "").trim();
+    if (!str) return out;
+
+    str.split(",").forEach((pair) => {
+      const p = String(pair || "").trim();
+      if (!p) return;
+      const idx = p.indexOf("=");
+      if (idx <= 0) return;
+      const key = p.slice(0, idx).trim();
+      const value = p.slice(idx + 1).trim();
+      if (!key || !value) return;
+
+      if (key === "width" || key === "height") {
+        const n = Number(value);
+        if (Number.isFinite(n) && n > 0) out[key] = n;
+        return;
+      }
+
+      if (key === "quality") {
+        const n = Number(value);
+        out.quality = Number.isFinite(n) && n > 0 ? n : value;
+        return;
+      }
+
+      if (key === "fit") out.fit = value;
+      if (key === "format") out.format = value;
+    });
+
+    return out;
+  }
+
   function applyAssetAttributes(root) {
     if (typeof document === "undefined") return;
     const scope = root && root.querySelectorAll ? root : document;
-    const toUrl = (v) => (v ? window.assetUrl(v) : "");
+    const toUrl = (v, resizeRaw) => {
+      if (!v) return "";
+      if (resizeRaw && typeof window.assetResizeUrl === "function") {
+        return window.assetResizeUrl(v, parseResizeOptions(resizeRaw));
+      }
+      return window.assetUrl(v);
+    };
 
     // root 자신이 타겟 엘리먼트일 수도 있어 별도 처리
     const maybeApply = (el) => {
       if (!el || el.nodeType !== 1) return;
       if (el.hasAttribute && el.hasAttribute("data-asset-src")) {
         const path = el.getAttribute("data-asset-src");
+        const resize = el.getAttribute("data-asset-resize");
         if (path && !el.getAttribute("src"))
-          el.setAttribute("src", toUrl(path));
+          el.setAttribute("src", toUrl(path, resize));
       }
       if (el.hasAttribute && el.hasAttribute("data-asset-href")) {
         const path = el.getAttribute("data-asset-href");
@@ -170,8 +237,9 @@
       }
       if (el.hasAttribute && el.hasAttribute("data-asset-bg")) {
         const path = el.getAttribute("data-asset-bg");
+        const resize = el.getAttribute("data-asset-resize");
         if (path && !el.style?.backgroundImage)
-          el.style.backgroundImage = `url(${toUrl(path)})`;
+          el.style.backgroundImage = `url(${toUrl(path, resize)})`;
       }
     };
 

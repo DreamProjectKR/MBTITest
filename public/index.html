@@ -31,8 +31,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/reset.css">
   <link rel="stylesheet" href="styles/main.css">
-  <link rel="preload" as="image" href="/assets/images/mainLogo.png" fetchpriority="high">
-  <link rel="preload" as="image" href="/assets/images/mainbanner.png" fetchpriority="high">
+  <link rel="preload" as="image" href="/cdn-cgi/image/width=360,quality=90,format=auto/assets/images/mainLogo.png" fetchpriority="high">
+  <link rel="preload" as="image" href="/cdn-cgi/image/width=1230,quality=85,fit=cover,format=auto/assets/images/mainbanner.png" fetchpriority="high">
   <link rel="shortcut icon" data-asset-href="assets/images/favicon.png" type="image/x-icon">
   <script src="./scripts/config.js" defer></script>
 </head>
@@ -56,7 +56,7 @@
     <main id="MainTop">
       <div class="MainBanner">
         <a href="./testlist.html">
-          <img data-asset-src="assets/images/mainbanner.png" alt="테스트 리스트로 바로가기">
+          <img data-asset-src="assets/images/mainbanner.png" data-asset-resize="width=1230,quality=85,fit=cover,format=auto" alt="테스트 리스트로 바로가기">
         </a>
       </div>
       <div class="NewTestList">
@@ -129,4 +129,4 @@
 
 </html>
 
-<script type="module" src="./scripts/main.js" data-cfasync="false"></script>
+<script type="module" src="./scripts/main.js" crossorigin="anonymous"></script>
