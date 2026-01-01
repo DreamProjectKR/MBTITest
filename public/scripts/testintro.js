@@ -12,16 +12,30 @@ const headerScroll = document.querySelector("header");
 const headerOffset = header ? header.offsetTop : 0;
 // NOTE: `config.js` defines `window.ASSETS_BASE` and `window.assetUrl()`.
 // Production default: same-origin `/assets/*` (served by Pages Functions proxy).
-const ASSETS_BASE = window.ASSETS_BASE ?? "";
-const assetUrl =
-  window.assetUrl ||
-  ((path) => {
-    if (!path) return "";
-    if (/^https?:\/\//i.test(path)) return path;
-    let clean = String(path).replace(/^\.?\/+/, "");
-    clean = clean.replace(/^assets\/+/i, "");
-    return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
-  });
+/**
+ * Resolve an asset path into a browser URL.
+ * Keep this dynamic because Rocket Loader can delay `config.js`.
+ * @param {string} path
+ * @returns {string}
+ */
+function assetUrl(path) {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+
+  if (typeof window !== "undefined" && typeof window.assetUrl === "function") {
+    return window.assetUrl(path);
+  }
+
+  const base = String(
+    typeof window !== "undefined" && window.ASSETS_BASE
+      ? window.ASSETS_BASE
+      : "/assets",
+  ).replace(/\/+$/, "");
+
+  let clean = String(path).replace(/^\.?\/+/, "");
+  clean = clean.replace(/^assets\/+/i, "");
+  return `${base}/${clean}`.replace(/\/{2,}/g, "/");
+}
 
 const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
 

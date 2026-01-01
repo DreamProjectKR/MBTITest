@@ -14,23 +14,30 @@ const dom = {
   shareBtn: document.querySelector(".ResultBtnShell .TestShare button"),
 };
 
-// `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
-// Production default: same-origin `/assets/*` (served by Pages Functions proxy).
-const ASSETS_BASE = window.ASSETS_BASE || "";
 /**
- * Build an absolute URL for an asset path under `assets/`.
+ * Resolve an asset path into a browser URL.
+ * See `public/scripts/testquiz.js` for why this is dynamic.
  * @param {string} path
  * @returns {string}
  */
-const assetUrl =
-  window.assetUrl ||
-  ((path) => {
-    if (!path) return "";
-    if (/^https?:\/\//i.test(path)) return path;
-    let clean = String(path).replace(/^\.?\/+/, "");
-    clean = clean.replace(/^assets\/+/i, "");
-    return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
-  });
+function assetUrl(path) {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+
+  if (typeof window !== "undefined" && typeof window.assetUrl === "function") {
+    return window.assetUrl(path);
+  }
+
+  const base = String(
+    typeof window !== "undefined" && window.ASSETS_BASE
+      ? window.ASSETS_BASE
+      : "/assets",
+  ).replace(/\/+$/, "");
+
+  let clean = String(path).replace(/^\.?\/+/, "");
+  clean = clean.replace(/^assets\/+/i, "");
+  return `${base}/${clean}`.replace(/\/{2,}/g, "/");
+}
 
 const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
 

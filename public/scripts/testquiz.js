@@ -27,18 +27,34 @@ const dom = {
   pageShell: document.querySelector(".PageShell"),
 };
 
-// `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
-// Production default: same-origin `/assets/*` (served by Pages Functions proxy).
-const ASSETS_BASE = window.ASSETS_BASE || "";
-const assetUrl =
-  window.assetUrl ||
-  ((path) => {
-    if (!path) return "";
-    if (/^https?:\/\//i.test(path)) return path;
-    let clean = String(path).replace(/^\.?\/+/, "");
-    clean = clean.replace(/^assets\/+/i, "");
-    return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
-  });
+/**
+ * Resolve an asset path into a browser URL.
+ *
+ * Why this is a function (not a top-level constant):
+ * Cloudflare Rocket Loader can delay/reorder classic scripts like `config.js`,
+ * so `window.assetUrl` / `window.ASSETS_BASE` might not be ready at module-eval time.
+ *
+ * @param {string} path
+ * @returns {string}
+ */
+function assetUrl(path) {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+
+  if (typeof window !== "undefined" && typeof window.assetUrl === "function") {
+    return window.assetUrl(path);
+  }
+
+  const base = String(
+    typeof window !== "undefined" && window.ASSETS_BASE
+      ? window.ASSETS_BASE
+      : "/assets",
+  ).replace(/\/+$/, "");
+
+  let clean = String(path).replace(/^\.?\/+/, "");
+  clean = clean.replace(/^assets\/+/i, "");
+  return `${base}/${clean}`.replace(/\/{2,}/g, "/");
+}
 const ICONS = {
   instagram: assetUrl("assets/images/instagram.png"),
   katalk: assetUrl("assets/images/katalk.png"),
@@ -249,7 +265,8 @@ function renderQuestion() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = `select${idx + 1}`;
-    btn.textContent = answer.label || `문항 ${idx + 1}`;
+    // Backward compatible with legacy data fields.
+    btn.textContent = answer.answer || answer.label || `문항 ${idx + 1}`;
     btn.addEventListener("click", () => handleAnswer(answer));
     frag.appendChild(btn);
   });
