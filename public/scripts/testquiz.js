@@ -173,6 +173,84 @@ function resolveAssetPath(relative) {
   return assetUrl(relative);
 }
 
+/**
+ * Build a list of candidate image URLs for a question.
+ * Handles:
+ * - Field name differences (`questionImage`, `image`, etc.)
+ * - Missing `questionImage` by guessing common filenames under `assets/<testId>/images/`
+ * - Case differences (e.g. `Q7.png` vs `q7.png`) via fallback attempts
+ *
+ * @param {any} question
+ * @returns {string[]}
+ */
+function getQuestionImageUrlCandidates(question) {
+  const raw =
+    question?.questionImage ||
+    question?.image ||
+    question?.questionImg ||
+    question?.question_image;
+
+  if (raw) {
+    const url = resolveAssetPath(raw);
+    return url ? [url] : [];
+  }
+
+  const testId = state.test?.id;
+  const questionId = String(question?.id || "").trim();
+  if (!testId || !questionId) return [];
+
+  const base = `assets/${testId}/images/`;
+  const upperId = questionId.toUpperCase();
+  const qPrefixId = questionId.replace(/^q/i, "Q");
+
+  const candidates = [
+    `${base}${questionId}.png`,
+    `${base}${questionId}.jpg`,
+    `${base}${questionId}.jpeg`,
+    `${base}${upperId}.png`,
+    `${base}${upperId}.jpg`,
+    `${base}${upperId}.jpeg`,
+    `${base}${qPrefixId}.png`,
+    `${base}${qPrefixId}.jpg`,
+    `${base}${qPrefixId}.jpeg`,
+  ];
+
+  return candidates
+    .map((p) => resolveAssetPath(p))
+    .filter((u) => typeof u === "string" && u.length > 0);
+}
+
+/**
+ * Set an <img> src with fallback attempts.
+ * @param {HTMLImageElement|null} imgEl
+ * @param {string[]} urls
+ * @param {string} alt
+ */
+function setImageWithFallback(imgEl, urls, alt) {
+  if (!imgEl) return;
+  const list = Array.isArray(urls) ? urls : [];
+  imgEl.alt = alt || "";
+
+  let i = 0;
+  const tryNext = () => {
+    while (i < list.length && !list[i]) i += 1;
+    if (i >= list.length) {
+      // Avoid leaving `src="#"` which looks like a "loaded" URL but shows nothing.
+      imgEl.removeAttribute("src");
+      return;
+    }
+    const next = list[i];
+    i += 1;
+    imgEl.src = next;
+  };
+
+  imgEl.onerror = () => {
+    tryNext();
+  };
+
+  tryNext();
+}
+
 function renderError(message) {
   if (dom.image) {
     dom.image.alt = message || "오류";
@@ -244,8 +322,9 @@ function renderQuestion() {
   updateProgressBar(state.currentIndex, state.totalQuestions);
 
   if (dom.image) {
-    dom.image.src = resolveAssetPath(question.questionImage) || "#";
-    dom.image.alt = question.id || `문항 ${state.currentIndex + 1}`;
+    const alt = question.id || `문항 ${state.currentIndex + 1}`;
+    const candidates = getQuestionImageUrlCandidates(question);
+    setImageWithFallback(dom.image, candidates, alt);
   }
 
   if (!dom.options) return;
