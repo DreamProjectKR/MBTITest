@@ -56,6 +56,57 @@ function cacheControlForKey(key) {
 }
 
 /**
+ * Toggle case of the first character in a string (ASCII letters only).
+ * @param {string} s
+ * @returns {string}
+ */
+function toggleFirstCharCase(s) {
+  if (!s) return s;
+  const first = s[0];
+  const code = first.charCodeAt(0);
+  // A-Z
+  if (code >= 65 && code <= 90) return String.fromCharCode(code + 32) + s.slice(1);
+  // a-z
+  if (code >= 97 && code <= 122) return String.fromCharCode(code - 32) + s.slice(1);
+  return s;
+}
+
+/**
+ * Add case-fallback candidate keys for common filename case mismatches.
+ * This prevents 404s when JSON references `q7.png` but the bucket stores `Q7.png` (or vice versa).
+ *
+ * @param {string[]} keys
+ * @param {string} tail
+ */
+function addCaseFallbackCandidates(keys, tail) {
+  const t = String(tail || "").replace(/^\/+/, "");
+  if (!t) return;
+
+  // Only do this for common static assets (avoid odd behavior for JSON, etc.)
+  const lower = t.toLowerCase();
+  const isStatic =
+    lower.endsWith(".png") ||
+    lower.endsWith(".jpg") ||
+    lower.endsWith(".jpeg") ||
+    lower.endsWith(".webp") ||
+    lower.endsWith(".gif") ||
+    lower.endsWith(".svg") ||
+    lower.endsWith(".woff2");
+  if (!isStatic) return;
+
+  const parts = t.split("/");
+  const filename = parts.pop() || "";
+  if (!filename) return;
+
+  const toggled = toggleFirstCharCase(filename);
+  if (!toggled || toggled === filename) return;
+
+  const toggledTail = [...parts, toggled].join("/");
+  keys.push(`assets/${toggledTail}`);
+  keys.push(toggledTail);
+}
+
+/**
  * Cloudflare Pages Function entrypoint for `GET /assets/*`.
  * @param {{ request: Request, env: any, params?: any, waitUntil: (p: Promise<any>) => void }} context
  * @returns {Promise<Response>}
@@ -101,6 +152,7 @@ export async function onRequestGet(context) {
     tail, // fallback: key stored without `assets/` prefix
     `assets/data/${tail}`, // legacy fallback
   ];
+  addCaseFallbackCandidates(candidateKeys, tail);
 
   let obj = null;
   let key = "";
