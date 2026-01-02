@@ -32,8 +32,6 @@ const elements = {
   questionList: document.querySelector("[data-question-list]"),
   resultForm: document.querySelector("[data-result-form]"),
   resultList: document.querySelector("[data-result-list]"),
-  jsonInput: document.querySelector("[data-json-input]"),
-  exportButton: document.querySelector("[data-export-json]"),
   testSelect: document.querySelector("[data-test-select]"),
   createTestButton: document.querySelector("[data-create-test]"),
   saveButton: document.querySelector("[data-save-test]"),
@@ -74,8 +72,6 @@ async function initAdmin() {
 }
 
 function wireStaticEvents() {
-  elements.jsonInput?.addEventListener("change", handleJsonUpload);
-  elements.exportButton?.addEventListener("click", exportJson);
   elements.createTestButton?.addEventListener("click", createTest);
   elements.testSelect?.addEventListener("change", (event) => {
     setActiveTest(event.target.value);
@@ -92,6 +88,12 @@ function setupForms() {
   elements.metaForm?.addEventListener("input", handleMetaInput);
   elements.metaForm?.addEventListener("change", handleMetaFileInputs);
 
+  // Axis-based direction selector (A=E/B=I etc.)
+  elements.questionForm
+    ?.querySelector('select[name="axis"]')
+    ?.addEventListener("change", () => syncAnswerDirectionOptions());
+  syncAnswerDirectionOptions();
+
   elements.questionForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     const activeTest = getActiveTest();
@@ -104,16 +106,6 @@ function setupForms() {
       alert(`문항은 ${REQUIRED_QUESTION_COUNT}개까지 등록할 수 있습니다.`);
       return;
     }
-
-    const formEl = elements.questionForm;
-    if (!formEl) return;
-    const data = new FormData(formEl);
-
-    const axis = String(data.get("axis") || "EI");
-    const [positive, negative] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
-    const poleOrder = String(data.get("poleOrder") || "positiveFirst");
-    const aDir = poleOrder === "negativeFirst" ? negative : positive;
-    const bDir = poleOrder === "negativeFirst" ? positive : negative;
 
     const nextNo = getNextQuestionNo(activeTest.questions);
     if (!nextNo) {
@@ -137,9 +129,9 @@ function setupForms() {
 
         const axis = String(data.get("axis") || "EI");
         const [positive, negative] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
-        const poleOrder = String(data.get("poleOrder") || "positiveFirst");
-        const aDir = poleOrder === "negativeFirst" ? negative : positive;
-        const bDir = poleOrder === "negativeFirst" ? positive : negative;
+        const pref = String(data.get("answerADirection") || "positive");
+        const aDir = pref === "negative" ? negative : positive;
+        const bDir = pref === "negative" ? positive : negative;
 
         const question = {
           id: qId,
@@ -163,7 +155,16 @@ function setupForms() {
 
         activeTest.questions.push(question);
         renderQuestions(activeTest.questions);
+        // Reset but keep axis/direction for faster authoring.
+        const keepAxis = String(formEl.elements["axis"]?.value || "EI");
+        const keepDir = String(
+          formEl.elements["answerADirection"]?.value || "positive",
+        );
         formEl.reset();
+        if (formEl.elements["axis"]) formEl.elements["axis"].value = keepAxis;
+        if (formEl.elements["answerADirection"])
+          formEl.elements["answerADirection"].value = keepDir;
+        syncAnswerDirectionOptions();
         // Keep the hidden readonly path empty after reset.
         formEl.elements["questionImage"].value = "";
       })
@@ -202,7 +203,9 @@ function setupForms() {
       summary: data.get("summary"),
     };
     renderResults(activeTest.results);
-    elements.resultForm.reset();
+    // Keep selected MBTI code; only clear the summary input.
+    const formEl = elements.resultForm;
+    if (formEl?.elements?.["summary"]) formEl.elements["summary"].value = "";
   });
 
   elements.resultList?.addEventListener("click", (event) => {
@@ -214,22 +217,6 @@ function setupForms() {
     delete activeTest.results[code];
     renderResults(activeTest.results);
   });
-}
-
-async function handleJsonUpload(event) {
-  const [file] = event.target.files ?? [];
-  if (!file) return;
-
-  try {
-    const text = await file.text();
-    const json = JSON.parse(text);
-    applyPayload(json);
-  } catch (error) {
-    alert("JSON 파싱에 실패했습니다.");
-    console.error(error);
-  } finally {
-    event.target.value = "";
-  }
 }
 
 function applyIndex(payload) {
@@ -250,33 +237,6 @@ function applyIndex(payload) {
   } else {
     refreshActiveTest();
   }
-}
-
-function applyPayload(payload) {
-  const tests = Array.isArray(payload?.tests) ? payload.tests : [];
-  const normalized = tests.map((test) => {
-    const id =
-      test.id ??
-      `test-${(crypto.randomUUID
-        ? crypto.randomUUID()
-        : String(Date.now())
-      ).slice(0, 8)}`;
-    return {
-      ...test,
-      id,
-    };
-  });
-
-  state.loadedTests = normalized.reduce((acc, test) => {
-    acc[test.id] = test;
-    return acc;
-  }, {});
-
-  state.tests = normalized.map((test) => buildMetaFromTest(test));
-  state.activeTestId = normalized[0]?.id ?? null;
-  populateTestSelector();
-  refreshActiveTest();
-  refreshImageList(state.activeTestId);
 }
 
 function buildMetaFromTest(test) {
@@ -538,6 +498,28 @@ async function uploadQuestionImageIfNeeded(activeTest, nextNo) {
   const uploaded = await uploadTestImage(activeTest.id, file, uploadName);
   formEl.elements["questionImage"].value = uploaded.path;
   return uploaded.path;
+}
+
+function syncAnswerDirectionOptions() {
+  const formEl = elements.questionForm;
+  if (!formEl) return;
+  const axis = String(formEl.elements["axis"]?.value || "EI");
+  const [pos, neg] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
+  const select = formEl.elements["answerADirection"];
+  if (!select) return;
+
+  const current = String(select.value || "positive");
+  select.innerHTML = "";
+
+  const optPos = document.createElement("option");
+  optPos.value = "positive";
+  optPos.textContent = `A=${pos} / B=${neg}`;
+  const optNeg = document.createElement("option");
+  optNeg.value = "negative";
+  optNeg.textContent = `A=${neg} / B=${pos}`;
+
+  select.append(optPos, optNeg);
+  select.value = current === "negative" ? "negative" : "positive";
 }
 
 async function reloadActiveTest() {
@@ -860,17 +842,7 @@ function createRemoveQuestionButton(questionId) {
   return button;
 }
 
-function buildAnswer(prefix, data) {
-  const axis = data.get(`${prefix}Mbti`) || "EI";
-  const directionPref = data.get(`${prefix}Pole`) || "positive";
-  const [positive, negative] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
-  return {
-    id: crypto.randomUUID?.() ?? `${prefix}-${Date.now()}`,
-    label: data.get(`${prefix}Text`),
-    mbtiAxis: axis,
-    direction: directionPref === "positive" ? positive : negative,
-  };
-}
+// buildAnswer() removed with legacy JSON-import question builder.
 
 function fetchJson(url) {
   return fetch(url).then((response) => {
@@ -881,16 +853,5 @@ function fetchJson(url) {
   });
 }
 
-function exportJson() {
-  const tests = Object.values(state.loadedTests);
-  const exportPayload = { tests };
-  const blob = new Blob([JSON.stringify(exportPayload, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = "mbti-tests.json";
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
+// JSON import/export was removed:
+// This admin page writes directly to R2/D1.

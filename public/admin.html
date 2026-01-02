@@ -30,15 +30,8 @@
         </div>
       </div>
       <div class="admin-header__actions">
-        <label class="ds-button ds-button--ghost" aria-label="JSON 불러오기">
-          <input type="file" accept="application/json" hidden data-json-input />
-          JSON 불러오기
-        </label>
-        <button class="ds-button ds-button--primary" type="button" data-export-json>
-          JSON 내보내기
-        </button>
         <button class="ds-button ds-button--primary" type="button" data-save-test>
-          R2 저장
+          저장하기
         </button>
         <span class="save-status" data-save-status>저장 준비</span>
       </div>
@@ -104,10 +97,10 @@
           </div>
           <div class="form-field">
             <label>
-              선택지 방향
-              <select name="poleOrder" aria-label="선택지 방향">
-                <option value="positiveFirst">A=앞 글자 / B=뒷 글자</option>
-                <option value="negativeFirst">A=뒷 글자 / B=앞 글자</option>
+              선택지 방향(A가 어떤 쪽인지)
+              <select name="answerADirection" aria-label="A 선택지 방향">
+                <option value="positive">앞 글자</option>
+                <option value="negative">뒷 글자</option>
               </select>
             </label>
           </div>
@@ -132,8 +125,25 @@
         </div>
         <form class="form-grid" data-result-form>
           <label class="form-field">
-            <span>MBTI 유형 (예: ENFP)</span>
-            <input type="text" name="code" pattern="[EI][NS][FT][JP]" required />
+            <span>MBTI 유형</span>
+            <select name="code" aria-label="MBTI 유형 선택" required>
+              <option value="INTJ">INTJ</option>
+              <option value="INTP">INTP</option>
+              <option value="ENTJ">ENTJ</option>
+              <option value="ENTP">ENTP</option>
+              <option value="INFJ">INFJ</option>
+              <option value="INFP">INFP</option>
+              <option value="ENFJ">ENFJ</option>
+              <option value="ENFP">ENFP</option>
+              <option value="ISTJ">ISTJ</option>
+              <option value="ISTP">ISTP</option>
+              <option value="ESTJ">ESTJ</option>
+              <option value="ESTP">ESTP</option>
+              <option value="ISFJ">ISFJ</option>
+              <option value="ISFP">ISFP</option>
+              <option value="ESFJ">ESFJ</option>
+              <option value="ESFP">ESFP</option>
+            </select>
           </label>
           <label class="form-field">
             <span>설명(요약)</span>
@@ -148,7 +158,24 @@
           <div class="result-image-upload__grid">
             <label class="form-field">
               <span>MBTI 코드</span>
-              <input type="text" placeholder="ENFP" data-result-image-code />
+              <select data-result-image-code aria-label="MBTI 코드 선택">
+                <option value="INTJ">INTJ</option>
+                <option value="INTP">INTP</option>
+                <option value="ENTJ">ENTJ</option>
+                <option value="ENTP">ENTP</option>
+                <option value="INFJ">INFJ</option>
+                <option value="INFP">INFP</option>
+                <option value="ENFJ">ENFJ</option>
+                <option value="ENFP">ENFP</option>
+                <option value="ISTJ">ISTJ</option>
+                <option value="ISTP">ISTP</option>
+                <option value="ESTJ">ESTJ</option>
+                <option value="ESTP">ESTP</option>
+                <option value="ISFJ">ISFJ</option>
+                <option value="ISFP">ISFP</option>
+                <option value="ESFJ">ESFJ</option>
+                <option value="ESFP">ESFP</option>
+              </select>
             </label>
             <label class="form-field">
               <span>결과 이미지 파일</span>
