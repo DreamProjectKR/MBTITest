@@ -8,6 +8,8 @@
   // Keep the default explicit so callers can pass clean paths like `images/x.png`.
   const DEFAULT_ASSETS_BASE = "/assets";
   const DEFAULT_API_TESTS_BASE = "/api/tests";
+  // Legacy: `assets/index.json` used to be served from R2.
+  // New default: fetch test index from D1 via API (`GET /api/tests`).
   const DEFAULT_TEST_INDEX_PATH = "assets/index.json";
 
   const ASSETS_BASE = String(window.ASSETS_BASE || DEFAULT_ASSETS_BASE).replace(
@@ -75,14 +77,16 @@
   };
 
   // Test index source:
-  // - Default: same-origin `/assets/index.json` (served by Pages Functions proxy from R2).
+  // - Default: same-origin `/api/tests` (served by Pages Functions using D1).
+  // - Legacy fallback: `/assets/index.json` (served by Pages Functions proxy from R2).
   // - You can override by setting `window.TEST_INDEX_URL` before this script runs.
-  const DEFAULT_TEST_INDEX_URL = window.assetUrl(DEFAULT_TEST_INDEX_PATH);
-  window.TEST_INDEX_URL = window.TEST_INDEX_URL || DEFAULT_TEST_INDEX_URL;
+  const DEFAULT_TEST_INDEX_URL = String(API_TESTS_BASE || DEFAULT_API_TESTS_BASE);
+  window.TEST_INDEX_URL =
+    window.TEST_INDEX_URL || DEFAULT_TEST_INDEX_URL || window.assetUrl(TEST_INDEX_PATH);
 
   function getIndexOrigin() {
     try {
-      return new URL(window.TEST_INDEX_URL).origin;
+      return new URL(window.TEST_INDEX_URL, window.location.origin).origin;
     } catch (e) {
       return "";
     }
