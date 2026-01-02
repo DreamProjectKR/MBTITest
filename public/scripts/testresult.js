@@ -14,29 +14,12 @@ const dom = {
   shareBtn: document.querySelector(".ResultBtnShell .TestShare button"),
 };
 
-/**
- * Resolve an asset path into a browser URL.
- * See `public/scripts/testquiz.js` for why this is dynamic.
- * @param {string} path
- * @returns {string}
- */
-function assetUrl(path) {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
-
-  if (typeof window !== "undefined" && typeof window.assetUrl === "function") {
-    return window.assetUrl(path);
+// Asset URL building is centralized in `public/scripts/config.js`.
+function hydrateAssetElement(el) {
+  if (!el) return;
+  if (typeof window.applyAssetAttributes === "function") {
+    window.applyAssetAttributes(el);
   }
-
-  const base = String(
-    typeof window !== "undefined" && window.ASSETS_BASE
-      ? window.ASSETS_BASE
-      : "/assets",
-  ).replace(/\/+$/, "");
-
-  let clean = String(path).replace(/^\.?\/+/, "");
-  clean = clean.replace(/^assets\/+/i, "");
-  return `${base}/${clean}`.replace(/\/{2,}/g, "/");
 }
 
 const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
@@ -79,15 +62,6 @@ function getParam(name) {
   const params = new URLSearchParams(window.location.search);
   const value = params.get(name);
   return value ? decodeURIComponent(value) : "";
-}
-
-/**
- * Resolve a relative asset path into an absolute URL for use in <img src>.
- * @param {string} relative
- * @returns {string}
- */
-function resolveAssetPath(relative) {
-  return assetUrl(relative);
 }
 
 /**
@@ -137,10 +111,18 @@ function renderResultPage(data, mbti) {
   }
 
   const resultData = data.results?.[mbti];
-  const resultImage = resolveAssetPath(resultData?.image);
+  const resultImage = resultData?.image ? String(resultData.image) : "";
 
   if (dom.thumbnailEl) {
-    if (resultImage) dom.thumbnailEl.src = resultImage;
+    if (resultImage) {
+      dom.thumbnailEl.removeAttribute("src");
+      dom.thumbnailEl.setAttribute("data-asset-src", resultImage);
+      dom.thumbnailEl.setAttribute(
+        "data-asset-resize",
+        "width=780,quality=90,fit=cover,format=auto",
+      );
+      hydrateAssetElement(dom.thumbnailEl);
+    }
     dom.thumbnailEl.alt = mbti ? `${mbti} 결과` : "결과 이미지";
   }
 

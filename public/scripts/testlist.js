@@ -9,40 +9,28 @@
 const header = document.getElementById("header");
 const headerScroll = document.getElementById("headerScroll");
 const MainTop = document.getElementById("MainTop");
-// `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
-// Production default: same-origin `/assets/*` (served by Pages Functions proxy).
-const ASSETS_BASE = window.ASSETS_BASE || "";
-/**
- * Build an absolute URL for an asset path under `assets/`.
- * @param {string} path
- * @returns {string}
- */
-const assetUrl =
-  window.assetUrl ||
-  ((path) => {
-    if (!path) return "";
-    if (/^https?:\/\//i.test(path)) return path;
-    let clean = String(path).replace(/^\.?\/+/, "");
-    clean = clean.replace(/^assets\/+/i, "");
-    return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
-  });
+// Asset URLs are resolved centrally by `public/scripts/config.js` via `data-asset-*`.
 
 const headerOffset = header.offsetTop; // 헤더 원래 위치 저장
 
-window.addEventListener("scroll", () => {
-  const isMobile = window.matchMedia("(max-width: 900px)").matches;
-  if (window.scrollY > headerOffset) {
-    header.classList.add("fixed-header", "bg-on");
-    if (isMobile && headerScroll) {
-      headerScroll.style.marginBottom = "45px";
+window.addEventListener(
+  "scroll",
+  () => {
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
+    if (window.scrollY > headerOffset) {
+      header.classList.add("fixed-header", "bg-on");
+      if (isMobile && headerScroll) {
+        headerScroll.style.marginBottom = "45px";
+      }
+    } else {
+      header.classList.remove("fixed-header", "bg-on");
+      if (headerScroll) {
+        headerScroll.style.marginBottom = "";
+      }
     }
-  } else {
-    header.classList.remove("fixed-header", "bg-on");
-    if (headerScroll) {
-      headerScroll.style.marginBottom = "";
-    }
-  }
-});
+  },
+  { passive: true },
+);
 
 document.querySelector(".test1").onclick = function () {
   window.location.href = "testintro.html";
@@ -91,63 +79,8 @@ document.querySelector(".test1").onclick = function () {
     return deduped;
   }
 
-  // ----- 썸네일 경로 보정 -----
-  /**
-   * Convert thumbnail path from API into a URL usable by <img src>.
-   * @param {string} thumbnail
-   * @returns {string}
-   */
-  function resolveThumbnailPath(thumbnail, resizeOptions = {}) {
-    if (!thumbnail) return "#";
-    if (/^https?:\/\//i.test(thumbnail)) return thumbnail;
-    if (window.assetResizeUrl) {
-      return window.assetResizeUrl(thumbnail, resizeOptions);
-    }
-    return assetUrl(thumbnail);
-  }
-
-  const warmedImageUrls = new Set();
-
-  function preloadImage(url) {
-    if (!url || warmedImageUrls.has(url) || typeof document === "undefined") return;
-    const link = document.createElement("link");
-    link.rel = "preload";
-    link.as = "image";
-    link.href = url;
-    document.head.appendChild(link);
-    warmedImageUrls.add(url);
-  }
-
-  function prefetchImage(url) {
-    if (!url || warmedImageUrls.has(url)) return;
-    const img = new Image();
-    img.decoding = "async";
-    img.src = url;
-    warmedImageUrls.add(url);
-  }
-
-  function warmCriticalImages(tests) {
-    const heroPaths = [
-      "assets/images/HeaderBackgroundImg.png",
-      "assets/images/HeaderBackgroundImgNon.png",
-      "assets/images/FooterBackgroundImg.png",
-    ];
-    heroPaths.forEach((path) => {
-      const resized = window.assetResizeUrl
-        ? window.assetResizeUrl(path, { width: 1600, quality: 85 })
-        : assetUrl(path);
-      preloadImage(resized);
-    });
-
-    tests.slice(0, 4).forEach((test) => {
-      const thumbUrl = resolveThumbnailPath(test.thumbnail, {
-        width: 780,
-        quality: 90,
-        fit: "cover",
-      });
-      prefetchImage(thumbUrl);
-    });
-  }
+  // NOTE: we intentionally avoid JS-driven image preloads/prefetches here.
+  // Static assets are hydrated by `config.js`; thumbnails are sized by `data-asset-resize`.
 
   // ----- 태그 DOM 생성 -----
   /**
@@ -185,8 +118,15 @@ document.querySelector(".test1").onclick = function () {
       width: opts.isFirst ? 780 : 520,
       quality: opts.isFirst ? 90 : 78,
       fit: "cover",
+      format: "auto",
     };
-    img.src = resolveThumbnailPath(test.thumbnail, sizeOptions);
+    if (test.thumbnail) {
+      img.setAttribute("data-asset-src", String(test.thumbnail));
+      img.setAttribute(
+        "data-asset-resize",
+        `width=${sizeOptions.width},quality=${sizeOptions.quality},fit=${sizeOptions.fit},format=${sizeOptions.format}`,
+      );
+    }
     img.alt = test.title || "테스트 이미지";
     img.decoding = "async";
     // First card is most likely above the fold: prioritize it.
@@ -256,7 +196,6 @@ document.querySelector(".test1").onclick = function () {
       .then(normalizeTests)
       .then((tests) => {
         renderTests(tests);
-        warmCriticalImages(tests);
       })
       .catch((err) => console.error("테스트 목록 로딩 실패:", err));
   }

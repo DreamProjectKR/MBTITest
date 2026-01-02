@@ -8,10 +8,10 @@ body {
 }
 
 :root {
-  /* JS(config.js)로도 주입되지만, 초기 렌더에서 이미지 로딩을 늦추지 않도록 기본값을 둔다 */
-  --asset-header-bg: url(/cdn-cgi/image/width=1600,quality=80,fit=cover,format=auto/assets/images/HeaderBackgroundImg.png);
-  --asset-header-bg-non: url(/cdn-cgi/image/width=1600,quality=80,fit=cover,format=auto/assets/images/HeaderBackgroundImgNon.png);
-  --asset-footer-bg: url(/cdn-cgi/image/width=1600,quality=80,fit=cover,format=auto/assets/images/FooterBackgroundImg.png);
+  /* Assets are injected by `public/scripts/config.js` as CSS variables. */
+  --asset-header-bg: none;
+  --asset-header-bg-non: none;
+  --asset-footer-bg: none;
 }
 
 .PageShell {

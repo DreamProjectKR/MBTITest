@@ -39,7 +39,18 @@
     const base = window.assetUrl(path);
     if (!base) return "";
 
+    // Local dev (wrangler pages dev): `/cdn-cgi/image` is not reliably available.
+    // To keep asset loading consistent, disable resize and just return `/assets/...`.
+    const host =
+      typeof window !== "undefined" && window.location ? window.location.hostname : "";
+    const isLocalhost = host === "localhost" || host === "127.0.0.1";
+    if (isLocalhost) return base;
+
+    // Prefer same-origin relative URLs for `/cdn-cgi/image` so browser preloads match
+    // and we don't fetch both `.../assets/x.png` and `.../https://origin/assets/x.png`.
     const absoluteUrl = (() => {
+      // If the asset is already a relative path, keep it relative.
+      if (typeof base === "string" && base.startsWith("/")) return base;
       try {
         return new URL(base, window.location.origin).toString();
       } catch (err) {
@@ -73,7 +84,11 @@
     if (!params.length) return absoluteUrl;
 
     const paramString = params.filter(Boolean).join(",");
-    return `/cdn-cgi/image/${paramString}/${absoluteUrl}`;
+    const target =
+      typeof absoluteUrl === "string" && absoluteUrl.startsWith("/")
+        ? absoluteUrl.replace(/^\/+/, "")
+        : absoluteUrl;
+    return `/cdn-cgi/image/${paramString}/${target}`;
   };
 
   // Test index source:
@@ -256,6 +271,9 @@
   // 가능한 한 빨리 src/href를 주입해야 브라우저가 이미지/리소스 다운로드를 빨리 시작한다.
   // - defer 없이 <head>에서 실행되는 경우에도 MutationObserver로 파싱 중 생성되는 노드에 즉시 주입
   if (typeof document !== "undefined") {
+    // Expose a tiny hook so other scripts can re-hydrate after setting `data-asset-*`.
+    // This keeps URL-building centralized in this file.
+    window.applyAssetAttributes = applyAssetAttributes;
     applyAssetAttributes(document);
 
     try {

@@ -1,21 +1,21 @@
+import type { MbtiEnv, PagesContext } from "../../../../_types";
 import { JSON_HEADERS, getImagesPrefix } from "../../utils/store.js";
 
-function createJsonResponse(payload, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: JSON_HEADERS,
-  });
+type Params = { id?: string };
+
+function json(payload: unknown, status = 200): Response {
+  return new Response(JSON.stringify(payload), { status, headers: JSON_HEADERS });
 }
 
-function methodNotAllowed() {
-  return createJsonResponse({ error: "Method not allowed." }, 405);
+function methodNotAllowed(): Response {
+  return json({ error: "Method not allowed." }, 405);
 }
 
-function badRequest(message) {
-  return createJsonResponse({ error: message }, 400);
+function badRequest(message: string): Response {
+  return json({ error: message }, 400);
 }
 
-function extensionFromMime(mimeType = "") {
+function extensionFromMime(mimeType = ""): string {
   const type = String(mimeType || "").toLowerCase();
   if (type === "image/jpeg" || type === "image/jpg") return "jpg";
   if (type === "image/webp") return "webp";
@@ -24,23 +24,28 @@ function extensionFromMime(mimeType = "") {
   return "png";
 }
 
-function sanitizeBaseName(value) {
+function sanitizeBaseName(value: unknown): string {
   const raw = String(value || "").trim();
   if (!raw) return "";
-  // Keep simple URL-safe-ish names.
   return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80);
 }
 
-async function extractUpload(context) {
+async function extractUpload(
+  context: PagesContext<MbtiEnv, Params>,
+): Promise<{ buffer: ArrayBuffer; contentType: string; name: string } | null> {
   const contentType = context.request.headers.get("content-type") || "";
   const isMultipart = contentType.toLowerCase().startsWith("multipart/form-data");
   if (isMultipart) {
     const formData = await context.request.formData();
     const file = formData.get("file");
     const name = formData.get("name");
-    if (!file || typeof file.arrayBuffer !== "function") return null;
-    const buffer = await file.arrayBuffer();
-    return { buffer, contentType: file.type || contentType, name: name ? String(name) : "" };
+    if (!file || typeof (file as File).arrayBuffer !== "function") return null;
+    const buffer = await (file as File).arrayBuffer();
+    return {
+      buffer,
+      contentType: (file as File).type || contentType,
+      name: name ? String(name) : "",
+    };
   }
 
   const buffer = await context.request.arrayBuffer();
@@ -48,17 +53,15 @@ async function extractUpload(context) {
   return { buffer, contentType: contentType || "image/png", name: "" };
 }
 
-export async function onRequestGet(context) {
+export async function onRequestGet(
+  context: PagesContext<MbtiEnv, Params>,
+): Promise<Response> {
   if (context.request.method !== "GET") return methodNotAllowed();
   const bucket = context.env.MBTI_BUCKET;
-  if (!bucket)
-    return createJsonResponse(
-      { error: "R2 binding MBTI_BUCKET is missing." },
-      500,
-    );
+  if (!bucket) return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
-  if (!testId) return createJsonResponse({ error: "Missing test id." }, 400);
+  if (!testId) return json({ error: "Missing test id." }, 400);
 
   try {
     const prefix = getImagesPrefix(testId);
@@ -76,33 +79,29 @@ export async function onRequestGet(context) {
         lastModified: obj?.uploaded ?? null,
       };
     });
-    return createJsonResponse({ items });
+    return json({ items });
   } catch (err) {
-    return createJsonResponse(
-      {
-        error: err instanceof Error ? err.message : "Failed to list images.",
-      },
+    return json(
+      { error: err instanceof Error ? err.message : "Failed to list images." },
       500,
     );
   }
 }
 
-export async function onRequestPut(context) {
+export async function onRequestPut(
+  context: PagesContext<MbtiEnv, Params>,
+): Promise<Response> {
   if (context.request.method !== "PUT") return methodNotAllowed();
   const bucket = context.env.MBTI_BUCKET;
-  if (!bucket)
-    return createJsonResponse(
-      { error: "R2 binding MBTI_BUCKET is missing." },
-      500,
-    );
+  if (!bucket) return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
 
-  let upload;
+  let upload: { buffer: ArrayBuffer; contentType: string; name: string } | null = null;
   try {
     upload = await extractUpload(context);
-  } catch (err) {
+  } catch {
     return badRequest("Unable to parse uploaded file.");
   }
   if (!upload) return badRequest("File upload required.");
@@ -110,7 +109,7 @@ export async function onRequestPut(context) {
   const ext = extensionFromMime(upload.contentType);
   const base =
     sanitizeBaseName(upload.name) ||
-    (typeof crypto !== "undefined" && crypto.randomUUID
+    (typeof crypto !== "undefined" && "randomUUID" in crypto && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
       : `img-${Date.now()}`);
 
@@ -122,19 +121,14 @@ export async function onRequestPut(context) {
       httpMetadata: { contentType: upload.contentType },
     });
   } catch (err) {
-    return createJsonResponse(
+    return json(
       { error: err instanceof Error ? err.message : "Failed to upload image." },
       500,
     );
   }
 
-  const path = key; // includes `assets/...`
   const publicPath = key.replace(/^assets\/?/i, "");
-
-  return createJsonResponse({
-    ok: true,
-    key,
-    path,
-    url: `/assets/${publicPath}`,
-  });
+  return json({ ok: true, key, path: key, url: `/assets/${publicPath}` });
 }
+
+

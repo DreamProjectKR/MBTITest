@@ -5,36 +5,19 @@
  * - Reads `testId` from the query string.
  * - Fetches test JSON via `GET /api/tests/:id`.
  * - Renders thumbnail/tags/author/description and wires Start/Share buttons.
- * - Warms browser cache by preloading images referenced in the test JSON.
+ * - Renders intro UI and navigates to quiz.
  */
 const header = document.querySelector(".Head");
 const headerScroll = document.querySelector("header");
 const headerOffset = header ? header.offsetTop : 0;
-// NOTE: `config.js` defines `window.ASSETS_BASE` and `window.assetUrl()`.
-// Production default: same-origin `/assets/*` (served by Pages Functions proxy).
-/**
- * Resolve an asset path into a browser URL.
- * Keep this dynamic because Rocket Loader can delay `config.js`.
- * @param {string} path
- * @returns {string}
- */
-function assetUrl(path) {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
+// Asset URL building is centralized in `public/scripts/config.js`.
+// This file only sets `data-asset-*` and asks config.js to hydrate.
 
-  if (typeof window !== "undefined" && typeof window.assetUrl === "function") {
-    return window.assetUrl(path);
+function hydrateAssetElement(el) {
+  if (!el) return;
+  if (typeof window.applyAssetAttributes === "function") {
+    window.applyAssetAttributes(el);
   }
-
-  const base = String(
-    typeof window !== "undefined" && window.ASSETS_BASE
-      ? window.ASSETS_BASE
-      : "/assets",
-  ).replace(/\/+$/, "");
-
-  let clean = String(path).replace(/^\.?\/+/, "");
-  clean = clean.replace(/^assets\/+/i, "");
-  return `${base}/${clean}`.replace(/\/{2,}/g, "/");
 }
 
 const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
@@ -56,126 +39,27 @@ function persistTestJson(testId, data) {
   }
 }
 
-function isProbablyImagePath(v) {
-  if (!v) return false;
-  const s = String(v).trim();
-  // Keep this conservative: only preload known image extensions.
-  return /\.(png|jpe?g|gif|webp|svg)$/i.test(s);
-}
+// NOTE: preloading/prefetching is intentionally removed; `config.js` is the single loader.
 
-/**
- * Collect any strings that look like image paths inside a nested JSON structure.
- * This is used to preload question/result images after the intro renders.
- * @param {any} value
- * @param {Set<string>} out
- */
-function collectImagePathsDeep(value, out) {
-  if (!out) return;
-  if (!value) return;
-
-  if (typeof value === "string") {
-    if (isProbablyImagePath(value)) out.add(value);
-    return;
-  }
-
-  if (Array.isArray(value)) {
-    value.forEach((v) => collectImagePathsDeep(v, out));
-    return;
-  }
-
-  if (typeof value === "object") {
-    Object.keys(value).forEach((k) => collectImagePathsDeep(value[k], out));
-  }
-}
-
-function scheduleIdle(fn) {
-  if (typeof window === "undefined") return;
-  if (typeof window.requestIdleCallback === "function") {
-    window.requestIdleCallback(fn, { timeout: 1200 });
-    return;
-  }
-  window.setTimeout(fn, 0);
-}
-
-/**
- * Preload a list of image paths by creating `new Image()` objects.
- * This warms cache for later pages (quiz/result) without blocking initial render.
- * @param {string[]} imagePaths
- * @param {{ limit?: number }} [opts]
- */
-function preloadImages(imagePaths, { limit = 60 } = {}) {
-  const list = Array.isArray(imagePaths) ? imagePaths : [];
-  if (!list.length) return;
-
-  // Keep strong references so the browser doesn't GC preloads before they start.
-  if (!window.__MBTI_PRELOADED_IMAGES__) window.__MBTI_PRELOADED_IMAGES__ = [];
-
-  const max = Math.min(limit, list.length);
-  for (let i = 0; i < max; i += 1) {
-    const raw = list[i];
-    const url = assetUrl(raw);
-    if (!url) continue;
-    const img = new Image();
-    img.decoding = "async";
-    try {
-      // Hint: these are warming the cache, not critical render.
-      img.fetchPriority = "low";
-    } catch (e) {
-      // Safari/older browsers
+window.addEventListener(
+  "scroll",
+  () => {
+    if (!header) return;
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
+    if (window.scrollY > headerOffset) {
+      header.classList.add("fixed-header", "bg-on");
+      if (isMobile && headerScroll) {
+        headerScroll.style.marginBottom = "35px";
+      }
+    } else {
+      header.classList.remove("fixed-header", "bg-on");
+      if (headerScroll) {
+        headerScroll.style.marginBottom = "";
+      }
     }
-    img.src = url;
-    window.__MBTI_PRELOADED_IMAGES__.push(img);
-  }
-}
-
-/**
- * Mark an <img> as critical so the browser prioritizes its fetch/decoding.
- * Best-effort: different browsers support either the property or the attribute.
- * @param {HTMLImageElement | null} imgEl
- */
-function markHighPriorityImage(imgEl) {
-  if (!imgEl) return;
-  // Above-the-fold images: start early and decode off the main thread when possible.
-  try {
-    imgEl.loading = "eager";
-  } catch (e) {}
-  try {
-    imgEl.decoding = "async";
-  } catch (e) {}
-  try {
-    imgEl.fetchPriority = "high";
-  } catch (e) {}
-  try {
-    imgEl.setAttribute("fetchpriority", "high");
-  } catch (e) {}
-}
-
-function warmTestImagesFromTestJson(testJson) {
-  // `testJson` is the parsed contents of `test.json` (fetched via /api/tests/:id on this page).
-  const set = new Set();
-  collectImagePathsDeep(testJson, set);
-  const paths = Array.from(set);
-  if (!paths.length) return;
-
-  // Stage the preload work so the intro UI renders smoothly first.
-  scheduleIdle(() => preloadImages(paths, { limit: 80 }));
-}
-
-window.addEventListener("scroll", () => {
-  if (!header) return;
-  const isMobile = window.matchMedia("(max-width: 900px)").matches;
-  if (window.scrollY > headerOffset) {
-    header.classList.add("fixed-header", "bg-on");
-    if (isMobile && headerScroll) {
-      headerScroll.style.marginBottom = "35px";
-    }
-  } else {
-    header.classList.remove("fixed-header", "bg-on");
-    if (headerScroll) {
-      headerScroll.style.marginBottom = "";
-    }
-  }
-});
+  },
+  { passive: true },
+);
 
 function getTestIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
@@ -232,7 +116,7 @@ async function loadIntroData() {
       const resolveUrl =
         typeof window.resolveTestDataUrl === "function"
           ? window.resolveTestDataUrl
-          : (rawPath) => assetUrl(rawPath);
+          : (rawPath) => rawPath;
       const url = resolveUrl(meta.path);
 
       const res2 = await fetch(url);
@@ -244,9 +128,6 @@ async function loadIntroData() {
 
     setupShareButton(data);
     renderIntro(data);
-    // When users land on the intro page, warm the images referenced inside test.json
-    // so quiz/result screens can render without cold image fetches.
-    warmTestImagesFromTestJson(data);
   } catch (err) {
     console.error("테스트 인트로 로딩 오류:", err);
     renderIntroError("테스트 정보를 불러오지 못했습니다.");
@@ -301,9 +182,15 @@ function renderIntro(data) {
   const descEl = document.querySelector(".IntroDescription");
 
   if (thumbnailEl) {
-    // LCP candidate on this page.
-    markHighPriorityImage(thumbnailEl);
-    if (data.thumbnail) thumbnailEl.src = assetUrl(data.thumbnail);
+    if (data.thumbnail) {
+      thumbnailEl.removeAttribute("src");
+      thumbnailEl.setAttribute("data-asset-src", String(data.thumbnail));
+      thumbnailEl.setAttribute(
+        "data-asset-resize",
+        "width=780,quality=90,fit=cover,format=auto",
+      );
+      hydrateAssetElement(thumbnailEl);
+    }
     if (data.title) thumbnailEl.alt = data.title;
   }
 
@@ -314,9 +201,15 @@ function renderIntro(data) {
   const authorName = data.author;
 
   if (authorImgEl) {
-    // Above-the-fold avatar: prioritize so the creator row doesn't pop in late.
-    markHighPriorityImage(authorImgEl);
-    if (data.authorImg) authorImgEl.src = assetUrl(data.authorImg);
+    if (data.authorImg) {
+      authorImgEl.removeAttribute("src");
+      authorImgEl.setAttribute("data-asset-src", String(data.authorImg));
+      authorImgEl.setAttribute(
+        "data-asset-resize",
+        "width=200,quality=85,fit=cover,format=auto",
+      );
+      hydrateAssetElement(authorImgEl);
+    }
     if (authorName) authorImgEl.alt = `제작자 ${authorName}`;
   }
 

@@ -31,9 +31,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/reset.css">
   <link rel="stylesheet" href="styles/main.css">
-  <link rel="preload" as="image" href="/cdn-cgi/image/width=360,quality=90,format=auto/assets/images/mainLogo.png" fetchpriority="high">
-  <link rel="preload" as="image" href="/cdn-cgi/image/width=1230,quality=85,fit=cover,format=auto/assets/images/mainbanner.png" fetchpriority="high">
+  <link rel="preload" as="image" href="/cdn-cgi/image/width=360,quality=90,format=auto/assets/images/mainLogo.png" fetchpriority="high" data-skip-local="true">
+  <link rel="preload" as="image" href="/cdn-cgi/image/width=1230,quality=85,fit=cover,format=auto/assets/images/mainbanner.png" fetchpriority="high" data-skip-local="true">
   <link rel="shortcut icon" data-asset-href="assets/images/favicon.png" type="image/x-icon">
+  <script>
+    // Local dev: disable preloads to avoid noisy "preloaded but not used" warnings
+    // when dev tooling or delayed attribute hydration changes timing.
+    (function () {
+      var h = location.hostname;
+      if (h === "localhost" || h === "127.0.0.1") {
+        document
+          .querySelectorAll('link[rel="preload"][data-skip-local="true"]')
+          .forEach(function (el) {
+            el.parentNode && el.parentNode.removeChild(el);
+          });
+      }
+    })();
+  </script>
   <script src="./scripts/config.js" defer></script>
 </head>
 
@@ -43,7 +57,7 @@
       <div id="header" class="Head">
         <div class="Logo">
           <a href="index.html">
-            <img data-asset-src="assets/images/mainLogo.png" alt="MBTIZOO바로가기">
+            <img data-asset-src="assets/images/mainLogo.png" data-asset-resize="width=360,quality=90,format=auto" alt="MBTIZOO바로가기">
           </a>
         </div>
         <div class="HeaderGnb holographic-container">
@@ -67,7 +81,7 @@
         <div class="NewTestListShell">
           <div class="NewTestShell newtest">
             <div class="NewTest">
-              <img src="#" alt="테스트 이미지">
+              <img alt="테스트 이미지">
               <h4>테스트 이름</h4>
               <div class="NewTestHashTag">
                 <span class="HashTag">#태그</span>
@@ -84,7 +98,7 @@
         <div class="NewTestListShell">
           <div class="NewTestShell toptest">
             <div class="NewTest">
-              <img src="#" alt="테스트 이미지">
+              <img alt="테스트 이미지">
               <h4>테스트 이름</h4>
               <div class="NewTestHashTag">
                 <span class="HashTag">#태그</span>

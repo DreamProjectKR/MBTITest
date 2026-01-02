@@ -9,35 +9,47 @@
 const header = document.getElementById("header");
 const headerScroll = document.getElementById("headerScroll");
 const MainTop = document.getElementById("MainTop");
-// `config.js` usually defines `window.ASSETS_BASE` and `window.assetUrl`.
-// Production default: same-origin `/assets/*` (served by Pages Functions proxy).
-const ASSETS_BASE = window.ASSETS_BASE || "";
 /**
- * Build an absolute URL for assets (images/json) stored under `assets/` in R2.
- * Accepts absolute URLs and returns them unchanged.
+ * Resolve an asset path into a browser URL.
+ * Keep this dynamic because Rocket Loader can delay `config.js`.
  * @param {string} path
  * @returns {string}
  */
-const assetUrl =
-  window.assetUrl ||
-  ((path) => {
-    if (!path) return "";
-    if (/^https?:\/\//i.test(path)) return path;
-    let clean = String(path).replace(/^\.?\/+/, "");
-    clean = clean.replace(/^assets\/+/i, "");
-    return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
-  });
+function assetUrl(path) {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  if (typeof window !== "undefined" && typeof window.assetUrl === "function") {
+    return window.assetUrl(path);
+  }
+  const base = String(
+    typeof window !== "undefined" && window.ASSETS_BASE ? window.ASSETS_BASE : "/assets",
+  ).replace(/\/+$/, "");
+  let clean = String(path).replace(/^\.?\/+/, "");
+  clean = clean.replace(/^assets\/+/i, "");
+  return `${base}/${clean}`.replace(/\/{2,}/g, "/");
+}
+
+function assetResizeUrl(path, options) {
+  if (typeof window !== "undefined" && typeof window.assetResizeUrl === "function") {
+    return window.assetResizeUrl(path, options || {});
+  }
+  return assetUrl(path);
+}
 
 // 헤더 원래 위치 저장 (스크롤로 fixed 전환 시 기준점)
 const headerOffset = header.offsetTop;
 
-window.addEventListener("scroll", () => {
+window.addEventListener(
+  "scroll",
+  () => {
   if (window.scrollY > headerOffset) {
     header.classList.add("fixed-header", "bg-on");
   } else {
     header.classList.remove("fixed-header", "bg-on");
   }
-});
+  },
+  { passive: true },
+);
 
 // ----- 유틸: 썸네일 경로 보정 -----
 function resolveThumbnailPath(thumbnail) {
@@ -47,7 +59,7 @@ function resolveThumbnailPath(thumbnail) {
 }
 
 // ----- 카드 DOM 생성 -----
-function createTestCard(test, variantClass) {
+function createTestCard(test, variantClass, opts = {}) {
   const shell = document.createElement("div");
   shell.className = `NewTestShell ${variantClass}`;
 
@@ -55,8 +67,26 @@ function createTestCard(test, variantClass) {
   card.className = "NewTest";
 
   const img = document.createElement("img");
-  img.src = resolveThumbnailPath(test.thumbnail);
+  const size =
+    variantClass === "newtest"
+      ? { width: 780, quality: 88, fit: "cover", format: "auto" }
+      : { width: 520, quality: 78, fit: "cover", format: "auto" };
+  // Single place for asset URL building: `config.js` hydrates `data-asset-*` into real URLs.
+  if (test.thumbnail) {
+    img.setAttribute("data-asset-src", String(test.thumbnail));
+    img.setAttribute(
+      "data-asset-resize",
+      `width=${size.width},quality=${size.quality},fit=${size.fit},format=${size.format}`,
+    );
+  }
   img.alt = test.title || "테스트 이미지";
+  img.decoding = "async";
+  try {
+    img.loading = opts.isFirst ? "eager" : "lazy";
+  } catch (e) {}
+  try {
+    if (opts.isFirst) img.fetchPriority = "high";
+  } catch (e) {}
 
   const title = document.createElement("h4");
   title.textContent = test.title || "테스트 이름";
@@ -83,13 +113,13 @@ function createTestCard(test, variantClass) {
   return shell;
 }
 
-// ----- 테스트 목록 불러오기 (default: /assets/index.json) -----
+// ----- 테스트 목록 불러오기 (default: /api/tests) -----
 async function fetchTestsAjax() {
   if (typeof window.getTestIndex === "function") {
     const data = await window.getTestIndex();
     return Array.isArray(data?.tests) ? data.tests : [];
   }
-  const url = window.TEST_INDEX_URL || "/assets/index.json";
+  const url = window.TEST_INDEX_URL || "/api/tests";
   const res = await fetch(url);
   if (!res.ok) throw new Error(url + " 요청 실패: " + res.status);
   const data = await res.json();
@@ -111,10 +141,9 @@ function normalizeTests(tests) {
     const bd = new Date(b.updatedAt || b.createdAt || 0);
     return bd - ad; // 최신 우선
   });
-  return deduped.map((t) => ({
-    ...t,
-    thumbnail: resolveThumbnailPath(t.thumbnail),
-  }));
+  // Keep raw `thumbnail` path (e.g. `assets/test-x/images/thumbnail.png`).
+  // `config.js` will resolve and (in production) resize it consistently.
+  return deduped;
 }
 
 // ----- 섹션별로 순서대로 채우기 -----
@@ -133,9 +162,9 @@ function renderSections(tests) {
 
   // newtest 섹션: 최대 4개
   const newTests = tests.slice(0, Math.min(4, tests.length));
-  newTests.forEach((test) => {
+  newTests.forEach((test, idx) => {
     if (newShellContainer) {
-      newShellContainer.appendChild(createTestCard(test, "newtest"));
+      newShellContainer.appendChild(createTestCard(test, "newtest", { isFirst: idx === 0 }));
     }
   });
 

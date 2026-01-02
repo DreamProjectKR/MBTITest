@@ -27,40 +27,13 @@ const dom = {
   pageShell: document.querySelector(".PageShell"),
 };
 
-/**
- * Resolve an asset path into a browser URL.
- *
- * Why this is a function (not a top-level constant):
- * Cloudflare Rocket Loader can delay/reorder classic scripts like `config.js`,
- * so `window.assetUrl` / `window.ASSETS_BASE` might not be ready at module-eval time.
- *
- * @param {string} path
- * @returns {string}
- */
-function assetUrl(path) {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
-
-  if (typeof window !== "undefined" && typeof window.assetUrl === "function") {
-    return window.assetUrl(path);
+// Asset URL building is centralized in `public/scripts/config.js`.
+function hydrateAssetElement(el) {
+  if (!el) return;
+  if (typeof window.applyAssetAttributes === "function") {
+    window.applyAssetAttributes(el);
   }
-
-  const base = String(
-    typeof window !== "undefined" && window.ASSETS_BASE
-      ? window.ASSETS_BASE
-      : "/assets",
-  ).replace(/\/+$/, "");
-
-  let clean = String(path).replace(/^\.?\/+/, "");
-  clean = clean.replace(/^assets\/+/i, "");
-  return `${base}/${clean}`.replace(/\/{2,}/g, "/");
 }
-const ICONS = {
-  instagram: assetUrl("assets/images/instagram.png"),
-  katalk: assetUrl("assets/images/katalk.png"),
-  naver: assetUrl("assets/images/naver.png"),
-  mail: assetUrl("assets/images/mail.png"),
-};
 
 const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
 
@@ -170,7 +143,7 @@ function getTestIdFromQuery() {
 }
 
 function resolveAssetPath(relative) {
-  return assetUrl(relative);
+  return String(relative || "");
 }
 
 /**
@@ -191,8 +164,8 @@ function getQuestionImageUrlCandidates(question) {
     question?.question_image;
 
   if (raw) {
-    const url = resolveAssetPath(raw);
-    return url ? [url] : [];
+    const p = resolveAssetPath(raw);
+    return p ? [p] : [];
   }
 
   const testId = state.test?.id;
@@ -226,9 +199,9 @@ function getQuestionImageUrlCandidates(question) {
  * @param {string[]} urls
  * @param {string} alt
  */
-function setImageWithFallback(imgEl, urls, alt) {
+function setImageWithFallback(imgEl, paths, alt) {
   if (!imgEl) return;
-  const list = Array.isArray(urls) ? urls : [];
+  const list = Array.isArray(paths) ? paths : [];
   imgEl.alt = alt || "";
 
   let i = 0;
@@ -237,11 +210,14 @@ function setImageWithFallback(imgEl, urls, alt) {
     if (i >= list.length) {
       // Avoid leaving `src="#"` which looks like a "loaded" URL but shows nothing.
       imgEl.removeAttribute("src");
+      imgEl.removeAttribute("data-asset-src");
       return;
     }
     const next = list[i];
     i += 1;
-    imgEl.src = next;
+    imgEl.removeAttribute("src");
+    imgEl.setAttribute("data-asset-src", next);
+    hydrateAssetElement(imgEl);
   };
 
   imgEl.onerror = () => {
