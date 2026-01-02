@@ -36,7 +36,6 @@ const elements = {
   createTestButton: document.querySelector("[data-create-test]"),
   saveButton: document.querySelector("[data-save-test]"),
   saveStatus: document.querySelector("[data-save-status]"),
-  imageBrowser: document.querySelector("[data-image-browser]"),
 };
 
 const state = {
@@ -74,7 +73,6 @@ function wireStaticEvents() {
     setActiveTest(event.target.value);
   });
   elements.saveButton?.addEventListener("click", handleSaveTest);
-  elements.imageBrowser?.addEventListener("click", handleImageBrowserClick);
 }
 
 function setupForms() {
@@ -624,7 +622,6 @@ function setSaveStatus(message, isError = false) {
 async function refreshImageList(testId) {
   if (!testId) {
     state.imageList = [];
-    renderImageBrowser([]);
     return;
   }
 
@@ -634,52 +631,74 @@ async function refreshImageList(testId) {
     const data = await response.json();
     const items = Array.isArray(data.items) ? data.items : [];
     state.imageList = items;
-    renderImageBrowser(items);
+    syncImagesToActiveTestFromR2(items);
   } catch (error) {
     console.error(error);
     state.imageList = [];
-    renderImageBrowser([]);
   }
 }
 
-function renderImageBrowser(items = []) {
-  if (!elements.imageBrowser) return;
-  if (!items.length) {
-    elements.imageBrowser.innerHTML =
-      '<p class="image-browser__empty">이미지가 없습니다.</p>';
-    return;
+function normalizeAssetsPath(rawPath) {
+  const p = String(rawPath || "").trim();
+  if (!p) return "";
+  return p.startsWith("assets/") ? p : `assets/${p.replace(/^\/+/, "")}`;
+}
+
+function findByBaseName(items, baseName) {
+  const bn = String(baseName || "").toLowerCase();
+  if (!bn) return null;
+  return (
+    items.find((it) => String(it?.path || "").toLowerCase().endsWith(`/${bn}.png`)) ||
+    items.find((it) => String(it?.path || "").toLowerCase().endsWith(`/${bn}.jpg`)) ||
+    items.find((it) => String(it?.path || "").toLowerCase().endsWith(`/${bn}.jpeg`)) ||
+    items.find((it) => String(it?.path || "").toLowerCase().endsWith(`/${bn}.webp`)) ||
+    null
+  );
+}
+
+function syncImagesToActiveTestFromR2(items = []) {
+  const active = getActiveTest();
+  const form = elements.metaForm;
+  if (!active) return;
+
+  // thumbnail / author (meta fields)
+  const thumb = findByBaseName(items, "thumbnail");
+  if (thumb?.path) {
+    const v = normalizeAssetsPath(thumb.path);
+    active.thumbnail = v;
+    if (form?.elements?.["thumbnail"]) form.elements["thumbnail"].value = v;
   }
-  const fragment = document.createDocumentFragment();
-  items.forEach((item) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "image-browser__item";
-    button.dataset.imagePath = item.path;
-    button.dataset.imageCode = extractMbtiCode(item.path);
-    button.textContent = item.path;
-    fragment.append(button);
+
+  const author = findByBaseName(items, "author");
+  if (author?.path) {
+    const v = normalizeAssetsPath(author.path);
+    active.authorImg = v;
+    if (form?.elements?.["authorImg"]) form.elements["authorImg"].value = v;
+  }
+
+  // results: MBTI_CODE.(ext)
+  active.results = active.results ?? {};
+  MBTI_ORDER.forEach((code) => {
+    const it = findByBaseName(items, code);
+    if (!it?.path) return;
+    const v = normalizeAssetsPath(it.path);
+    active.results[code] = { ...(active.results[code] ?? {}), image: v };
   });
-  elements.imageBrowser.innerHTML = "";
-  elements.imageBrowser.append(fragment);
-}
 
-function handleImageBrowserClick(event) {
-  const target = event.target.closest("[data-image-path]");
-  if (!target) return;
-  const code = target.dataset.imageCode;
-  if (!elements.resultForm || !code) return;
-  const select = elements.resultForm.elements["code"];
-  if (!select) return;
-  const options = Array.from(select.options || []);
-  const exists = options.some((o) => o.value === code);
-  if (exists) select.value = code;
-}
+  // questions: Q1..Q12.(ext) mapped to q1..q12
+  const questions = Array.isArray(active.questions) ? active.questions : [];
+  for (let i = 1; i <= REQUIRED_QUESTION_COUNT; i += 1) {
+    const it = findByBaseName(items, `q${i}`) || findByBaseName(items, `Q${i}`);
+    if (!it?.path) continue;
+    const v = normalizeAssetsPath(it.path);
+    const q = questions.find((qq) => String(qq?.id || "") === `q${i}`);
+    if (q && !String(q.questionImage || "").trim()) {
+      q.questionImage = v;
+    }
+  }
 
-function extractMbtiCode(path) {
-  if (!path) return "";
-  const fileName = path.split("/").pop() ?? "";
-  const [name] = fileName.split(".");
-  return (name ?? "").replace(/[^A-Z]/gi, "").toUpperCase();
+  // Re-render previews so paths show under the correct cards instead of listing.
+  refreshActiveTest();
 }
 function removeQuestion(questionId) {
   const activeTest = getActiveTest();
@@ -775,6 +794,16 @@ function renderResults(results = {}) {
     const summary = document.createElement("p");
     summary.textContent = detail.summary;
     textWrap.append(strong, summary);
+
+    if (detail.image) {
+      const path = document.createElement("small");
+      path.style.display = "block";
+      path.style.marginTop = "6px";
+      path.style.color = "#6b7280";
+      path.style.wordBreak = "break-all";
+      path.textContent = `image: ${detail.image}`;
+      textWrap.append(path);
+    }
     badge.append(textWrap);
 
     const controls = document.createElement("div");
