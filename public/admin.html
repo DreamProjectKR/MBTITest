@@ -123,7 +123,7 @@
         <div class="section__header">
           <h2 id="result-heading">MBTI 결과 콘텐츠</h2>
         </div>
-        <form class="form-grid" data-result-form>
+        <form class="result-editor" data-result-form>
           <label class="form-field">
             <span>MBTI 유형</span>
             <select name="code" aria-label="MBTI 유형 선택" required>
@@ -146,46 +146,18 @@
             </select>
           </label>
           <label class="form-field">
+            <span>결과 이미지 업로드</span>
+            <input type="file" accept="image/*" name="resultImageFile" required />
+          </label>
+          <label class="form-field">
             <span>설명(요약)</span>
             <textarea name="summary" rows="3" required></textarea>
           </label>
           <div class="form-field">
-            <button class="ds-button ds-button--secondary" type="submit">결과 저장/업데이트</button>
+            <button class="ds-button ds-button--secondary" type="submit">결과 저장</button>
           </div>
         </form>
         <ul class="result-list" data-result-list></ul>
-        <div class="result-image-upload">
-          <div class="result-image-upload__grid">
-            <label class="form-field">
-              <span>MBTI 코드</span>
-              <select data-result-image-code aria-label="MBTI 코드 선택">
-                <option value="INTJ">INTJ</option>
-                <option value="INTP">INTP</option>
-                <option value="ENTJ">ENTJ</option>
-                <option value="ENTP">ENTP</option>
-                <option value="INFJ">INFJ</option>
-                <option value="INFP">INFP</option>
-                <option value="ENFJ">ENFJ</option>
-                <option value="ENFP">ENFP</option>
-                <option value="ISTJ">ISTJ</option>
-                <option value="ISTP">ISTP</option>
-                <option value="ESTJ">ESTJ</option>
-                <option value="ESTP">ESTP</option>
-                <option value="ISFJ">ISFJ</option>
-                <option value="ISFP">ISFP</option>
-                <option value="ESFJ">ESFJ</option>
-                <option value="ESFP">ESFP</option>
-              </select>
-            </label>
-            <label class="form-field">
-              <span>결과 이미지 파일</span>
-              <input type="file" accept="image/*" data-result-image-file />
-            </label>
-            <button class="ds-button ds-button--secondary" type="button" data-result-image-submit>
-              업로드
-            </button>
-          </div>
-        </div>
         <div class="image-browser" data-image-browser aria-live="polite">
           <p class="image-browser__empty">R2에서 이미지를 가져오면 목록이 여기에 표시됩니다.</p>
         </div>

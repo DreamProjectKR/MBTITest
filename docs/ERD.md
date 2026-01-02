@@ -98,5 +98,3 @@ D1.tests.source_path  ───────────────►  R2: asse
 
 - `tags_json`, `description_json`은 “JSON 문자열”입니다. (D1에서 파싱하여 배열로 사용)
 - 본문 `test.json`은 R2에 있으므로, 대용량/빈번한 변경에도 D1 스키마가 과도하게 커지지 않습니다.
-
-

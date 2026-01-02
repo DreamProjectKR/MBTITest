@@ -36,9 +36,6 @@ const elements = {
   createTestButton: document.querySelector("[data-create-test]"),
   saveButton: document.querySelector("[data-save-test]"),
   saveStatus: document.querySelector("[data-save-status]"),
-  resultImageCode: document.querySelector("[data-result-image-code]"),
-  resultImageFile: document.querySelector("[data-result-image-file]"),
-  resultImageSubmit: document.querySelector("[data-result-image-submit]"),
   imageBrowser: document.querySelector("[data-image-browser]"),
 };
 
@@ -77,10 +74,6 @@ function wireStaticEvents() {
     setActiveTest(event.target.value);
   });
   elements.saveButton?.addEventListener("click", handleSaveTest);
-  elements.resultImageSubmit?.addEventListener(
-    "click",
-    handleResultImageUpload,
-  );
   elements.imageBrowser?.addEventListener("click", handleImageBrowserClick);
 }
 
@@ -179,33 +172,13 @@ function setupForms() {
       removeQuestion(removeButton.dataset.removeQuestion);
       return;
     }
-
-    const moveButton = event.target.closest("[data-move-question]");
-    if (moveButton) {
-      reorderQuestion(
-        moveButton.dataset.questionId,
-        moveButton.dataset.moveQuestion,
-      );
-    }
   });
 
   elements.resultForm?.addEventListener("submit", (event) => {
     event.preventDefault();
-    const data = new FormData(elements.resultForm);
-    const code = data.get("code")?.toUpperCase();
-    if (!code) return;
-
-    const activeTest = getActiveTest();
-    if (!activeTest) return;
-    activeTest.results = activeTest.results ?? {};
-    activeTest.results[code] = {
-      image: activeTest.results?.[code]?.image ?? "",
-      summary: data.get("summary"),
-    };
-    renderResults(activeTest.results);
-    // Keep selected MBTI code; only clear the summary input.
-    const formEl = elements.resultForm;
-    if (formEl?.elements?.["summary"]) formEl.elements["summary"].value = "";
+    handleResultEditorSubmit().catch((err) => {
+      alert(err?.message || "결과 저장 실패");
+    });
   });
 
   elements.resultList?.addEventListener("click", (event) => {
@@ -217,6 +190,48 @@ function setupForms() {
     delete activeTest.results[code];
     renderResults(activeTest.results);
   });
+}
+
+async function handleResultEditorSubmit() {
+  const testId = state.activeTestId;
+  const activeTest = getActiveTest();
+  const formEl = elements.resultForm;
+  if (!testId || !activeTest || !formEl) return;
+
+  const data = new FormData(formEl);
+  const code = String(data.get("code") || "").toUpperCase().trim();
+  const summary = String(data.get("summary") || "").trim();
+  const file = formEl.querySelector('input[name="resultImageFile"]')?.files?.[0];
+
+  if (!code) throw new Error("MBTI 유형을 선택하세요.");
+  if (!summary) throw new Error("설명(요약)을 입력하세요.");
+  if (!file) throw new Error("결과 이미지를 업로드하세요.");
+
+  setSaveStatus("결과 이미지 업로드 중…");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(
+    `${API_ADMIN_TESTS_BASE}/${testId}/results/${code}/image`,
+    { method: "PUT", body: formData },
+  );
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error || "이미지 업로드 실패");
+
+  activeTest.results = activeTest.results ?? {};
+  activeTest.results[code] = {
+    image: body.path || activeTest.results?.[code]?.image || "",
+    summary,
+  };
+  renderResults(activeTest.results);
+
+  // Keep MBTI selection, clear summary + file for rapid entry.
+  formEl.querySelector('input[name="resultImageFile"]').value = "";
+  formEl.elements["summary"].value = "";
+  setSaveStatus("결과 업데이트 완료");
+
+  await refreshImageList(testId);
 }
 
 function applyIndex(payload) {
@@ -604,41 +619,7 @@ function setSaveStatus(message, isError = false) {
   elements.saveStatus.classList.toggle("save-status--error", isError);
 }
 
-async function handleResultImageUpload() {
-  const testId = state.activeTestId;
-  const code = elements.resultImageCode?.value?.toUpperCase().trim();
-  const file = elements.resultImageFile?.files?.[0];
-  if (!testId || !code || !file) {
-    alert("MBTI 코드와 이미지 파일을 모두 입력하세요.");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    const response = await fetch(
-      `${API_ADMIN_TESTS_BASE}/${testId}/results/${code}/image`,
-      { method: "PUT", body: formData },
-    );
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(body.error || "이미지 업로드 실패");
-
-    const activeTest = getActiveTest();
-    if (activeTest) {
-      activeTest.results = activeTest.results ?? {};
-      activeTest.results[code] = {
-        ...(activeTest.results[code] ?? {}),
-        image: body.path,
-      };
-      renderResults(activeTest.results);
-    }
-    elements.resultImageFile.value = "";
-    await refreshImageList(testId);
-  } catch (error) {
-    alert(error.message || "이미지 업로드 실패");
-  }
-}
+// Result image upload is handled inside the unified result editor submit.
 
 async function refreshImageList(testId) {
   if (!testId) {
@@ -686,9 +667,12 @@ function handleImageBrowserClick(event) {
   const target = event.target.closest("[data-image-path]");
   if (!target) return;
   const code = target.dataset.imageCode;
-  if (elements.resultImageCode && code) {
-    elements.resultImageCode.value = code;
-  }
+  if (!elements.resultForm || !code) return;
+  const select = elements.resultForm.elements["code"];
+  if (!select) return;
+  const options = Array.from(select.options || []);
+  const exists = options.some((o) => o.value === code);
+  if (exists) select.value = code;
 }
 
 function extractMbtiCode(path) {
@@ -706,19 +690,7 @@ function removeQuestion(questionId) {
   renderQuestions(activeTest.questions);
 }
 
-function reorderQuestion(questionId, direction) {
-  const activeTest = getActiveTest();
-  if (!activeTest?.questions) return;
-  const index = activeTest.questions.findIndex(
-    (question) => question.id === questionId,
-  );
-  if (index === -1) return;
-  const targetIndex = direction === "up" ? index - 1 : index + 1;
-  if (targetIndex < 0 || targetIndex >= activeTest.questions.length) return;
-  const [item] = activeTest.questions.splice(index, 1);
-  activeTest.questions.splice(targetIndex, 0, item);
-  renderQuestions(activeTest.questions);
-}
+// Reordering questions is intentionally disabled (designer flow: q1..q12 fixed).
 
 function renderQuestions(questions) {
   if (!elements.questionList) return;
@@ -762,11 +734,7 @@ function renderQuestions(questions) {
 
     const controls = document.createElement("div");
     controls.className = "question-item__controls";
-    controls.append(
-      createQuestionControlButton("위로", "up", question.id),
-      createQuestionControlButton("아래로", "down", question.id),
-      createRemoveQuestionButton(question.id),
-    );
+    controls.append(createRemoveQuestionButton(question.id));
     item.append(controls);
 
     elements.questionList.append(item);
@@ -821,16 +789,6 @@ function renderResults(results = {}) {
     item.append(badge, controls);
     elements.resultList.append(item);
   });
-}
-
-function createQuestionControlButton(label, direction, questionId) {
-  const button = document.createElement("button");
-  button.className = "ds-button ds-button--ghost ds-button--small";
-  button.type = "button";
-  button.textContent = label;
-  button.dataset.moveQuestion = direction;
-  button.dataset.questionId = questionId;
-  return button;
 }
 
 function createRemoveQuestionButton(questionId) {
