@@ -90,10 +90,10 @@ function wireStaticEvents() {
 
 function setupForms() {
   elements.metaForm?.addEventListener("input", handleMetaInput);
+  elements.metaForm?.addEventListener("change", handleMetaFileInputs);
 
   elements.questionForm?.addEventListener("submit", (event) => {
     event.preventDefault();
-    const data = new FormData(elements.questionForm);
     const activeTest = getActiveTest();
     if (!activeTest) return;
 
@@ -104,6 +104,10 @@ function setupForms() {
       alert(`문항은 ${REQUIRED_QUESTION_COUNT}개까지 등록할 수 있습니다.`);
       return;
     }
+
+    const formEl = elements.questionForm;
+    if (!formEl) return;
+    const data = new FormData(formEl);
 
     const axis = String(data.get("axis") || "EI");
     const [positive, negative] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
@@ -117,30 +121,55 @@ function setupForms() {
       return;
     }
 
-    const qId = `q${nextNo}`;
-    const question = {
-      id: qId,
-      label: String(data.get("questionLabel") || "").trim(),
-      questionImage: String(data.get("questionImage") || "").trim(),
-      answers: [
-        {
-          id: `${qId}_a`,
-          label: String(data.get("answerAText") || "").trim(),
-          mbtiAxis: axis,
-          direction: aDir,
-        },
-        {
-          id: `${qId}_b`,
-          label: String(data.get("answerBText") || "").trim(),
-          mbtiAxis: axis,
-          direction: bDir,
-        },
-      ],
-    };
+    // Ensure the image is uploaded and the path is available before creating the question.
+    uploadQuestionImageIfNeeded(activeTest, nextNo)
+      .then(() => {
+        const formEl = elements.questionForm;
+        if (!formEl) return;
+        const data = new FormData(formEl);
 
-    activeTest.questions.push(question);
-    renderQuestions(activeTest.questions);
-    elements.questionForm.reset();
+        const qId = `q${nextNo}`;
+        const questionImage = String(data.get("questionImage") || "").trim();
+        if (!questionImage) {
+          alert("질문 이미지를 먼저 업로드해주세요.");
+          return;
+        }
+
+        const axis = String(data.get("axis") || "EI");
+        const [positive, negative] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
+        const poleOrder = String(data.get("poleOrder") || "positiveFirst");
+        const aDir = poleOrder === "negativeFirst" ? negative : positive;
+        const bDir = poleOrder === "negativeFirst" ? positive : negative;
+
+        const question = {
+          id: qId,
+          label: String(data.get("questionLabel") || "").trim(),
+          questionImage,
+          answers: [
+            {
+              id: `${qId}_a`,
+              label: String(data.get("answerAText") || "").trim(),
+              mbtiAxis: axis,
+              direction: aDir,
+            },
+            {
+              id: `${qId}_b`,
+              label: String(data.get("answerBText") || "").trim(),
+              mbtiAxis: axis,
+              direction: bDir,
+            },
+          ],
+        };
+
+        activeTest.questions.push(question);
+        renderQuestions(activeTest.questions);
+        formEl.reset();
+        // Keep the hidden readonly path empty after reset.
+        formEl.elements["questionImage"].value = "";
+      })
+      .catch((err) => {
+        alert(err?.message || "질문 이미지 업로드 실패");
+      });
   });
 
   elements.questionList?.addEventListener("click", (event) => {
@@ -169,7 +198,7 @@ function setupForms() {
     if (!activeTest) return;
     activeTest.results = activeTest.results ?? {};
     activeTest.results[code] = {
-      image: data.get("image"),
+      image: activeTest.results?.[code]?.image ?? "",
       summary: data.get("summary"),
     };
     renderResults(activeTest.results);
@@ -388,13 +417,12 @@ function formatDescriptionForInput(description) {
 }
 
 function parseDescriptionInput(value) {
-  if (!value) return "";
+  if (!value) return [];
   const lines = value
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
-  if (!lines.length) return "";
-  return lines.length === 1 ? lines[0] : lines;
+  return lines;
 }
 
 function handleMetaInput() {
@@ -443,6 +471,75 @@ async function handleSaveTest() {
   }
 }
 
+async function handleMetaFileInputs(event) {
+  const form = elements.metaForm;
+  const activeTest = getActiveTest();
+  if (!form || !activeTest) return;
+
+  const target = event.target;
+  if (!target || target.tagName !== "INPUT") return;
+
+  if (target.name === "thumbnailFile") {
+    const file = target.files?.[0];
+    if (!file) return;
+    try {
+      setSaveStatus("썸네일 업로드 중…");
+      const uploaded = await uploadTestImage(activeTest.id, file, "thumbnail");
+      activeTest.thumbnail = uploaded.path;
+      form.elements["thumbnail"].value = uploaded.path;
+      syncMetaEntry(activeTest);
+      setSaveStatus("썸네일 업로드 완료");
+    } catch (err) {
+      setSaveStatus(err.message || "썸네일 업로드 실패", true);
+    } finally {
+      target.value = "";
+    }
+  }
+
+  if (target.name === "authorImgFile") {
+    const file = target.files?.[0];
+    if (!file) return;
+    try {
+      setSaveStatus("제작자 이미지 업로드 중…");
+      const uploaded = await uploadTestImage(activeTest.id, file, "author");
+      activeTest.authorImg = uploaded.path;
+      form.elements["authorImg"].value = uploaded.path;
+      syncMetaEntry(activeTest);
+      setSaveStatus("제작자 이미지 업로드 완료");
+    } catch (err) {
+      setSaveStatus(err.message || "제작자 이미지 업로드 실패", true);
+    } finally {
+      target.value = "";
+    }
+  }
+}
+
+async function uploadTestImage(testId, file, name) {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (name) formData.append("name", name);
+  const response = await fetch(`${API_ADMIN_TESTS_BASE}/${testId}/images`, {
+    method: "PUT",
+    body: formData,
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error || "이미지 업로드 실패");
+  if (!body?.path) throw new Error("이미지 업로드 응답이 올바르지 않습니다.");
+  return body;
+}
+
+async function uploadQuestionImageIfNeeded(activeTest, nextNo) {
+  const formEl = elements.questionForm;
+  if (!formEl) return "";
+  const fileInput = formEl.querySelector('input[name="questionImageFile"]');
+  const file = fileInput?.files?.[0];
+  if (!file) return "";
+  const uploadName = `Q${nextNo}`;
+  const uploaded = await uploadTestImage(activeTest.id, file, uploadName);
+  formEl.elements["questionImage"].value = uploaded.path;
+  return uploaded.path;
+}
+
 async function reloadActiveTest() {
   const testId = state.activeTestId;
   if (!testId) return;
@@ -470,6 +567,8 @@ function getNextQuestionNo(questions) {
 
 function validateTestForSave(test) {
   if (!test?.title || !String(test.title).trim()) return "테스트 제목이 필요합니다.";
+  if (!String(test.thumbnail || "").trim()) return "썸네일 이미지를 업로드해주세요.";
+  if (!String(test.authorImg || "").trim()) return "제작자 이미지를 업로드해주세요.";
   const questions = Array.isArray(test.questions) ? test.questions : [];
   if (questions.length !== REQUIRED_QUESTION_COUNT)
     return `문항은 반드시 ${REQUIRED_QUESTION_COUNT}개여야 합니다. (현재 ${questions.length}개)`;
@@ -477,6 +576,8 @@ function validateTestForSave(test) {
   for (const q of questions) {
     if (!q?.label || !String(q.label).trim())
       return "모든 문항에 질문 텍스트(label)가 필요합니다.";
+    if (!String(q.questionImage || "").trim())
+      return "모든 문항에 질문 이미지(questionImage)가 필요합니다.";
     const answers = Array.isArray(q.answers) ? q.answers : [];
     if (answers.length !== 2) return "각 문항은 2개의 선택지가 필요합니다.";
     const axis = answers[0]?.mbtiAxis;
@@ -652,7 +753,8 @@ function renderQuestions(questions) {
 
     const content = document.createElement("div");
     const title = document.createElement("strong");
-    title.textContent = `${index + 1}. ${question.questionImage}`;
+    const label = question.label || "";
+    title.textContent = `${index + 1}. ${question.id || ""} - ${label}`;
     content.append(title);
 
     const chipRow = document.createElement("div");
@@ -668,6 +770,12 @@ function renderQuestions(questions) {
       chipRow.append(chip);
     });
     content.append(chipRow);
+
+    if (question.questionImage) {
+      const imgPath = document.createElement("small");
+      imgPath.textContent = `image: ${question.questionImage}`;
+      content.append(imgPath);
+    }
     item.append(content);
 
     const controls = document.createElement("div");

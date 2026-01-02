@@ -47,8 +47,17 @@ function methodNotAllowed() {
 function validateTestPayload(test) {
   if (!test.id) return "Missing test id.";
   if (!test.title || !String(test.title).trim()) return "Test title required.";
+  if (!test.thumbnail || !String(test.thumbnail).trim())
+    return "Test needs a thumbnail path.";
+  if (!test.authorImg || !String(test.authorImg).trim())
+    return "Test needs an author image path.";
   if (!Array.isArray(test.questions) || test.questions.length !== 12)
     return "Test must have exactly 12 questions.";
+
+  if (/^https?:\/\//i.test(String(test.thumbnail)))
+    return "Thumbnail must be an uploaded R2 asset path (not an external URL).";
+  if (/^https?:\/\//i.test(String(test.authorImg)))
+    return "Author image must be an uploaded R2 asset path (not an external URL).";
 
   for (let i = 0; i < test.questions.length; i += 1) {
     const question = test.questions[i];
@@ -56,6 +65,10 @@ function validateTestPayload(test) {
       return `Question ${i + 1} is invalid.`;
     if (!question.label || !String(question.label).trim())
       return `Question ${i + 1} needs a label.`;
+    if (!question.questionImage || !String(question.questionImage).trim())
+      return `Question ${i + 1} needs a questionImage path.`;
+    if (/^https?:\/\//i.test(String(question.questionImage)))
+      return `Question ${i + 1} image must be an uploaded R2 asset path (not an external URL).`;
     if (!Array.isArray(question.answers) || question.answers.length !== 2)
       return `Question ${i + 1} needs exactly two answers.`;
 
@@ -102,6 +115,8 @@ function validateTestPayload(test) {
       return `Result ${code} must be an object.`;
     if (!details.image || !String(details.image).trim())
       return `Result ${code} needs an image path.`;
+    if (/^https?:\/\//i.test(String(details.image)))
+      return `Result ${code} image must be an uploaded R2 asset path (not an external URL).`;
     if (!details.summary || !String(details.summary).trim())
       return `Result ${code} needs a summary.`;
   }

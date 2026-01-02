@@ -55,8 +55,9 @@
             <input type="text" name="author" />
           </label>
           <label class="form-field">
-            <span>제작자 이미지 URL</span>
-            <input type="url" name="authorImg" />
+            <span>제작자 이미지 업로드</span>
+            <input type="file" name="authorImgFile" accept="image/*" />
+            <input type="text" name="authorImg" placeholder="업로드 후 자동 입력" readonly />
           </label>
           <label class="form-field">
             <span>테스트 제목</span>
@@ -64,15 +65,16 @@
           </label>
           <label class="form-field">
             <span>설명</span>
-            <textarea name="description" rows="3"></textarea>
+            <textarea name="description" rows="4" placeholder="엔터로 줄바꿈하면 각 줄이 배열로 저장됩니다."></textarea>
           </label>
           <label class="form-field">
             <span>해시태그 (쉼표 구분)</span>
             <input type="text" name="tags" />
           </label>
           <label class="form-field">
-            <span>썸네일 URL</span>
-            <input type="url" name="thumbnail" />
+            <span>썸네일 업로드</span>
+            <input type="file" name="thumbnailFile" accept="image/*" />
+            <input type="text" name="thumbnail" placeholder="업로드 후 자동 입력" readonly />
           </label>
         </form>
       </section>
@@ -86,7 +88,8 @@
             <label>질문 내용 <input type="text" name="questionLabel" placeholder="질문 텍스트" required /></label>
           </div>
           <div class="form-field">
-            <label>질문 이미지 경로(선택) <input type="text" name="questionImage" placeholder="assets/<test-id>/images/Q1.png" /></label>
+            <label>질문 이미지 업로드 <input type="file" name="questionImageFile" accept="image/*" required /></label>
+            <input type="text" name="questionImage" placeholder="업로드 후 자동 입력" readonly />
           </div>
           <div class="form-field">
             <label>
@@ -133,11 +136,7 @@
             <input type="text" name="code" pattern="[EI][NS][FT][JP]" required />
           </label>
           <label class="form-field">
-            <span>대표 이미지 URL</span>
-            <input type="url" name="image" />
-          </label>
-          <label class="form-field">
-            <span>설명</span>
+            <span>설명(요약)</span>
             <textarea name="summary" rows="3" required></textarea>
           </label>
           <div class="form-field">
