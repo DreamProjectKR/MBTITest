@@ -702,6 +702,33 @@ input[readonly] {
   background: #ffffff;
 }
 
+/* Question list: use the same badge layout but slightly smaller media */
+.question-list .ds-badge.ds-badge--question {
+  max-width: none;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0;
+}
+
+.question-list .ds-badge.ds-badge--question .ds-badge__media {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.question-list .ds-badge.ds-badge--question .ds-badge__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
+}
+
 .result-list .ds-badge > :nth-child(2) {
   flex: 1;
   min-width: 0;

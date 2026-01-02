@@ -724,6 +724,24 @@ function renderQuestions(questions) {
     const item = document.createElement("li");
     item.className = "ds-card ds-card--compact";
 
+    const badge = document.createElement("div");
+    badge.className = "ds-badge ds-badge--question";
+
+    const media = document.createElement("div");
+    media.className = "ds-badge__media";
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.alt = `${question.id || index + 1} 문항 이미지`;
+    if (question.questionImage) {
+      // Accept either `assets/...` or `test-.../...` (server returns both sometimes)
+      const raw = String(question.questionImage || "");
+      const normalized = raw.startsWith("assets/") ? raw : `assets/${raw.replace(/^\/+/, "")}`;
+      img.src = `/${normalized.replace(/^\/+/, "")}`;
+    }
+    media.append(img);
+    badge.append(media);
+
     const content = document.createElement("div");
     const title = document.createElement("strong");
     const label = question.label || "";
@@ -749,7 +767,8 @@ function renderQuestions(questions) {
       imgPath.textContent = `image: ${question.questionImage}`;
       content.append(imgPath);
     }
-    item.append(content);
+    badge.append(content);
+    item.append(badge);
 
     const controls = document.createElement("div");
     controls.className = "question-item__controls";
