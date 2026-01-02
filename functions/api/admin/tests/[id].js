@@ -4,6 +4,12 @@ import {
 } from "../utils/store.js";
 
 const AXIS_SET = new Set(["EI", "SN", "TF", "JP"]);
+const AXIS_MAP = {
+  EI: ["E", "I"],
+  SN: ["S", "N"],
+  TF: ["T", "F"],
+  JP: ["J", "P"],
+};
 const MBTI_ORDER = [
   "INTJ",
   "INTP",
@@ -41,17 +47,22 @@ function methodNotAllowed() {
 function validateTestPayload(test) {
   if (!test.id) return "Missing test id.";
   if (!test.title || !String(test.title).trim()) return "Test title required.";
-  if (!Array.isArray(test.questions) || test.questions.length === 0)
-    return "At least one question is required.";
+  if (!Array.isArray(test.questions) || test.questions.length !== 12)
+    return "Test must have exactly 12 questions.";
 
   for (let i = 0; i < test.questions.length; i += 1) {
     const question = test.questions[i];
     if (!question || typeof question !== "object")
       return `Question ${i + 1} is invalid.`;
-    if (!question.questionImage && !question.label)
-      return `Question ${i + 1} needs questionImage or label.`;
-    if (!Array.isArray(question.answers) || question.answers.length < 2)
-      return `Question ${i + 1} needs at least two answers.`;
+    if (!question.label || !String(question.label).trim())
+      return `Question ${i + 1} needs a label.`;
+    if (!Array.isArray(question.answers) || question.answers.length !== 2)
+      return `Question ${i + 1} needs exactly two answers.`;
+
+    const axis = question.answers?.[0]?.mbtiAxis;
+    if (!axis || !AXIS_SET.has(axis))
+      return `Question ${i + 1} has invalid mbtiAxis.`;
+    const [pos, neg] = AXIS_MAP[axis] || [];
 
     for (let j = 0; j < question.answers.length; j += 1) {
       const answer = question.answers[j];
@@ -64,14 +75,24 @@ function validateTestPayload(test) {
       if (!answer.direction || !String(answer.direction).trim())
         return `Question ${i + 1} answer ${j + 1} needs a direction.`;
     }
+
+    // Ensure both answers are mapped to the same axis and cover both poles.
+    if (question.answers[1]?.mbtiAxis !== axis)
+      return `Question ${i + 1} answers must share the same mbtiAxis.`;
+    const dirSet = new Set([
+      String(question.answers[0]?.direction || ""),
+      String(question.answers[1]?.direction || ""),
+    ]);
+    if (!(dirSet.has(pos) && dirSet.has(neg)))
+      return `Question ${i + 1} answers must cover both poles for ${axis}.`;
   }
 
   if (!test.results || typeof test.results !== "object")
     return "Results must be an object.";
 
   const codes = Object.keys(test.results);
-  if (codes.length === 0)
-    return "Results must contain at least one MBTI entry.";
+  if (codes.length !== MBTI_ORDER.length)
+    return "Results must contain exactly 16 MBTI entries.";
 
   for (const code of codes) {
     if (!MBTI_ORDER.includes(code))

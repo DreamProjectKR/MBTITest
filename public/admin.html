@@ -51,6 +51,14 @@
         </div>
         <form class="form-grid" data-test-meta-form>
           <label class="form-field">
+            <span>제작자</span>
+            <input type="text" name="author" />
+          </label>
+          <label class="form-field">
+            <span>제작자 이미지 URL</span>
+            <input type="url" name="authorImg" />
+          </label>
+          <label class="form-field">
             <span>테스트 제목</span>
             <input type="text" name="title" required />
           </label>
@@ -75,36 +83,39 @@
         </div>
         <form class="question-form" data-question-form>
           <div class="form-field">
-            <label>질문 내용 <input type="text" name="questionImage" required /></label>
+            <label>질문 내용 <input type="text" name="questionLabel" placeholder="질문 텍스트" required /></label>
+          </div>
+          <div class="form-field">
+            <label>질문 이미지 경로(선택) <input type="text" name="questionImage" placeholder="assets/<test-id>/images/Q1.png" /></label>
+          </div>
+          <div class="form-field">
+            <label>
+              축(영역)
+              <select name="axis" aria-label="MBTI 축">
+                <option value="EI">E / I</option>
+                <option value="SN">S / N</option>
+                <option value="TF">T / F</option>
+                <option value="JP">J / P</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-field">
+            <label>
+              선택지 방향
+              <select name="poleOrder" aria-label="선택지 방향">
+                <option value="positiveFirst">A=앞 글자 / B=뒷 글자</option>
+                <option value="negativeFirst">A=뒷 글자 / B=앞 글자</option>
+              </select>
+            </label>
           </div>
           <div class="answer-grid">
             <fieldset>
               <legend>답변 A</legend>
               <input type="text" name="answerAText" placeholder="답변 텍스트" required />
-              <select name="answerAMbti" aria-label="MBTI 요소">
-                <option value="EI">E / I</option>
-                <option value="SN">S / N</option>
-                <option value="TF">T / F</option>
-                <option value="JP">J / P</option>
-              </select>
-              <select name="answerAPole" aria-label="MBTI 극">
-                <option value="positive">앞 글자</option>
-                <option value="negative">뒷 글자</option>
-              </select>
             </fieldset>
             <fieldset>
               <legend>답변 B</legend>
               <input type="text" name="answerBText" placeholder="답변 텍스트" required />
-              <select name="answerBMbti" aria-label="MBTI 요소">
-                <option value="EI">E / I</option>
-                <option value="SN">S / N</option>
-                <option value="TF">T / F</option>
-                <option value="JP">J / P</option>
-              </select>
-              <select name="answerBPole" aria-label="MBTI 극">
-                <option value="positive">앞 글자</option>
-                <option value="negative">뒷 글자</option>
-              </select>
             </fieldset>
           </div>
           <button class="ds-button ds-button--primary" type="submit">문항 추가</button>

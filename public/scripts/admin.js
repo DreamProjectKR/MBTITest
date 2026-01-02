@@ -6,6 +6,7 @@ const AXIS_MAP = {
   TF: ["T", "F"],
   JP: ["J", "P"],
 };
+const REQUIRED_QUESTION_COUNT = 12;
 const MBTI_ORDER = [
   "INTJ",
   "INTP",
@@ -93,15 +94,50 @@ function setupForms() {
   elements.questionForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(elements.questionForm);
-    const question = {
-      id: crypto.randomUUID?.() ?? `q-${Date.now()}`,
-      questionImage: data.get("questionImage")?.trim() ?? "",
-      answers: [buildAnswer("answerA", data), buildAnswer("answerB", data)],
-    };
-
     const activeTest = getActiveTest();
     if (!activeTest) return;
-    activeTest.questions = activeTest.questions ?? [];
+
+    activeTest.questions = Array.isArray(activeTest.questions)
+      ? activeTest.questions
+      : [];
+    if (activeTest.questions.length >= REQUIRED_QUESTION_COUNT) {
+      alert(`문항은 ${REQUIRED_QUESTION_COUNT}개까지 등록할 수 있습니다.`);
+      return;
+    }
+
+    const axis = String(data.get("axis") || "EI");
+    const [positive, negative] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
+    const poleOrder = String(data.get("poleOrder") || "positiveFirst");
+    const aDir = poleOrder === "negativeFirst" ? negative : positive;
+    const bDir = poleOrder === "negativeFirst" ? positive : negative;
+
+    const nextNo = getNextQuestionNo(activeTest.questions);
+    if (!nextNo) {
+      alert(`문항은 ${REQUIRED_QUESTION_COUNT}개까지 등록할 수 있습니다.`);
+      return;
+    }
+
+    const qId = `q${nextNo}`;
+    const question = {
+      id: qId,
+      label: String(data.get("questionLabel") || "").trim(),
+      questionImage: String(data.get("questionImage") || "").trim(),
+      answers: [
+        {
+          id: `${qId}_a`,
+          label: String(data.get("answerAText") || "").trim(),
+          mbtiAxis: axis,
+          direction: aDir,
+        },
+        {
+          id: `${qId}_b`,
+          label: String(data.get("answerBText") || "").trim(),
+          mbtiAxis: axis,
+          direction: bDir,
+        },
+      ],
+    };
+
     activeTest.questions.push(question);
     renderQuestions(activeTest.questions);
     elements.questionForm.reset();
@@ -310,8 +346,13 @@ function createTest() {
     description: "",
     tags: [],
     thumbnail: "",
+    author: "",
+    authorImg: "",
     questions: [],
-    results: {},
+    results: MBTI_ORDER.reduce((acc, code) => {
+      acc[code] = { image: "", summary: "" };
+      return acc;
+    }, {}),
   };
 
   state.loadedTests = { ...state.loadedTests, [newTest.id]: newTest };
@@ -326,6 +367,8 @@ function hydrateForms(test) {
   if (!elements.metaForm) return;
   const form = elements.metaForm;
   isHydratingMeta = true;
+  form.elements["author"].value = test?.author ?? "";
+  form.elements["authorImg"].value = test?.authorImg ?? "";
   form.elements["title"].value = test?.title ?? "";
   form.elements["description"].value = formatDescriptionForInput(
     test?.description,
@@ -359,6 +402,8 @@ function handleMetaInput() {
   const activeTest = getActiveTest();
   if (!activeTest) return;
   const form = elements.metaForm;
+  activeTest.author = form.elements["author"].value;
+  activeTest.authorImg = form.elements["authorImg"].value;
   activeTest.title = form.elements["title"].value;
   activeTest.description = parseDescriptionInput(
     form.elements["description"].value,
@@ -378,6 +423,9 @@ async function handleSaveTest() {
 
   setSavingState(true);
   try {
+    const err = validateTestForSave(test);
+    if (err) throw new Error(err);
+
     const response = await fetch(`${API_ADMIN_TESTS_BASE}/${testId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -385,15 +433,73 @@ async function handleSaveTest() {
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || "저장 실패");
-    state.loadedTests[testId] = payload.test;
-    syncMetaEntry(payload.test);
-    refreshActiveTest();
+    // Server returns { ok: true }. Reload the merged view from /api/tests/:id.
+    await reloadActiveTest();
     setSaveStatus("저장 완료");
   } catch (error) {
     setSaveStatus(error.message || "저장 실패", true);
   } finally {
     setSavingState(false);
   }
+}
+
+async function reloadActiveTest() {
+  const testId = state.activeTestId;
+  if (!testId) return;
+  const test = await fetchJson(`${API_TESTS_BASE}/${testId}`);
+  state.loadedTests = { ...state.loadedTests, [testId]: test };
+  syncMetaEntry(test);
+  refreshActiveTest();
+}
+
+function getNextQuestionNo(questions) {
+  const used = new Set(
+    (Array.isArray(questions) ? questions : [])
+      .map((q) => String(q?.id || ""))
+      .map((id) => {
+        const m = /^q(\d{1,2})$/i.exec(id);
+        return m ? Number(m[1]) : null;
+      })
+      .filter((n) => Number.isFinite(n)),
+  );
+  for (let i = 1; i <= REQUIRED_QUESTION_COUNT; i += 1) {
+    if (!used.has(i)) return i;
+  }
+  return 0;
+}
+
+function validateTestForSave(test) {
+  if (!test?.title || !String(test.title).trim()) return "테스트 제목이 필요합니다.";
+  const questions = Array.isArray(test.questions) ? test.questions : [];
+  if (questions.length !== REQUIRED_QUESTION_COUNT)
+    return `문항은 반드시 ${REQUIRED_QUESTION_COUNT}개여야 합니다. (현재 ${questions.length}개)`;
+
+  for (const q of questions) {
+    if (!q?.label || !String(q.label).trim())
+      return "모든 문항에 질문 텍스트(label)가 필요합니다.";
+    const answers = Array.isArray(q.answers) ? q.answers : [];
+    if (answers.length !== 2) return "각 문항은 2개의 선택지가 필요합니다.";
+    const axis = answers[0]?.mbtiAxis;
+    if (!axis || !AXIS_MAP[axis]) return "선택지의 mbtiAxis가 올바르지 않습니다.";
+    if (answers[1]?.mbtiAxis !== axis)
+      return "한 문항의 두 선택지는 같은 축(mbtiAxis)을 가져야 합니다.";
+    const [pos, neg] = AXIS_MAP[axis];
+    const dirs = new Set([answers[0]?.direction, answers[1]?.direction]);
+    if (!(dirs.has(pos) && dirs.has(neg)))
+      return "한 문항의 두 선택지는 축의 두 방향(E/I, S/N, T/F, J/P)을 각각 가져야 합니다.";
+    if (!String(answers[0]?.label || "").trim() || !String(answers[1]?.label || "").trim())
+      return "모든 선택지에 텍스트(label)가 필요합니다.";
+  }
+
+  const results = test?.results && typeof test.results === "object" ? test.results : {};
+  for (const code of MBTI_ORDER) {
+    const r = results[code];
+    if (!r) return `결과가 누락되었습니다: ${code}`;
+    if (!String(r.summary || "").trim()) return `결과 요약(summary)이 필요합니다: ${code}`;
+    if (!String(r.image || "").trim()) return `결과 이미지(image)가 필요합니다: ${code}`;
+  }
+
+  return "";
 }
 
 function setSavingState(isSaving) {
