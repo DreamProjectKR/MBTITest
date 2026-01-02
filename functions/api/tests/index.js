@@ -1,8 +1,8 @@
 /**
  * API: `GET /api/tests`
  *
- * Reads `assets/index.json` from the bound R2 bucket and returns it verbatim.
- * Designed to be cache-friendly (ETag + Cache-Control).
+ * Reads the test index from D1 (`mbti_db.tests`) and returns it in the same shape
+ * as the legacy `assets/index.json` response: `{ tests: [...] }`.
  */
 const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
@@ -32,35 +32,61 @@ function withCacheHeaders(headers, { etag, maxAge = 60 } = {}) {
  * @returns {Promise<Response>}
  */
 export async function onRequestGet(context) {
-  const bucket = context.env.MBTI_BUCKET;
-  if (!bucket) {
+  const db = context.env.mbti_db;
+  if (!db) {
     return new Response(
-      JSON.stringify({ error: "R2 binding MBTI_BUCKET is missing." }),
+      JSON.stringify({ error: "D1 binding mbti_db is missing." }),
       { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
 
-  const key = "assets/index.json";
-  const obj = await bucket.get(key);
-  if (!obj) {
-    // Keep response shape compatible with existing frontend code.
-    return new Response(JSON.stringify({ tests: [] }), {
-      status: 200,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 5 }),
-    });
-  }
+  const rows = await db
+    .prepare(
+      "SELECT test_id, title, thumbnail_path, tags_json, source_path, created_at, updated_at FROM tests ORDER BY updated_at DESC, test_id ASC",
+    )
+    .all();
+
+  const tests = (rows?.results || []).map((r) => {
+    const tags = (() => {
+      const raw = r?.tags_json;
+      if (!raw) return [];
+      try {
+        const parsed = JSON.parse(String(raw));
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
+    })();
+
+    return {
+      id: String(r.test_id),
+      title: String(r.title || ""),
+      thumbnail: r.thumbnail_path ? String(r.thumbnail_path) : "",
+      tags,
+      path: r.source_path ? String(r.source_path) : "",
+      createdAt: r.created_at ? String(r.created_at) : "",
+      updatedAt: r.updated_at ? String(r.updated_at) : "",
+    };
+  });
+
+  const etag = (() => {
+    const maxUpdated = tests.reduce((acc, t) => {
+      const v = t?.updatedAt || "";
+      return v > acc ? v : acc;
+    }, "");
+    return `"${tests.length}-${maxUpdated}"`;
+  })();
 
   const ifNoneMatch = context.request.headers.get("if-none-match");
-  if (ifNoneMatch && obj.etag && ifNoneMatch === obj.etag) {
+  if (ifNoneMatch && ifNoneMatch === etag) {
     return new Response(null, {
       status: 304,
-      headers: withCacheHeaders(JSON_HEADERS, { etag: obj.etag, maxAge: 60 }),
+      headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 60 }),
     });
   }
 
-  const text = await obj.text();
-  return new Response(text, {
+  return new Response(JSON.stringify({ tests }), {
     status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, { etag: obj.etag, maxAge: 60 }),
+    headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 60 }),
   });
 }

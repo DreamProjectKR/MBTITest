@@ -1,8 +1,8 @@
 /**
  * API: `GET /api/tests/:id`
  *
- * Reads `assets/index.json` from R2, finds the matching test by `id`,
- * then fetches that test's JSON (`assets/<test>/test.json`) and returns it.
+ * Reads the test index row from D1 (`mbti_db.tests`) by `id`,
+ * then fetches that test's JSON from R2 (`assets/<path>`) and returns it.
  *
  * Cache behavior:
  * - Supports ETag / If-None-Match
@@ -57,6 +57,13 @@ export async function onRequestGet(context) {
       { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
+  const db = context.env.mbti_db;
+  if (!db) {
+    return new Response(JSON.stringify({ error: "D1 binding mbti_db is missing." }), {
+      status: 500,
+      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
+    });
+  }
 
   const id = context.params?.id ? String(context.params.id) : "";
   if (!id) {
@@ -66,40 +73,19 @@ export async function onRequestGet(context) {
     });
   }
 
-  const indexObj = await bucket.get("assets/index.json");
-  if (!indexObj) {
-    return new Response(
-      JSON.stringify({ error: "index.json not found in R2." }),
-      {
-        status: 404,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 5 }),
-      },
-    );
-  }
+  const row = await db
+    .prepare("SELECT source_path FROM tests WHERE test_id = ?1 LIMIT 1")
+    .bind(id)
+    .first();
 
-  let index;
-  try {
-    index = JSON.parse(await indexObj.text());
-  } catch (e) {
-    return new Response(
-      JSON.stringify({ error: "index.json is invalid JSON." }),
-      {
-        status: 500,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-      },
-    );
-  }
-
-  const tests = Array.isArray(index?.tests) ? index.tests : [];
-  const meta = tests.find((t) => t?.id === id);
-  if (!meta) {
+  if (!row?.source_path) {
     return new Response(JSON.stringify({ error: "Test not found: " + id }), {
       status: 404,
       headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
     });
   }
 
-  const key = normalizeR2KeyFromIndexPath(meta.path);
+  const key = normalizeR2KeyFromIndexPath(String(row.source_path));
   if (!key) {
     return new Response(
       JSON.stringify({ error: "Test meta has empty path: " + id }),
