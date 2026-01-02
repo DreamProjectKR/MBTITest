@@ -57,7 +57,8 @@
       <div id="header" class="Head">
         <div class="Logo">
           <a href="index.html">
-            <img data-asset-src="assets/images/mainLogo.png" data-asset-resize="width=360,quality=90,format=auto" alt="MBTIZOO바로가기">
+            <!-- Set `src` directly so the preload is always consumed quickly in production (Rocket Loader timing-safe). -->
+            <img src="/cdn-cgi/image/width=360,quality=90,format=auto/assets/images/mainLogo.png" data-asset-src="assets/images/mainLogo.png" data-asset-resize="width=360,quality=90,format=auto" alt="MBTIZOO바로가기" decoding="async" fetchpriority="high">
           </a>
         </div>
         <div class="HeaderGnb holographic-container">
@@ -70,7 +71,7 @@
     <main id="MainTop">
       <div class="MainBanner">
         <a href="./testlist.html">
-          <img data-asset-src="assets/images/mainbanner.png" data-asset-resize="width=1230,quality=85,fit=cover,format=auto" alt="테스트 리스트로 바로가기">
+          <img src="/cdn-cgi/image/width=1230,quality=85,fit=cover,format=auto/assets/images/mainbanner.png" data-asset-src="assets/images/mainbanner.png" data-asset-resize="width=1230,quality=85,fit=cover,format=auto" alt="테스트 리스트로 바로가기" decoding="async" fetchpriority="high">
         </a>
       </div>
       <div class="NewTestList">
