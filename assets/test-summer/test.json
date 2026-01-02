@@ -1,321 +1,298 @@
 {
-  "id": "test-summer",
-  "title": "여름 바캉스 스타일 테스트",
-  "description": [
-    "두근두근 여름방학 유형 ✨",
-    "여름방학에 친구들이랑 미친 듯이 놀고 싶은지,",
-    "혼자 조용히 책 읽으며 쉬고 싶은지… 👀",
-    "이런 당신의 방학 스타일로",
-    "성격 유형을 살짝 들여다봐요 💕",
-    "몇 가지 질문에 답하면",
-    "✔️ 당신이 어떤 방학 계획을 더 좋아하는지",
-    "✔️ 어떤 포인트에 끌리는 타입인지",
-    "귀여운 동물·캐릭터 해설과 함께",
-    "콕콕 알려드릴게요 🐰🦉🦔🦥🦩"
-  ],
-  "author": "우애앵애",
-  "authorImg": "assets/test-summer/images/author.png",
-  "tags": [
-    "여름",
-    "여행",
-    "휴가",
-    "바캉스"
-  ],
-  "thumbnail": "assets/test-summer/images/thumbnail.png",
   "questions": [
     {
       "id": "q1",
-      "question": "방학 첫날 아침, 눈을 뜨자마자 가장 먼저 하고 싶은 일은?",
       "questionImage": "assets/test-summer/images/q1.png",
       "answers": [
         {
           "id": "q1_a",
-          "answer": "친구들에게 바로 연락해서 오늘 만나자고 약속 잡기",
           "mbtiAxis": "EI",
-          "direction": "E"
+          "direction": "E",
+          "label": "친구들에게 바로 연락해서 오늘 만나자고 약속 잡기"
         },
         {
           "id": "q1_b",
-          "answer": "창문 너머로 햇살 느끼며 천천히 혼자만의 시간을 즐기기",
           "mbtiAxis": "EI",
-          "direction": "I"
+          "direction": "I",
+          "label": "창문 너머로 햇살 느끼며 천천히 혼자만의 시간을 즐기기"
         }
-      ]
+      ],
+      "label": "방학 첫날 아침, 눈을 뜨자마자 가장 먼저 하고 싶은 일은?"
     },
     {
       "id": "q2",
-      "question": "여름 캠프에 간다면 어떤 게 더 설레나요?",
       "questionImage": "assets/test-summer/images/q2.png",
       "answers": [
         {
           "id": "q2_a",
-          "answer": "모두가 함께하는 단체 게임과 밤샘 파티",
           "mbtiAxis": "EI",
-          "direction": "E"
+          "direction": "E",
+          "label": "모두가 함께하는 단체 게임과 밤샘 파티"
         },
         {
           "id": "q2_b",
-          "answer": "조용한 텐트 안에서 책 읽거나 혼자 산책하기",
           "mbtiAxis": "EI",
-          "direction": "I"
+          "direction": "I",
+          "label": "조용한 텐트 안에서 책 읽거나 혼자 산책하기"
         }
-      ]
+      ],
+      "label": "여름 캠프에 간다면 어떤 게 더 설레나요?"
     },
     {
       "id": "q3",
-      "question": "방학 계획을 세울 때 친구가 갑자기 놀러 오자고 하면?",
       "questionImage": "assets/test-summer/images/q3.png",
       "answers": [
         {
           "id": "q3_a",
-          "answer": "당연히 좋다! 바로 계획 바꿔서 같이 놀자",
           "mbtiAxis": "EI",
-          "direction": "E"
+          "direction": "E",
+          "label": "당연히 좋다! 바로 계획 바꿔서 같이 놀자"
         },
         {
           "id": "q3_b",
-          "answer": "조금 피곤하지만… 그래도 만나긴 할게요 (속으로는 조용히 쉬고 싶음)",
           "mbtiAxis": "EI",
-          "direction": "I"
+          "direction": "I",
+          "label": "조금 피곤하지만… 그래도 만나긴 할게요 (속으로는 조용히 쉬고 싶음)"
         }
-      ]
+      ],
+      "label": "방학 계획을 세울 때 친구가 갑자기 놀러 오자고 하면?"
     },
     {
       "id": "q4",
-      "question": "바닷가에 도착했을 때 가장 먼저 눈에 들어오는 것은?",
       "questionImage": "assets/test-summer/images/q4.png",
       "answers": [
         {
           "id": "q4_a",
-          "answer": "파도 소리, 모래 느낌, 햇볕의 따뜻함 같은 지금 이 순간의 감각",
           "mbtiAxis": "SN",
-          "direction": "S"
+          "direction": "S",
+          "label": "파도 소리, 모래 느낌, 햇볕의 따뜻함 같은 지금 이 순간의 감각"
         },
         {
           "id": "q4_b",
-          "answer": "저 멀리 지는 해의 색깔과 분위기, 전체적인 풍경이 주는 느낌",
           "mbtiAxis": "SN",
-          "direction": "N"
+          "direction": "N",
+          "label": "저 멀리 지는 해의 색깔과 분위기, 전체적인 풍경이 주는 느낌"
         }
-      ]
+      ],
+      "label": "바닷가에 도착했을 때 가장 먼저 눈에 들어오는 것은?"
     },
     {
       "id": "q5",
-      "question": "여름방학 일기장을 펼쳤을 때 어떤 내용을 더 적고 싶나요?",
       "questionImage": "assets/test-summer/images/q5.png",
       "answers": [
         {
           "id": "q5_a",
-          "answer": "오늘 먹은 아이스크림 맛, 물놀이할 때 발이 차가웠던 느낌 등 구체적인 기억",
           "mbtiAxis": "SN",
-          "direction": "S"
+          "direction": "S",
+          "label": "오늘 먹은 아이스크림 맛, 물놀이할 때 발이 차가웠던 느낌 등 구체적인 기억"
         },
         {
           "id": "q5_b",
-          "answer": "그날 느꼈던 자유로운 기분, 앞으로의 상상 같은 감성적인 기록",
           "mbtiAxis": "SN",
-          "direction": "N"
+          "direction": "N",
+          "label": "그날 느꼈던 자유로운 기분, 앞으로의 상상 같은 감성적인 기록"
         }
-      ]
+      ],
+      "label": "여름방학 일기장을 펼쳤을 때 어떤 내용을 더 적고 싶나요?"
     },
     {
       "id": "q6",
-      "question": "해변에서 우연히 예쁜 조개껍데기를 발견했다면?",
       "questionImage": "assets/test-summer/images/q6.png",
       "answers": [
         {
           "id": "q6_a",
-          "answer": "바로 주워서 손에 쥐고 색깔과 모양을 자세히 관찰한다",
           "mbtiAxis": "SN",
-          "direction": "S"
+          "direction": "S",
+          "label": "바로 주워서 손에 쥐고 색깔과 모양을 자세히 관찰한다"
         },
         {
           "id": "q6_b",
-          "answer": "이 조개가 어디서 왔을지, 어떤 바다 생물의 집이었을지 상상한다",
           "mbtiAxis": "SN",
-          "direction": "N"
+          "direction": "N",
+          "label": "이 조개가 어디서 왔을지, 어떤 바다 생물의 집이었을지 상상한다"
         }
-      ]
+      ],
+      "label": "해변에서 우연히 예쁜 조개껍데기를 발견했다면?"
     },
     {
       "id": "q7",
-      "question": "친구와 물놀이 중 친구가 물에 빠뜨린 선글라스를 찾을 때?",
       "questionImage": "assets/test-summer/images/q7.png",
       "answers": [
         {
           "id": "q7_a",
-          "answer": "\"어디서 빠뜨렸는지 정확히 기억해봐\" 하며 논리적으로 찾는 방법 제안",
           "mbtiAxis": "TF",
-          "direction": "T"
+          "direction": "T",
+          "label": "\"어디서 빠뜨렸는지 정확히 기억해봐\" 하며 논리적으로 찾는 방법 제안"
         },
         {
           "id": "q7_b",
-          "answer": "\"괜찮아! 새로 사면 돼~\" 하며 분위기 풀어주기",
           "mbtiAxis": "TF",
-          "direction": "F"
+          "direction": "F",
+          "label": "\"괜찮아! 새로 사면 돼~\" 하며 분위기 풀어주기"
         }
-      ]
+      ],
+      "label": "친구와 물놀이 중 친구가 물에 빠뜨린 선글라스를 찾을 때?"
     },
     {
       "id": "q8",
-      "question": "캠프파이어 시간에 누군가 실수로 불을 너무 크게 키웠다면?",
       "questionImage": "assets/test-summer/images/q8.png",
       "answers": [
         {
           "id": "q8_a",
-          "answer": "안전을 최우선으로 차분히 불을 조절하는 방법 알려주기",
           "mbtiAxis": "TF",
-          "direction": "T"
+          "direction": "T",
+          "label": "안전을 최우선으로 차분히 불을 조절하는 방법 알려주기"
         },
         {
           "id": "q8_b",
-          "answer": "모두가 당황하지 않게 농담으로 분위기 전환시키기",
           "mbtiAxis": "TF",
-          "direction": "F"
+          "direction": "F",
+          "label": "모두가 당황하지 않게 농담으로 분위기 전환시키기"
         }
-      ]
+      ],
+      "label": "캠프파이어 시간에 누군가 실수로 불을 너무 크게 키웠다면?"
     },
     {
       "id": "q9",
-      "question": "친구가 방학 숙제를 깜빡했다고 울먹일 때?",
       "questionImage": "assets/test-summer/images/q9.png",
       "answers": [
         {
           "id": "q9_a",
-          "answer": "\"어떤 부분이 어려운지 말해봐, 효율적으로 끝낼 방법 찾아보자\"",
           "mbtiAxis": "TF",
-          "direction": "T"
+          "direction": "T",
+          "label": "\"어떤 부분이 어려운지 말해봐, 효율적으로 끝낼 방법 찾아보자\""
         },
         {
           "id": "q9_b",
-          "answer": "\"나도 같이 도와줄게! 걱정 마\" 하며 바로 위로하고 감싸주기",
           "mbtiAxis": "TF",
-          "direction": "F"
+          "direction": "F",
+          "label": "\"나도 같이 도와줄게! 걱정 마\" 하며 바로 위로하고 감싸주기"
         }
-      ]
+      ],
+      "label": "친구가 방학 숙제를 깜빡했다고 울먹일 때?"
     },
     {
       "id": "q10",
-      "question": "방학 일정표를 만들 때 더 편한 방식은?",
       "questionImage": "assets/test-summer/images/q10.png",
       "answers": [
         {
           "id": "q10_a",
-          "answer": "하루하루 빽빽이 계획 세워서 빈틈없이 채우기",
           "mbtiAxis": "JP",
-          "direction": "J"
+          "direction": "J",
+          "label": "하루하루 빽빽이 계획 세워서 빈틈없이 채우기"
         },
         {
           "id": "q10_b",
-          "answer": "대충 \"이럴까 저럴까\" 하며 즉흥적으로 움직이기",
           "mbtiAxis": "JP",
-          "direction": "P"
+          "direction": "P",
+          "label": "대충 \"이럴까 저럴까\" 하며 즉흥적으로 움직이기"
         }
-      ]
+      ],
+      "label": "방학 일정표를 만들 때 더 편한 방식은?"
     },
     {
       "id": "q11",
-      "question": "여행 가방을 쌀 때 어떤 스타일인가요?",
       "questionImage": "assets/test-summer/images/q11.png",
       "answers": [
         {
           "id": "q11_a",
-          "answer": "갈아입을 옷, 챙길 물건 하나하나 리스트 만들어서 빠뜨리는 거 없이 준비",
           "mbtiAxis": "JP",
-          "direction": "J"
+          "direction": "J",
+          "label": "갈아입을 옷, 챙길 물건 하나하나 리스트 만들어서 빠뜨리는 거 없이 준비"
         },
         {
           "id": "q11_b",
-          "answer": "대충 필요한 거만 던져 넣고, 부족하면 그때 가서 해결하면 돼!",
           "mbtiAxis": "JP",
-          "direction": "P"
+          "direction": "P",
+          "label": "대충 필요한 거만 던져 넣고, 부족하면 그때 가서 해결하면 돼!"
         }
-      ]
+      ],
+      "label": "여행 가방을 쌀 때 어떤 스타일인가요?"
     },
     {
       "id": "q12",
-      "question": "방학 마지막 주가 되었을 때 남은 시간을 어떻게 쓰고 싶나요?",
       "questionImage": "assets/test-summer/images/q12.png",
       "answers": [
         {
           "id": "q12_a",
-          "answer": "미뤄뒀던 숙제와 정리 먼저 깔끔하게 끝내놓기",
           "mbtiAxis": "JP",
-          "direction": "J"
+          "direction": "J",
+          "label": "미뤄뒀던 숙제와 정리 먼저 깔끔하게 끝내놓기"
         },
         {
           "id": "q12_b",
-          "answer": "아직 안 해본 재미있는 일들 위주로 자유롭게 즐기기",
           "mbtiAxis": "JP",
-          "direction": "P"
+          "direction": "P",
+          "label": "아직 안 해본 재미있는 일들 위주로 자유롭게 즐기기"
         }
-      ]
+      ],
+      "label": "방학 마지막 주가 되었을 때 남은 시간을 어떻게 쓰고 싶나요?"
     }
   ],
   "results": {
     "ENFJ": {
       "image": "assets/test-summer/images/ENFJ.png",
-      "description": "평화의 상징"
+      "summary": "평화의 상징"
     },
     "ENFP": {
       "image": "assets/test-summer/images/ENFP.png",
-      "description": "호기심 천국 미어캣"
+      "summary": "호기심 천국 미어캣"
     },
     "ENTJ": {
       "image": "assets/test-summer/images/ENTJ.png",
-      "description": "총명한 다람쥐 총무"
+      "summary": "총명한 다람쥐 총무"
     },
     "ENTP": {
       "image": "assets/test-summer/images/ENTP.png",
-      "description": "즉흥 여행 P 퍼피"
+      "summary": "즉흥 여행 P 퍼피"
     },
     "ESFJ": {
       "image": "assets/test-summer/images/ESFJ.png",
-      "description": "포토그래플라밍고"
+      "summary": "포토그래플라밍고"
     },
     "ESFP": {
       "image": "assets/test-summer/images/ESFP.png",
-      "description": "댄싱머신 앵무가"
+      "summary": "댄싱머신 앵무가"
     },
     "ESTJ": {
       "image": "assets/test-summer/images/ESTJ.png",
-      "description": "나를 따르낙타"
+      "summary": "나를 따르낙타"
     },
     "ESTP": {
       "image": "assets/test-summer/images/ESTP.png",
-      "description": "바다의 야생마"
+      "summary": "바다의 야생마"
     },
     "INFJ": {
       "image": "assets/test-summer/images/INFJ.png",
-      "description": "유유자적 문학 해달"
+      "summary": "유유자적 문학 해달"
     },
     "INFP": {
       "image": "assets/test-summer/images/INFP.png",
-      "description": "감성 충만 치즈냥"
+      "summary": "감성 충만 치즈냥"
     },
     "INTJ": {
       "image": "assets/test-summer/images/INTJ.png",
-      "description": "두등동선 짜두지"
+      "summary": "두등동선 짜두지"
     },
     "INTP": {
       "image": "assets/test-summer/images/INTP.png",
-      "description": "분석가오부엉"
+      "summary": "분석가오부엉"
     },
     "ISFJ": {
       "image": "assets/test-summer/images/ISFJ.png",
-      "description": "럭키비키 우파루파"
+      "summary": "럭키비키 우파루파"
     },
     "ISFP": {
       "image": "assets/test-summer/images/ISFP.png",
-      "description": "조개 수집 하수달"
+      "summary": "조개 수집 하수달"
     },
     "ISTJ": {
       "image": "assets/test-summer/images/ISTJ.png",
-      "description": "철저햄 보부상"
+      "summary": "철저햄 보부상"
     },
     "ISTP": {
       "image": "assets/test-summer/images/ISTP.png",
-      "description": "귄차니즘 숙소 조아"
+      "summary": "귄차니즘 숙소 조아"
     }
   }
 }

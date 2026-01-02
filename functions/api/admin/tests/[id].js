@@ -1,9 +1,5 @@
 import {
   JSON_HEADERS,
-  readIndex,
-  writeIndex,
-  buildIndexWithMeta,
-  createMetaFromTest,
   writeTest,
 } from "../utils/store.js";
 
@@ -100,6 +96,9 @@ export async function onRequestPut(context) {
       { error: "R2 binding MBTI_BUCKET is missing." },
       500,
     );
+  const db = context.env.mbti_db;
+  if (!db)
+    return createJsonResponse({ error: "D1 binding mbti_db is missing." }, 500);
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
@@ -119,15 +118,52 @@ export async function onRequestPut(context) {
   if (validationError) return badRequest(validationError);
 
   try {
-    await writeTest(bucket, testId, testPayload);
-    const index = await readIndex(bucket);
-    const existingMeta = Array.isArray(index.tests)
-      ? index.tests.find((entry) => entry?.id === testId)
-      : undefined;
-    const meta = createMetaFromTest(testPayload, existingMeta);
-    const updatedIndex = buildIndexWithMeta(index, meta);
-    await writeIndex(bucket, updatedIndex);
-    return createJsonResponse({ ok: true, test: testPayload, meta });
+    // 1) Store the full quiz body in R2 (slim: questions/results only)
+    const slimBody = {
+      questions: Array.isArray(testPayload.questions) ? testPayload.questions : [],
+      results: testPayload.results && typeof testPayload.results === "object" ? testPayload.results : {},
+    };
+    await writeTest(bucket, testId, slimBody);
+
+    // 2) Store/refresh meta in D1
+    const now = new Date().toISOString().split("T")[0];
+    const createdAt = String(testPayload.createdAt || now);
+    const updatedAt = String(testPayload.updatedAt || now);
+    const tagsJson = JSON.stringify(Array.isArray(testPayload.tags) ? testPayload.tags : []);
+    const descriptionJson = JSON.stringify(testPayload.description ?? null);
+
+    await db
+      .prepare(
+        `
+        INSERT INTO tests (test_id, title, description_json, author, author_img_path, thumbnail_path, source_path, tags_json, created_at, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
+        ON CONFLICT(test_id) DO UPDATE SET
+          title = excluded.title,
+          description_json = excluded.description_json,
+          author = excluded.author,
+          author_img_path = excluded.author_img_path,
+          thumbnail_path = excluded.thumbnail_path,
+          source_path = excluded.source_path,
+          tags_json = excluded.tags_json,
+          created_at = COALESCE(tests.created_at, excluded.created_at),
+          updated_at = excluded.updated_at
+        `,
+      )
+      .bind(
+        testId,
+        String(testPayload.title || ""),
+        descriptionJson,
+        String(testPayload.author || ""),
+        String(testPayload.authorImg || ""),
+        String(testPayload.thumbnail || ""),
+        String(testPayload.path || `${testId}/test.json`),
+        tagsJson,
+        createdAt,
+        updatedAt,
+      )
+      .run();
+
+    return createJsonResponse({ ok: true });
   } catch (err) {
     return createJsonResponse(
       { error: err instanceof Error ? err.message : "Failed to save test." },

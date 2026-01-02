@@ -1,10 +1,6 @@
 import {
   JSON_HEADERS,
   getImagesPrefix,
-  readIndex,
-  writeIndex,
-  buildIndexWithMeta,
-  createMetaFromTest,
   readTest,
   writeTest,
 } from "../../../../utils/store.js";
@@ -77,6 +73,9 @@ export async function onRequestPut(context) {
       { error: "R2 binding MBTI_BUCKET is missing." },
       500,
     );
+  const db = context.env.mbti_db;
+  if (!db)
+    return createJsonResponse({ error: "D1 binding mbti_db is missing." }, 500);
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
@@ -129,13 +128,12 @@ export async function onRequestPut(context) {
 
     await writeTest(bucket, testId, testJson);
 
-    const index = await readIndex(bucket);
-    const existingMeta = Array.isArray(index.tests)
-      ? index.tests.find((entry) => entry?.id === testId)
-      : undefined;
-    const meta = createMetaFromTest(testJson, existingMeta);
-    const updatedIndex = buildIndexWithMeta(index, meta);
-    await writeIndex(bucket, updatedIndex);
+    // Touch updated_at in D1 so listing order reflects recent edits.
+    const now = new Date().toISOString().split("T")[0];
+    await db
+      .prepare("UPDATE tests SET updated_at = ?1 WHERE test_id = ?2")
+      .bind(now, testId)
+      .run();
 
     return createJsonResponse({
       ok: true,

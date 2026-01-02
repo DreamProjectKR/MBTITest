@@ -74,7 +74,9 @@ export async function onRequestGet(context) {
   }
 
   const row = await db
-    .prepare("SELECT source_path FROM tests WHERE test_id = ?1 LIMIT 1")
+    .prepare(
+      "SELECT test_id, title, description_json, author, author_img_path, thumbnail_path, tags_json, source_path, created_at, updated_at FROM tests WHERE test_id = ?1 LIMIT 1",
+    )
     .bind(id)
     .first();
 
@@ -115,8 +117,54 @@ export async function onRequestGet(context) {
     });
   }
 
-  const text = await obj.text();
-  return new Response(text, {
+  let bodyJson = null;
+  try {
+    bodyJson = JSON.parse(await obj.text());
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Test JSON is invalid JSON." }), {
+      status: 500,
+      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
+    });
+  }
+
+  const description = (() => {
+    const raw = row?.description_json;
+    if (!raw) return null;
+    try {
+      return JSON.parse(String(raw));
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  const tags = (() => {
+    const raw = row?.tags_json;
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(String(raw));
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  })();
+
+  const merged = {
+    // meta (D1)
+    id: String(row.test_id),
+    title: row.title ? String(row.title) : "",
+    description,
+    author: row.author ? String(row.author) : "",
+    authorImg: row.author_img_path ? String(row.author_img_path) : "",
+    thumbnail: row.thumbnail_path ? String(row.thumbnail_path) : "",
+    tags,
+    path: row.source_path ? String(row.source_path) : "",
+    createdAt: row.created_at ? String(row.created_at) : "",
+    updatedAt: row.updated_at ? String(row.updated_at) : "",
+    // body (R2)
+    ...(bodyJson && typeof bodyJson === "object" ? bodyJson : {}),
+  };
+
+  return new Response(JSON.stringify(merged), {
     status: 200,
     headers: withCacheHeaders(JSON_HEADERS, { etag: obj.etag, maxAge: 120 }),
   });
