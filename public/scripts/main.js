@@ -76,8 +76,9 @@ function createTestCard(test, variantClass, opts = {}) {
     img.setAttribute("data-asset-src", String(test.thumbnail));
     img.setAttribute(
       "data-asset-resize",
-      `width=${size.width},quality=${size.quality},fit=${size.fit},format=${size.format}`,
+      `width=${size.width},quality=${size.quality},fit=${size.fit},format=${size.format},minWidth=240,maxWidth=720,fallbackWidth=${size.width}`,
     );
+    img.setAttribute("data-asset-auto-width", "true");
     // Responsive images (production only; config.js skips srcset on localhost)
     img.setAttribute(
       "data-asset-srcset",

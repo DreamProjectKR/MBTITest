@@ -124,8 +124,9 @@ document.querySelector(".test1").onclick = function () {
       img.setAttribute("data-asset-src", String(test.thumbnail));
       img.setAttribute(
         "data-asset-resize",
-        `width=${sizeOptions.width},quality=${sizeOptions.quality},fit=${sizeOptions.fit},format=${sizeOptions.format}`,
+        `width=${sizeOptions.width},quality=${sizeOptions.quality},fit=${sizeOptions.fit},format=${sizeOptions.format},minWidth=240,maxWidth=720,fallbackWidth=${sizeOptions.width}`,
       );
+      img.setAttribute("data-asset-auto-width", "true");
       img.setAttribute("data-asset-srcset", "320,480,520,640");
       img.setAttribute("data-asset-sizes", "(max-width: 900px) 72vw, 22vw");
       if (test.updatedAt) {

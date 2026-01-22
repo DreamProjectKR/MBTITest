@@ -6,14 +6,25 @@ export const JSON_HEADERS: Readonly<Record<string, string>> = {
 
 export function withCacheHeaders(
   headers: HeadersInit,
-  opts?: { etag?: string; maxAge?: number },
+  opts?: {
+    etag?: string;
+    maxAge?: number;
+    sMaxAge?: number;
+    staleWhileRevalidate?: number;
+  },
 ): Headers {
-  const { etag, maxAge = 60 } = opts ?? {};
+  const { etag, maxAge = 60, sMaxAge, staleWhileRevalidate } = opts ?? {};
+  const swr =
+    typeof staleWhileRevalidate === "number" && Number.isFinite(staleWhileRevalidate)
+      ? Math.max(0, Math.floor(staleWhileRevalidate))
+      : maxAge * 10;
   const h = new Headers(headers);
-  h.set(
-    "Cache-Control",
-    `public, max-age=${maxAge}, stale-while-revalidate=${maxAge * 10}`,
-  );
+  const parts = [`public`, `max-age=${maxAge}`];
+  if (typeof sMaxAge === "number" && Number.isFinite(sMaxAge)) {
+    parts.push(`s-maxage=${Math.max(0, Math.floor(sMaxAge))}`);
+  }
+  parts.push(`stale-while-revalidate=${swr}`);
+  h.set("Cache-Control", parts.join(", "));
   if (etag) h.set("ETag", etag);
   return h;
 }

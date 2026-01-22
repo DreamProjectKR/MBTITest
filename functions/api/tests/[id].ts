@@ -128,12 +128,33 @@ export async function onRequestGet(
     return `"${r2Etag}|${d1Updated}"`;
   })();
 
+  const cache =
+    (globalThis.caches as unknown as { default?: Cache | undefined } | undefined)?.default ??
+    null;
+  const url = new URL(context.request.url);
+  const cacheKeyUrl = new URL(url.toString());
+  cacheKeyUrl.searchParams.set("__cache", etag);
+  const cacheKey = new Request(cacheKeyUrl.toString(), { method: "GET" });
+
   const ifNoneMatch = context.request.headers.get("if-none-match");
   if (ifNoneMatch && ifNoneMatch === etag) {
     return new Response(null, {
       status: 304,
-      headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 120 }),
+      headers: withCacheHeaders(JSON_HEADERS, {
+        etag,
+        maxAge: 60,
+        sMaxAge: 300,
+        staleWhileRevalidate: 1800,
+      }),
     });
+  }
+
+  if (cache) {
+    const cached = await cache.match(cacheKey);
+    if (cached) {
+      const headers = new Headers(cached.headers);
+      return new Response(cached.body, { status: cached.status, headers });
+    }
   }
 
   let bodyJson: unknown = null;
@@ -167,10 +188,17 @@ export async function onRequestGet(
     ...(bodyJson && typeof bodyJson === "object" ? (bodyJson as Record<string, unknown>) : {}),
   };
 
-  return new Response(JSON.stringify(merged), {
+  const response = new Response(JSON.stringify(merged), {
     status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 120 }),
+    headers: withCacheHeaders(JSON_HEADERS, {
+      etag,
+      maxAge: 60,
+      sMaxAge: 300,
+      staleWhileRevalidate: 1800,
+    }),
   });
+  if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));
+  return response;
 }
 
 

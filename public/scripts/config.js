@@ -230,6 +230,12 @@
         return;
       }
 
+      if (key === "minWidth" || key === "maxWidth" || key === "fallbackWidth") {
+        const n = Number(value);
+        if (Number.isFinite(n) && n > 0) out[key] = n;
+        return;
+      }
+
       if (key === "quality") {
         const n = Number(value);
         out.quality = Number.isFinite(n) && n > 0 ? n : value;
@@ -241,6 +247,26 @@
     });
 
     return out;
+  }
+
+  function computeMeasuredWidthPx(el, options) {
+    const minWidth =
+      options && typeof options.minWidth === "number" ? options.minWidth : 160;
+    const maxWidth =
+      options && typeof options.maxWidth === "number" ? options.maxWidth : 1280;
+
+    if (!el || typeof el.getBoundingClientRect !== "function") return null;
+    const rect = el.getBoundingClientRect();
+    const rendered = rect && typeof rect.width === "number" ? rect.width : 0;
+    if (!Number.isFinite(rendered) || rendered <= 0) return null;
+
+    const dpr =
+      typeof window !== "undefined" && typeof window.devicePixelRatio === "number"
+        ? window.devicePixelRatio
+        : 1;
+    const target = Math.round(rendered * Math.max(1, dpr));
+    const clamped = Math.max(minWidth, Math.min(target, maxWidth));
+    return clamped;
   }
 
   const SUPPORTS_IO =
@@ -370,8 +396,36 @@
         const path = el.getAttribute("data-asset-src");
         const resize = el.getAttribute("data-asset-resize");
         const version = el.getAttribute("data-asset-version");
+        const autoWidth = String(el.getAttribute("data-asset-auto-width") || "").toLowerCase();
         maybeApplySrcset(el);
-        if (path && !el.getAttribute("src")) el.setAttribute("src", toUrl(path, resize, version));
+        if (path && !el.getAttribute("src")) {
+          // Measured width based resizing (opt-in).
+          if (!isLocalhost && autoWidth === "true" && typeof window.assetResizeUrl === "function") {
+            const opts = parseResizeOptions(resize);
+            const measured = computeMeasuredWidthPx(el, opts);
+            if (!measured) {
+              // If layout isn't ready yet, retry once on next frame.
+              const tries = Number(el.getAttribute("data-asset-measure-tries") || "0");
+              if (tries < 2) {
+                el.setAttribute("data-asset-measure-tries", String(tries + 1));
+                requestAnimationFrame(() => applyAssetAttributes(el));
+                return;
+              }
+            }
+            const width =
+              measured ||
+              (typeof opts.fallbackWidth === "number" ? opts.fallbackWidth : undefined) ||
+              (typeof opts.width === "number" ? opts.width : undefined) ||
+              520;
+            const url = appendVersion(
+              window.assetResizeUrl(path, { ...opts, width }),
+              version,
+            );
+            el.setAttribute("src", url);
+            return;
+          }
+          el.setAttribute("src", toUrl(path, resize, version));
+        }
       }
       if (el.hasAttribute && el.hasAttribute("data-asset-href")) {
         const path = el.getAttribute("data-asset-href");
@@ -435,6 +489,36 @@
           setTimeout(run, 50);
         }
       } catch (e) {}
+    };
+
+    // Promise-based image loader (used for intro "gate" preloading).
+    // This actually creates an Image() so callers can await completion.
+    window.loadImageAsset = function loadImageAsset(path, resizeRaw, versionRaw) {
+      return new Promise((resolve) => {
+        try {
+          const p = String(path || "");
+          if (!p) return resolve(false);
+
+          const href = (function () {
+            if (resizeRaw && typeof window.assetResizeUrl === "function") {
+              return appendVersion(
+                window.assetResizeUrl(String(p), parseResizeOptions(String(resizeRaw))),
+                versionRaw,
+              );
+            }
+            return appendVersion(window.assetUrl(String(p)), versionRaw);
+          })();
+          if (!href) return resolve(false);
+
+          const img = new Image();
+          img.decoding = "async";
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = href;
+        } catch (e) {
+          resolve(false);
+        }
+      });
     };
 
     applyAssetAttributes(document);

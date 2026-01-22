@@ -107,6 +107,17 @@
       </div>
     </footer>
   </div>
+
+  <!-- Start preloading overlay (shown only when user clicks Start) -->
+  <div id="preloadOverlay" class="preload-overlay" aria-hidden="true">
+    <div class="preload-skeleton" role="status" aria-live="polite">
+      <div class="skeleton-image"></div>
+      <div class="skeleton-progress" aria-hidden="true">
+        <div class="skeleton-progress-bar" data-preload-progress></div>
+      </div>
+      <p class="skeleton-text" data-preload-text>테스트 준비 중...</p>
+    </div>
+  </div>
 </body>
 
 <script type="module" src="./scripts/testintro.js" crossorigin="anonymous"></script>

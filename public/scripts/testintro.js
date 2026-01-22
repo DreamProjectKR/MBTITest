@@ -21,10 +21,28 @@ function hydrateAssetElement(el) {
 }
 
 const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
+let lastLoadedTest = null;
+const preloadState = { started: false, criticalPromise: null };
+
+const QUESTION_RESIZE_RAW = "width=720,quality=82,fit=contain,format=auto";
+const RESULT_RESIZE_RAW = "width=480,quality=82,fit=cover,format=auto";
 
 function getTestCacheKey(testId) {
   if (!testId) return "";
   return `${TEST_JSON_CACHE_PREFIX}${testId}`;
+}
+
+function readCachedTestJson(testId) {
+  if (!testId || typeof window === "undefined") return null;
+  try {
+    const storage = window.sessionStorage;
+    if (!storage) return null;
+    const raw = storage.getItem(getTestCacheKey(testId));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (err) {
+    return null;
+  }
 }
 
 function persistTestJson(testId, data) {
@@ -39,7 +57,210 @@ function persistTestJson(testId, data) {
   }
 }
 
-// NOTE: preloading/prefetching is intentionally removed; `config.js` is the single loader.
+function setOverlayVisible(visible) {
+  const overlay = document.getElementById("preloadOverlay");
+  if (!overlay) return;
+  if (visible) {
+    overlay.classList.add("active");
+    overlay.setAttribute("aria-hidden", "false");
+  } else {
+    overlay.classList.remove("active");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+}
+
+function updateOverlayProgress(done, total) {
+  const bar = document.querySelector("[data-preload-progress]");
+  const text = document.querySelector("[data-preload-text]");
+  const pct =
+    total > 0 ? Math.max(0, Math.min(100, Math.round((done / total) * 100))) : 0;
+  if (bar && bar.style) bar.style.width = `${pct}%`;
+  if (text) text.textContent = `테스트 준비 중... (${pct}%)`;
+}
+
+function promiseWithTimeout(promise, timeoutMs) {
+  const ms = Number(timeoutMs);
+  if (!Number.isFinite(ms) || ms <= 0) return promise;
+  return Promise.race([
+    promise,
+    new Promise((resolve) => setTimeout(() => resolve({ timedOut: true }), ms)),
+  ]);
+}
+
+function normalizeImagePath(p) {
+  const s = String(p || "").trim();
+  return s ? s : "";
+}
+
+function getQuestionImageCandidates(testId, question) {
+  const raw =
+    question?.questionImage ||
+    question?.image ||
+    question?.questionImg ||
+    question?.question_image;
+  if (raw) return [normalizeImagePath(raw)].filter(Boolean);
+
+  const qid = String(question?.id || "").trim();
+  if (!testId || !qid) return [];
+  const base = `assets/${testId}/images/`;
+  const upper = qid.toUpperCase();
+  const qPrefix = qid.replace(/^q/i, "Q");
+  const list = [
+    `${base}${qid}.png`,
+    `${base}${qid}.jpg`,
+    `${base}${qid}.jpeg`,
+    `${base}${upper}.png`,
+    `${base}${upper}.jpg`,
+    `${base}${upper}.jpeg`,
+    `${base}${qPrefix}.png`,
+    `${base}${qPrefix}.jpg`,
+    `${base}${qPrefix}.jpeg`,
+  ];
+  return list.map(normalizeImagePath).filter(Boolean);
+}
+
+function extractImagePaths(test) {
+  const testId = test?.id ? String(test.id) : "";
+  const questions = Array.isArray(test?.questions) ? test.questions : [];
+  const resultsObj = test?.results && typeof test.results === "object" ? test.results : null;
+
+  const questionPaths = [];
+  for (const q of questions) {
+    const candidates = getQuestionImageCandidates(testId, q);
+    if (candidates.length) questionPaths.push(candidates[0]);
+  }
+
+  const resultPaths = [];
+  if (resultsObj) {
+    Object.values(resultsObj).forEach((r) => {
+      const img = r && typeof r === "object" ? r.image : null;
+      const p = normalizeImagePath(img);
+      if (p) resultPaths.push(p);
+    });
+  }
+
+  return { questionPaths, resultPaths };
+}
+
+async function preloadImages(paths, resizeRaw, version, opts) {
+  const list = Array.isArray(paths) ? paths.filter(Boolean) : [];
+  const total = list.length;
+  if (!total) return { loaded: 0, failed: 0, total: 0 };
+
+  const concurrency =
+    opts && Number.isFinite(Number(opts.concurrency)) ? Number(opts.concurrency) : 4;
+  const onProgress = opts && typeof opts.onProgress === "function" ? opts.onProgress : null;
+
+  let loaded = 0;
+  let failed = 0;
+  let index = 0;
+
+  const worker = async () => {
+    while (index < list.length) {
+      const i = index;
+      index += 1;
+      const p = list[i];
+      if (!p) continue;
+
+      let ok = false;
+      if (typeof window.loadImageAsset === "function") {
+        // eslint-disable-next-line no-await-in-loop
+        ok = await window.loadImageAsset(p, resizeRaw, version);
+      } else if (typeof window.prefetchImageAsset === "function") {
+        window.prefetchImageAsset(p, resizeRaw, version);
+        ok = true;
+      }
+
+      if (ok) loaded += 1;
+      else failed += 1;
+      if (onProgress) onProgress({ loaded, failed, total });
+    }
+  };
+
+  const workers = [];
+  const n = Math.max(1, Math.min(concurrency, total));
+  for (let i = 0; i < n; i += 1) workers.push(worker());
+  await Promise.all(workers);
+  return { loaded, failed, total };
+}
+
+function startBackgroundPrefetch(test) {
+  if (!test || preloadState.started) return;
+  preloadState.started = true;
+
+  const version = test.updatedAt ? String(test.updatedAt) : "";
+  const { questionPaths, resultPaths } = extractImagePaths(test);
+
+  const criticalQuestions = questionPaths.slice(0, 3);
+  const rest = questionPaths.slice(3);
+
+  const runCritical = () =>
+    Promise.all([
+      preloadImages(criticalQuestions, QUESTION_RESIZE_RAW, version, { concurrency: 2 }),
+      preloadImages(resultPaths, RESULT_RESIZE_RAW, version, { concurrency: 2 }),
+    ]);
+  const runRest = () =>
+    preloadImages(rest, QUESTION_RESIZE_RAW, version, { concurrency: 2 });
+
+  // Phase 1 quickly; Phase 2 in idle time.
+  preloadState.criticalPromise = (function () {
+    if (typeof requestIdleCallback === "function") {
+      return new Promise((resolve) => {
+        requestIdleCallback(
+          () => {
+            runCritical().then(resolve);
+          },
+          { timeout: 1200 },
+        );
+      });
+    }
+    return runCritical();
+  })().then(() => {
+    try {
+      if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(() => runRest(), { timeout: 2000 });
+      } else {
+        setTimeout(() => runRest(), 50);
+      }
+    } catch (e) {}
+    return null;
+  });
+}
+
+async function ensureCriticalPreloaded(test, timeoutMs) {
+  if (!test) return;
+  if (!preloadState.started) startBackgroundPrefetch(test);
+
+  const version = test.updatedAt ? String(test.updatedAt) : "";
+  const { questionPaths, resultPaths } = extractImagePaths(test);
+  const criticalQuestions = questionPaths.slice(0, 3);
+  const total = criticalQuestions.length + resultPaths.length;
+
+  let qDone = 0;
+  let rDone = 0;
+  updateOverlayProgress(0, total);
+
+  const p = Promise.all([
+    preloadImages(criticalQuestions, QUESTION_RESIZE_RAW, version, {
+      concurrency: 4,
+      onProgress: ({ loaded, failed }) => {
+        qDone = loaded + failed;
+        updateOverlayProgress(qDone + rDone, total);
+      },
+    }),
+    preloadImages(resultPaths, RESULT_RESIZE_RAW, version, {
+      concurrency: 4,
+      onProgress: ({ loaded, failed }) => {
+        rDone = loaded + failed;
+        updateOverlayProgress(qDone + rDone, total);
+      },
+    }),
+  ]);
+
+  await promiseWithTimeout(p, timeoutMs);
+}
+
+// NOTE: preloading/prefetching is intentionally removed elsewhere; this file uses config.js helpers.
 
 window.addEventListener(
   "scroll",
@@ -125,6 +346,8 @@ async function loadIntroData() {
     }
 
     persistTestJson(testId, data);
+    lastLoadedTest = data;
+    startBackgroundPrefetch(data);
 
     setupShareButton(data);
     renderIntro(data);
@@ -253,7 +476,16 @@ function setupStartButton(testId) {
   const startBtn = document.querySelector(".TestStart button");
   if (!startBtn) return;
   const targetUrl = `./testquiz.html?testId=${encodeURIComponent(testId)}`;
-  startBtn.addEventListener("click", () => {
-    window.location.href = targetUrl;
+  startBtn.addEventListener("click", async () => {
+    setOverlayVisible(true);
+    try {
+      const test =
+        lastLoadedTest || readCachedTestJson(testId) || { id: testId, questions: [], results: {} };
+      await ensureCriticalPreloaded(test, 2500);
+    } catch (e) {
+      // Ignore preload errors; proceed.
+    } finally {
+      window.location.href = targetUrl;
+    }
   });
 }

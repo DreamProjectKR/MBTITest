@@ -70,18 +70,46 @@ export async function onRequestGet(context: PagesContext<MbtiEnv>): Promise<Resp
     return `"${tests.length}-${maxUpdated}"`;
   })();
 
+  const cache =
+    (globalThis.caches as unknown as { default?: Cache | undefined } | undefined)?.default ??
+    null;
+  const url = new URL(context.request.url);
+  const cacheKeyUrl = new URL(url.toString());
+  cacheKeyUrl.searchParams.set("__cache", etag);
+  const cacheKey = new Request(cacheKeyUrl.toString(), { method: "GET" });
+
   const ifNoneMatch = context.request.headers.get("if-none-match");
   if (ifNoneMatch && ifNoneMatch === etag) {
     return new Response(null, {
       status: 304,
-      headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 60 }),
+      headers: withCacheHeaders(JSON_HEADERS, {
+        etag,
+        maxAge: 30,
+        sMaxAge: 60,
+        staleWhileRevalidate: 300,
+      }),
     });
   }
 
-  return new Response(JSON.stringify({ tests }), {
+  if (cache) {
+    const cached = await cache.match(cacheKey);
+    if (cached) {
+      const headers = new Headers(cached.headers);
+      return new Response(cached.body, { status: cached.status, headers });
+    }
+  }
+
+  const response = new Response(JSON.stringify({ tests }), {
     status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, { etag, maxAge: 60 }),
+    headers: withCacheHeaders(JSON_HEADERS, {
+      etag,
+      maxAge: 30,
+      sMaxAge: 60,
+      staleWhileRevalidate: 300,
+    }),
   });
+  if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));
+  return response;
 }
 
 
