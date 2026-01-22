@@ -269,6 +269,11 @@
     return clamped;
   }
 
+  function isTestImagePath(path) {
+    const p = String(path || "");
+    return /^assets\/test-/i.test(p) || p.includes("/test-") || p.includes("assets/test-");
+  }
+
   const SUPPORTS_IO =
     typeof IntersectionObserver !== "undefined" &&
     typeof IntersectionObserverEntry !== "undefined";
@@ -365,6 +370,8 @@
 
       const path = el.getAttribute("data-asset-src");
       if (!path) return;
+      // If Image Resizing is failing for test images, stop generating srcset with `/cdn-cgi/image`.
+      if (window.__MBTI_DISABLE_TEST_IMAGE_RESIZE && isTestImagePath(path)) return;
 
       const widths = parseSrcsetWidths(el.getAttribute("data-asset-srcset"));
       if (!widths.length) return;
@@ -399,6 +406,12 @@
         const autoWidth = String(el.getAttribute("data-asset-auto-width") || "").toLowerCase();
         maybeApplySrcset(el);
         if (path && !el.getAttribute("src")) {
+          // If `/cdn-cgi/image` is unstable for test images, fall back to raw assets for the session.
+          if (window.__MBTI_DISABLE_TEST_IMAGE_RESIZE && isTestImagePath(path)) {
+            el.setAttribute("src", appendVersion(window.assetUrl(path), version));
+            return;
+          }
+
           // Measured width based resizing (opt-in).
           if (!isLocalhost && autoWidth === "true" && typeof window.assetResizeUrl === "function") {
             const opts = parseResizeOptions(resize);
@@ -425,6 +438,32 @@
             return;
           }
           el.setAttribute("src", toUrl(path, resize, version));
+
+          // Attach one-shot fallback: if image resizing fails, retry raw `/assets/*`
+          // and disable resizing for test images for the rest of this session.
+          try {
+            const isImg =
+              el.tagName && String(el.tagName).toLowerCase() === "img" && typeof el.addEventListener === "function";
+            const shouldFallback = Boolean(resize) && !isLocalhost && isImg && isTestImagePath(path);
+            const already = el.getAttribute("data-asset-resize-fallback") === "1";
+            if (shouldFallback && !already) {
+              el.setAttribute("data-asset-resize-fallback", "1");
+              el.addEventListener(
+                "error",
+                () => {
+                  try {
+                    window.__MBTI_DISABLE_TEST_IMAGE_RESIZE = true;
+                    el.removeAttribute("src");
+                    el.removeAttribute("srcset");
+                    el.removeAttribute("sizes");
+                    el.removeAttribute("data-asset-resize");
+                    el.setAttribute("src", appendVersion(window.assetUrl(path), version));
+                  } catch (e) {}
+                },
+                { once: true },
+              );
+            }
+          } catch (e) {}
         }
       }
       if (el.hasAttribute && el.hasAttribute("data-asset-href")) {
