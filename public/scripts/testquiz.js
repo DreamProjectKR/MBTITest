@@ -219,6 +219,8 @@ function setImageWithFallback(imgEl, paths, alt) {
   }
 
   let i = 0;
+  let lastPath = "";
+  let triedNoResizeForLastPath = false;
   const tryNext = () => {
     while (i < list.length && !list[i]) i += 1;
     if (i >= list.length) {
@@ -232,10 +234,27 @@ function setImageWithFallback(imgEl, paths, alt) {
     imgEl.removeAttribute("src");
     imgEl.setAttribute("data-asset-src", next);
     if (version) imgEl.setAttribute("data-asset-version", version);
+    // Reset per-candidate fallback state.
+    lastPath = String(next || "");
+    triedNoResizeForLastPath = false;
+    // Prefer resized URL first.
+    imgEl.setAttribute("data-asset-resize", QUESTION_IMAGE_RESIZE);
     hydrateAssetElement(imgEl);
   };
 
   imgEl.onerror = () => {
+    // If `/cdn-cgi/image` fails (503 etc), fall back to raw `/assets/*` once for the same path.
+    if (!triedNoResizeForLastPath && lastPath) {
+      triedNoResizeForLastPath = true;
+      try {
+        imgEl.removeAttribute("src");
+        imgEl.removeAttribute("data-asset-resize");
+        imgEl.setAttribute("data-asset-src", lastPath);
+        if (version) imgEl.setAttribute("data-asset-version", version);
+        hydrateAssetElement(imgEl);
+        return;
+      } catch (e) {}
+    }
     tryNext();
   };
 
@@ -318,20 +337,8 @@ function renderQuestion() {
     setImageWithFallback(dom.image, candidates, alt);
   }
 
-  // Prefetch the next question image during idle time to reduce "next" latency.
-  try {
-    const next =
-      Array.isArray(state.test?.questions) &&
-      state.test.questions[state.currentIndex + 1]
-        ? state.test.questions[state.currentIndex + 1]
-        : null;
-    if (next && typeof window.prefetchImageAsset === "function") {
-      const nextCandidates = getQuestionImageUrlCandidates(next);
-      const nextPath = Array.isArray(nextCandidates) ? nextCandidates[0] : "";
-      const version = state.test?.updatedAt ? String(state.test.updatedAt) : "";
-      if (nextPath) window.prefetchImageAsset(nextPath, QUESTION_IMAGE_RESIZE, version);
-    }
-  } catch (e) {}
+  // NOTE: We intentionally avoid aggressive prefetching here.
+  // Some environments can return 503 for `/cdn-cgi/image` under bursty loads.
 
   if (!dom.options) return;
   dom.options.innerHTML = "";

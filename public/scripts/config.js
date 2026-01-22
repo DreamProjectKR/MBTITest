@@ -459,35 +459,20 @@
     window.prefetchImageAsset = function prefetchImageAsset(path, resizeRaw, versionRaw) {
       try {
         if (!path) return;
-        const href = (function () {
-          if (resizeRaw && typeof window.assetResizeUrl === "function") {
-            return appendVersion(
-              window.assetResizeUrl(String(path), parseResizeOptions(String(resizeRaw))),
-              versionRaw,
-            );
-          }
-          return appendVersion(window.assetUrl(String(path)), versionRaw);
-        })();
+        // Avoid hitting `/cdn-cgi/image` repeatedly for prefetch. Warm the origin asset cache instead.
+        const href = appendVersion(window.assetUrl(String(path)), versionRaw);
         if (!href) return;
 
-        const head = document.head || document.getElementsByTagName("head")[0];
-        if (!head) return;
-        if (document.querySelector(`link[rel="prefetch"][as="image"][href="${href}"]`))
-          return;
-
         const run = () => {
-          const link = document.createElement("link");
-          link.rel = "prefetch";
-          link.as = "image";
-          link.href = href;
-          head.appendChild(link);
+          const img = new Image();
+          img.decoding = "async";
+          img.onload = () => {};
+          img.onerror = () => {};
+          img.src = href;
         };
 
-        if (typeof requestIdleCallback === "function") {
-          requestIdleCallback(run, { timeout: 1200 });
-        } else {
-          setTimeout(run, 50);
-        }
+        if (typeof requestIdleCallback === "function") requestIdleCallback(run, { timeout: 1200 });
+        else setTimeout(run, 50);
       } catch (e) {}
     };
 

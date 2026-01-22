@@ -24,8 +24,10 @@ const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
 let lastLoadedTest = null;
 const preloadState = { started: false, criticalPromise: null };
 
-const QUESTION_RESIZE_RAW = "width=720,quality=82,fit=contain,format=auto";
-const RESULT_RESIZE_RAW = "width=480,quality=82,fit=cover,format=auto";
+// Preload raw assets (no `/cdn-cgi/image`) so we can reuse them as fallback
+// if Image Resizing returns intermittent 503s.
+const QUESTION_RESIZE_RAW = "";
+const RESULT_RESIZE_RAW = "";
 
 function getTestCacheKey(testId) {
   if (!testId) return "";
