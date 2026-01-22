@@ -144,8 +144,8 @@ function setupForms() {
           ],
         };
 
-        activeTest.questions.push(question);
-        renderQuestions(activeTest.questions);
+    activeTest.questions.push(question);
+    renderQuestions(activeTest.questions);
         // Reset but keep axis/direction for faster authoring.
         const keepAxis = String(formEl.elements["axis"]?.value || "EI");
         const keepDir = String(
@@ -674,7 +674,7 @@ function syncImagesToActiveTestFromR2(items = []) {
     const v = normalizeAssetsPath(author.path);
     active.authorImg = v;
     if (form?.elements?.["authorImg"]) form.elements["authorImg"].value = v;
-  }
+}
 
   // results: MBTI_CODE.(ext)
   active.results = active.results ?? {};

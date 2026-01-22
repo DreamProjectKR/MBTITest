@@ -16,6 +16,9 @@ const state = {
   answers: [],
 };
 
+// Quiz question images often include text; avoid cropping.
+const QUESTION_IMAGE_RESIZE = "width=720,quality=82,fit=contain,format=auto";
+
 /**
  * Cached DOM references for render/update.
  * @type {{ progress: HTMLElement|null, image: HTMLImageElement|null, options: HTMLElement|null, pageShell: HTMLElement|null }}
@@ -203,6 +206,17 @@ function setImageWithFallback(imgEl, paths, alt) {
   if (!imgEl) return;
   const list = Array.isArray(paths) ? paths : [];
   imgEl.alt = alt || "";
+  const version = state.test?.updatedAt ? String(state.test.updatedAt) : "";
+  // Ensure we always request a resized image in production.
+  if (!imgEl.getAttribute("data-asset-resize")) {
+    imgEl.setAttribute("data-asset-resize", QUESTION_IMAGE_RESIZE);
+  }
+  if (!imgEl.getAttribute("data-asset-srcset")) {
+    imgEl.setAttribute("data-asset-srcset", "360,480,720");
+  }
+  if (!imgEl.getAttribute("data-asset-sizes")) {
+    imgEl.setAttribute("data-asset-sizes", "(max-width: 476px) 70vw, 350px");
+  }
 
   let i = 0;
   const tryNext = () => {
@@ -217,6 +231,7 @@ function setImageWithFallback(imgEl, paths, alt) {
     i += 1;
     imgEl.removeAttribute("src");
     imgEl.setAttribute("data-asset-src", next);
+    if (version) imgEl.setAttribute("data-asset-version", version);
     hydrateAssetElement(imgEl);
   };
 
@@ -302,6 +317,21 @@ function renderQuestion() {
     const candidates = getQuestionImageUrlCandidates(question);
     setImageWithFallback(dom.image, candidates, alt);
   }
+
+  // Prefetch the next question image during idle time to reduce "next" latency.
+  try {
+    const next =
+      Array.isArray(state.test?.questions) &&
+      state.test.questions[state.currentIndex + 1]
+        ? state.test.questions[state.currentIndex + 1]
+        : null;
+    if (next && typeof window.prefetchImageAsset === "function") {
+      const nextCandidates = getQuestionImageUrlCandidates(next);
+      const nextPath = Array.isArray(nextCandidates) ? nextCandidates[0] : "";
+      const version = state.test?.updatedAt ? String(state.test.updatedAt) : "";
+      if (nextPath) window.prefetchImageAsset(nextPath, QUESTION_IMAGE_RESIZE, version);
+    }
+  } catch (e) {}
 
   if (!dom.options) return;
   dom.options.innerHTML = "";

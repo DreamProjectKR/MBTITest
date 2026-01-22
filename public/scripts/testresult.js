@@ -112,6 +112,7 @@ function renderResultPage(data, mbti) {
 
   const resultData = data.results?.[mbti];
   const resultImage = resultData?.image ? String(resultData.image) : "";
+  const version = data.updatedAt ? String(data.updatedAt) : "";
 
   if (dom.thumbnailEl) {
     if (resultImage) {
@@ -119,8 +120,11 @@ function renderResultPage(data, mbti) {
       dom.thumbnailEl.setAttribute("data-asset-src", resultImage);
       dom.thumbnailEl.setAttribute(
         "data-asset-resize",
-        "width=780,quality=90,fit=cover,format=auto",
+        "width=480,quality=82,fit=cover,format=auto",
       );
+      dom.thumbnailEl.setAttribute("data-asset-srcset", "360,480,720");
+      dom.thumbnailEl.setAttribute("data-asset-sizes", "(max-width: 900px) 92vw, 350px");
+      if (version) dom.thumbnailEl.setAttribute("data-asset-version", version);
       hydrateAssetElement(dom.thumbnailEl);
     }
     dom.thumbnailEl.alt = mbti ? `${mbti} 결과` : "결과 이미지";

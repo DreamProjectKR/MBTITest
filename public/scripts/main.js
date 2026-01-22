@@ -16,16 +16,16 @@ const MainTop = document.getElementById("MainTop");
  * @returns {string}
  */
 function assetUrl(path) {
-  if (!path) return "";
-  if (/^https?:\/\//i.test(path)) return path;
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
   if (typeof window !== "undefined" && typeof window.assetUrl === "function") {
     return window.assetUrl(path);
   }
   const base = String(
     typeof window !== "undefined" && window.ASSETS_BASE ? window.ASSETS_BASE : "/assets",
   ).replace(/\/+$/, "");
-  let clean = String(path).replace(/^\.?\/+/, "");
-  clean = clean.replace(/^assets\/+/i, "");
+    let clean = String(path).replace(/^\.?\/+/, "");
+    clean = clean.replace(/^assets\/+/i, "");
   return `${base}/${clean}`.replace(/\/{2,}/g, "/");
 }
 
@@ -69,7 +69,7 @@ function createTestCard(test, variantClass, opts = {}) {
   const img = document.createElement("img");
   const size =
     variantClass === "newtest"
-      ? { width: 780, quality: 88, fit: "cover", format: "auto" }
+      ? { width: 640, quality: 82, fit: "cover", format: "auto" }
       : { width: 520, quality: 78, fit: "cover", format: "auto" };
   // Single place for asset URL building: `config.js` hydrates `data-asset-*` into real URLs.
   if (test.thumbnail) {
@@ -78,6 +78,16 @@ function createTestCard(test, variantClass, opts = {}) {
       "data-asset-resize",
       `width=${size.width},quality=${size.quality},fit=${size.fit},format=${size.format}`,
     );
+    // Responsive images (production only; config.js skips srcset on localhost)
+    img.setAttribute(
+      "data-asset-srcset",
+      variantClass === "newtest" ? "320,480,640" : "320,480,520",
+    );
+    // Desktop: cards are ~22% of the 1230px container. Mobile: horizontal cards are ~72vw.
+    img.setAttribute("data-asset-sizes", "(max-width: 900px) 72vw, 22vw");
+    if (test.updatedAt) {
+      img.setAttribute("data-asset-version", String(test.updatedAt));
+    }
   }
   img.alt = test.title || "테스트 이미지";
   img.decoding = "async";

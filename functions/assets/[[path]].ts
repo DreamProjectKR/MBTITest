@@ -30,11 +30,24 @@ function guessContentType(key: string): string {
   return "application/octet-stream";
 }
 
-function cacheControlForKey(key: string): string {
+function cacheControlForKey(key: string, isVersioned: boolean): string {
   const lower = key.toLowerCase();
   if (lower.endsWith(".json"))
     return "public, max-age=60, s-maxage=60, must-revalidate, stale-while-revalidate=600, stale-if-error=600";
-  return "public, max-age=31536000, s-maxage=86400, immutable, stale-while-revalidate=86400, stale-if-error=86400";
+  if (isVersioned) {
+    // Cache-busted URLs (e.g. `?v=updatedAt`) are safe to cache aggressively.
+    return "public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400";
+  }
+  const isUiImage =
+    lower.startsWith("assets/images/") ||
+    lower.startsWith("images/") ||
+    lower.startsWith("assets/data/images/");
+  if (isUiImage) {
+    // Static UI assets (rarely overwritten). Cache aggressively.
+    return "public, max-age=31536000, s-maxage=31536000, immutable, stale-while-revalidate=86400, stale-if-error=86400";
+  }
+  // Test images may be overwritten during authoring (same key). Keep cache shorter.
+  return "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400";
 }
 
 function toggleFirstCharCase(s: string): string {
@@ -75,6 +88,7 @@ function addCaseFallbackCandidates(keys: string[], tail: string): void {
 async function tryFetchRemote(
   candidates: string[],
   publicBase: string,
+  isVersioned: boolean,
 ): Promise<Response | null> {
   const base = publicBase.replace(/\/+$/, "");
   if (!base) return null;
@@ -85,7 +99,7 @@ async function tryFetchRemote(
     const resp = await fetch(remoteUrl);
     if (resp.ok) {
       const headers = new Headers(resp.headers);
-      headers.set("Cache-Control", cacheControlForKey(candidate));
+      headers.set("Cache-Control", cacheControlForKey(candidate, isVersioned));
       headers.set("X-MBTI-Assets-Proxy", "1");
       headers.set("X-MBTI-R2-Key", candidate);
       headers.set("X-MBTI-Edge-Cache", "MISS");
@@ -95,11 +109,19 @@ async function tryFetchRemote(
   return null;
 }
 
-function buildObjectResponse(obj: R2Object, key: string, hit: "HIT" | "MISS"): Response {
+function buildObjectResponse(
+  obj: R2Object,
+  key: string,
+  hit: "HIT" | "MISS",
+  isVersioned: boolean,
+): Response {
   const ifNoneMatch = obj.etag ? obj.etag : "";
   const headers = new Headers();
   if (ifNoneMatch) headers.set("ETag", ifNoneMatch);
-  headers.set("Cache-Control", obj.httpMetadata?.cacheControl || cacheControlForKey(key));
+  headers.set(
+    "Cache-Control",
+    obj.httpMetadata?.cacheControl || cacheControlForKey(key, isVersioned),
+  );
   headers.set("Content-Type", obj.httpMetadata?.contentType || guessContentType(key));
   headers.set("X-MBTI-Assets-Proxy", "1");
   headers.set("X-MBTI-R2-Key", key);
@@ -115,6 +137,7 @@ export async function onRequestGet(
 
   const cache = caches?.default;
   const url = new URL(context.request.url);
+  const isVersioned = url.searchParams.has("v");
   const cacheKey = new Request(url.toString(), { method: "GET" });
 
   const requestCacheControl = (context.request.headers.get("cache-control") || "").toLowerCase();
@@ -157,7 +180,7 @@ export async function onRequestGet(
     const isLocalhost = hostname === "127.0.0.1" || hostname === "localhost";
     const publicBase = context.env.R2_PUBLIC_BASE_URL ? String(context.env.R2_PUBLIC_BASE_URL) : "";
     if (isLocalhost && publicBase) {
-      const remote = await tryFetchRemote(candidateKeys, publicBase);
+      const remote = await tryFetchRemote(candidateKeys, publicBase, isVersioned);
       if (remote) return remote;
     }
     return new Response("Not Found", { status: 404, headers: { "Cache-Control": "no-store" } });
@@ -167,11 +190,11 @@ export async function onRequestGet(
   if (ifNoneMatch && obj.etag && ifNoneMatch === obj.etag) {
     return new Response(null, {
       status: 304,
-      headers: { ETag: obj.etag, "Cache-Control": cacheControlForKey(key) },
+      headers: { ETag: obj.etag, "Cache-Control": cacheControlForKey(key, isVersioned) },
     });
   }
 
-  const response = buildObjectResponse(obj, key, "MISS");
+  const response = buildObjectResponse(obj, key, "MISS", isVersioned);
   const respCacheControl = (response.headers.get("cache-control") || "").toLowerCase();
   const shouldCache =
     !bypassCache &&

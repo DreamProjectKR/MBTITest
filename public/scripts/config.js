@@ -35,6 +35,20 @@
     return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
   };
 
+  function appendVersion(url, versionRaw) {
+    const v = String(versionRaw || "").trim();
+    if (!v) return url;
+    try {
+      const u = new URL(url, window.location.origin);
+      if (!u.searchParams.has("v")) u.searchParams.set("v", v);
+      return u.toString();
+    } catch (e) {
+      // For relative URLs like "/assets/..." without origin support.
+      const sep = url.includes("?") ? "&" : "?";
+      return `${url}${sep}v=${encodeURIComponent(v)}`;
+    }
+  }
+
   window.assetResizeUrl = function assetResizeUrl(path, options = {}) {
     const base = window.assetUrl(path);
     if (!base) return "";
@@ -155,23 +169,23 @@
     const root = document.documentElement.style;
     root.setProperty("--ASSETS_BASE", ASSETS_BASE);
     const resizedHeader = window.assetResizeUrl("assets/images/HeaderBackgroundImg.png", {
-      width: 1600,
-      quality: 80,
+      width: 1440,
+      quality: 72,
       fit: "cover",
       format: "auto",
     });
     const resizedHeaderNon = window.assetResizeUrl(
       "assets/images/HeaderBackgroundImgNon.png",
       {
-        width: 1600,
-        quality: 80,
+        width: 1440,
+        quality: 72,
         fit: "cover",
         format: "auto",
       },
     );
     const resizedFooter = window.assetResizeUrl("assets/images/FooterBackgroundImg.png", {
-      width: 1600,
-      quality: 80,
+      width: 1440,
+      quality: 72,
       fit: "cover",
       format: "auto",
     });
@@ -229,36 +243,147 @@
     return out;
   }
 
+  const SUPPORTS_IO =
+    typeof IntersectionObserver !== "undefined" &&
+    typeof IntersectionObserverEntry !== "undefined";
+  const OBSERVED = typeof WeakSet !== "undefined" ? new WeakSet() : null;
+  const LAZY_OBSERVER = (() => {
+    if (!SUPPORTS_IO) return null;
+    try {
+      return new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            try {
+              LAZY_OBSERVER && LAZY_OBSERVER.unobserve(el);
+            } catch (e) {}
+            // Re-run hydration now that the element is near the viewport.
+            applyAssetAttributes(el);
+          });
+        },
+        { rootMargin: "250px 0px", threshold: 0.01 },
+      );
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  function isLazyAssetElement(el) {
+    if (!el || !el.getAttribute) return false;
+    const explicit = String(el.getAttribute("data-asset-lazy") || "").toLowerCase();
+    if (explicit === "true") return true;
+    const loading = String(el.getAttribute("loading") || "").toLowerCase();
+    return loading === "lazy";
+  }
+
+  function nearViewport(el) {
+    if (!el || typeof el.getBoundingClientRect !== "function") return true;
+    const rect = el.getBoundingClientRect();
+    const h = window.innerHeight || document.documentElement.clientHeight || 0;
+    return rect.top < h + 250 && rect.bottom > -250;
+  }
+
+  function observeLazy(el) {
+    if (!LAZY_OBSERVER || !el) return false;
+    if (OBSERVED && OBSERVED.has(el)) return true;
+    try {
+      LAZY_OBSERVER.observe(el);
+      OBSERVED && OBSERVED.add(el);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function applyAssetAttributes(root) {
     if (typeof document === "undefined") return;
     const scope = root && root.querySelectorAll ? root : document;
-    const toUrl = (v, resizeRaw) => {
+    const isLocalhost = (() => {
+      const host =
+        typeof window !== "undefined" && window.location ? window.location.hostname : "";
+      return host === "localhost" || host === "127.0.0.1";
+    })();
+
+    const toUrl = (v, resizeRaw, versionRaw) => {
       if (!v) return "";
+      let url = "";
       if (resizeRaw && typeof window.assetResizeUrl === "function") {
-        return window.assetResizeUrl(v, parseResizeOptions(resizeRaw));
+        url = window.assetResizeUrl(v, parseResizeOptions(resizeRaw));
+      } else {
+        url = window.assetUrl(v);
       }
-      return window.assetUrl(v);
+      return appendVersion(url, versionRaw);
     };
 
-    // root 자신이 타겟 엘리먼트일 수도 있어 별도 처리
+    const parseSrcsetWidths = (raw) => {
+      const list = String(raw || "")
+        .split(",")
+        .map((x) => String(x || "").trim())
+        .filter(Boolean);
+      const widths = [];
+      for (const item of list) {
+        const m = item.match(/^(\d+)(w)?$/i);
+        if (!m) continue;
+        const n = Number(m[1]);
+        if (Number.isFinite(n) && n > 0) widths.push(n);
+      }
+      return widths;
+    };
+
+    const maybeApplySrcset = (el) => {
+      if (!el || !el.getAttribute || !el.setAttribute) return;
+      if (isLocalhost) return; // avoid building `/cdn-cgi/image` srcset locally
+      if (!el.hasAttribute("data-asset-srcset")) return;
+      if (el.getAttribute("srcset")) return;
+
+      const path = el.getAttribute("data-asset-src");
+      if (!path) return;
+
+      const widths = parseSrcsetWidths(el.getAttribute("data-asset-srcset"));
+      if (!widths.length) return;
+
+      const resizeRaw = el.getAttribute("data-asset-resize") || "";
+      const baseOptions = parseResizeOptions(resizeRaw);
+      const version = el.getAttribute("data-asset-version");
+
+      const srcset = widths
+        .map((w) => {
+          const url = appendVersion(
+            window.assetResizeUrl(path, { ...baseOptions, width: w }),
+            version,
+          );
+          return `${url} ${w}w`;
+        })
+        .join(", ");
+
+      el.setAttribute("srcset", srcset);
+      const sizes = el.getAttribute("data-asset-sizes");
+      if (sizes && !el.getAttribute("sizes")) el.setAttribute("sizes", sizes);
+    };
+
     const maybeApply = (el) => {
       if (!el || el.nodeType !== 1) return;
+      if (isLazyAssetElement(el) && !nearViewport(el) && observeLazy(el)) return;
+
       if (el.hasAttribute && el.hasAttribute("data-asset-src")) {
         const path = el.getAttribute("data-asset-src");
         const resize = el.getAttribute("data-asset-resize");
-        if (path && !el.getAttribute("src"))
-          el.setAttribute("src", toUrl(path, resize));
+        const version = el.getAttribute("data-asset-version");
+        maybeApplySrcset(el);
+        if (path && !el.getAttribute("src")) el.setAttribute("src", toUrl(path, resize, version));
       }
       if (el.hasAttribute && el.hasAttribute("data-asset-href")) {
         const path = el.getAttribute("data-asset-href");
-        if (path && !el.getAttribute("href"))
-          el.setAttribute("href", toUrl(path));
+        const version = el.getAttribute("data-asset-version");
+        if (path && !el.getAttribute("href")) el.setAttribute("href", toUrl(path, null, version));
       }
       if (el.hasAttribute && el.hasAttribute("data-asset-bg")) {
         const path = el.getAttribute("data-asset-bg");
         const resize = el.getAttribute("data-asset-resize");
+        const version = el.getAttribute("data-asset-version");
         if (path && !el.style?.backgroundImage)
-          el.style.backgroundImage = `url(${toUrl(path, resize)})`;
+          el.style.backgroundImage = `url(${toUrl(path, resize, version)})`;
       }
     };
 
@@ -274,6 +399,44 @@
     // Expose a tiny hook so other scripts can re-hydrate after setting `data-asset-*`.
     // This keeps URL-building centralized in this file.
     window.applyAssetAttributes = applyAssetAttributes;
+
+    // Centralized image prefetch helper (used by quiz/result for "next" images).
+    // Runs in idle time, and uses the same URL resolution rules as hydration.
+    window.prefetchImageAsset = function prefetchImageAsset(path, resizeRaw, versionRaw) {
+      try {
+        if (!path) return;
+        const href = (function () {
+          if (resizeRaw && typeof window.assetResizeUrl === "function") {
+            return appendVersion(
+              window.assetResizeUrl(String(path), parseResizeOptions(String(resizeRaw))),
+              versionRaw,
+            );
+          }
+          return appendVersion(window.assetUrl(String(path)), versionRaw);
+        })();
+        if (!href) return;
+
+        const head = document.head || document.getElementsByTagName("head")[0];
+        if (!head) return;
+        if (document.querySelector(`link[rel="prefetch"][as="image"][href="${href}"]`))
+          return;
+
+        const run = () => {
+          const link = document.createElement("link");
+          link.rel = "prefetch";
+          link.as = "image";
+          link.href = href;
+          head.appendChild(link);
+        };
+
+        if (typeof requestIdleCallback === "function") {
+          requestIdleCallback(run, { timeout: 1200 });
+        } else {
+          setTimeout(run, 50);
+        }
+      } catch (e) {}
+    };
+
     applyAssetAttributes(document);
 
     try {

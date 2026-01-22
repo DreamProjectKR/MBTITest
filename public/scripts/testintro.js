@@ -44,19 +44,19 @@ function persistTestJson(testId, data) {
 window.addEventListener(
   "scroll",
   () => {
-    if (!header) return;
-    const isMobile = window.matchMedia("(max-width: 900px)").matches;
-    if (window.scrollY > headerOffset) {
-      header.classList.add("fixed-header", "bg-on");
-      if (isMobile && headerScroll) {
-        headerScroll.style.marginBottom = "35px";
-      }
-    } else {
-      header.classList.remove("fixed-header", "bg-on");
-      if (headerScroll) {
-        headerScroll.style.marginBottom = "";
-      }
+  if (!header) return;
+  const isMobile = window.matchMedia("(max-width: 900px)").matches;
+  if (window.scrollY > headerOffset) {
+    header.classList.add("fixed-header", "bg-on");
+    if (isMobile && headerScroll) {
+      headerScroll.style.marginBottom = "35px";
     }
+  } else {
+    header.classList.remove("fixed-header", "bg-on");
+    if (headerScroll) {
+      headerScroll.style.marginBottom = "";
+    }
+  }
   },
   { passive: true },
 );
@@ -180,6 +180,7 @@ function renderIntro(data) {
   const authorImgEl = document.querySelector(".Creator img");
   const authorNameEl = document.querySelector(".CreatorName");
   const descEl = document.querySelector(".IntroDescription");
+  const version = data.updatedAt ? String(data.updatedAt) : "";
 
   if (thumbnailEl) {
     if (data.thumbnail) {
@@ -187,8 +188,11 @@ function renderIntro(data) {
       thumbnailEl.setAttribute("data-asset-src", String(data.thumbnail));
       thumbnailEl.setAttribute(
         "data-asset-resize",
-        "width=780,quality=90,fit=cover,format=auto",
+        "width=480,quality=82,fit=cover,format=auto",
       );
+      thumbnailEl.setAttribute("data-asset-srcset", "360,480,720");
+      thumbnailEl.setAttribute("data-asset-sizes", "(max-width: 900px) 92vw, 350px");
+      if (version) thumbnailEl.setAttribute("data-asset-version", version);
       hydrateAssetElement(thumbnailEl);
     }
     if (data.title) thumbnailEl.alt = data.title;
@@ -208,6 +212,7 @@ function renderIntro(data) {
         "data-asset-resize",
         "width=200,quality=85,fit=cover,format=auto",
       );
+      if (version) authorImgEl.setAttribute("data-asset-version", version);
       hydrateAssetElement(authorImgEl);
     }
     if (authorName) authorImgEl.alt = `제작자 ${authorName}`;

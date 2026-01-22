@@ -16,18 +16,18 @@ const headerOffset = header.offsetTop; // 헤더 원래 위치 저장
 window.addEventListener(
   "scroll",
   () => {
-    const isMobile = window.matchMedia("(max-width: 900px)").matches;
-    if (window.scrollY > headerOffset) {
-      header.classList.add("fixed-header", "bg-on");
-      if (isMobile && headerScroll) {
-        headerScroll.style.marginBottom = "45px";
-      }
-    } else {
-      header.classList.remove("fixed-header", "bg-on");
-      if (headerScroll) {
-        headerScroll.style.marginBottom = "";
-      }
+  const isMobile = window.matchMedia("(max-width: 900px)").matches;
+  if (window.scrollY > headerOffset) {
+    header.classList.add("fixed-header", "bg-on");
+    if (isMobile && headerScroll) {
+      headerScroll.style.marginBottom = "45px";
     }
+  } else {
+    header.classList.remove("fixed-header", "bg-on");
+    if (headerScroll) {
+      headerScroll.style.marginBottom = "";
+    }
+  }
   },
   { passive: true },
 );
@@ -115,8 +115,8 @@ document.querySelector(".test1").onclick = function () {
 
     const img = document.createElement("img");
     const sizeOptions = {
-      width: opts.isFirst ? 780 : 520,
-      quality: opts.isFirst ? 90 : 78,
+      width: opts.isFirst ? 640 : 520,
+      quality: opts.isFirst ? 82 : 78,
       fit: "cover",
       format: "auto",
     };
@@ -126,6 +126,11 @@ document.querySelector(".test1").onclick = function () {
         "data-asset-resize",
         `width=${sizeOptions.width},quality=${sizeOptions.quality},fit=${sizeOptions.fit},format=${sizeOptions.format}`,
       );
+      img.setAttribute("data-asset-srcset", "320,480,520,640");
+      img.setAttribute("data-asset-sizes", "(max-width: 900px) 72vw, 22vw");
+      if (test.updatedAt) {
+        img.setAttribute("data-asset-version", String(test.updatedAt));
+      }
     }
     img.alt = test.title || "테스트 이미지";
     img.decoding = "async";
