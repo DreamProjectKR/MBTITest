@@ -232,6 +232,11 @@ function setImageWithFallback(imgEl, paths, alt) {
     const next = list[i];
     i += 1;
     imgEl.removeAttribute("src");
+    // IMPORTANT: `srcset` takes precedence over `src`. Since `config.js` only
+    // sets `srcset` once, we must reset it when switching to a new image path,
+    // otherwise the browser keeps rendering the previous question's image.
+    imgEl.removeAttribute("srcset");
+    imgEl.removeAttribute("sizes");
     imgEl.setAttribute("data-asset-src", next);
     if (version) imgEl.setAttribute("data-asset-version", version);
     // Reset per-candidate fallback state.
@@ -249,6 +254,8 @@ function setImageWithFallback(imgEl, paths, alt) {
       try {
         imgEl.removeAttribute("src");
         imgEl.removeAttribute("data-asset-resize");
+        imgEl.removeAttribute("srcset");
+        imgEl.removeAttribute("sizes");
         imgEl.setAttribute("data-asset-src", lastPath);
         if (version) imgEl.setAttribute("data-asset-version", version);
         hydrateAssetElement(imgEl);
