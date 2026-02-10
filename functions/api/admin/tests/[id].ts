@@ -64,7 +64,10 @@ type ResultEntry = {
 };
 
 function json(payload: unknown, status = 200): Response {
-  return new Response(JSON.stringify(payload), { status, headers: JSON_HEADERS });
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: JSON_HEADERS,
+  });
 }
 
 function badRequest(message: string): Response {
@@ -89,7 +92,8 @@ function validateTestPayload(test: {
 }): string | null {
   if (!test.id) return "Missing test id.";
   if (!test.title || !String(test.title).trim()) return "Test title required.";
-  if (!test.thumbnail || !String(test.thumbnail).trim()) return "Test needs a thumbnail path.";
+  if (!test.thumbnail || !String(test.thumbnail).trim())
+    return "Test needs a thumbnail path.";
   if (!test.authorImg || !String(test.authorImg).trim())
     return "Test needs an author image path.";
   if (!Array.isArray(test.questions) || test.questions.length !== 12)
@@ -102,7 +106,8 @@ function validateTestPayload(test: {
 
   for (let i = 0; i < test.questions.length; i += 1) {
     const question = test.questions[i];
-    if (!question || typeof question !== "object") return `Question ${i + 1} is invalid.`;
+    if (!question || typeof question !== "object")
+      return `Question ${i + 1} is invalid.`;
     if (!question.label || !String(question.label).trim())
       return `Question ${i + 1} needs a label.`;
     if (!question.questionImage || !String(question.questionImage).trim())
@@ -110,11 +115,15 @@ function validateTestPayload(test: {
     if (/^https?:\/\//i.test(String(question.questionImage)))
       return `Question ${i + 1} image must be an uploaded R2 asset path (not an external URL).`;
 
-    const answers = Array.isArray(question.answers) ? (question.answers as Answer[]) : [];
-    if (answers.length !== 2) return `Question ${i + 1} needs exactly two answers.`;
+    const answers = Array.isArray(question.answers)
+      ? (question.answers as Answer[])
+      : [];
+    if (answers.length !== 2)
+      return `Question ${i + 1} needs exactly two answers.`;
     const axisRaw = answers?.[0]?.mbtiAxis;
     const axis = typeof axisRaw === "string" ? axisRaw : "";
-    if (!axis || !AXIS_SET.has(axis)) return `Question ${i + 1} has invalid mbtiAxis.`;
+    if (!axis || !AXIS_SET.has(axis))
+      return `Question ${i + 1} has invalid mbtiAxis.`;
     const pair = AXIS_MAP[axis];
     const pos = pair?.[0] ?? "";
     const neg = pair?.[1] ?? "";
@@ -143,14 +152,17 @@ function validateTestPayload(test: {
 
   const results = test.results;
   const codes = Object.keys(results);
-  if (codes.length !== MBTI_ORDER.length) return "Results must contain exactly 16 MBTI entries.";
+  if (codes.length !== MBTI_ORDER.length)
+    return "Results must contain exactly 16 MBTI entries.";
 
   for (const code of codes) {
     if (!MBTI_ORDER.includes(code as (typeof MBTI_ORDER)[number]))
       return `Result code "${code}" is not a valid MBTI type.`;
     const details = results[code];
-    if (!details || typeof details !== "object") return `Result ${code} must be an object.`;
-    if (!details.image || !String(details.image).trim()) return `Result ${code} needs an image path.`;
+    if (!details || typeof details !== "object")
+      return `Result ${code} must be an object.`;
+    if (!details.image || !String(details.image).trim())
+      return `Result ${code} needs an image path.`;
     if (/^https?:\/\//i.test(String(details.image)))
       return `Result ${code} image must be an uploaded R2 asset path (not an external URL).`;
     if (!details.summary || !String(details.summary).trim())
@@ -165,7 +177,8 @@ export async function onRequestPut(
 ): Promise<Response> {
   if (context.request.method !== "PUT") return methodNotAllowed();
   const bucket = context.env.MBTI_BUCKET;
-  if (!bucket) return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
+  if (!bucket)
+    return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
   const db = context.env.mbti_db;
   if (!db) return json({ error: "D1 binding mbti_db is missing." }, 500);
 
@@ -188,8 +201,12 @@ export async function onRequestPut(
   const thumbnail = String(p.thumbnail ?? "");
   const authorImg = String(p.authorImg ?? "");
 
-  const questions = Array.isArray(p.questions) ? (p.questions as Question[]) : [];
-  const results = isObject(p.results) ? (p.results as Record<string, ResultEntry>) : {};
+  const questions = Array.isArray(p.questions)
+    ? (p.questions as Question[])
+    : [];
+  const results = isObject(p.results)
+    ? (p.results as Record<string, ResultEntry>)
+    : {};
 
   const validationError = validateTestPayload({
     id: testId,
@@ -244,11 +261,13 @@ export async function onRequestPut(
       )
       .all();
 
+    if (context.env.CACHE_KV) {
+      context.waitUntil(context.env.CACHE_KV.delete(`test:${testId}`));
+    }
+
     return json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to save test.";
     return json({ error: message }, 500);
   }
 }
-
-

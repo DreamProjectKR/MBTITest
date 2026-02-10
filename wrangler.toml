@@ -11,6 +11,10 @@ binding = "mbti_db"
 database_name = "mbti-db"
 database_id = "b3d4e76a-4e45-4070-9e89-701c35cb642f"
 
+[[kv_namespaces]]
+binding = "MBTI_KV"
+id = "c99274b4b04d4979b10507ce02e77f59"
+
 [vars]
 ASSETS_BASE = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"
 R2_PUBLIC_BASE_URL = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"

@@ -55,10 +55,13 @@ export async function onRequestGet(
   }
   const db = context.env.mbti_db;
   if (!db) {
-    return new Response(JSON.stringify({ error: "D1 binding mbti_db is missing." }), {
-      status: 500,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
+    return new Response(
+      JSON.stringify({ error: "D1 binding mbti_db is missing." }),
+      {
+        status: 500,
+        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
+      },
+    );
   }
 
   const id = context.params?.id ? String(context.params.id) : "";
@@ -67,6 +70,45 @@ export async function onRequestGet(
       status: 400,
       headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
     });
+  }
+  const ifNoneMatch = context.request.headers.get("if-none-match");
+  const kv = context.env.CACHE_KV;
+  const kvKey = `test:${id}`;
+  if (kv) {
+    try {
+      const cachedRaw = await kv.get(kvKey);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw) as {
+          etag?: string;
+          body?: Record<string, unknown>;
+        };
+        const cachedEtag = cached?.etag ? String(cached.etag) : "";
+        if (ifNoneMatch && cachedEtag && ifNoneMatch === cachedEtag) {
+          return new Response(null, {
+            status: 304,
+            headers: withCacheHeaders(JSON_HEADERS, {
+              etag: cachedEtag,
+              maxAge: 60,
+              sMaxAge: 300,
+              staleWhileRevalidate: 1800,
+            }),
+          });
+        }
+        if (cached?.body && typeof cached.body === "object") {
+          return new Response(JSON.stringify(cached.body), {
+            status: 200,
+            headers: withCacheHeaders(JSON_HEADERS, {
+              etag: cachedEtag || undefined,
+              maxAge: 60,
+              sMaxAge: 300,
+              staleWhileRevalidate: 1800,
+            }),
+          });
+        }
+      }
+    } catch {
+      // Best effort: continue with D1 + R2 source of truth.
+    }
   }
 
   const row = await db
@@ -85,17 +127,21 @@ export async function onRequestGet(
 
   const key = normalizeR2KeyFromIndexPath(String(row.source_path));
   if (!key) {
-    return new Response(JSON.stringify({ error: "Test meta has empty path: " + id }), {
-      status: 500,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
+    return new Response(
+      JSON.stringify({ error: "Test meta has empty path: " + id }),
+      {
+        status: 500,
+        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
+      },
+    );
   }
 
   const obj = await bucket.get(key);
   // Local-dev fallback: if local R2 is empty, fetch from the public R2 URL.
   // This avoids needing to seed local R2 for `/api/tests/:id` to work.
   const requestHost = new URL(context.request.url).hostname;
-  const isLocalhost = requestHost === "localhost" || requestHost === "127.0.0.1";
+  const isLocalhost =
+    requestHost === "localhost" || requestHost === "127.0.0.1";
   const publicBase = context.env.R2_PUBLIC_BASE_URL
     ? String(context.env.R2_PUBLIC_BASE_URL).replace(/\/+$/, "")
     : "";
@@ -116,10 +162,13 @@ export async function onRequestGet(
   }
 
   if (!resolvedBodyText) {
-    return new Response(JSON.stringify({ error: "Test JSON not found in R2.", key }), {
-      status: 404,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
-    });
+    return new Response(
+      JSON.stringify({ error: "Test JSON not found in R2.", key }),
+      {
+        status: 404,
+        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
+      },
+    );
   }
 
   const etag = (() => {
@@ -129,14 +178,16 @@ export async function onRequestGet(
   })();
 
   const cache =
-    (globalThis.caches as unknown as { default?: Cache | undefined } | undefined)?.default ??
-    null;
+    (
+      globalThis.caches as unknown as
+        | { default?: Cache | undefined }
+        | undefined
+    )?.default ?? null;
   const url = new URL(context.request.url);
   const cacheKeyUrl = new URL(url.toString());
   cacheKeyUrl.searchParams.set("__cache", etag);
   const cacheKey = new Request(cacheKeyUrl.toString(), { method: "GET" });
 
-  const ifNoneMatch = context.request.headers.get("if-none-match");
   if (ifNoneMatch && ifNoneMatch === etag) {
     return new Response(null, {
       status: 304,
@@ -161,17 +212,23 @@ export async function onRequestGet(
   try {
     bodyJson = JSON.parse(resolvedBodyText) as unknown;
   } catch {
-    return new Response(JSON.stringify({ error: "Test JSON is invalid JSON." }), {
-      status: 500,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
+    return new Response(
+      JSON.stringify({ error: "Test JSON is invalid JSON." }),
+      {
+        status: 500,
+        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
+      },
+    );
   }
 
-  const description = parseJsonArray(row?.description_json)?.filter(Boolean) ?? null;
+  const description =
+    parseJsonArray(row?.description_json)?.filter(Boolean) ?? null;
 
   const tags = (() => {
     const parsed = parseJsonArray(row?.tags_json);
-    return parsed ? parsed.filter((x): x is string => typeof x === "string") : [];
+    return parsed
+      ? parsed.filter((x): x is string => typeof x === "string")
+      : [];
   })();
 
   const merged = {
@@ -185,7 +242,9 @@ export async function onRequestGet(
     path: row.source_path ? String(row.source_path) : "",
     createdAt: row.created_at ? String(row.created_at) : "",
     updatedAt: row.updated_at ? String(row.updated_at) : "",
-    ...(bodyJson && typeof bodyJson === "object" ? (bodyJson as Record<string, unknown>) : {}),
+    ...(bodyJson && typeof bodyJson === "object"
+      ? (bodyJson as Record<string, unknown>)
+      : {}),
   };
 
   const response = new Response(JSON.stringify(merged), {
@@ -197,8 +256,13 @@ export async function onRequestGet(
       staleWhileRevalidate: 1800,
     }),
   });
+  if (kv) {
+    context.waitUntil(
+      kv.put(kvKey, JSON.stringify({ etag, body: merged }), {
+        expirationTtl: 300,
+      }),
+    );
+  }
   if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));
   return response;
 }
-
-

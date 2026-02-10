@@ -1,7 +1,6 @@
 import type { D1Database, R2Bucket } from "../../../_types";
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
-const INDEX_KEY = "assets/index.json";
 
 export const JSON_HEADERS: Readonly<Record<string, string>> = {
   "Content-Type": JSON_CONTENT_TYPE,
@@ -19,75 +18,10 @@ export function formatIndexDate(date: Date = new Date()): string {
   return new Date(date).toISOString().split("T")[0] ?? "";
 }
 
-type IndexPayload = { tests: unknown[] };
-
-export async function readIndex(bucket: R2Bucket): Promise<IndexPayload> {
-  const obj = await bucket.get(INDEX_KEY);
-  if (!obj) return { tests: [] };
-  const text = await obj.text();
-  try {
-    const parsed: unknown = JSON.parse(text);
-    if (parsed && typeof parsed === "object") return parsed as IndexPayload;
-    return { tests: [] };
-  } catch {
-    throw new Error("index.json is not valid JSON.");
-  }
-}
-
-export async function writeIndex(bucket: R2Bucket, payload: unknown): Promise<void> {
-  await bucket.put(
-    INDEX_KEY,
-    new TextEncoder().encode(JSON.stringify(payload, null, 2)),
-    { httpMetadata: { contentType: JSON_CONTENT_TYPE } },
-  );
-}
-
-export function buildIndexWithMeta(index: unknown, meta: unknown): unknown {
-  const tests = Array.isArray((index as { tests?: unknown[] } | null)?.tests)
-    ? [...((index as { tests: unknown[] }).tests)]
-    : [];
-  const m = meta as { id?: unknown };
-  const existingIndex = tests.findIndex((entry) => (entry as { id?: unknown } | null)?.id === m?.id);
-  if (existingIndex === -1) tests.push(meta);
-  else tests[existingIndex] = meta;
-  return { ...(index as object), tests };
-}
-
-export function createMetaFromTest(
-  test: { id: string; title?: string; thumbnail?: string; tags?: unknown[] },
-  existingMeta?: {
-    title?: string;
-    thumbnail?: string;
-    tags?: unknown[];
-    createdAt?: string;
-  },
-): {
-  id: string;
-  title: string;
-  thumbnail: string;
-  tags: string[];
-  path: string;
-  createdAt: string;
-  updatedAt: string;
-} {
-  const now = formatIndexDate();
-  const tags = Array.isArray(test.tags)
-    ? test.tags.filter((t): t is string => typeof t === "string")
-    : Array.isArray(existingMeta?.tags)
-      ? existingMeta.tags.filter((t): t is string => typeof t === "string")
-      : [];
-  return {
-    id: test.id,
-    title: test.title || existingMeta?.title || "제목 없는 테스트",
-    thumbnail: test.thumbnail || existingMeta?.thumbnail || "",
-    tags,
-    path: `${test.id}/test.json`,
-    createdAt: existingMeta?.createdAt || now,
-    updatedAt: now,
-  };
-}
-
-export async function readTest(bucket: R2Bucket, testId: string): Promise<unknown | null> {
+export async function readTest(
+  bucket: R2Bucket,
+  testId: string,
+): Promise<unknown | null> {
   const key = getTestKey(testId);
   const obj = await bucket.get(key);
   if (!obj) return null;
@@ -99,7 +33,11 @@ export async function readTest(bucket: R2Bucket, testId: string): Promise<unknow
   }
 }
 
-export async function writeTest(bucket: R2Bucket, testId: string, test: unknown): Promise<void> {
+export async function writeTest(
+  bucket: R2Bucket,
+  testId: string,
+  test: unknown,
+): Promise<void> {
   const key = getTestKey(testId);
   await bucket.put(
     key,
@@ -114,7 +52,77 @@ export async function touchTestUpdatedAt(
   date: Date = new Date(),
 ): Promise<void> {
   const now = formatIndexDate(date);
-  await db.prepare("UPDATE tests SET updated_at = ?1 WHERE test_id = ?2").bind(now, testId).all();
+  await db
+    .prepare("UPDATE tests SET updated_at = ?1 WHERE test_id = ?2")
+    .bind(now, testId)
+    .all();
 }
 
+export type TestImageMetaInput = {
+  testId: string;
+  imageKey: string;
+  imageType: string;
+  imageName: string;
+  contentType?: string;
+  sizeBytes?: number;
+  uploadedAt?: string;
+};
 
+export type TestImageMetaRow = {
+  id?: number;
+  test_id?: string;
+  image_key?: string;
+  image_type?: string;
+  image_name?: string;
+  content_type?: string;
+  size_bytes?: number;
+  uploaded_at?: string;
+};
+
+export async function upsertTestImageMeta(
+  db: D1Database,
+  input: TestImageMetaInput,
+): Promise<void> {
+  const uploadedAt = input.uploadedAt || new Date().toISOString();
+  await db
+    .prepare(
+      `
+      INSERT INTO test_images (test_id, image_key, image_type, image_name, content_type, size_bytes, uploaded_at)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+      ON CONFLICT(test_id, image_name) DO UPDATE SET
+        image_key = excluded.image_key,
+        image_type = excluded.image_type,
+        content_type = excluded.content_type,
+        size_bytes = excluded.size_bytes,
+        uploaded_at = excluded.uploaded_at
+      `,
+    )
+    .bind(
+      input.testId,
+      input.imageKey,
+      input.imageType,
+      input.imageName,
+      input.contentType || null,
+      Number.isFinite(input.sizeBytes) ? Number(input.sizeBytes) : null,
+      uploadedAt,
+    )
+    .all();
+}
+
+export async function listTestImageMeta(
+  db: D1Database,
+  testId: string,
+): Promise<TestImageMetaRow[]> {
+  const rows = await db
+    .prepare(
+      `
+      SELECT id, test_id, image_key, image_type, image_name, content_type, size_bytes, uploaded_at
+      FROM test_images
+      WHERE test_id = ?1
+      ORDER BY image_name ASC
+      `,
+    )
+    .bind(testId)
+    .all<TestImageMetaRow>();
+  return Array.isArray(rows.results) ? rows.results : [];
+}

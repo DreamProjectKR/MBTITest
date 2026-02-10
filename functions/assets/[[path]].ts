@@ -50,12 +50,22 @@ function cacheControlForKey(key: string, isVersioned: boolean): string {
   return "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400";
 }
 
+function buildCacheTagHeader(key: string): string {
+  const tags = ["assets"];
+  const clean = String(key || "").replace(/^\/+/, "");
+  const m = clean.match(/^assets\/(test-[^/]+)\//i);
+  if (m?.[1]) tags.push("test", m[1]);
+  return tags.join(",");
+}
+
 function toggleFirstCharCase(s: string): string {
   if (!s) return s;
   const first = s[0];
   const code = first.charCodeAt(0);
-  if (code >= 65 && code <= 90) return String.fromCharCode(code + 32) + s.slice(1);
-  if (code >= 97 && code <= 122) return String.fromCharCode(code - 32) + s.slice(1);
+  if (code >= 65 && code <= 90)
+    return String.fromCharCode(code + 32) + s.slice(1);
+  if (code >= 97 && code <= 122)
+    return String.fromCharCode(code - 32) + s.slice(1);
   return s;
 }
 
@@ -100,6 +110,7 @@ async function tryFetchRemote(
     if (resp.ok) {
       const headers = new Headers(resp.headers);
       headers.set("Cache-Control", cacheControlForKey(candidate, isVersioned));
+      headers.set("Cache-Tag", buildCacheTagHeader(candidate));
       headers.set("X-MBTI-Assets-Proxy", "1");
       headers.set("X-MBTI-R2-Key", candidate);
       headers.set("X-MBTI-Edge-Cache", "MISS");
@@ -122,7 +133,11 @@ function buildObjectResponse(
     "Cache-Control",
     obj.httpMetadata?.cacheControl || cacheControlForKey(key, isVersioned),
   );
-  headers.set("Content-Type", obj.httpMetadata?.contentType || guessContentType(key));
+  headers.set("Cache-Tag", buildCacheTagHeader(key));
+  headers.set(
+    "Content-Type",
+    obj.httpMetadata?.contentType || guessContentType(key),
+  );
   headers.set("X-MBTI-Assets-Proxy", "1");
   headers.set("X-MBTI-R2-Key", key);
   headers.set("X-MBTI-Edge-Cache", hit);
@@ -133,14 +148,17 @@ export async function onRequestGet(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<Response> {
   const bucket = context.env.MBTI_BUCKET;
-  if (!bucket) return new Response("MBTI_BUCKET binding missing.", { status: 500 });
+  if (!bucket)
+    return new Response("MBTI_BUCKET binding missing.", { status: 500 });
 
   const cache = caches?.default;
   const url = new URL(context.request.url);
   const isVersioned = url.searchParams.has("v");
   const cacheKey = new Request(url.toString(), { method: "GET" });
 
-  const requestCacheControl = (context.request.headers.get("cache-control") || "").toLowerCase();
+  const requestCacheControl = (
+    context.request.headers.get("cache-control") || ""
+  ).toLowerCase();
   const bypassCache =
     requestCacheControl.includes("no-cache") ||
     requestCacheControl.includes("no-store") ||
@@ -157,7 +175,10 @@ export async function onRequestGet(
 
   const tail = getPathParam(context.params).replace(/^\/+/, "");
   if (!tail) {
-    return new Response("Not Found", { status: 404, headers: { "Cache-Control": "no-store" } });
+    return new Response("Not Found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store" },
+    });
   }
 
   const candidateKeys = [`assets/${tail}`, tail, `assets/data/${tail}`];
@@ -178,24 +199,39 @@ export async function onRequestGet(
   if (!obj) {
     const hostname = url.hostname;
     const isLocalhost = hostname === "127.0.0.1" || hostname === "localhost";
-    const publicBase = context.env.R2_PUBLIC_BASE_URL ? String(context.env.R2_PUBLIC_BASE_URL) : "";
+    const publicBase = context.env.R2_PUBLIC_BASE_URL
+      ? String(context.env.R2_PUBLIC_BASE_URL)
+      : "";
     if (isLocalhost && publicBase) {
-      const remote = await tryFetchRemote(candidateKeys, publicBase, isVersioned);
+      const remote = await tryFetchRemote(
+        candidateKeys,
+        publicBase,
+        isVersioned,
+      );
       if (remote) return remote;
     }
-    return new Response("Not Found", { status: 404, headers: { "Cache-Control": "no-store" } });
+    return new Response("Not Found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store" },
+    });
   }
 
   const ifNoneMatch = context.request.headers.get("if-none-match");
   if (ifNoneMatch && obj.etag && ifNoneMatch === obj.etag) {
     return new Response(null, {
       status: 304,
-      headers: { ETag: obj.etag, "Cache-Control": cacheControlForKey(key, isVersioned) },
+      headers: {
+        ETag: obj.etag,
+        "Cache-Control": cacheControlForKey(key, isVersioned),
+        "Cache-Tag": buildCacheTagHeader(key),
+      },
     });
   }
 
   const response = buildObjectResponse(obj, key, "MISS", isVersioned);
-  const respCacheControl = (response.headers.get("cache-control") || "").toLowerCase();
+  const respCacheControl = (
+    response.headers.get("cache-control") || ""
+  ).toLowerCase();
   const shouldCache =
     !bypassCache &&
     Boolean(cache) &&
@@ -209,5 +245,3 @@ export async function onRequestGet(
 
   return response;
 }
-
-

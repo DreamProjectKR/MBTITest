@@ -1,10 +1,18 @@
 import type { MbtiEnv, PagesContext } from "../../../../_types";
-import { JSON_HEADERS, getImagesPrefix } from "../../utils/store.js";
+import {
+  JSON_HEADERS,
+  getImagesPrefix,
+  listTestImageMeta,
+  upsertTestImageMeta,
+} from "../../utils/store.js";
 
 type Params = { id?: string };
 
 function json(payload: unknown, status = 200): Response {
-  return new Response(JSON.stringify(payload), { status, headers: JSON_HEADERS });
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: JSON_HEADERS,
+  });
 }
 
 function methodNotAllowed(): Response {
@@ -30,11 +38,24 @@ function sanitizeBaseName(value: unknown): string {
   return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80);
 }
 
+function inferImageType(baseName: string): string {
+  const base = String(baseName || "")
+    .trim()
+    .toLowerCase();
+  if (base === "thumbnail") return "thumbnail";
+  if (base === "author") return "author";
+  if (/^q\d{1,2}$/i.test(baseName)) return "question";
+  if (/^[ei][ns][tf][jp]$/i.test(baseName)) return "result";
+  return "misc";
+}
+
 async function extractUpload(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<{ buffer: ArrayBuffer; contentType: string; name: string } | null> {
   const contentType = context.request.headers.get("content-type") || "";
-  const isMultipart = contentType.toLowerCase().startsWith("multipart/form-data");
+  const isMultipart = contentType
+    .toLowerCase()
+    .startsWith("multipart/form-data");
   if (isMultipart) {
     const formData = await context.request.formData();
     const file = formData.get("file");
@@ -57,26 +78,27 @@ export async function onRequestGet(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<Response> {
   if (context.request.method !== "GET") return methodNotAllowed();
-  const bucket = context.env.MBTI_BUCKET;
-  if (!bucket) return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
+  const db = context.env.mbti_db;
+  if (!db) return json({ error: "D1 binding mbti_db is missing." }, 500);
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return json({ error: "Missing test id." }, 400);
 
   try {
-    const prefix = getImagesPrefix(testId);
-    const listing = await bucket.list({ prefix });
-    const objects = Array.isArray(listing.objects) ? listing.objects : [];
-    const items = objects.map((obj) => {
-      const key = obj?.key ?? "";
+    const rows = await listTestImageMeta(db, testId);
+    const items = rows.map((row) => {
+      const key = String(row.image_key || "");
       const path = key.replace(/^assets\/?/i, "");
       return {
+        id: row.id ?? null,
         key,
         path,
         url: `/assets/${path}`,
-        size: obj?.size ?? 0,
-        etag: obj?.etag ?? "",
-        lastModified: obj?.uploaded ?? null,
+        imageType: row.image_type || "",
+        imageName: row.image_name || "",
+        contentType: row.content_type || "",
+        size: Number(row.size_bytes || 0),
+        lastModified: row.uploaded_at || null,
       };
     });
     return json({ items });
@@ -93,12 +115,19 @@ export async function onRequestPut(
 ): Promise<Response> {
   if (context.request.method !== "PUT") return methodNotAllowed();
   const bucket = context.env.MBTI_BUCKET;
-  if (!bucket) return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
+  if (!bucket)
+    return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
+  const db = context.env.mbti_db;
+  if (!db) return json({ error: "D1 binding mbti_db is missing." }, 500);
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
 
-  let upload: { buffer: ArrayBuffer; contentType: string; name: string } | null = null;
+  let upload: {
+    buffer: ArrayBuffer;
+    contentType: string;
+    name: string;
+  } | null = null;
   try {
     upload = await extractUpload(context);
   } catch {
@@ -109,16 +138,27 @@ export async function onRequestPut(
   const ext = extensionFromMime(upload.contentType);
   const base =
     sanitizeBaseName(upload.name) ||
-    (typeof crypto !== "undefined" && "randomUUID" in crypto && typeof crypto.randomUUID === "function"
+    (typeof crypto !== "undefined" &&
+    "randomUUID" in crypto &&
+    typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
       : `img-${Date.now()}`);
 
   const prefix = getImagesPrefix(testId);
   const key = `${prefix}${base}.${ext}`;
+  const imageType = inferImageType(base);
 
   try {
     await bucket.put(key, new Uint8Array(upload.buffer), {
       httpMetadata: { contentType: upload.contentType },
+    });
+    await upsertTestImageMeta(db, {
+      testId,
+      imageKey: key,
+      imageType,
+      imageName: base,
+      contentType: upload.contentType,
+      sizeBytes: upload.buffer.byteLength,
     });
   } catch (err) {
     return json(
@@ -130,5 +170,3 @@ export async function onRequestPut(
   const publicPath = key.replace(/^assets\/?/i, "");
   return json({ ok: true, key, path: key, url: `/assets/${publicPath}` });
 }
-
-

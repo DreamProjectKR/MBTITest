@@ -67,11 +67,22 @@ export interface D1Database {
   prepare(query: string): D1PreparedStatement;
 }
 
+export interface KVNamespace {
+  get(key: string): Promise<string | null>;
+  put(
+    key: string,
+    value: string,
+    options?: {
+      expirationTtl?: number;
+    },
+  ): Promise<void>;
+  delete(key: string): Promise<void>;
+}
+
 export interface MbtiEnv {
   MBTI_BUCKET?: R2Bucket;
   mbti_db?: D1Database;
+  CACHE_KV?: KVNamespace;
   ASSETS_BASE?: string;
   R2_PUBLIC_BASE_URL?: string;
 }
-
-
