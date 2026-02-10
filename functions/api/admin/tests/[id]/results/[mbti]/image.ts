@@ -1,4 +1,5 @@
 import type { MbtiEnv, PagesContext } from "../../../../../../_types";
+
 import {
   JSON_HEADERS,
   getImagesPrefix,
@@ -88,8 +89,9 @@ export async function onRequestPut(
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
 
-  const mbtiRaw = context.params?.mbti
-    ? String(context.params.mbti).trim().toUpperCase()
+  const mbtiRaw =
+    context.params?.mbti ?
+      String(context.params.mbti).trim().toUpperCase()
     : "";
   if (
     !mbtiRaw ||
@@ -138,13 +140,13 @@ export async function onRequestPut(
 
   const t = testJson as { results?: Record<string, unknown> };
   const results =
-    t.results && typeof t.results === "object"
-      ? (t.results as Record<string, unknown>)
-      : {};
+    t.results && typeof t.results === "object" ?
+      (t.results as Record<string, unknown>)
+    : {};
   const existing =
-    results[mbtiRaw] && typeof results[mbtiRaw] === "object"
-      ? (results[mbtiRaw] as Record<string, unknown>)
-      : {};
+    results[mbtiRaw] && typeof results[mbtiRaw] === "object" ?
+      (results[mbtiRaw] as Record<string, unknown>)
+    : {};
   results[mbtiRaw] = {
     ...existing,
     image: `${getImagesPrefix(testId)}${fileName}`,

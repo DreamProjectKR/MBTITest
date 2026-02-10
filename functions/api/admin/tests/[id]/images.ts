@@ -1,4 +1,5 @@
 import type { MbtiEnv, PagesContext } from "../../../../_types";
+
 import {
   JSON_HEADERS,
   getImagesPrefix,
@@ -138,11 +139,13 @@ export async function onRequestPut(
   const ext = extensionFromMime(upload.contentType);
   const base =
     sanitizeBaseName(upload.name) ||
-    (typeof crypto !== "undefined" &&
-    "randomUUID" in crypto &&
-    typeof crypto.randomUUID === "function"
-      ? crypto.randomUUID()
-      : `img-${Date.now()}`);
+    ((
+      typeof crypto !== "undefined" &&
+      "randomUUID" in crypto &&
+      typeof crypto.randomUUID === "function"
+    ) ?
+      crypto.randomUUID()
+    : `img-${Date.now()}`);
 
   const prefix = getImagesPrefix(testId);
   const key = `${prefix}${base}.${ext}`;

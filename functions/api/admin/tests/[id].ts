@@ -1,4 +1,5 @@
 import type { MbtiEnv, PagesContext } from "../../../_types";
+
 import { JSON_HEADERS, writeTest } from "../utils/store.js";
 
 type Params = { id?: string };
@@ -115,9 +116,8 @@ function validateTestPayload(test: {
     if (/^https?:\/\//i.test(String(question.questionImage)))
       return `Question ${i + 1} image must be an uploaded R2 asset path (not an external URL).`;
 
-    const answers = Array.isArray(question.answers)
-      ? (question.answers as Answer[])
-      : [];
+    const answers =
+      Array.isArray(question.answers) ? (question.answers as Answer[]) : [];
     if (answers.length !== 2)
       return `Question ${i + 1} needs exactly two answers.`;
     const axisRaw = answers?.[0]?.mbtiAxis;
@@ -201,12 +201,10 @@ export async function onRequestPut(
   const thumbnail = String(p.thumbnail ?? "");
   const authorImg = String(p.authorImg ?? "");
 
-  const questions = Array.isArray(p.questions)
-    ? (p.questions as Question[])
-    : [];
-  const results = isObject(p.results)
-    ? (p.results as Record<string, ResultEntry>)
-    : {};
+  const questions =
+    Array.isArray(p.questions) ? (p.questions as Question[]) : [];
+  const results =
+    isObject(p.results) ? (p.results as Record<string, ResultEntry>) : {};
 
   const validationError = validateTestPayload({
     id: testId,

@@ -9,6 +9,7 @@
  * - Uses conservative TTLs because content may change
  */
 import type { MbtiEnv, PagesContext } from "../../../_types";
+
 import { JSON_HEADERS, withCacheHeaders } from "../_utils/http";
 
 type Params = { id?: string };
@@ -142,8 +143,9 @@ export async function onRequestGet(
   const requestHost = new URL(context.request.url).hostname;
   const isLocalhost =
     requestHost === "localhost" || requestHost === "127.0.0.1";
-  const publicBase = context.env.R2_PUBLIC_BASE_URL
-    ? String(context.env.R2_PUBLIC_BASE_URL).replace(/\/+$/, "")
+  const publicBase =
+    context.env.R2_PUBLIC_BASE_URL ?
+      String(context.env.R2_PUBLIC_BASE_URL).replace(/\/+$/, "")
     : "";
 
   let resolvedBodyText: string | null = null;
@@ -226,8 +228,8 @@ export async function onRequestGet(
 
   const tags = (() => {
     const parsed = parseJsonArray(row?.tags_json);
-    return parsed
-      ? parsed.filter((x): x is string => typeof x === "string")
+    return parsed ?
+        parsed.filter((x): x is string => typeof x === "string")
       : [];
   })();
 
@@ -242,9 +244,9 @@ export async function onRequestGet(
     path: row.source_path ? String(row.source_path) : "",
     createdAt: row.created_at ? String(row.created_at) : "",
     updatedAt: row.updated_at ? String(row.updated_at) : "",
-    ...(bodyJson && typeof bodyJson === "object"
-      ? (bodyJson as Record<string, unknown>)
-      : {}),
+    ...(bodyJson && typeof bodyJson === "object" ?
+      (bodyJson as Record<string, unknown>)
+    : {}),
   };
 
   const response = new Response(JSON.stringify(merged), {

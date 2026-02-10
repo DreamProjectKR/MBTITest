@@ -199,8 +199,9 @@ export async function onRequestGet(
   if (!obj) {
     const hostname = url.hostname;
     const isLocalhost = hostname === "127.0.0.1" || hostname === "localhost";
-    const publicBase = context.env.R2_PUBLIC_BASE_URL
-      ? String(context.env.R2_PUBLIC_BASE_URL)
+    const publicBase =
+      context.env.R2_PUBLIC_BASE_URL ?
+        String(context.env.R2_PUBLIC_BASE_URL)
       : "";
     if (isLocalhost && publicBase) {
       const remote = await tryFetchRemote(

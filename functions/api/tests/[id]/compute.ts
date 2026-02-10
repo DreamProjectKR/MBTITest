@@ -1,4 +1,5 @@
 import type { MbtiEnv, PagesContext } from "../../../../_types";
+
 import { JSON_HEADERS, withCacheHeaders } from "../../_utils/http";
 
 type Params = { id?: string };
@@ -121,9 +122,8 @@ export async function onRequestPost(
     return json({ error: "Request body must be valid JSON." }, 400);
   }
 
-  const answers = Array.isArray(body?.answers)
-    ? (body.answers as SubmittedAnswer[])
-    : [];
+  const answers =
+    Array.isArray(body?.answers) ? (body.answers as SubmittedAnswer[]) : [];
   if (!answers.length)
     return json({ error: "answers array is required." }, 400);
 

@@ -15,10 +15,12 @@ export function withCacheHeaders(
 ): Headers {
   const { etag, maxAge = 60, sMaxAge, staleWhileRevalidate } = opts ?? {};
   const swr =
-    typeof staleWhileRevalidate === "number" &&
-    Number.isFinite(staleWhileRevalidate)
-      ? Math.max(0, Math.floor(staleWhileRevalidate))
-      : maxAge * 10;
+    (
+      typeof staleWhileRevalidate === "number" &&
+      Number.isFinite(staleWhileRevalidate)
+    ) ?
+      Math.max(0, Math.floor(staleWhileRevalidate))
+    : maxAge * 10;
   const h = new Headers(headers);
   const parts = [`public`, `max-age=${maxAge}`];
   if (typeof sMaxAge === "number" && Number.isFinite(sMaxAge)) {

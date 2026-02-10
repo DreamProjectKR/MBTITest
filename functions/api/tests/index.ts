@@ -5,7 +5,8 @@
  * as the legacy `assets/index.json` response: `{ tests: [...] }`.
  */
 import type { MbtiEnv, PagesContext } from "../../_types";
-import { jsonResponse, withCacheHeaders, JSON_HEADERS } from "../_utils/http";
+
+import { JSON_HEADERS, jsonResponse, withCacheHeaders } from "../_utils/http";
 
 type TestRow = {
   test_id?: unknown;
@@ -31,8 +32,8 @@ function safeJsonArray(value: unknown): string[] {
   if (typeof value !== "string") return [];
   try {
     const parsed: unknown = JSON.parse(value);
-    return Array.isArray(parsed)
-      ? parsed.filter((x): x is string => typeof x === "string")
+    return Array.isArray(parsed) ?
+        parsed.filter((x): x is string => typeof x === "string")
       : [];
   } catch {
     return [];
