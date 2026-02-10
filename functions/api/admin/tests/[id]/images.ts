@@ -1,7 +1,7 @@
 import type { MbtiEnv, PagesContext } from "../../../../_types";
 
 import {
-  JSON_HEADERS,
+  NO_STORE_HEADERS,
   getImagesPrefix,
   listTestImageMeta,
   upsertTestImageMeta,
@@ -12,7 +12,7 @@ type Params = { id?: string };
 function json(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
     status,
-    headers: JSON_HEADERS,
+    headers: NO_STORE_HEADERS,
   });
 }
 
@@ -105,7 +105,9 @@ export async function onRequestGet(
     return json({ items });
   } catch (err) {
     return json(
-      { error: err instanceof Error ? err.message : "Failed to list images." },
+      {
+        error: err instanceof Error ? err.message : "Failed to list images.",
+      },
       500,
     );
   }
@@ -167,6 +169,16 @@ export async function onRequestPut(
     return json(
       { error: err instanceof Error ? err.message : "Failed to upload image." },
       500,
+    );
+  }
+
+  const cache = (globalThis.caches as { default?: Cache } | undefined)?.default;
+  if (cache) {
+    const origin = new URL(context.request.url).origin;
+    context.waitUntil(
+      cache.delete(
+        new Request(`${origin}/api/tests/${testId}`, { method: "GET" }),
+      ),
     );
   }
 

@@ -90,8 +90,7 @@ export async function onRequestGet(
         | undefined
     )?.default ?? null;
   const url = new URL(context.request.url);
-  const cacheKeyUrl = new URL(url.toString());
-  cacheKeyUrl.searchParams.set("__cache", etag);
+  const cacheKeyUrl = new URL(url.origin + url.pathname);
   const cacheKey = new Request(cacheKeyUrl.toString(), { method: "GET" });
 
   const ifNoneMatch = context.request.headers.get("if-none-match");

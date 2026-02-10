@@ -1,6 +1,6 @@
 import type { MbtiEnv, PagesContext } from "../../../_types";
 
-import { JSON_HEADERS, writeTest } from "../utils/store.js";
+import { NO_STORE_HEADERS, writeTest } from "../utils/store.js";
 
 type Params = { id?: string };
 
@@ -68,7 +68,7 @@ type ResultEntry = {
 function json(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
     status,
-    headers: JSON_HEADERS,
+    headers: NO_STORE_HEADERS,
   });
 }
 
@@ -273,6 +273,20 @@ export async function onRequestPut(
 
     if (context.env.MBTI_KV) {
       context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));
+    }
+
+    const cache = (globalThis.caches as { default?: Cache } | undefined)
+      ?.default;
+    if (cache) {
+      const origin = new URL(context.request.url).origin;
+      context.waitUntil(
+        cache.delete(new Request(`${origin}/api/tests`, { method: "GET" })),
+      );
+      context.waitUntil(
+        cache.delete(
+          new Request(`${origin}/api/tests/${testId}`, { method: "GET" }),
+        ),
+      );
     }
 
     return json({ ok: true });

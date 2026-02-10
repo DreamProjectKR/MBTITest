@@ -30,8 +30,11 @@
 
 `caches.default`를 이용한 엣지 캐시입니다.
 
-- ETag 기반 캐시 키로 콘텐츠 변경 시 자동 회피
-- `s-maxage` + `stale-while-revalidate`로 엣지 TTL 제어
+- URL 기반 캐시 키 (어드민 저장 시 `cache.delete()`로 퍼지)
+- `s-maxage` + `stale-while-revalidate` + `stale-if-error`로 엣지 TTL 제어
+- `Vary: Accept-Encoding`으로 압축/비압축 응답 분리
+
+**Tiered Cache 참고**: `cache.put()`는 Cloudflare Tiered Cache와 호환되지 않습니다. 현재 구현은 단일 엣지 PoP에만 캐시됩니다. 글로벌 배포가 필요하면 `fetch()` + `cf: { cacheTtl, cacheEverything: true }`로 전환 시 Tiered Cache가 활성화됩니다.
 
 ### Cache-Tag (구현됨)
 
@@ -48,7 +51,27 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/{zone_id}/purge_cache" 
   -d '{"tags":["test-summer"]}'
 ```
 
-## 3. Cache Rules (대시보드, 선택)
+### 어드민 응답 (구현됨)
+
+모든 어드민 API 응답에 `Cache-Control: no-store`를 적용하여 변형(mutation) 응답의 캐시를 방지합니다.
+
+### 자동 캐시 퍼지 (구현됨)
+
+어드민에서 테스트 저장 또는 이미지 업로드 시, Cache API에서 해당 엔드포인트를 자동으로 퍼지합니다.
+
+- `PUT /api/admin/tests/:id` → `/api/tests`, `/api/tests/:id` 퍼지
+- `PUT /api/admin/tests/:id/images` → `/api/tests/:id` 퍼지
+- `PUT /api/admin/tests/:id/results/:mbti/image` → `/api/tests`, `/api/tests/:id` 퍼지
+
+## 3. 정적 에셋 헤더 (구현됨)
+
+`public/_headers`로 HTML/CSS/JS에 Cache-Control과 Early Hints를 적용합니다.
+
+- **HTML**: `max-age=0, must-revalidate` + `Link` 헤더 (preconnect, preload)
+- **CSS/JS**: `max-age=86400, stale-while-revalidate=604800`
+- **Early Hints**: Pages가 `Link` 헤더를 캐시하여 103 Early Hints로 선행 전송 (LCP 개선)
+
+## 4. Cache Rules (대시보드, 선택)
 
 코드 헤더가 실수로 변경되어도 캐시를 안정적으로 유지하려면 대시보드 규칙을 추가합니다.
 
@@ -57,7 +80,7 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/{zone_id}/purge_cache" 
 | API 캐시    | `*dreamp.org/api/tests*` | 60초     |
 | Assets 캐시 | `*dreamp.org/assets/*`   | 1년      |
 
-## 4. D1 인덱스 (적용됨)
+## 5. D1 인덱스 (적용됨)
 
 성능에 영향을 주는 인덱스는 마이그레이션으로 관리합니다.
 
@@ -75,7 +98,7 @@ npm run d1:migrate:local    # 로컬
 npm run d1:migrate:remote   # 프로덕션
 ```
 
-## 5. 이미지 최적화 전략
+## 6. 이미지 최적화 전략
 
 ### Image Resizing (현재 사용 중)
 
@@ -96,7 +119,7 @@ npm run d1:migrate:remote   # 프로덕션
 - 각 `<img>` 요소에 1회성 `error` 이벤트 리스너 등록
 - 리사이징 실패 시 `data-asset-resize` 제거 후 원본 요청
 
-## 6. 에셋 프록시 캐시 정책
+## 7. 에셋 프록시 캐시 정책
 
 `functions/assets/[[path]].ts`에서 키 유형별 캐시 정책:
 
@@ -107,7 +130,7 @@ npm run d1:migrate:remote   # 프로덕션
 | UI 이미지        | `public, max-age=1y, immutable`                    | `assets/images/` 경로     |
 | 테스트 이미지    | `public, max-age=1d, s-maxage=1d`                  | 어드민에서 덮어쓸 수 있음 |
 
-## 7. 서버 사이드 MBTI 계산 (구현됨)
+## 8. 서버 사이드 MBTI 계산 (구현됨)
 
 `POST /api/tests/:id/compute` 엔드포인트로 MBTI 결과를 서버에서 계산합니다.
 

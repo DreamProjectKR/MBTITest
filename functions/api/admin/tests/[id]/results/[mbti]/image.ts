@@ -1,7 +1,7 @@
 import type { MbtiEnv, PagesContext } from "../../../../../../_types";
 
 import {
-  JSON_HEADERS,
+  NO_STORE_HEADERS,
   getImagesPrefix,
   readTest,
   upsertTestImageMeta,
@@ -32,7 +32,7 @@ const MBTI_ORDER = [
 function json(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
     status,
-    headers: JSON_HEADERS,
+    headers: NO_STORE_HEADERS,
   });
 }
 
@@ -163,6 +163,19 @@ export async function onRequestPut(
     .all();
   if (context.env.MBTI_KV) {
     context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));
+  }
+
+  const cache = (globalThis.caches as { default?: Cache } | undefined)?.default;
+  if (cache) {
+    const origin = new URL(context.request.url).origin;
+    context.waitUntil(
+      cache.delete(new Request(`${origin}/api/tests`, { method: "GET" })),
+    );
+    context.waitUntil(
+      cache.delete(
+        new Request(`${origin}/api/tests/${testId}`, { method: "GET" }),
+      ),
+    );
   }
 
   return json({

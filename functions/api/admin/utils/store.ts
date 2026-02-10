@@ -6,6 +6,11 @@ export const JSON_HEADERS: Readonly<Record<string, string>> = {
   "Content-Type": JSON_CONTENT_TYPE,
 };
 
+export const NO_STORE_HEADERS: Readonly<Record<string, string>> = {
+  "Content-Type": JSON_CONTENT_TYPE,
+  "Cache-Control": "no-store",
+};
+
 export function getTestKey(testId: string): string {
   return `assets/${testId}/test.json`;
 }
