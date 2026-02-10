@@ -1,5 +1,5 @@
--- Auto-generated from assets/<test-*>/test.json + seed/seed-config.json
--- DO NOT EDIT BY HAND (edit config/JSON, then re-run: node scripts/generate_d1_seed.cjs)
+-- Auto-generated from assets/<test-*>/test.json, assets/<test-*>/images/*, + seed/seed-config.json
+-- DO NOT EDIT BY HAND (edit config/JSON or assets, then re-run: node scripts/generate_d1_seed.cjs)
 
 PRAGMA foreign_keys = ON;
 
