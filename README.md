@@ -113,7 +113,7 @@ npm run dev                 # wrangler pages dev 실행 (http://localhost:8788)
 | ------------- | ---- | ------------- | --------------------------- |
 | `MBTI_BUCKET` | R2   | `mbti-assets` | 테스트 JSON + 이미지 저장   |
 | `mbti_db`     | D1   | `mbti-db`     | 테스트 메타 + 이미지 메타   |
-| `CACHE_KV`    | KV   | --            | 테스트 상세 캐시 (TTL 300s) |
+| `MBTI_KV`     | KV   | --            | 테스트 상세 캐시 (TTL 300s) |
 
 ### 환경 변수
 

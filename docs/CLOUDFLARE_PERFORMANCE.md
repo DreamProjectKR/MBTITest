@@ -24,7 +24,7 @@
 
 - **읽기**: KV 히트 → 즉시 반환 (D1+R2 접근 없음)
 - **쓰기**: 어드민 저장 시 KV 키 삭제
-- **바인딩**: `CACHE_KV` (wrangler.toml)
+- **바인딩**: `MBTI_KV` (wrangler.toml)
 
 ### Cache API (구현됨)
 

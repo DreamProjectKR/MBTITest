@@ -261,8 +261,8 @@ export async function onRequestPut(
       )
       .all();
 
-    if (context.env.CACHE_KV) {
-      context.waitUntil(context.env.CACHE_KV.delete(`test:${testId}`));
+    if (context.env.MBTI_KV) {
+      context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));
     }
 
     return json({ ok: true });

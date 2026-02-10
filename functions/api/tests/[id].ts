@@ -72,7 +72,7 @@ export async function onRequestGet(
     });
   }
   const ifNoneMatch = context.request.headers.get("if-none-match");
-  const kv = context.env.CACHE_KV;
+  const kv = context.env.MBTI_KV;
   const kvKey = `test:${id}`;
   if (kv) {
     try {

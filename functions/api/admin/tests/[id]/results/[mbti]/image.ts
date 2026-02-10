@@ -159,8 +159,8 @@ export async function onRequestPut(
     .prepare("UPDATE tests SET updated_at = ?1 WHERE test_id = ?2")
     .bind(now, testId)
     .all();
-  if (context.env.CACHE_KV) {
-    context.waitUntil(context.env.CACHE_KV.delete(`test:${testId}`));
+  if (context.env.MBTI_KV) {
+    context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));
   }
 
   return json({
