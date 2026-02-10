@@ -66,6 +66,9 @@ document.querySelector(".test1").onclick = function () {
     const seen = new Set();
     const deduped = [];
     tests.forEach((t) => {
+      // Filter out unpublished tests (unless we are in some debug mode, but for now strict)
+      if (!t.is_published) return;
+
       const key = `${t.id}-${t.path}`;
       if (seen.has(key)) return;
       seen.add(key);

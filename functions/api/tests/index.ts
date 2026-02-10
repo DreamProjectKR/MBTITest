@@ -16,6 +16,7 @@ type TestRow = {
   source_path?: unknown;
   created_at?: unknown;
   updated_at?: unknown;
+  is_published?: unknown;
 };
 
 type TestMeta = {
@@ -26,6 +27,7 @@ type TestMeta = {
   path: string;
   createdAt: string;
   updatedAt: string;
+  is_published: boolean;
 };
 
 function safeJsonArray(value: unknown): string[] {
@@ -53,7 +55,7 @@ export async function onRequestGet(
 
   const rows = await db
     .prepare(
-      "SELECT test_id, title, thumbnail_path, tags_json, source_path, created_at, updated_at FROM tests ORDER BY updated_at DESC, test_id ASC",
+      "SELECT test_id, title, thumbnail_path, tags_json, source_path, created_at, updated_at, is_published FROM tests ORDER BY updated_at DESC, test_id ASC",
     )
     .all<TestRow>();
 
@@ -69,6 +71,7 @@ export async function onRequestGet(
       path: r?.source_path ? String(r.source_path) : "",
       createdAt: r?.created_at ? String(r.created_at) : "",
       updatedAt: r?.updated_at ? String(r.updated_at) : "",
+      is_published: Boolean(r?.is_published),
     };
   });
 
