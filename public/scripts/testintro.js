@@ -75,9 +75,9 @@ function updateOverlayProgress(done, total) {
   const bar = document.querySelector("[data-preload-progress]");
   const text = document.querySelector("[data-preload-text]");
   const pct =
-    total > 0
-      ? Math.max(0, Math.min(100, Math.round((done / total) * 100)))
-      : 0;
+    total > 0 ?
+      Math.max(0, Math.min(100, Math.round((done / total) * 100)))
+    : 0;
   if (bar && bar.style) bar.style.width = `${pct}%`;
   if (text) text.textContent = `테스트 준비 중... (${pct}%)`;
 }
@@ -153,9 +153,9 @@ async function preloadImages(paths, resizeRaw, version, opts) {
   if (!total) return { loaded: 0, failed: 0, total: 0 };
 
   const concurrency =
-    opts && Number.isFinite(Number(opts.concurrency))
-      ? Number(opts.concurrency)
-      : 4;
+    opts && Number.isFinite(Number(opts.concurrency)) ?
+      Number(opts.concurrency)
+    : 4;
   const onProgress =
     opts && typeof opts.onProgress === "function" ? opts.onProgress : null;
 
@@ -337,11 +337,11 @@ async function loadIntroData() {
     } catch (e) {
       // Fallback: index.json을 읽어서 test.json 경로를 찾고, /assets 프록시로 불러온다.
       const index =
-        typeof window.getTestIndex === "function"
-          ? await window.getTestIndex()
-          : await fetch(window.TEST_INDEX_URL || "/assets/index.json").then(
-              (r) => r.json(),
-            );
+        typeof window.getTestIndex === "function" ?
+          await window.getTestIndex()
+        : await fetch(window.TEST_INDEX_URL || "/assets/index.json").then((r) =>
+            r.json(),
+          );
       const tests = Array.isArray(index?.tests) ? index.tests : [];
       const meta = tests.find((t) => String(t?.id || "") === String(testId));
       if (!meta?.path)
@@ -389,11 +389,10 @@ function renderDescription(descEl, description) {
   if (!descEl) return;
   descEl.innerHTML = "";
 
-  const lines = Array.isArray(description)
-    ? description
-    : description
-      ? [description]
-      : [];
+  const lines =
+    Array.isArray(description) ? description
+    : description ? [description]
+    : [];
 
   const frag = document.createDocumentFragment();
   lines.forEach((line) => {

@@ -22,9 +22,9 @@ function assetUrl(path) {
     return window.assetUrl(path);
   }
   const base = String(
-    typeof window !== "undefined" && window.ASSETS_BASE
-      ? window.ASSETS_BASE
-      : "/assets",
+    typeof window !== "undefined" && window.ASSETS_BASE ?
+      window.ASSETS_BASE
+    : "/assets",
   ).replace(/\/+$/, "");
   let clean = String(path).replace(/^\.?\/+/, "");
   clean = clean.replace(/^assets\/+/i, "");
@@ -73,9 +73,9 @@ function createTestCard(test, variantClass, opts = {}) {
 
   const img = document.createElement("img");
   const size =
-    variantClass === "newtest"
-      ? { width: 640, quality: 82, fit: "cover", format: "auto" }
-      : { width: 520, quality: 78, fit: "cover", format: "auto" };
+    variantClass === "newtest" ?
+      { width: 640, quality: 82, fit: "cover", format: "auto" }
+    : { width: 520, quality: 78, fit: "cover", format: "auto" };
   // Single place for asset URL building: `config.js` hydrates `data-asset-*` into real URLs.
   if (test.thumbnail) {
     img.setAttribute("data-asset-src", String(test.thumbnail));

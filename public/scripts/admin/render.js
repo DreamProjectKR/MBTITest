@@ -1,4 +1,4 @@
-import { elements, MBTI_ORDER, state } from "./state.js";
+import { MBTI_ORDER, elements, state } from "./state.js";
 import { formatDescriptionForInput } from "./validation.js";
 
 function toImageUrl(path) {

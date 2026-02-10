@@ -2,23 +2,43 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
     <title>MBTI 테스트 관리자</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles/reset.css" />
-    <link rel="stylesheet" href="./styles/admin.css" />
+    <link
+      rel="stylesheet"
+      href="./styles/reset.css"
+    />
+    <link
+      rel="stylesheet"
+      href="./styles/admin.css"
+    />
   </head>
 
   <body>
     <div class="page-shell admin-shell">
       <header class="site-header admin-header">
         <div class="admin-header__group">
-          <a class="brand" href="./index.html">MBTI Zoo</a>
+          <a
+            class="brand"
+            href="./index.html"
+            >MBTI Zoo</a
+          >
           <div class="admin-header__controls">
             <label class="form-field form-field--inline">
               <span>테스트 선택</span>
@@ -46,23 +66,40 @@
           >
             저장하기
           </button>
-          <span class="save-status" data-save-status>저장 준비</span>
+          <span
+            class="save-status"
+            data-save-status
+            >저장 준비</span
+          >
         </div>
       </header>
 
       <main class="admin-main">
-        <section class="admin-panel" aria-labelledby="test-meta-heading">
+        <section
+          class="admin-panel"
+          aria-labelledby="test-meta-heading"
+        >
           <div class="section__header">
             <h2 id="test-meta-heading">테스트 기본 정보</h2>
           </div>
-          <form class="form-grid" data-test-meta-form>
+          <form
+            class="form-grid"
+            data-test-meta-form
+          >
             <label class="form-field">
               <span>제작자</span>
-              <input type="text" name="author" />
+              <input
+                type="text"
+                name="author"
+              />
             </label>
             <label class="form-field">
               <span>제작자 이미지 업로드</span>
-              <input type="file" name="authorImgFile" accept="image/*" />
+              <input
+                type="file"
+                name="authorImgFile"
+                accept="image/*"
+              />
               <input
                 type="text"
                 name="authorImg"
@@ -72,7 +109,11 @@
             </label>
             <label class="form-field">
               <span>테스트 제목</span>
-              <input type="text" name="title" required />
+              <input
+                type="text"
+                name="title"
+                required
+              />
             </label>
             <label class="form-field">
               <span>설명</span>
@@ -84,11 +125,18 @@
             </label>
             <label class="form-field">
               <span>해시태그 (쉼표 구분)</span>
-              <input type="text" name="tags" />
+              <input
+                type="text"
+                name="tags"
+              />
             </label>
             <label class="form-field">
               <span>썸네일 업로드</span>
-              <input type="file" name="thumbnailFile" accept="image/*" />
+              <input
+                type="file"
+                name="thumbnailFile"
+                accept="image/*"
+              />
               <input
                 type="text"
                 name="thumbnail"
@@ -99,11 +147,17 @@
           </form>
         </section>
 
-        <section class="admin-panel" aria-labelledby="question-builder-heading">
+        <section
+          class="admin-panel"
+          aria-labelledby="question-builder-heading"
+        >
           <div class="section__header">
             <h2 id="question-builder-heading">문항 작성 (2지선다)</h2>
           </div>
-          <form class="question-form" data-question-form>
+          <form
+            class="question-form"
+            data-question-form
+          >
             <div class="form-field">
               <label
                 >질문 내용
@@ -133,7 +187,10 @@
             <div class="form-field">
               <label>
                 축(영역)
-                <select name="axis" aria-label="MBTI 축">
+                <select
+                  name="axis"
+                  aria-label="MBTI 축"
+                >
                   <option value="EI">E / I</option>
                   <option value="SN">S / N</option>
                   <option value="TF">T / F</option>
@@ -144,7 +201,10 @@
             <div class="form-field">
               <label>
                 선택지 방향(A가 어떤 쪽인지)
-                <select name="answerADirection" aria-label="A 선택지 방향">
+                <select
+                  name="answerADirection"
+                  aria-label="A 선택지 방향"
+                >
                   <option value="positive">앞 글자</option>
                   <option value="negative">뒷 글자</option>
                 </select>
@@ -170,21 +230,38 @@
                 />
               </fieldset>
             </div>
-            <button class="ds-button ds-button--primary" type="submit">
+            <button
+              class="ds-button ds-button--primary"
+              type="submit"
+            >
               문항 추가
             </button>
           </form>
-          <ul class="question-list" data-question-list aria-live="polite"></ul>
+          <ul
+            class="question-list"
+            data-question-list
+            aria-live="polite"
+          ></ul>
         </section>
 
-        <section class="admin-panel" aria-labelledby="result-heading">
+        <section
+          class="admin-panel"
+          aria-labelledby="result-heading"
+        >
           <div class="section__header">
             <h2 id="result-heading">MBTI 결과 콘텐츠</h2>
           </div>
-          <form class="result-editor" data-result-form>
+          <form
+            class="result-editor"
+            data-result-form
+          >
             <label class="form-field">
               <span>MBTI 유형</span>
-              <select name="code" aria-label="MBTI 유형 선택" required>
+              <select
+                name="code"
+                aria-label="MBTI 유형 선택"
+                required
+              >
                 <option value="INTJ">INTJ</option>
                 <option value="INTP">INTP</option>
                 <option value="ENTJ">ENTJ</option>
@@ -223,10 +300,17 @@
             </label>
             <label class="form-field">
               <span>설명(요약)</span>
-              <textarea name="summary" rows="3" required></textarea>
+              <textarea
+                name="summary"
+                rows="3"
+                required
+              ></textarea>
             </label>
             <div class="form-field">
-              <button class="ds-button ds-button--secondary" type="submit">
+              <button
+                class="ds-button ds-button--secondary"
+                type="submit"
+              >
                 결과 저장
               </button>
               <button
@@ -238,7 +322,10 @@
               </button>
             </div>
           </form>
-          <ul class="result-list" data-result-list></ul>
+          <ul
+            class="result-list"
+            data-result-list
+          ></ul>
         </section>
       </main>
     </div>

@@ -1,4 +1,4 @@
-import { AXIS_MAP, elements, REQUIRED_QUESTION_COUNT } from "./state.js";
+import { AXIS_MAP, REQUIRED_QUESTION_COUNT, elements } from "./state.js";
 import { parseDescriptionInput } from "./validation.js";
 
 export function syncAnswerDirectionOptions() {
@@ -108,9 +108,8 @@ export function bindForms({
     event.preventDefault();
     const activeTest = getActiveTest();
     if (!activeTest || !elements.questionForm) return;
-    activeTest.questions = Array.isArray(activeTest.questions)
-      ? activeTest.questions
-      : [];
+    activeTest.questions =
+      Array.isArray(activeTest.questions) ? activeTest.questions : [];
     if (activeTest.questions.length >= REQUIRED_QUESTION_COUNT) {
       showToast(
         `문항은 ${REQUIRED_QUESTION_COUNT}개까지 등록할 수 있습니다.`,

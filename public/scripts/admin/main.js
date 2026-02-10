@@ -1,11 +1,4 @@
 import {
-  elements,
-  MBTI_ORDER,
-  REQUIRED_QUESTION_COUNT,
-  setActiveTest,
-  state,
-} from "./state.js";
-import {
   fetchImageList,
   fetchTestDetail,
   fetchTestsIndex,
@@ -14,11 +7,6 @@ import {
   uploadTestImage,
 } from "./api.js";
 import { bindForms } from "./forms.js";
-import {
-  findByBaseName,
-  normalizeAssetsPath,
-  validateTestForSave,
-} from "./validation.js";
 import {
   hydrateForms,
   populateTestSelector,
@@ -30,6 +18,18 @@ import {
   setSavingState,
   showToast,
 } from "./render.js";
+import {
+  MBTI_ORDER,
+  REQUIRED_QUESTION_COUNT,
+  elements,
+  setActiveTest,
+  state,
+} from "./state.js";
+import {
+  findByBaseName,
+  normalizeAssetsPath,
+  validateTestForSave,
+} from "./validation.js";
 
 let isHydratingMeta = false;
 
