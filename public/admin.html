@@ -1,169 +1,253 @@
 <!doctype html>
 <html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MBTI 테스트 관리자</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles/reset.css" />
+    <link rel="stylesheet" href="./styles/admin.css" />
+  </head>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MBTI 테스트 관리자</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="./styles/reset.css" />
-  <link rel="stylesheet" href="./styles/admin.css" />
-</head>
-
-<body>
-  <div class="page-shell admin-shell">
-    <header class="site-header admin-header">
-      <div class="admin-header__group">
-        <a class="brand" href="./index.html">MBTI Zoo</a>
-        <div class="admin-header__controls">
-          <label class="form-field form-field--inline">
-            <span>테스트 선택</span>
-            <select id="testSelect" name="testSelect" data-test-select aria-label="현재 편집할 테스트 선택"></select>
-          </label>
-          <button class="ds-button ds-button--secondary" type="button" data-create-test>
-            새 테스트
+  <body>
+    <div class="page-shell admin-shell">
+      <header class="site-header admin-header">
+        <div class="admin-header__group">
+          <a class="brand" href="./index.html">MBTI Zoo</a>
+          <div class="admin-header__controls">
+            <label class="form-field form-field--inline">
+              <span>테스트 선택</span>
+              <select
+                id="testSelect"
+                name="testSelect"
+                data-test-select
+                aria-label="현재 편집할 테스트 선택"
+              ></select>
+            </label>
+            <button
+              class="ds-button ds-button--secondary"
+              type="button"
+              data-create-test
+            >
+              새 테스트
+            </button>
+          </div>
+        </div>
+        <div class="admin-header__actions">
+          <button
+            class="ds-button ds-button--primary"
+            type="button"
+            data-save-test
+          >
+            저장하기
           </button>
+          <span class="save-status" data-save-status>저장 준비</span>
         </div>
-      </div>
-      <div class="admin-header__actions">
-        <button class="ds-button ds-button--primary" type="button" data-save-test>
-          저장하기
-        </button>
-        <span class="save-status" data-save-status>저장 준비</span>
-      </div>
-    </header>
+      </header>
 
-    <main class="admin-main">
-      <section class="admin-panel" aria-labelledby="test-meta-heading">
-        <div class="section__header">
-          <h2 id="test-meta-heading">테스트 기본 정보</h2>
-        </div>
-        <form class="form-grid" data-test-meta-form>
-          <label class="form-field">
-            <span>제작자</span>
-            <input type="text" name="author" />
-          </label>
-          <label class="form-field">
-            <span>제작자 이미지 업로드</span>
-            <input type="file" name="authorImgFile" accept="image/*" />
-            <input type="text" name="authorImg" placeholder="업로드 후 자동 입력" readonly />
-          </label>
-          <label class="form-field">
-            <span>테스트 제목</span>
-            <input type="text" name="title" required />
-          </label>
-          <label class="form-field">
-            <span>설명</span>
-            <textarea name="description" rows="4" placeholder="엔터로 줄바꿈하면 각 줄이 배열로 저장됩니다."></textarea>
-          </label>
-          <label class="form-field">
-            <span>해시태그 (쉼표 구분)</span>
-            <input type="text" name="tags" />
-          </label>
-          <label class="form-field">
-            <span>썸네일 업로드</span>
-            <input type="file" name="thumbnailFile" accept="image/*" />
-            <input type="text" name="thumbnail" placeholder="업로드 후 자동 입력" readonly />
-          </label>
-        </form>
-      </section>
+      <main class="admin-main">
+        <section class="admin-panel" aria-labelledby="test-meta-heading">
+          <div class="section__header">
+            <h2 id="test-meta-heading">테스트 기본 정보</h2>
+          </div>
+          <form class="form-grid" data-test-meta-form>
+            <label class="form-field">
+              <span>제작자</span>
+              <input type="text" name="author" />
+            </label>
+            <label class="form-field">
+              <span>제작자 이미지 업로드</span>
+              <input type="file" name="authorImgFile" accept="image/*" />
+              <input
+                type="text"
+                name="authorImg"
+                placeholder="업로드 후 자동 입력"
+                readonly
+              />
+            </label>
+            <label class="form-field">
+              <span>테스트 제목</span>
+              <input type="text" name="title" required />
+            </label>
+            <label class="form-field">
+              <span>설명</span>
+              <textarea
+                name="description"
+                rows="4"
+                placeholder="엔터로 줄바꿈하면 각 줄이 배열로 저장됩니다."
+              ></textarea>
+            </label>
+            <label class="form-field">
+              <span>해시태그 (쉼표 구분)</span>
+              <input type="text" name="tags" />
+            </label>
+            <label class="form-field">
+              <span>썸네일 업로드</span>
+              <input type="file" name="thumbnailFile" accept="image/*" />
+              <input
+                type="text"
+                name="thumbnail"
+                placeholder="업로드 후 자동 입력"
+                readonly
+              />
+            </label>
+          </form>
+        </section>
 
-      <section class="admin-panel" aria-labelledby="question-builder-heading">
-        <div class="section__header">
-          <h2 id="question-builder-heading">문항 작성 (2지선다)</h2>
-        </div>
-        <form class="question-form" data-question-form>
-          <div class="form-field">
-            <label>질문 내용 <input type="text" name="questionLabel" placeholder="질문 텍스트" required /></label>
+        <section class="admin-panel" aria-labelledby="question-builder-heading">
+          <div class="section__header">
+            <h2 id="question-builder-heading">문항 작성 (2지선다)</h2>
           </div>
-          <div class="form-field">
-            <label>질문 이미지 업로드 <input type="file" name="questionImageFile" accept="image/*" required /></label>
-            <input type="text" name="questionImage" placeholder="업로드 후 자동 입력" readonly />
+          <form class="question-form" data-question-form>
+            <div class="form-field">
+              <label
+                >질문 내용
+                <input
+                  type="text"
+                  name="questionLabel"
+                  placeholder="질문 텍스트"
+                  required
+              /></label>
+            </div>
+            <div class="form-field">
+              <label
+                >질문 이미지 업로드
+                <input
+                  type="file"
+                  name="questionImageFile"
+                  accept="image/*"
+                  required
+              /></label>
+              <input
+                type="text"
+                name="questionImage"
+                placeholder="업로드 후 자동 입력"
+                readonly
+              />
+            </div>
+            <div class="form-field">
+              <label>
+                축(영역)
+                <select name="axis" aria-label="MBTI 축">
+                  <option value="EI">E / I</option>
+                  <option value="SN">S / N</option>
+                  <option value="TF">T / F</option>
+                  <option value="JP">J / P</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-field">
+              <label>
+                선택지 방향(A가 어떤 쪽인지)
+                <select name="answerADirection" aria-label="A 선택지 방향">
+                  <option value="positive">앞 글자</option>
+                  <option value="negative">뒷 글자</option>
+                </select>
+              </label>
+            </div>
+            <div class="answer-grid">
+              <fieldset>
+                <legend>답변 A</legend>
+                <input
+                  type="text"
+                  name="answerAText"
+                  placeholder="답변 텍스트"
+                  required
+                />
+              </fieldset>
+              <fieldset>
+                <legend>답변 B</legend>
+                <input
+                  type="text"
+                  name="answerBText"
+                  placeholder="답변 텍스트"
+                  required
+                />
+              </fieldset>
+            </div>
+            <button class="ds-button ds-button--primary" type="submit">
+              문항 추가
+            </button>
+          </form>
+          <ul class="question-list" data-question-list aria-live="polite"></ul>
+        </section>
+
+        <section class="admin-panel" aria-labelledby="result-heading">
+          <div class="section__header">
+            <h2 id="result-heading">MBTI 결과 콘텐츠</h2>
           </div>
-          <div class="form-field">
-            <label>
-              축(영역)
-              <select name="axis" aria-label="MBTI 축">
-                <option value="EI">E / I</option>
-                <option value="SN">S / N</option>
-                <option value="TF">T / F</option>
-                <option value="JP">J / P</option>
+          <form class="result-editor" data-result-form>
+            <label class="form-field">
+              <span>MBTI 유형</span>
+              <select name="code" aria-label="MBTI 유형 선택" required>
+                <option value="INTJ">INTJ</option>
+                <option value="INTP">INTP</option>
+                <option value="ENTJ">ENTJ</option>
+                <option value="ENTP">ENTP</option>
+                <option value="INFJ">INFJ</option>
+                <option value="INFP">INFP</option>
+                <option value="ENFJ">ENFJ</option>
+                <option value="ENFP">ENFP</option>
+                <option value="ISTJ">ISTJ</option>
+                <option value="ISTP">ISTP</option>
+                <option value="ESTJ">ESTJ</option>
+                <option value="ESTP">ESTP</option>
+                <option value="ISFJ">ISFJ</option>
+                <option value="ISFP">ISFP</option>
+                <option value="ESFJ">ESFJ</option>
+                <option value="ESFP">ESFP</option>
               </select>
             </label>
-          </div>
-          <div class="form-field">
-            <label>
-              선택지 방향(A가 어떤 쪽인지)
-              <select name="answerADirection" aria-label="A 선택지 방향">
-                <option value="positive">앞 글자</option>
-                <option value="negative">뒷 글자</option>
-              </select>
+            <label class="form-field">
+              <span>결과 이미지 업로드</span>
+              <input
+                type="file"
+                accept="image/*"
+                name="resultImageFile"
+                required
+              />
             </label>
-          </div>
-          <div class="answer-grid">
-            <fieldset>
-              <legend>답변 A</legend>
-              <input type="text" name="answerAText" placeholder="답변 텍스트" required />
-            </fieldset>
-            <fieldset>
-              <legend>답변 B</legend>
-              <input type="text" name="answerBText" placeholder="답변 텍스트" required />
-            </fieldset>
-          </div>
-          <button class="ds-button ds-button--primary" type="submit">문항 추가</button>
-        </form>
-        <ul class="question-list" data-question-list aria-live="polite"></ul>
-      </section>
+            <label class="form-field">
+              <span>결과 이미지 일괄 업로드 (파일명: INTJ.png 등)</span>
+              <input
+                type="file"
+                accept="image/*"
+                name="bulkResultFiles"
+                multiple
+              />
+            </label>
+            <label class="form-field">
+              <span>설명(요약)</span>
+              <textarea name="summary" rows="3" required></textarea>
+            </label>
+            <div class="form-field">
+              <button class="ds-button ds-button--secondary" type="submit">
+                결과 저장
+              </button>
+              <button
+                class="ds-button ds-button--ghost"
+                type="button"
+                data-bulk-result-upload
+              >
+                일괄 업로드
+              </button>
+            </div>
+          </form>
+          <ul class="result-list" data-result-list></ul>
+        </section>
+      </main>
+    </div>
 
-      <section class="admin-panel" aria-labelledby="result-heading">
-        <div class="section__header">
-          <h2 id="result-heading">MBTI 결과 콘텐츠</h2>
-        </div>
-        <form class="result-editor" data-result-form>
-          <label class="form-field">
-            <span>MBTI 유형</span>
-            <select name="code" aria-label="MBTI 유형 선택" required>
-              <option value="INTJ">INTJ</option>
-              <option value="INTP">INTP</option>
-              <option value="ENTJ">ENTJ</option>
-              <option value="ENTP">ENTP</option>
-              <option value="INFJ">INFJ</option>
-              <option value="INFP">INFP</option>
-              <option value="ENFJ">ENFJ</option>
-              <option value="ENFP">ENFP</option>
-              <option value="ISTJ">ISTJ</option>
-              <option value="ISTP">ISTP</option>
-              <option value="ESTJ">ESTJ</option>
-              <option value="ESTP">ESTP</option>
-              <option value="ISFJ">ISFJ</option>
-              <option value="ISFP">ISFP</option>
-              <option value="ESFJ">ESFJ</option>
-              <option value="ESFP">ESFP</option>
-            </select>
-          </label>
-          <label class="form-field">
-            <span>결과 이미지 업로드</span>
-            <input type="file" accept="image/*" name="resultImageFile" required />
-          </label>
-          <label class="form-field">
-            <span>설명(요약)</span>
-            <textarea name="summary" rows="3" required></textarea>
-          </label>
-          <div class="form-field">
-            <button class="ds-button ds-button--secondary" type="submit">결과 저장</button>
-          </div>
-        </form>
-        <ul class="result-list" data-result-list></ul>
-      </section>
-    </main>
-  </div>
-
-  <script src="./scripts/config.js"></script>
-  <script type="module" src="./scripts/admin.js" crossorigin="anonymous"></script>
-</body>
-
+    <script src="./scripts/config.js"></script>
+    <script
+      type="module"
+      src="./scripts/admin.js"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>
