@@ -40,6 +40,7 @@ type TestPayload = {
   authorImg?: unknown;
   thumbnail?: unknown;
   tags?: unknown;
+  isPublished?: unknown;
   path?: unknown;
   createdAt?: unknown;
   updatedAt?: unknown;
@@ -200,6 +201,7 @@ export async function onRequestPut(
   const title = String(p.title ?? "");
   const thumbnail = String(p.thumbnail ?? "");
   const authorImg = String(p.authorImg ?? "");
+  const isPublished = Boolean(p.isPublished) ? 1 : 0;
 
   const questions =
     Array.isArray(p.questions) ? (p.questions as Question[]) : [];
@@ -223,16 +225,18 @@ export async function onRequestPut(
 
     // 2) Store/refresh meta in D1
     const now = new Date().toISOString().split("T")[0] ?? "";
+    const nowTs = new Date().toISOString();
     const createdAt = String(p.createdAt ?? now);
     const updatedAt = String(p.updatedAt ?? now);
     const tagsJson = JSON.stringify(Array.isArray(p.tags) ? p.tags : []);
     const descriptionJson = JSON.stringify(p.description ?? null);
+    const questionCount = questions.length;
 
     await db
       .prepare(
         `
-        INSERT INTO tests (test_id, title, description_json, author, author_img_path, thumbnail_path, source_path, tags_json, created_at, updated_at)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
+        INSERT INTO tests (test_id, title, description_json, author, author_img_path, thumbnail_path, source_path, tags_json, question_count, is_published, created_at, updated_at, created_ts, updated_ts)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)
         ON CONFLICT(test_id) DO UPDATE SET
           title = excluded.title,
           description_json = excluded.description_json,
@@ -241,8 +245,12 @@ export async function onRequestPut(
           thumbnail_path = excluded.thumbnail_path,
           source_path = excluded.source_path,
           tags_json = excluded.tags_json,
+          question_count = excluded.question_count,
+          is_published = excluded.is_published,
           created_at = COALESCE(tests.created_at, excluded.created_at),
-          updated_at = excluded.updated_at
+          updated_at = excluded.updated_at,
+          created_ts = COALESCE(tests.created_ts, excluded.created_ts),
+          updated_ts = excluded.updated_ts
         `,
       )
       .bind(
@@ -254,8 +262,12 @@ export async function onRequestPut(
         thumbnail,
         String(p.path ?? `${testId}/test.json`),
         tagsJson,
+        questionCount,
+        isPublished,
         createdAt,
         updatedAt,
+        nowTs, // created_ts (will be ignored on update due to COALESCE)
+        nowTs, // updated_ts
       )
       .all();
 

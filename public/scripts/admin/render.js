@@ -72,6 +72,7 @@ export function populateTestSelector() {
 export function hydrateForms(test) {
   if (!elements.metaForm) return;
   const form = elements.metaForm;
+  form.elements.isPublished.checked = Boolean(test?.isPublished);
   form.elements.author.value = test?.author ?? "";
   form.elements.authorImg.value = test?.authorImg ?? "";
   form.elements.title.value = test?.title ?? "";

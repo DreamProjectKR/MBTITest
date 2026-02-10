@@ -57,6 +57,7 @@ function buildMetaFromTest(test) {
     path: test.path ?? `${test.id}/test.json`,
     createdAt: test.createdAt ?? now,
     updatedAt: test.updatedAt ?? now,
+    isPublished: Boolean(test.isPublished),
   };
 }
 
@@ -168,6 +169,7 @@ function createTest() {
   const newTest = {
     id: `test-${rawId.slice(0, 8)}`,
     title: "새 테스트",
+    isPublished: false,
     description: [],
     tags: [],
     thumbnail: "",
@@ -301,6 +303,7 @@ export async function initAdmin() {
       path: meta.path ?? `${meta.id}/test.json`,
       createdAt: meta.createdAt ?? "",
       updatedAt: meta.updatedAt ?? "",
+      isPublished: Boolean(meta.is_published), // D1 returns snake_case
     }));
     setActiveTest(state.tests[0]?.id ?? null);
     populateTestSelector();

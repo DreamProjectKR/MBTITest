@@ -54,6 +54,7 @@ export function bindForms({
     const activeTest = getActiveTest();
     if (!activeTest || !elements.metaForm) return;
     const form = elements.metaForm;
+    activeTest.isPublished = form.elements.isPublished.checked;
     activeTest.author = form.elements.author.value;
     activeTest.authorImg = form.elements.authorImg.value;
     activeTest.title = form.elements.title.value;
