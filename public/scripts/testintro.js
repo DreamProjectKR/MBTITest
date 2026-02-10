@@ -75,7 +75,9 @@ function updateOverlayProgress(done, total) {
   const bar = document.querySelector("[data-preload-progress]");
   const text = document.querySelector("[data-preload-text]");
   const pct =
-    total > 0 ? Math.max(0, Math.min(100, Math.round((done / total) * 100))) : 0;
+    total > 0
+      ? Math.max(0, Math.min(100, Math.round((done / total) * 100)))
+      : 0;
   if (bar && bar.style) bar.style.width = `${pct}%`;
   if (text) text.textContent = `테스트 준비 중... (${pct}%)`;
 }
@@ -124,7 +126,8 @@ function getQuestionImageCandidates(testId, question) {
 function extractImagePaths(test) {
   const testId = test?.id ? String(test.id) : "";
   const questions = Array.isArray(test?.questions) ? test.questions : [];
-  const resultsObj = test?.results && typeof test.results === "object" ? test.results : null;
+  const resultsObj =
+    test?.results && typeof test.results === "object" ? test.results : null;
 
   const questionPaths = [];
   for (const q of questions) {
@@ -150,8 +153,11 @@ async function preloadImages(paths, resizeRaw, version, opts) {
   if (!total) return { loaded: 0, failed: 0, total: 0 };
 
   const concurrency =
-    opts && Number.isFinite(Number(opts.concurrency)) ? Number(opts.concurrency) : 4;
-  const onProgress = opts && typeof opts.onProgress === "function" ? opts.onProgress : null;
+    opts && Number.isFinite(Number(opts.concurrency))
+      ? Number(opts.concurrency)
+      : 4;
+  const onProgress =
+    opts && typeof opts.onProgress === "function" ? opts.onProgress : null;
 
   let loaded = 0;
   let failed = 0;
@@ -198,8 +204,12 @@ function startBackgroundPrefetch(test) {
 
   const runCritical = () =>
     Promise.all([
-      preloadImages(criticalQuestions, QUESTION_RESIZE_RAW, version, { concurrency: 2 }),
-      preloadImages(resultPaths, RESULT_RESIZE_RAW, version, { concurrency: 2 }),
+      preloadImages(criticalQuestions, QUESTION_RESIZE_RAW, version, {
+        concurrency: 2,
+      }),
+      preloadImages(resultPaths, RESULT_RESIZE_RAW, version, {
+        concurrency: 2,
+      }),
     ]);
   const runRest = () =>
     preloadImages(rest, QUESTION_RESIZE_RAW, version, { concurrency: 2 });
@@ -267,19 +277,19 @@ async function ensureCriticalPreloaded(test, timeoutMs) {
 window.addEventListener(
   "scroll",
   () => {
-  if (!header) return;
-  const isMobile = window.matchMedia("(max-width: 900px)").matches;
-  if (window.scrollY > headerOffset) {
-    header.classList.add("fixed-header", "bg-on");
-    if (isMobile && headerScroll) {
-      headerScroll.style.marginBottom = "35px";
+    if (!header) return;
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
+    if (window.scrollY > headerOffset) {
+      header.classList.add("fixed-header", "bg-on");
+      if (isMobile && headerScroll) {
+        headerScroll.style.marginBottom = "35px";
+      }
+    } else {
+      header.classList.remove("fixed-header", "bg-on");
+      if (headerScroll) {
+        headerScroll.style.marginBottom = "";
+      }
     }
-  } else {
-    header.classList.remove("fixed-header", "bg-on");
-    if (headerScroll) {
-      headerScroll.style.marginBottom = "";
-    }
-  }
   },
   { passive: true },
 );
@@ -329,18 +339,17 @@ async function loadIntroData() {
       const index =
         typeof window.getTestIndex === "function"
           ? await window.getTestIndex()
-          : await fetch(window.TEST_INDEX_URL || "/assets/index.json").then((r) =>
-              r.json(),
+          : await fetch(window.TEST_INDEX_URL || "/assets/index.json").then(
+              (r) => r.json(),
             );
       const tests = Array.isArray(index?.tests) ? index.tests : [];
       const meta = tests.find((t) => String(t?.id || "") === String(testId));
-      if (!meta?.path) throw new Error("index.json에 테스트가 없습니다: " + testId);
+      if (!meta?.path)
+        throw new Error("index.json에 테스트가 없습니다: " + testId);
 
-      const resolveUrl =
-        typeof window.resolveTestDataUrl === "function"
-          ? window.resolveTestDataUrl
-          : (rawPath) => rawPath;
-      const url = resolveUrl(meta.path);
+      const path = String(meta.path || "").trim();
+      const url =
+        typeof window.assetUrl === "function" ? window.assetUrl(path) : path;
 
       const res2 = await fetch(url);
       if (!res2.ok) throw new Error(`테스트 데이터 로딩 실패: ${res2.status}`);
@@ -383,8 +392,8 @@ function renderDescription(descEl, description) {
   const lines = Array.isArray(description)
     ? description
     : description
-    ? [description]
-    : [];
+      ? [description]
+      : [];
 
   const frag = document.createDocumentFragment();
   lines.forEach((line) => {
@@ -416,7 +425,10 @@ function renderIntro(data) {
         "width=480,quality=82,fit=cover,format=auto",
       );
       thumbnailEl.setAttribute("data-asset-srcset", "360,480,720");
-      thumbnailEl.setAttribute("data-asset-sizes", "(max-width: 900px) 92vw, 350px");
+      thumbnailEl.setAttribute(
+        "data-asset-sizes",
+        "(max-width: 900px) 92vw, 350px",
+      );
       if (version) thumbnailEl.setAttribute("data-asset-version", version);
       hydrateAssetElement(thumbnailEl);
     }
@@ -481,8 +493,12 @@ function setupStartButton(testId) {
   startBtn.addEventListener("click", async () => {
     setOverlayVisible(true);
     try {
-      const test =
-        lastLoadedTest || readCachedTestJson(testId) || { id: testId, questions: [], results: {} };
+      const test = lastLoadedTest ||
+        readCachedTestJson(testId) || {
+          id: testId,
+          questions: [],
+          results: {},
+        };
       await ensureCriticalPreloaded(test, 2500);
     } catch (e) {
       // Ignore preload errors; proceed.

@@ -13,49 +13,22 @@
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "wrangler dev"
+    "dev": "wrangler pages dev public",
+    "pages:dev": "wrangler pages dev public",
+    "pages:publish": "wrangler pages publish public",
+    "d1:migrate:local": "wrangler d1 migrations apply mbti-db --local",
+    "d1:migrate:remote": "wrangler d1 migrations apply mbti-db --remote",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "test": "echo \"No automated tests configured\""
   },
-  "dependencies": {
-    "acorn": "^8.14.0",
-    "acorn-walk": "^8.3.2",
-    "blake3-wasm": "^2.1.5",
-    "color": "^4.2.3",
-    "color-convert": "^2.0.1",
-    "color-name": "^1.1.4",
-    "color-string": "^1.9.1",
-    "cookie": "^1.1.1",
-    "detect-libc": "^2.1.2",
-    "error-stack-parser-es": "^1.0.5",
-    "esbuild": "^0.27.0",
-    "exit-hook": "^2.2.1",
-    "fsevents": "^2.3.3",
-    "glob-to-regexp": "^0.4.1",
-    "is-arrayish": "^0.3.4",
-    "kleur": "^4.1.5",
-    "mime": "^3.0.0",
-    "miniflare": "^4.20251217.0",
-    "path-to-regexp": "^6.3.0",
-    "pathe": "^2.0.3",
-    "semver": "^7.7.3",
-    "sharp": "^0.33.5",
-    "simple-swizzle": "^0.2.4",
-    "stoppable": "^1.1.0",
-    "supports-color": "^10.2.2",
-    "undici": "^7.14.0",
-    "unenv": "^2.0.0-rc.24",
-    "workerd": "^1.20251217.0",
-    "ws": "^8.18.0",
-    "youch": "^4.1.0-beta.10",
-    "youch-core": "^0.3.3",
-    "zod": "^3.22.3"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "prettier": "^3.6.2",
     "wrangler": "^4.56.0"
   }
 }

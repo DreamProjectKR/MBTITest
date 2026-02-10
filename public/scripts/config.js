@@ -8,20 +8,15 @@
   // Keep the default explicit so callers can pass clean paths like `images/x.png`.
   const DEFAULT_ASSETS_BASE = "/assets";
   const DEFAULT_API_TESTS_BASE = "/api/tests";
-  // Legacy: `assets/index.json` used to be served from R2.
-  // New default: fetch test index from D1 via API (`GET /api/tests`).
-  const DEFAULT_TEST_INDEX_PATH = "assets/index.json";
 
   const ASSETS_BASE = String(window.ASSETS_BASE || DEFAULT_ASSETS_BASE).replace(
     /\/+$/,
     "",
   );
   const API_TESTS_BASE = window.API_TESTS_BASE || DEFAULT_API_TESTS_BASE;
-  const TEST_INDEX_PATH = window.TEST_INDEX_PATH || DEFAULT_TEST_INDEX_PATH;
 
   window.ASSETS_BASE = ASSETS_BASE;
   window.API_TESTS_BASE = API_TESTS_BASE;
-  window.TEST_INDEX_PATH = TEST_INDEX_PATH;
 
   window.assetUrl = function assetUrl(path) {
     if (!path) return "";
@@ -56,7 +51,9 @@
     // Local dev (wrangler pages dev): `/cdn-cgi/image` is not reliably available.
     // To keep asset loading consistent, disable resize and just return `/assets/...`.
     const host =
-      typeof window !== "undefined" && window.location ? window.location.hostname : "";
+      typeof window !== "undefined" && window.location
+        ? window.location.hostname
+        : "";
     const isLocalhost = host === "localhost" || host === "127.0.0.1";
     if (isLocalhost) return base;
 
@@ -107,32 +104,11 @@
 
   // Test index source:
   // - Default: same-origin `/api/tests` (served by Pages Functions using D1).
-  // - Legacy fallback: `/assets/index.json` (served by Pages Functions proxy from R2).
   // - You can override by setting `window.TEST_INDEX_URL` before this script runs.
-  const DEFAULT_TEST_INDEX_URL = String(API_TESTS_BASE || DEFAULT_API_TESTS_BASE);
-  window.TEST_INDEX_URL =
-    window.TEST_INDEX_URL || DEFAULT_TEST_INDEX_URL || window.assetUrl(TEST_INDEX_PATH);
-
-  function getIndexOrigin() {
-    try {
-      return new URL(window.TEST_INDEX_URL, window.location.origin).origin;
-    } catch (e) {
-      return "";
-    }
-  }
-
-  // Convert an index `path` field into a usable URL.
-  // In current production, test JSON is fetched via the API, so this is mostly a utility.
-  window.resolveTestDataUrl = function resolveTestDataUrl(rawPath) {
-    if (!rawPath) return "";
-    const str = String(rawPath).trim();
-    if (/^https?:\/\//i.test(str)) return str;
-    const clean = str.replace(/^\.?\/+/, "");
-    const normalized = clean.startsWith("assets/") ? clean : `assets/${clean}`;
-    const origin = getIndexOrigin();
-    if (origin) return `${origin}/${normalized}`;
-    return window.assetUrl(normalized);
-  };
+  const DEFAULT_TEST_INDEX_URL = String(
+    API_TESTS_BASE || DEFAULT_API_TESTS_BASE,
+  );
+  window.TEST_INDEX_URL = window.TEST_INDEX_URL || DEFAULT_TEST_INDEX_URL;
 
   // index.json을 한 번만 가져오도록 메모이즈.
   window.getTestIndex = (function createGetTestIndex() {
@@ -168,12 +144,15 @@
   if (typeof document !== "undefined") {
     const root = document.documentElement.style;
     root.setProperty("--ASSETS_BASE", ASSETS_BASE);
-    const resizedHeader = window.assetResizeUrl("assets/images/HeaderBackgroundImg.png", {
-      width: 1440,
-      quality: 72,
-      fit: "cover",
-      format: "auto",
-    });
+    const resizedHeader = window.assetResizeUrl(
+      "assets/images/HeaderBackgroundImg.png",
+      {
+        width: 1440,
+        quality: 72,
+        fit: "cover",
+        format: "auto",
+      },
+    );
     const resizedHeaderNon = window.assetResizeUrl(
       "assets/images/HeaderBackgroundImgNon.png",
       {
@@ -183,24 +162,18 @@
         format: "auto",
       },
     );
-    const resizedFooter = window.assetResizeUrl("assets/images/FooterBackgroundImg.png", {
-      width: 1440,
-      quality: 72,
-      fit: "cover",
-      format: "auto",
-    });
-    root.setProperty(
-      "--asset-header-bg",
-      `url(${resizedHeader})`,
+    const resizedFooter = window.assetResizeUrl(
+      "assets/images/FooterBackgroundImg.png",
+      {
+        width: 1440,
+        quality: 72,
+        fit: "cover",
+        format: "auto",
+      },
     );
-    root.setProperty(
-      "--asset-header-bg-non",
-      `url(${resizedHeaderNon})`,
-    );
-    root.setProperty(
-      "--asset-footer-bg",
-      `url(${resizedFooter})`,
-    );
+    root.setProperty("--asset-header-bg", `url(${resizedHeader})`);
+    root.setProperty("--asset-header-bg-non", `url(${resizedHeaderNon})`);
+    root.setProperty("--asset-footer-bg", `url(${resizedFooter})`);
   }
 
   // data-asset-* 속성 자동 주입 (img/src, link/href, bg)
@@ -261,17 +234,13 @@
     if (!Number.isFinite(rendered) || rendered <= 0) return null;
 
     const dpr =
-      typeof window !== "undefined" && typeof window.devicePixelRatio === "number"
+      typeof window !== "undefined" &&
+      typeof window.devicePixelRatio === "number"
         ? window.devicePixelRatio
         : 1;
     const target = Math.round(rendered * Math.max(1, dpr));
     const clamped = Math.max(minWidth, Math.min(target, maxWidth));
     return clamped;
-  }
-
-  function isTestImagePath(path) {
-    const p = String(path || "");
-    return /^assets\/test-/i.test(p) || p.includes("/test-") || p.includes("assets/test-");
   }
 
   const SUPPORTS_IO =
@@ -302,7 +271,9 @@
 
   function isLazyAssetElement(el) {
     if (!el || !el.getAttribute) return false;
-    const explicit = String(el.getAttribute("data-asset-lazy") || "").toLowerCase();
+    const explicit = String(
+      el.getAttribute("data-asset-lazy") || "",
+    ).toLowerCase();
     if (explicit === "true") return true;
     const loading = String(el.getAttribute("loading") || "").toLowerCase();
     return loading === "lazy";
@@ -332,7 +303,9 @@
     const scope = root && root.querySelectorAll ? root : document;
     const isLocalhost = (() => {
       const host =
-        typeof window !== "undefined" && window.location ? window.location.hostname : "";
+        typeof window !== "undefined" && window.location
+          ? window.location.hostname
+          : "";
       return host === "localhost" || host === "127.0.0.1";
     })();
 
@@ -370,8 +343,6 @@
 
       const path = el.getAttribute("data-asset-src");
       if (!path) return;
-      // If Image Resizing is failing for test images, stop generating srcset with `/cdn-cgi/image`.
-      if (window.__MBTI_DISABLE_TEST_IMAGE_RESIZE && isTestImagePath(path)) return;
 
       const widths = parseSrcsetWidths(el.getAttribute("data-asset-srcset"));
       if (!widths.length) return;
@@ -397,28 +368,31 @@
 
     const maybeApply = (el) => {
       if (!el || el.nodeType !== 1) return;
-      if (isLazyAssetElement(el) && !nearViewport(el) && observeLazy(el)) return;
+      if (isLazyAssetElement(el) && !nearViewport(el) && observeLazy(el))
+        return;
 
       if (el.hasAttribute && el.hasAttribute("data-asset-src")) {
         const path = el.getAttribute("data-asset-src");
         const resize = el.getAttribute("data-asset-resize");
         const version = el.getAttribute("data-asset-version");
-        const autoWidth = String(el.getAttribute("data-asset-auto-width") || "").toLowerCase();
+        const autoWidth = String(
+          el.getAttribute("data-asset-auto-width") || "",
+        ).toLowerCase();
         maybeApplySrcset(el);
         if (path && !el.getAttribute("src")) {
-          // If `/cdn-cgi/image` is unstable for test images, fall back to raw assets for the session.
-          if (window.__MBTI_DISABLE_TEST_IMAGE_RESIZE && isTestImagePath(path)) {
-            el.setAttribute("src", appendVersion(window.assetUrl(path), version));
-            return;
-          }
-
           // Measured width based resizing (opt-in).
-          if (!isLocalhost && autoWidth === "true" && typeof window.assetResizeUrl === "function") {
+          if (
+            !isLocalhost &&
+            autoWidth === "true" &&
+            typeof window.assetResizeUrl === "function"
+          ) {
             const opts = parseResizeOptions(resize);
             const measured = computeMeasuredWidthPx(el, opts);
             if (!measured) {
               // If layout isn't ready yet, retry once on next frame.
-              const tries = Number(el.getAttribute("data-asset-measure-tries") || "0");
+              const tries = Number(
+                el.getAttribute("data-asset-measure-tries") || "0",
+              );
               if (tries < 2) {
                 el.setAttribute("data-asset-measure-tries", String(tries + 1));
                 requestAnimationFrame(() => applyAssetAttributes(el));
@@ -427,7 +401,9 @@
             }
             const width =
               measured ||
-              (typeof opts.fallbackWidth === "number" ? opts.fallbackWidth : undefined) ||
+              (typeof opts.fallbackWidth === "number"
+                ? opts.fallbackWidth
+                : undefined) ||
               (typeof opts.width === "number" ? opts.width : undefined) ||
               520;
             const url = appendVersion(
@@ -439,25 +415,29 @@
           }
           el.setAttribute("src", toUrl(path, resize, version));
 
-          // Attach one-shot fallback: if image resizing fails, retry raw `/assets/*`
-          // and disable resizing for test images for the rest of this session.
+          // Attach one-shot fallback: if image resizing fails, retry raw `/assets/*`.
           try {
             const isImg =
-              el.tagName && String(el.tagName).toLowerCase() === "img" && typeof el.addEventListener === "function";
-            const shouldFallback = Boolean(resize) && !isLocalhost && isImg && isTestImagePath(path);
-            const already = el.getAttribute("data-asset-resize-fallback") === "1";
+              el.tagName &&
+              String(el.tagName).toLowerCase() === "img" &&
+              typeof el.addEventListener === "function";
+            const shouldFallback = Boolean(resize) && !isLocalhost && isImg;
+            const already =
+              el.getAttribute("data-asset-resize-fallback") === "1";
             if (shouldFallback && !already) {
               el.setAttribute("data-asset-resize-fallback", "1");
               el.addEventListener(
                 "error",
                 () => {
                   try {
-                    window.__MBTI_DISABLE_TEST_IMAGE_RESIZE = true;
                     el.removeAttribute("src");
                     el.removeAttribute("srcset");
                     el.removeAttribute("sizes");
                     el.removeAttribute("data-asset-resize");
-                    el.setAttribute("src", appendVersion(window.assetUrl(path), version));
+                    el.setAttribute(
+                      "src",
+                      appendVersion(window.assetUrl(path), version),
+                    );
                   } catch (e) {}
                 },
                 { once: true },
@@ -469,7 +449,8 @@
       if (el.hasAttribute && el.hasAttribute("data-asset-href")) {
         const path = el.getAttribute("data-asset-href");
         const version = el.getAttribute("data-asset-version");
-        if (path && !el.getAttribute("href")) el.setAttribute("href", toUrl(path, null, version));
+        if (path && !el.getAttribute("href"))
+          el.setAttribute("href", toUrl(path, null, version));
       }
       if (el.hasAttribute && el.hasAttribute("data-asset-bg")) {
         const path = el.getAttribute("data-asset-bg");
@@ -495,7 +476,11 @@
 
     // Centralized image prefetch helper (used by quiz/result for "next" images).
     // Runs in idle time, and uses the same URL resolution rules as hydration.
-    window.prefetchImageAsset = function prefetchImageAsset(path, resizeRaw, versionRaw) {
+    window.prefetchImageAsset = function prefetchImageAsset(
+      path,
+      resizeRaw,
+      versionRaw,
+    ) {
       try {
         if (!path) return;
         // Avoid hitting `/cdn-cgi/image` repeatedly for prefetch. Warm the origin asset cache instead.
@@ -510,14 +495,19 @@
           img.src = href;
         };
 
-        if (typeof requestIdleCallback === "function") requestIdleCallback(run, { timeout: 1200 });
+        if (typeof requestIdleCallback === "function")
+          requestIdleCallback(run, { timeout: 1200 });
         else setTimeout(run, 50);
       } catch (e) {}
     };
 
     // Promise-based image loader (used for intro "gate" preloading).
     // This actually creates an Image() so callers can await completion.
-    window.loadImageAsset = function loadImageAsset(path, resizeRaw, versionRaw) {
+    window.loadImageAsset = function loadImageAsset(
+      path,
+      resizeRaw,
+      versionRaw,
+    ) {
       return new Promise((resolve) => {
         try {
           const p = String(path || "");
@@ -526,7 +516,10 @@
           const href = (function () {
             if (resizeRaw && typeof window.assetResizeUrl === "function") {
               return appendVersion(
-                window.assetResizeUrl(String(p), parseResizeOptions(String(resizeRaw))),
+                window.assetResizeUrl(
+                  String(p),
+                  parseResizeOptions(String(resizeRaw)),
+                ),
                 versionRaw,
               );
             }
