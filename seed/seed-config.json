@@ -1,5 +1,47 @@
 {
-  "excludeTestIds": ["test-holiday-cafe"]
+  "excludeTestIds": [],
+  "tests": {
+    "test-summer": {
+      "title": "여름 바캉스 스타일 테스트",
+      "description": [
+        "두근두근 여름방학 유형 ✨",
+        "여름방학에 친구들이랑 미친 듯이 놀고 싶은지,",
+        "혼자 조용히 책 읽으며 쉬고 싶은지… 👀",
+        "이런 당신의 방학 스타일로",
+        "성격 유형을 살짝 들여다봐요 💕",
+        "몇 가지 질문에 답하면",
+        "✔️ 당신이 어떤 방학 계획을 더 좋아하는지",
+        "✔️ 어떤 포인트에 끌리는 타입인지",
+        "귀여운 동물·캐릭터 해설과 함께",
+        "콕콕 알려드릴게요 🐰🦉🦔🦥🦩"
+      ],
+      "author": "우애앵애",
+      "authorImg": "assets/test-summer/images/author.png",
+      "thumbnail": "assets/test-summer/images/thumbnail.png",
+      "tags": ["여름", "여행", "휴가", "바캉스"],
+      "createdAt": "2025-12-08",
+      "updatedAt": "2025-12-08"
+    },
+    "test-root-vegetables": {
+      "title": "뿌리채소 성향 테스트",
+      "description": [
+        "뿌리뿌리 뿌리채소 유형 ✨",
+        "뿌리채소 농장에서 친구들 이끌고 신나게 돌아다니고 싶은지,",
+        "혼자 조용히 뿌리채소의 질감을 음미하고 싶은지… 👀",
+        "이런 당신의 뿌리채소 스타일로",
+        "MBTI 성격 유형을 살짝 들여다봐요 💕",
+        "몇 가지 질문에 답하면",
+        "✔️ 당신이 어떤 뿌리채소 취향을 더 좋아하는지",
+        "✔️ 어떤 포인트에 끌리는 타입인지",
+        "귀여운 뿌리채소·캐릭터 해설과 함께",
+        "콕콕 알려드릴게요 🥔🍠🥕🧅🌰"
+      ],
+      "author": "라푸",
+      "authorImg": "assets/test-root-vegetables/images/author.png",
+      "thumbnail": "assets/test-root-vegetables/images/thumbnail.png",
+      "tags": ["뿌리채소", "캐릭터", "MBTI"],
+      "createdAt": "2025-12-26",
+      "updatedAt": "2025-12-26"
+    }
+  }
 }
-
-

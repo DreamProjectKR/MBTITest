@@ -74,7 +74,8 @@ function normalizeTestJson(testJson) {
   // Slim down: keep only quiz body in R2 test.json. Meta lives in D1.
   return {
     questions: Array.isArray(next.questions) ? next.questions : [],
-    results: next.results && typeof next.results === "object" ? next.results : {},
+    results:
+      next.results && typeof next.results === "object" ? next.results : {},
   };
 }
 
@@ -104,5 +105,3 @@ function main() {
 }
 
 main();
-
-

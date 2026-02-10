@@ -22,6 +22,7 @@
     "pages:publish": "wrangler pages publish public",
     "d1:migrate:local": "wrangler d1 migrations apply mbti-db --local",
     "d1:migrate:remote": "wrangler d1 migrations apply mbti-db --remote",
+    "seed:generate": "node scripts/generate_d1_seed.cjs > seed/d1_seed_from_assets.sql",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "test": "echo \"No automated tests configured\""
