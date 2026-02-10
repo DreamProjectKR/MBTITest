@@ -121,3 +121,4 @@ __pycache__/
 .pnp/
 .cursor/
 .wrangler/
+.prettierrc
