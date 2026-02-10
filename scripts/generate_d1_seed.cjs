@@ -24,8 +24,9 @@ function readSeedConfig(repoRoot) {
   }
   try {
     const parsed = readJson(configPath);
-    const excludeTestIds = Array.isArray(parsed?.excludeTestIds)
-      ? parsed.excludeTestIds.map((v) => String(v || "").trim()).filter(Boolean)
+    const excludeTestIds =
+      Array.isArray(parsed?.excludeTestIds) ?
+        parsed.excludeTestIds.map((v) => String(v || "").trim()).filter(Boolean)
       : [];
     const tests =
       parsed?.tests && typeof parsed.tests === "object" ? parsed.tests : {};
@@ -79,9 +80,8 @@ function main() {
     }
 
     const testJson = readJson(testJsonPath);
-    const questionCount = Array.isArray(testJson?.questions)
-      ? testJson.questions.length
-      : 0;
+    const questionCount =
+      Array.isArray(testJson?.questions) ? testJson.questions.length : 0;
     const meta = testsMeta[testId] || {};
     const title = meta.title ?? testId;
     const description = meta.description ?? null;
