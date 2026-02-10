@@ -1,222 +1,149 @@
-# DreamProject MBTI MVP
+# MBTI ZOO
 
-Figma 기획안
-([DreamProject](https://www.figma.com/design/WMJMNrcMjLdI88EM1Xc6TS/DreamProject?node-id=228-3))
-을 그대로 옮긴 HTML/CSS/JS 기반의 MBTI 테스트 허브입니다. Cloudflare Pages에서바
-로 배포할 수 있도록 정적 자원으로 구성했으며, JSON 기반의 테스트 데이터를 관리자
-가 직접 만들고 내보낼 수 있습니다.
+Cloudflare Pages + D1 + R2 + KV 기반의 MBTI 테스트 플랫폼입니다.
+관리자가 어드민 페이지에서 테스트를 생성하면, 사용자는 퀴즈를 풀고 MBTI 결과를 확인하고 공유할 수 있습니다.
+
+- **프론트엔드**: HTML/CSS/JS (프레임워크 없음)
+- **백엔드**: Cloudflare Pages Functions (TypeScript)
+- **데이터베이스**: Cloudflare D1 (SQLite) -- 테스트 메타 + 이미지 메타
+- **스토리지**: Cloudflare R2 -- 테스트 본문 JSON + 이미지 바이너리
+- **캐시**: Cloudflare KV -- 테스트 상세 응답 캐시 (TTL 5분)
+- **이미지 최적화**: Cloudflare Image Resizing (`/cdn-cgi/image`)
 
 ## 폴더 구조
 
 ```text
-public/                    # 정적 페이지 (index, admin)
-public/styles/global.css    # 레이아웃 및 페이지 단위 스타일
-path_to_your_design_system/ # 디자인 토큰 + 컴포넌트 정의
-scripts/                    # index/admin 전용 JS
-assets/data/mbti-tests.json # 샘플 테스트 및 결과 데이터
+mbtitest/
+├── assets/                     # 로컬 개발용 샘플 데이터/이미지 (프로덕션에서는 R2에 저장)
+│   ├── images/                 # 공용 UI 이미지 (로고, 아이콘 등)
+│   ├── test-root-vegetables/   # 샘플 테스트 (이미지 + test.json)
+│   └── test-summer/            # 샘플 테스트
+├── docs/                       # 프로젝트 문서
+│   ├── API.md                  # API 엔드포인트 레퍼런스
+│   ├── CLOUDFLARE_PERFORMANCE.md  # Cloudflare 성능 최적화 가이드
+│   ├── ERD.md                  # D1 + R2 데이터 모델 ERD
+│   └── README.md               # 아키텍처 개요
+├── functions/                  # Cloudflare Pages Functions (백엔드)
+│   ├── _types.ts               # 공유 TypeScript 타입 정의
+│   ├── api/
+│   │   ├── _utils/http.ts      # 공용 HTTP 유틸 (캐시 헤더, JSON 응답)
+│   │   ├── admin/              # 어드민 전용 API
+│   │   │   ├── tests/[id].ts           # PUT /api/admin/tests/:id
+│   │   │   ├── tests/[id]/images.ts    # GET/PUT /api/admin/tests/:id/images
+│   │   │   ├── tests/[id]/results/[mbti]/image.ts  # PUT 결과 이미지
+│   │   │   └── utils/store.ts          # D1/R2 스토리지 유틸
+│   │   └── tests/
+│   │       ├── index.ts                # GET /api/tests
+│   │       ├── [id].ts                 # GET /api/tests/:id
+│   │       └── [id]/compute.ts         # POST /api/tests/:id/compute
+│   └── assets/[[path]].ts      # GET /assets/* (R2 프록시)
+├── migrations/                 # D1 스키마 마이그레이션
+│   ├── 0001_schema.sql         # 초기 tests 테이블
+│   ├── 0002_add_indexes.sql    # 정렬 인덱스
+│   └── 0003_schema_v2.sql      # v2: 분석 컬럼 + test_images 테이블
+├── public/                     # 정적 프론트엔드 (Pages 출력 디렉토리)
+│   ├── _routes.json            # Pages Functions 라우팅 설정
+│   ├── admin.html              # 어드민 페이지
+│   ├── index.html              # 홈페이지
+│   ├── testintro.html          # 테스트 소개 페이지
+│   ├── testlist.html           # 테스트 목록 페이지
+│   ├── testquiz.html           # 퀴즈 페이지
+│   ├── testresult.html         # 결과 페이지
+│   ├── scripts/
+│   │   ├── config.js           # 에셋 URL/이미지 최적화 설정
+│   │   ├── admin.js            # 어드민 엔트리포인트
+│   │   ├── admin/              # 어드민 모듈
+│   │   │   ├── state.js        # 상태 관리 + 상수
+│   │   │   ├── api.js          # API 호출
+│   │   │   ├── forms.js        # 폼 이벤트 핸들링
+│   │   │   ├── main.js         # 초기화 + 이벤트 바인딩
+│   │   │   ├── render.js       # DOM 렌더링 + 토스트 알림
+│   │   │   └── validation.js   # 입력 검증
+│   │   ├── main.js             # 홈페이지 로직
+│   │   ├── testintro.js        # 테스트 소개 페이지 로직
+│   │   ├── testlist.js         # 테스트 목록 로직
+│   │   ├── testquiz.js         # 퀴즈 로직 + MBTI 계산
+│   │   └── testresult.js       # 결과 페이지 로직
+│   └── styles/                 # 페이지별 CSS
+├── scripts/                    # 빌드/시드 유틸리티 스크립트
+├── wrangler.toml               # Cloudflare 설정 (D1, R2, KV 바인딩)
+└── package.json
 ```
 
-## 실행 방법
+## 로컬 개발
 
-1. `public/index.html`을 브라우저에서 열면 홈을, `public/admin.html`을 열면 관리
-   자 페이지를 볼 수 있습니다.
-2. 개발 서버가 필요하다면 `npx serve public`처럼 정적 서버로 `public` 폴더를 호
-   스팅하면 됩니다.
+### 사전 요구사항
 
-## 데이터 스키마 (`assets/data/mbti-tests.json`)
+- Node.js 18+
+- npm
 
-```json
-{
-  "tests": [
-    {
-      "id": "dream-001",
-      "title": "첫번째 테스트",
-      "description": "string",
-      "tags": ["#tag"],
-      "thumbnail": "https://...",
-      "questions": [
-        {
-          "id": "q1",
-          "questionImage": "질문",
-          "answers": [
-            {
-              "id": "q1a",
-              "label": "답변",
-              "mbtiAxis": "EI",
-              "direction": "E"
-            },
-            { "id": "q1b", "label": "답변", "mbtiAxis": "EI", "direction": "I" }
-          ]
-        }
-      ],
-      "results": {
-        "ENFP": { "image": "https://...", "summary": "string" },
-        "ESFP": { "image": "https://...", "summary": "string" }
-        // ... 16개 MBTI 모두 필요
-      }
-    }
-  ],
-  "forumHighlights": [
-    {
-      "id": "forum-001",
-      "title": "MBTI 관련 내용요약",
-      "image": "https://...",
-      "ctaLabel": "이글 보러가기",
-      "href": "#"
-    }
-  ]
-}
+### 설치 및 실행
+
+```bash
+npm install
+npm run d1:migrate:local    # D1 로컬 마이그레이션 적용
+npm run dev                 # wrangler pages dev 실행 (http://localhost:8788)
 ```
 
-- 각 문항은 **2지선다**이고, 모든 답변에는 `mbtiAxis(EI/SN/TF/JP)`와
-  `direction`(해당 축에서 어떤 문자를 의미하는지)이 必 필수입니다.
-- `results`에 16개 MBTI를 모두 채우면 홈 화면의 "16가지 MBTI" 그리드와 관리자 미
-  리보기가 동기화됩니다.
+### 주요 npm 스크립트
 
-## 관리자 페이지 워크플로우
+| 스크립트                    | 설명                                              |
+| --------------------------- | ------------------------------------------------- |
+| `npm run dev`               | 로컬 개발 서버 (Pages + Functions + D1 + R2 + KV) |
+| `npm run pages:dev`         | `dev`와 동일                                      |
+| `npm run pages:publish`     | Cloudflare Pages에 배포                           |
+| `npm run d1:migrate:local`  | D1 마이그레이션 로컬 적용                         |
+| `npm run d1:migrate:remote` | D1 마이그레이션 프로덕션 적용                     |
+| `npm run format`            | Prettier 포맷 검사                                |
+| `npm run format:write`      | Prettier 자동 수정                                |
 
-1. `public/admin.html`을 열면 기본 JSON이 자동으로 로드됩니다.
-2. 상단 셀렉트 박스로 편집할 테스트를 고르거나 `새 테스트` 버튼으로 신규 테스트
-   를 만듭니다.
-3. **테스트 기본 정보**에서 제목/설명/태그/썸네일을 수정하면 실시간으로 상태에반
-   영됩니다.
-4. **문항 작성** 섹션에서 질문과 두 개의 답변을 입력하고, 각 답변의 MBTI 축과 극
-   을 지정한 뒤 `문항 추가`를 누르면 리스트에서 순서를 이동하거나 삭제할 수 있습
-   니다.
-5. **MBTI 결과 콘텐츠**에서 코드(예: ENFP), 이미지, 설명을 작성하고 저장하면 우
-   측 리스트에 카드가 추가됩니다.
-6. 상단의 `JSON 내보내기` 버튼으로 최신 데이터를 다운로드하고, Cloudflare Pages
-   저장소(`assets/data/mbti-tests.json`)에 덮어쓰면 홈과 관리자 페이지가 동시에
-   갱신됩니다.
+## Cloudflare Pages 배포
 
-## Cloudflare Pages 배포 가이드
+### Pages 대시보드 설정
 
-### Pages + R2(Functions) 설정
+| 설정 항목           | 값          |
+| ------------------- | ----------- |
+| Build command       | (비움)      |
+| Output directory    | `public`    |
+| Functions directory | `functions` |
 
-> **중요:** Admin에서 테스트를 생성/업로드하려면 반드시 Functions(또는 Workers)
-> 이 켜져 있어야 합니다. 정적 배포만으로는 R2에 쓰기가 되지 않습니다.
+### 필수 바인딩
 
-관리자 페이지에서 업로드하면 R2에 `assets/data/{testId}/test.json`과 `images/*`
-가 생성됩니다. 다음을 설정하세요.
+| 바인딩        | 타입 | 이름          | 설명                        |
+| ------------- | ---- | ------------- | --------------------------- |
+| `MBTI_BUCKET` | R2   | `mbti-assets` | 테스트 JSON + 이미지 저장   |
+| `mbti_db`     | D1   | `mbti-db`     | 테스트 메타 + 이미지 메타   |
+| `CACHE_KV`    | KV   | --            | 테스트 상세 캐시 (TTL 300s) |
 
-1. **Functions 활성화**: 루트 `functions/api/tests.js`가 Pages Functions로 배포
-   됩니다.
-2. **R2 바인딩**: Pages > Settings > Functions > R2 bindings에서 버킷을 만들고바
-   인딩 이름을 `MBTI_BUCKET`으로 지정합니다.
-3. **공개 URL 환경변수**: `R2_PUBLIC_BASE_URL`을
-   `https://<r2-public-domain>/assets/data` 형태로 설정해야 프런트가 이미지에 접
-   근할 수 있습니다. (custom domain을 R2에연결했다면 해당 도메인을 사용)
-4. 로컬 테스트: `npm install wrangler -g` 후 `npx wrangler pages dev public` 로
-   실행. `.dev.vars`에 `R2_PUBLIC_BASE_URL`, `MBTI_BUCKET` 바인딩을 설정하거나
-   wrangler 대시보드에서 로컬 R2를 연결하세요.
+### 환경 변수
 
-이전처럼 정적 JSON만 사용할 경우 `scripts/utils/constants.js`의 `DATA_URL`을
-`../assets/data/index.json`으로 되돌리면 기존 동작을 유지할 수 있습니다.
+| 변수                 | 설명                                 |
+| -------------------- | ------------------------------------ |
+| `ASSETS_BASE`        | R2 공개 URL (로컬 폴백용)            |
+| `R2_PUBLIC_BASE_URL` | R2 공개 URL (로컬 개발 시 원격 폴백) |
 
-### 필수 환경 변수
+### D1 마이그레이션
 
-- `MBTI_BUCKET`: R2 버킷 바인딩 이름 (Pages Functions에서 R2 객체로 주입됨)
-- `R2_PUBLIC_BASE_URL`: R2에 정적 공개 경로(`https://<도메인>/assets/data`)를 가
-  리키는 URL. 실 서비스 예: `https://dreamp.org/assets/data`
-
-로컬 개발 시 `.dev.vars`를 사용하세요. 샘플: `.dev.vars.example` → `.dev.vars`로
-복사 후 값 채우기.
-
-### npm 스크립트(최신 wrangler)
-
-- `npm run pages:dev`: `wrangler pages dev public`로 Pages+Functions 로컬 프리뷰
-  .
-- `npm run pages:publish`: `wrangler pages publish public`로 Pages 배포.
-- `npm run r2:put-all`: 최신 wrangler에는 `r2 object sync`가 없어
-  `find+xargs+put`로 `assets/` 내 모든 파일을 업로드합니다. 실행 전
-  `R2_ACCESS_KEY_ID`/`R2_SECRET_ACCESS_KEY`(CLI 업로드용)와 `MBTI_BUCKET` 바인딩
-  이 설정되어 있어야 합니다. 원격 삭제/동기화는 수행하지 않으므로 필요 시 AWS
-  CLI `s3 sync --endpoint-url https://<account>.r2.cloudflarestorage.com`을 사용
-  하세요.
-
-### Workers + R2 + D1/D2로 배포하기 (선택)
-
-Admin 업로드를 Workers로 운영하려면:
-
-1. `wrangler.toml`에 바인딩 선언
-
-```toml
-name = "mbti-admin"
-main = "functions/api/tests.js"
-compatibility_date = "2024-12-01"
-
-r2_buckets = [{ binding = "MBTI_BUCKET", bucket_name = "mbti-assets" }]
-
-# D1 (선택: 테스트 메타/로그 저장용)
-d1_databases = [{ binding = "MBTI_DB", database_name = "mbti-db", database_id = "<your-d1-id>" }]
-
-# D2(베타)/서드파티 SQL을 쓸 경우 별도 Worker에서 API를 노출하고 여기서는 fetch로 연동하세요.
+```bash
+# 프로덕션 적용
+npm run d1:migrate:remote
 ```
 
-1. 변수 설정: `R2_PUBLIC_BASE_URL`를 `vars`에 추가하거나 dash에서 환경 변수로 설
-   정.
+## 어드민 워크플로우
 
-2. 배포: `npx wrangler deploy` (Pages가 아닌 Workers 모드).
+1. `/admin.html`에 접속합니다.
+2. 테스트를 선택하거나 "새 테스트" 버튼으로 생성합니다.
+3. **기본 정보** 패널에서 제목, 설명, 태그, 썸네일, 제작자 정보를 입력합니다.
+4. **문항 작성** 패널에서 12개의 2지선다 문항을 추가합니다 (각 문항에 MBTI 축/방향 지정).
+5. **결과 콘텐츠** 패널에서 16개 MBTI 유형별 이미지와 설명을 등록합니다.
+   - 개별 등록 또는 "일괄 업로드" 버튼으로 16개 이미지를 한 번에 업로드 (파일명: `INTJ.png` 등).
+6. "저장하기" 버튼으로 D1 + R2에 동시 저장합니다.
 
-3. 로컬:
-   `npx wrangler dev --local --var R2_PUBLIC_BASE_URL=https://<r2-public>/assets/data`.
+## 아키텍처
 
-**참고**: 현재 Functions는 R2만 사용합니다. D1/D2를 쓰려면
-`functions/api/tests.js`에 추가 로직을 넣어야 하며, 바인딩 이름은 위 예시
-(`MBTI_DB`)로 맞추면 됩니다.
+상세 문서는 `docs/` 폴더를 참조하세요:
 
-### Cloudflare Pages에서 “Missing entry-point to Worker script” 오류가 날 때
-
-이 메시지는 Pages 빌드 명령을 `npx wrangler deploy`로 설정했을 때 발생합니다.
-Pages는정적 파일을 복사하고 Functions 폴더(`functions/`)를 자동 인식하므로, 별도
-Worker 엔트리(main)가 없어도 됩니다. 해결:
-
-1. Cloudflare Pages 대시보드 > Project > Settings > Build & Deploy
-
-   - Build command: (비움)
-   - Output directory: `public`
-   - Functions directory: `functions`
-   - Env vars: `MBTI_BUCKET`, `R2_PUBLIC_BASE_URL`
-
-2. Worker 모드로 직접 배포하려면 `wrangler pages deploy ./public`(정적) 또는
-   `npx wrangler deploy --config wrangler.toml`처럼 목적에 맞는 명령을 사용하세
-   요. `wrangler deploy`를 Pages 빌드 명령으로 넣으면 동일 오류가 재발합니다.
-
-## GitHub Pages 배포 가이드
-
-1. `.github/workflows/deploy.yml`에서 정의된 workflow가 `public` 폴더를
-   `gh-pages` 브랜치로 배포하므로 추가 빌드 스크립트 없이도 자동으로 페이지가 만
-   들어집니다.
-2. GitHub 저장소의 **Settings > Pages**로 이동해 **Source**를 `gh-pages` 브랜치
-   의 루트로 설정하고 저장합니다.
-3. **Settings > Actions > General**에서 Workflow permissions를 **Read and write
-   permissions**로 변경하고
-   `Allow GitHub Actions to create and approve pull requests` 옵션을 체크해야
-   `github-actions[bot]`이 `gh-pages`에 푸시할 수 있습니다. (조직 정책상 불가능
-   하다면 `repo` 권한 PAT를 발급해 `GH_PAGES_TOKEN` 같은 시크릿으로 등록하고
-   workflow에서 사용하세요.)
-4. workflow 실행 시 `assets/`, `scripts/`, `path_to_your_design_system/` 폴더를
-   자동 으로 `public/` 안쪽으로 복사해 README에서 안내한 상대 경로(`../scripts`,
-   `../assets` 등)를 유지합니다.
-5. 커밋마다 `main` 브랜치로 푸시하면 workflow가 실행되며, GitHub Pages에서 곧바
-   로 `public`을 서빙합니다.
-
-## QA & 접근성 체크리스트
-
-- [ ] `index.html` / `admin.html` 모두 데스크톱(≥1280px)과 모바일(≤768px)에서 주
-      요 그리드가 깨지지 않는지 확인합니다.
-- [ ] JSON을 수정한 뒤 홈의 테스트 카드/MBTI 그리드/포럼 카드가 최신 데이터를 불
-      러오는지 확인합니다.
-- [ ] 관리자에서 문항 추가 → 순서 이동 → 삭제 → JSON 내보내기까지 한 번의 플로우
-      를 검증합니다.
-- [ ] 스크린 리더가 섹션 제목(`aria-labelledby`)을 올바르게 읽는지, 버튼 포커스
-      링이 명확한지 확인합니다.
-- [ ] Lighthouse/axe로 기본 접근성 점검을 수행하고 대비 이슈가 없는지 확인합니다
-      .
-
-## 참고
-
-- 디자인 토큰과 컴포넌트는 반드시 `/path_to_your_design_system` 폴더의 CSS를 통
-  해 확장하세요.
-- Cloudflare Workers/D1 등의 추가 백엔드가 필요하면 현재 JSON 구조를 API로 노출
-  하는 방식으로 확장할 수 있습니다.
+- [아키텍처 개요](docs/README.md)
+- [API 레퍼런스](docs/API.md)
+- [데이터 모델 ERD](docs/ERD.md)
+- [Cloudflare 성능 최적화](docs/CLOUDFLARE_PERFORMANCE.md)

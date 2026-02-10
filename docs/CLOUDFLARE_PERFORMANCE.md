@@ -1,94 +1,116 @@
-## 목표
-이 문서는 `dreamp.org`(Cloudflare Pages) 배포 환경에서 **이미지/데이터 로딩 체감 속도**를 더 끌어올리기 위해, Cloudflare 대시보드/`wrangler`에서 해야 하는 작업을 정리합니다.
+# Cloudflare 성능 최적화 가이드
 
-현재 아키텍처:
-- **Pages Functions**: `/api/tests`, `/api/tests/:id`, `/assets/*`
-- **D1**: 테스트 메타데이터(목록/검색용)
-- **R2**: `test.json`(본문) + 이미지
+이 문서는 `dreamp.org`(Cloudflare Pages) 배포 환경에서 로딩 성능을 최적화하기 위한 설정과 전략을 정리합니다.
+
+## 현재 아키텍처
+
+- **Pages Functions**: API + R2 프록시
+- **D1**: 테스트 메타데이터
+- **R2**: 테스트 본문 JSON + 이미지
+- **KV**: 테스트 상세 응답 캐시 (TTL 300초)
 - **이미지 최적화**: `/cdn-cgi/image` (format=auto + resize)
 
----
+## 1. Rocket Loader (권장: OFF)
 
-## 1) Rocket Loader 설정 (권장: 끄기 또는 Manual + 예외 처리)
-### 왜?
-`type="module"`/`defer` 스크립트는 브라우저가 이미 최적화해서 로딩하는데, Rocket Loader가 개입하면 **실행 타이밍이 바뀌어 preload 경고/초기 렌더 지연**이 생길 수 있습니다.
+`type="module"`/`defer` 스크립트는 브라우저가 이미 최적화하므로, Rocket Loader 개입은 초기 렌더를 지연시킬 수 있습니다.
 
-### 옵션 A (권장): Rocket Loader OFF
-- Cloudflare Dashboard → **Speed** → **Optimization** → **Rocket Loader** → **Off**
+**설정**: Cloudflare Dashboard > Speed > Optimization > Rocket Loader > **Off**
 
-### 옵션 B: Manual + critical script 제외
-- Rocket Loader를 Manual로 바꾸고, 중요한 스크립트에 `data-cfasync="false"`를 추가
-- (이미 일부 페이지에서 사용했던 방식)
+## 2. 다중 캐시 계층
 
----
+### KV 캐시 (구현됨)
 
-## 2) API 응답도 Edge 캐시 되도록 `s-maxage` 적용 (코드 반영됨)
-### 왜?
-브라우저 캐시(`max-age`)만 있으면, Edge(Cloudflare CDN)는 API 응답을 적극 캐시하지 못합니다.
+`GET /api/tests/:id` 응답을 KV에 5분 TTL로 캐싱합니다.
 
-### 현재 코드 적용 내용
-- `functions/api/_utils/http.ts`에서 `Cache-Control`에 `s-maxage`/`stale-while-revalidate`를 지원하도록 확장
-- `/api/tests` 및 `/api/tests/:id`에서 더 공격적인 edge 캐시 TTL 적용
-- 또한 Cache API(`caches.default`)에 **ETag별 캐시 키**(`__cache=<etag>`)로 저장해서, 내용 변경 시 구 캐시를 자동으로 회피
+- **읽기**: KV 히트 → 즉시 반환 (D1+R2 접근 없음)
+- **쓰기**: 어드민 저장 시 KV 키 삭제
+- **바인딩**: `CACHE_KV` (wrangler.toml)
 
----
+### Cache API (구현됨)
 
-## 3) Cloudflare Cache Rules(대시보드)로 캐시 정책 고정 (선택, 하지만 강력 추천)
-### 왜?
-코드 헤더가 실수로 변경되어도, 대시보드 규칙으로 캐시를 안정적으로 유지할 수 있습니다.
+`caches.default`를 이용한 엣지 캐시입니다.
 
-### 추천 규칙 예시
-1) **API 캐시**
-- Match: `*dreamp.org/api/tests*`
-- Edge TTL: 60s (또는 120s)
+- ETag 기반 캐시 키로 콘텐츠 변경 시 자동 회피
+- `s-maxage` + `stale-while-revalidate`로 엣지 TTL 제어
 
-2) **Assets 캐시**
-- Match: `*dreamp.org/assets/*`
-- Edge TTL: 1 year
-- (현재는 `/assets/*` 함수가 `?v=`가 있을 때 `immutable`로 응답하도록 구현되어 있음)
+### Cache-Tag (구현됨)
 
----
+`/assets/*` 응답에 `Cache-Tag` 헤더를 추가하여 선택적 퍼지가 가능합니다.
 
-## 4) D1 인덱스 추가 (필수: 데이터 늘수록 체감)
-### 왜?
-`/api/tests`는 `ORDER BY updated_at DESC`를 쓰기 때문에, 인덱스가 없으면 테스트가 늘수록 느려집니다.
+- `assets` -- 모든 에셋
+- `test-{testId}` -- 특정 테스트의 에셋만
 
-### 적용 파일
-- `migrations/0002_add_indexes.sql`
-
-### 실행 예시
-- 로컬(예시):
+특정 테스트 에셋만 퍼지하려면:
 
 ```bash
-wrangler d1 execute mbti-db --local --file=migrations/0002_add_indexes.sql
+curl -X POST "https://api.cloudflare.com/client/v4/zones/{zone_id}/purge_cache" \
+  -H "Authorization: Bearer {api_token}" \
+  -d '{"tags":["test-summer"]}'
 ```
 
-- 원격(예시):
+## 3. Cache Rules (대시보드, 선택)
+
+코드 헤더가 실수로 변경되어도 캐시를 안정적으로 유지하려면 대시보드 규칙을 추가합니다.
+
+| 규칙        | 매치                     | Edge TTL |
+| ----------- | ------------------------ | -------- |
+| API 캐시    | `*dreamp.org/api/tests*` | 60초     |
+| Assets 캐시 | `*dreamp.org/assets/*`   | 1년      |
+
+## 4. D1 인덱스 (적용됨)
+
+성능에 영향을 주는 인덱스는 마이그레이션으로 관리합니다.
+
+| 인덱스                        | 대상 쿼리                  | 마이그레이션           |
+| ----------------------------- | -------------------------- | ---------------------- |
+| `idx_tests_updated_at_desc`   | `ORDER BY updated_at DESC` | `0002_add_indexes.sql` |
+| `idx_tests_title`             | 제목 검색                  | `0003_schema_v2.sql`   |
+| `idx_tests_published_updated` | 공개+정렬 필터             | `0003_schema_v2.sql`   |
+| `idx_test_images_test_id`     | 테스트별 이미지 조회       | `0003_schema_v2.sql`   |
+
+마이그레이션 적용:
 
 ```bash
-wrangler d1 execute mbti-db --remote --file=migrations/0002_add_indexes.sql
+npm run d1:migrate:local    # 로컬
+npm run d1:migrate:remote   # 프로덕션
 ```
 
-> D1 바인딩 이름/DB 이름은 프로젝트 설정(`wrangler.toml`)에 맞게 바꿔주세요.
+## 5. 이미지 최적화 전략
 
----
+### Image Resizing (현재 사용 중)
 
-## 5) (선택) KV로 “테스트 목록” 초고속화
-### 언제 필요?
-`/api/tests` 트래픽이 커지고, D1 읽기 비용/지연을 더 줄이고 싶을 때.
+`/cdn-cgi/image/{params}/{path}` 형식으로 자동 포맷 변환 + 리사이징합니다.
 
-### 접근
-- KV에 `{ tests, maxUpdated, count }`를 1시간 TTL로 캐싱
-- Admin 저장 성공 시 KV 키 삭제(무효화)
+- `format=auto` -- 브라우저 지원 시 WebP/AVIF 자동 선택
+- `width`, `quality`, `fit` -- 크기/품질/맞춤 제어
+- `srcset` -- 반응형 이미지 (360w, 480w, 720w)
 
-### 해야 하는 일(요약)
-- KV namespace 생성 + `wrangler.toml` 바인딩 추가
-- `functions/api/tests/index.ts`에서 KV 우선 조회
-- `functions/api/admin/tests/[id].ts` 저장 성공 후 KV delete
+### 프리로드 (구현됨)
 
----
+퀴즈/결과 페이지에서 첫 번째 이미지를 `<link rel="preload" as="image">`로 동적 주입합니다.
 
-## 6) (선택) Cloudflare Images로 이동
-### 결론
-현재는 `/cdn-cgi/image`로 충분히 빠릅니다. 월 수십만~수백만 이미지 요청 규모로 커지거나, 변환 캐시/관리 기능이 필요해질 때 고려하세요.
+### 폴백 전략 (구현됨)
 
+`/cdn-cgi/image`가 실패하면 (503 등) 원본 `/assets/*` URL로 자동 폴백합니다.
+
+- 각 `<img>` 요소에 1회성 `error` 이벤트 리스너 등록
+- 리사이징 실패 시 `data-asset-resize` 제거 후 원본 요청
+
+## 6. 에셋 프록시 캐시 정책
+
+`functions/assets/[[path]].ts`에서 키 유형별 캐시 정책:
+
+| 에셋 유형        | Cache-Control                                      | 조건                      |
+| ---------------- | -------------------------------------------------- | ------------------------- |
+| JSON             | `public, max-age=60, s-maxage=60, must-revalidate` | --                        |
+| 버전 쿼리(`?v=`) | `public, max-age=1y, immutable`                    | `?v=` 파라미터 존재       |
+| UI 이미지        | `public, max-age=1y, immutable`                    | `assets/images/` 경로     |
+| 테스트 이미지    | `public, max-age=1d, s-maxage=1d`                  | 어드민에서 덮어쓸 수 있음 |
+
+## 7. 서버 사이드 MBTI 계산 (구현됨)
+
+`POST /api/tests/:id/compute` 엔드포인트로 MBTI 결과를 서버에서 계산합니다.
+
+- 클라이언트 조작 방지
+- 축별 퍼센트 제공 (결과 페이지 시각화용)
+- 클라이언트 폴백: 서버 응답 실패 시 로컬 계산 사용

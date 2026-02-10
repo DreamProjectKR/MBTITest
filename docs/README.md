@@ -1,77 +1,91 @@
-# MBTI Test Hub Docs (Minimal)
+# 아키텍처 개요
 
-This directory intentionally contains only one document: this file.
+## 시스템 구성
 
-## What This Repo Is
+MBTI ZOO는 Cloudflare의 엣지 인프라 위에서 동작합니다.
 
-- Static site (HTML/CSS/JS) served by **Cloudflare Pages** from `public/`.
-- Small backend using **Cloudflare Pages Functions** in `functions/`:
-  - `GET /api/tests` (test index)
-  - `GET /api/tests/:id` (test detail)
-  - `GET /assets/*` (same-origin asset proxy to R2)
-- Content stored in **Cloudflare R2** (bucket bound as `MBTI_BUCKET`).
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  브라우저                                                        │
+│                                                                   │
+│  index.html ──── /api/tests ─────────► Pages Function ──► D1      │
+│  testquiz.html ─ /api/tests/:id ─────► Pages Function ──► D1+R2  │
+│                  /api/tests/:id/compute ► Pages Function ──► D1   │
+│  *.html ──────── /assets/* ──────────► Pages Function ──► R2      │
+│  admin.html ──── /api/admin/tests/* ──► Pages Function ──► D1+R2  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-## Production Request Flow
+## Cloudflare 서비스 역할
 
-- Pages serves HTML/JS/CSS from `public/`.
-- Browser requests:
-  - JSON from `https://dreamp.org/api/tests...`
-  - Images from `https://dreamp.org/assets/...` (same-origin)
-- Pages Function `GET /assets/*` reads from R2 via the binding and returns the object.
-  - This avoids CORS issues that happen when the browser requests `*.r2.dev` directly.
+| 서비스              | 바인딩           | 역할                                           |
+| ------------------- | ---------------- | ---------------------------------------------- |
+| **Pages**           | --               | 정적 HTML/CSS/JS 호스팅 + Functions 라우팅     |
+| **Pages Functions** | --               | API 엔드포인트 + R2 프록시                     |
+| **D1**              | `mbti_db`        | 테스트 메타데이터 + 이미지 메타데이터 (SQLite) |
+| **R2**              | `MBTI_BUCKET`    | 테스트 본문 JSON + 이미지 바이너리             |
+| **KV**              | `CACHE_KV`       | 테스트 상세 응답 캐시 (TTL 300초)              |
+| **Image Resizing**  | `/cdn-cgi/image` | 이미지 포맷 변환(WebP) + 리사이징              |
 
-## Key Files
+## 데이터 흐름
 
-- Frontend runtime config: `public/scripts/config.js`
-  - `window.assetUrl(path)` builds an asset URL.
-  - Production default uses same-origin `/assets/...` (so assets go through the proxy).
-  - `assetUrl()` accepts both `assets/...` (legacy) and `images/...` (cleaner) style paths.
-- API endpoints:
-  - `functions/api/tests/index.js` -> `GET /api/tests`
-  - `functions/api/tests/[id].js` -> `GET /api/tests/:id`
-- Asset proxy:
-  - `functions/assets/[[path]].js` -> `GET /assets/*`
-- Routing include list:
-  - `_routes.json`
-  - `public/_routes.json`
+### 사용자 퀴즈 플로우
 
-## Deploy (Cloudflare Pages)
+1. 홈페이지 → `GET /api/tests` → D1에서 테스트 목록 조회
+2. 테스트 선택 → `GET /api/tests/:id` → KV 캐시 확인 → 없으면 D1(메타) + R2(본문) 병합
+3. 퀴즈 진행 → 이미지는 `/assets/*` 프록시를 통해 R2에서 로딩
+4. 퀴즈 완료 → `POST /api/tests/:id/compute` → 서버에서 MBTI 계산 + 퍼센트 반환
+5. 결과 페이지 → 퍼센트 바 렌더링 + 결과 이미지 표시
 
-- **Build settings**
-  - Build command: (empty)
-  - Output directory: `public`
-  - Functions directory: `functions`
-- **Bindings**
-  - R2 binding: `MBTI_BUCKET` -> your R2 bucket that contains `assets/...` keys
-- **Routes**
-  - Ensure `/_routes.json` and `/public/_routes.json` include `/api/*` and `/assets/*`
+### 어드민 저장 플로우
 
-## Data Layout in R2 (Minimal Contract)
+1. 어드민에서 "저장하기" → `PUT /api/admin/tests/:id`
+2. R2에 본문(questions + results) 저장
+3. D1에 메타데이터 upsert
+4. KV 캐시 키 삭제 (무효화)
 
-### 1 Test Index: `assets/index.json`
+### 이미지 업로드 플로우
 
-- Required shape:
-  - `tests`: array
-  - Each entry:
-    - `id`: string
-    - `path`: string (usually `test-xxx/test.json`, backend normalizes to `assets/<path>`)
-  - Recommended:
-    - `title`, `thumbnail`, `tags`, `createdAt`, `updatedAt`
+1. 어드민에서 이미지 선택 → `PUT /api/admin/tests/:id/images`
+2. R2에 바이너리 저장
+3. D1 `test_images` 테이블에 메타 기록
 
-### 2 Test Definition: `assets/<test-id>/test.json`
+## 캐싱 전략
 
-- Required fields (as used by current frontend):
-  - `id`, `title`
-  - `thumbnail`, `author`, `authorImg`, `tags`, `description`
-  - `questions[]` where `questionImage` is an image path and each answer has `mbtiAxis` + `direction`
-  - `results` map keyed by MBTI (e.g. `INTJ`) containing `image`
+| 계층                     | 대상                      | TTL       | 무효화                   |
+| ------------------------ | ------------------------- | --------- | ------------------------ |
+| **KV**                   | `GET /api/tests/:id` 응답 | 300초     | 어드민 저장 시 삭제      |
+| **Cache API**            | `GET /api/tests/:id` 응답 | ETag 기반 | 콘텐츠 변경 시 자동      |
+| **Edge** (`s-maxage`)    | API 응답                  | 60-300초  | `stale-while-revalidate` |
+| **Edge** (`Cache-Tag`)   | `/assets/*`               | 최대 1년  | 태그별 선택 퍼지         |
+| **브라우저** (`max-age`) | API/assets                | 60초-1년  | 버전 쿼리(`?v=`)         |
 
-## Troubleshooting
+## 프론트엔드 구조
 
-- Images 404 under `/assets/...`
-  - Check `MBTI_BUCKET` binding exists
-  - Check R2 keys exist under `assets/...`
-  - Check `_routes.json` includes `/assets/*`
-- Browser console shows CORS errors referencing `*.r2.dev`
-  - That means something is still pointing the browser at the R2 public domain.
-  - Production should request same-origin `https://dreamp.org/assets/...` instead.
+프레임워크 없이 HTML/CSS/JS로 구성되어 있습니다.
+
+- `config.js` -- 에셋 URL 빌딩, 이미지 리사이징, IntersectionObserver 기반 레이지 로딩
+- 각 페이지별 스크립트(`main.js`, `testquiz.js` 등)가 `config.js`의 `window.assetUrl()`, `window.assetResizeUrl()` 등을 사용
+
+### 어드민 모듈 구조
+
+```text
+public/scripts/admin/
+├── state.js       # 전역 상태, 상수(MBTI_ORDER, AXIS_MAP 등), DOM 참조
+├── api.js         # fetch 래퍼 (테스트 CRUD, 이미지 업로드)
+├── validation.js  # 입력 검증, 경로 정규화
+├── render.js      # DOM 렌더링, 토스트 알림, 로딩 오버레이
+├── forms.js       # 폼 이벤트 핸들링 (메타/문항/결과)
+└── main.js        # 초기화, 이벤트 바인딩, 테스트 로드/저장
+```
+
+## 주요 파일
+
+| 파일                                 | 설명                                           |
+| ------------------------------------ | ---------------------------------------------- |
+| `wrangler.toml`                      | D1, R2, KV 바인딩 + 환경 변수 설정             |
+| `public/_routes.json`                | Pages Functions 라우팅 (`/api/*`, `/assets/*`) |
+| `functions/_types.ts`                | 공유 TypeScript 타입 (MbtiEnv, KVNamespace 등) |
+| `functions/api/admin/utils/store.ts` | D1/R2 읽기/쓰기/이미지 메타 관리 유틸          |
+| `functions/assets/[[path]].ts`       | R2 에셋 프록시 (Cache-Tag, ETag, 폴백)         |
+| `public/scripts/config.js`           | 프론트엔드 에셋 URL/이미지 설정 중앙 관리      |
