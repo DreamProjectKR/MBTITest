@@ -16,18 +16,18 @@ const headerOffset = header.offsetTop; // 헤더 원래 위치 저장
 window.addEventListener(
   "scroll",
   () => {
-  const isMobile = window.matchMedia("(max-width: 900px)").matches;
-  if (window.scrollY > headerOffset) {
-    header.classList.add("fixed-header", "bg-on");
-    if (isMobile && headerScroll) {
-      headerScroll.style.marginBottom = "45px";
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
+    if (window.scrollY > headerOffset) {
+      header.classList.add("fixed-header", "bg-on");
+      if (isMobile && headerScroll) {
+        headerScroll.style.marginBottom = "45px";
+      }
+    } else {
+      header.classList.remove("fixed-header", "bg-on");
+      if (headerScroll) {
+        headerScroll.style.marginBottom = "";
+      }
     }
-  } else {
-    header.classList.remove("fixed-header", "bg-on");
-    if (headerScroll) {
-      headerScroll.style.marginBottom = "";
-    }
-  }
   },
   { passive: true },
 );

@@ -15,7 +15,8 @@ export function withCacheHeaders(
 ): Headers {
   const { etag, maxAge = 60, sMaxAge, staleWhileRevalidate } = opts ?? {};
   const swr =
-    typeof staleWhileRevalidate === "number" && Number.isFinite(staleWhileRevalidate)
+    typeof staleWhileRevalidate === "number" &&
+    Number.isFinite(staleWhileRevalidate)
       ? Math.max(0, Math.floor(staleWhileRevalidate))
       : maxAge * 10;
   const h = new Headers(headers);
@@ -37,5 +38,3 @@ export function jsonResponse(
   const headers = init?.headers ?? JSON_HEADERS;
   return new Response(JSON.stringify(payload), { status, headers });
 }
-
-

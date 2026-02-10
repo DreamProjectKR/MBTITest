@@ -16,21 +16,26 @@ const MainTop = document.getElementById("MainTop");
  * @returns {string}
  */
 function assetUrl(path) {
-    if (!path) return "";
-    if (/^https?:\/\//i.test(path)) return path;
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
   if (typeof window !== "undefined" && typeof window.assetUrl === "function") {
     return window.assetUrl(path);
   }
   const base = String(
-    typeof window !== "undefined" && window.ASSETS_BASE ? window.ASSETS_BASE : "/assets",
+    typeof window !== "undefined" && window.ASSETS_BASE
+      ? window.ASSETS_BASE
+      : "/assets",
   ).replace(/\/+$/, "");
-    let clean = String(path).replace(/^\.?\/+/, "");
-    clean = clean.replace(/^assets\/+/i, "");
+  let clean = String(path).replace(/^\.?\/+/, "");
+  clean = clean.replace(/^assets\/+/i, "");
   return `${base}/${clean}`.replace(/\/{2,}/g, "/");
 }
 
 function assetResizeUrl(path, options) {
-  if (typeof window !== "undefined" && typeof window.assetResizeUrl === "function") {
+  if (
+    typeof window !== "undefined" &&
+    typeof window.assetResizeUrl === "function"
+  ) {
     return window.assetResizeUrl(path, options || {});
   }
   return assetUrl(path);
@@ -42,11 +47,11 @@ const headerOffset = header.offsetTop;
 window.addEventListener(
   "scroll",
   () => {
-  if (window.scrollY > headerOffset) {
-    header.classList.add("fixed-header", "bg-on");
-  } else {
-    header.classList.remove("fixed-header", "bg-on");
-  }
+    if (window.scrollY > headerOffset) {
+      header.classList.add("fixed-header", "bg-on");
+    } else {
+      header.classList.remove("fixed-header", "bg-on");
+    }
   },
   { passive: true },
 );
@@ -175,7 +180,9 @@ function renderSections(tests) {
   const newTests = tests.slice(0, Math.min(4, tests.length));
   newTests.forEach((test, idx) => {
     if (newShellContainer) {
-      newShellContainer.appendChild(createTestCard(test, "newtest", { isFirst: idx === 0 }));
+      newShellContainer.appendChild(
+        createTestCard(test, "newtest", { isFirst: idx === 0 }),
+      );
     }
   });
 

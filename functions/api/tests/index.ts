@@ -31,13 +31,17 @@ function safeJsonArray(value: unknown): string[] {
   if (typeof value !== "string") return [];
   try {
     const parsed: unknown = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === "string") : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((x): x is string => typeof x === "string")
+      : [];
   } catch {
     return [];
   }
 }
 
-export async function onRequestGet(context: PagesContext<MbtiEnv>): Promise<Response> {
+export async function onRequestGet(
+  context: PagesContext<MbtiEnv>,
+): Promise<Response> {
   const db = context.env.mbti_db;
   if (!db) {
     return jsonResponse(
@@ -53,7 +57,9 @@ export async function onRequestGet(context: PagesContext<MbtiEnv>): Promise<Resp
     .all<TestRow>();
 
   const tests: TestMeta[] = (rows?.results ?? []).map((r) => {
-    const tags = safeJsonArray(typeof r?.tags_json === "string" ? r.tags_json : "");
+    const tags = safeJsonArray(
+      typeof r?.tags_json === "string" ? r.tags_json : "",
+    );
     return {
       id: String(r?.test_id ?? ""),
       title: String(r?.title ?? ""),
@@ -66,13 +72,19 @@ export async function onRequestGet(context: PagesContext<MbtiEnv>): Promise<Resp
   });
 
   const etag = (() => {
-    const maxUpdated = tests.reduce((acc, t) => (t.updatedAt > acc ? t.updatedAt : acc), "");
+    const maxUpdated = tests.reduce(
+      (acc, t) => (t.updatedAt > acc ? t.updatedAt : acc),
+      "",
+    );
     return `"${tests.length}-${maxUpdated}"`;
   })();
 
   const cache =
-    (globalThis.caches as unknown as { default?: Cache | undefined } | undefined)?.default ??
-    null;
+    (
+      globalThis.caches as unknown as
+        | { default?: Cache | undefined }
+        | undefined
+    )?.default ?? null;
   const url = new URL(context.request.url);
   const cacheKeyUrl = new URL(url.toString());
   cacheKeyUrl.searchParams.set("__cache", etag);
@@ -111,5 +123,3 @@ export async function onRequestGet(context: PagesContext<MbtiEnv>): Promise<Resp
   if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));
   return response;
 }
-
-
