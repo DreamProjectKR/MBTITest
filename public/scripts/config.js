@@ -51,9 +51,9 @@
     // Local dev (wrangler pages dev): `/cdn-cgi/image` is not reliably available.
     // To keep asset loading consistent, disable resize and just return `/assets/...`.
     const host =
-      typeof window !== "undefined" && window.location
-        ? window.location.hostname
-        : "";
+      typeof window !== "undefined" && window.location ?
+        window.location.hostname
+      : "";
     const isLocalhost = host === "localhost" || host === "127.0.0.1";
     if (isLocalhost) return base;
 
@@ -96,9 +96,9 @@
 
     const paramString = params.filter(Boolean).join(",");
     const target =
-      typeof absoluteUrl === "string" && absoluteUrl.startsWith("/")
-        ? absoluteUrl.replace(/^\/+/, "")
-        : absoluteUrl;
+      typeof absoluteUrl === "string" && absoluteUrl.startsWith("/") ?
+        absoluteUrl.replace(/^\/+/, "")
+      : absoluteUrl;
     return `/cdn-cgi/image/${paramString}/${target}`;
   };
 
@@ -234,10 +234,12 @@
     if (!Number.isFinite(rendered) || rendered <= 0) return null;
 
     const dpr =
-      typeof window !== "undefined" &&
-      typeof window.devicePixelRatio === "number"
-        ? window.devicePixelRatio
-        : 1;
+      (
+        typeof window !== "undefined" &&
+        typeof window.devicePixelRatio === "number"
+      ) ?
+        window.devicePixelRatio
+      : 1;
     const target = Math.round(rendered * Math.max(1, dpr));
     const clamped = Math.max(minWidth, Math.min(target, maxWidth));
     return clamped;
@@ -303,9 +305,9 @@
     const scope = root && root.querySelectorAll ? root : document;
     const isLocalhost = (() => {
       const host =
-        typeof window !== "undefined" && window.location
-          ? window.location.hostname
-          : "";
+        typeof window !== "undefined" && window.location ?
+          window.location.hostname
+        : "";
       return host === "localhost" || host === "127.0.0.1";
     })();
 
@@ -401,9 +403,9 @@
             }
             const width =
               measured ||
-              (typeof opts.fallbackWidth === "number"
-                ? opts.fallbackWidth
-                : undefined) ||
+              (typeof opts.fallbackWidth === "number" ?
+                opts.fallbackWidth
+              : undefined) ||
               (typeof opts.width === "number" ? opts.width : undefined) ||
               520;
             const url = appendVersion(

@@ -329,10 +329,12 @@ function updateProgressBar(index, total) {
 
 function renderQuestion() {
   const question =
-    Array.isArray(state.test?.questions) &&
-    state.test.questions[state.currentIndex]
-      ? state.test.questions[state.currentIndex]
-      : null;
+    (
+      Array.isArray(state.test?.questions) &&
+      state.test.questions[state.currentIndex]
+    ) ?
+      state.test.questions[state.currentIndex]
+    : null;
 
   if (!question) {
     renderError("질문 데이터를 찾지 못했습니다.");
@@ -498,9 +500,9 @@ async function computeMbtiOnEdge() {
     return {
       mbti: typeof body?.mbti === "string" ? body.mbti : "",
       percentages:
-        body?.percentages && typeof body.percentages === "object"
-          ? body.percentages
-          : null,
+        body?.percentages && typeof body.percentages === "object" ?
+          body.percentages
+        : null,
     };
   } catch (err) {
     return null;
