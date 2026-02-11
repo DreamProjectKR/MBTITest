@@ -89,3 +89,10 @@ public/scripts/admin/
 | `functions/api/admin/utils/store.ts` | D1/R2 읽기/쓰기/이미지 메타 관리 유틸          |
 | `functions/assets/[[path]].ts`       | R2 에셋 프록시 (Cache-Tag, ETag, 폴백)         |
 | `public/scripts/config.js`           | 프론트엔드 에셋 URL/이미지 설정 중앙 관리      |
+
+## 관련 문서
+
+- [API.md](API.md) — API 레퍼런스
+- [CLOUDFLARE_PERFORMANCE.md](CLOUDFLARE_PERFORMANCE.md) — 캐시·성능 가이드
+- [cloudflare_online.md](cloudflare_online.md) — Cloudflare 무료/유료 대시보드 설정 정리
+- [PERFORMANCE_MAINTENANCE_PLAN.md](PERFORMANCE_MAINTENANCE_PLAN.md) — 성능·유지보수 개선 계획 (Cloudflare 문서 기반)
