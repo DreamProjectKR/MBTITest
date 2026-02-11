@@ -1,6 +1,7 @@
 import type { MbtiEnv, PagesContext } from "../../../_types";
 
-import { NO_STORE_HEADERS, writeTest } from "../utils/store.js";
+import { getDefaultCache, noStoreJsonResponse } from "../../_utils/http";
+import { writeTest } from "../utils/store.js";
 
 type Params = { id?: string };
 
@@ -65,19 +66,12 @@ type ResultEntry = {
   summary?: unknown;
 };
 
-function json(payload: unknown, status = 200): Response {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: NO_STORE_HEADERS,
-  });
-}
-
 function badRequest(message: string): Response {
-  return json({ error: message }, 400);
+  return noStoreJsonResponse({ error: message }, 400);
 }
 
 function methodNotAllowed(): Response {
-  return json({ error: "Method not allowed." }, 405);
+  return noStoreJsonResponse({ error: "Method not allowed." }, 405);
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -179,9 +173,16 @@ export async function onRequestPut(
   if (context.request.method !== "PUT") return methodNotAllowed();
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket)
-    return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
+    return noStoreJsonResponse(
+      { error: "R2 binding MBTI_BUCKET is missing." },
+      500,
+    );
   const db = context.env.mbti_db;
-  if (!db) return json({ error: "D1 binding mbti_db is missing." }, 500);
+  if (!db)
+    return noStoreJsonResponse(
+      { error: "D1 binding mbti_db is missing." },
+      500,
+    );
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
@@ -275,8 +276,7 @@ export async function onRequestPut(
       context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));
     }
 
-    const cache = (globalThis.caches as { default?: Cache } | undefined)
-      ?.default;
+    const cache = getDefaultCache();
     if (cache) {
       const origin = new URL(context.request.url).origin;
       context.waitUntil(
@@ -289,9 +289,9 @@ export async function onRequestPut(
       );
     }
 
-    return json({ ok: true });
+    return noStoreJsonResponse({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to save test.";
-    return json({ error: message }, 500);
+    return noStoreJsonResponse({ error: message }, 500);
   }
 }
