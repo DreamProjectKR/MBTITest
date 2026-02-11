@@ -6,7 +6,13 @@
  */
 import type { MbtiEnv, PagesContext } from "../../_types";
 
-import { JSON_HEADERS, jsonResponse, withCacheHeaders } from "../_utils/http";
+import {
+  JSON_HEADERS,
+  cacheKeyForGet,
+  getDefaultCache,
+  jsonResponse,
+  withCacheHeaders,
+} from "../_utils/http";
 
 type TestRow = {
   test_id?: unknown;
@@ -83,15 +89,9 @@ export async function onRequestGet(
     return `"${tests.length}-${maxUpdated}"`;
   })();
 
-  const cache =
-    (
-      globalThis.caches as unknown as
-        | { default?: Cache | undefined }
-        | undefined
-    )?.default ?? null;
+  const cache = getDefaultCache();
   const url = new URL(context.request.url);
-  const cacheKeyUrl = new URL(url.origin + url.pathname);
-  const cacheKey = new Request(cacheKeyUrl.toString(), { method: "GET" });
+  const cacheKey = cacheKeyForGet(url);
 
   const ifNoneMatch = context.request.headers.get("if-none-match");
   if (ifNoneMatch && ifNoneMatch === etag) {
@@ -114,15 +114,18 @@ export async function onRequestGet(
     }
   }
 
-  const response = new Response(JSON.stringify({ tests }), {
-    status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, {
-      etag,
-      maxAge: 30,
-      sMaxAge: 60,
-      staleWhileRevalidate: 300,
-    }),
-  });
+  const response = jsonResponse(
+    { tests },
+    {
+      status: 200,
+      headers: withCacheHeaders(JSON_HEADERS, {
+        etag,
+        maxAge: 30,
+        sMaxAge: 60,
+        staleWhileRevalidate: 300,
+      }),
+    },
+  );
   if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));
   return response;
 }
