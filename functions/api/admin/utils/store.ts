@@ -1,15 +1,10 @@
 import type { D1Database, R2Bucket } from "../../../_types";
 
+import { JSON_HEADERS, NO_STORE_HEADERS } from "../../_utils/http";
+
+export { JSON_HEADERS, NO_STORE_HEADERS };
+
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
-
-export const JSON_HEADERS: Readonly<Record<string, string>> = {
-  "Content-Type": JSON_CONTENT_TYPE,
-};
-
-export const NO_STORE_HEADERS: Readonly<Record<string, string>> = {
-  "Content-Type": JSON_CONTENT_TYPE,
-  "Cache-Control": "no-store",
-};
 
 export function getTestKey(testId: string): string {
   return `assets/${testId}/test.json`;
@@ -112,6 +107,44 @@ export async function upsertTestImageMeta(
       uploadedAt,
     )
     .all();
+}
+
+const UPSERT_TEST_IMAGE_SQL = `
+  INSERT INTO test_images (test_id, image_key, image_type, image_name, content_type, size_bytes, uploaded_at)
+  VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+  ON CONFLICT(test_id, image_name) DO UPDATE SET
+    image_key = excluded.image_key,
+    image_type = excluded.image_type,
+    content_type = excluded.content_type,
+    size_bytes = excluded.size_bytes,
+    uploaded_at = excluded.uploaded_at
+`;
+
+/**
+ * Runs upsert into test_images and UPDATE tests.updated_at in a single D1 batch (one round-trip).
+ */
+export async function upsertTestImageMetaAndTouchBatch(
+  db: D1Database,
+  input: TestImageMetaInput,
+  testId: string,
+): Promise<void> {
+  const uploadedAt = input.uploadedAt || new Date().toISOString();
+  const now = formatIndexDate();
+  const stmt1 = db
+    .prepare(UPSERT_TEST_IMAGE_SQL)
+    .bind(
+      input.testId,
+      input.imageKey,
+      input.imageType,
+      input.imageName,
+      input.contentType || null,
+      Number.isFinite(input.sizeBytes) ? Number(input.sizeBytes) : null,
+      uploadedAt,
+    );
+  const stmt2 = db
+    .prepare("UPDATE tests SET updated_at = ?1 WHERE test_id = ?2")
+    .bind(now, testId);
+  await db.batch([stmt1, stmt2]);
 }
 
 export async function listTestImageMeta(
