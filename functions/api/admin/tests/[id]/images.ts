@@ -1,7 +1,7 @@
 import type { MbtiEnv, PagesContext } from "../../../../_types";
 
+import { getDefaultCache, noStoreJsonResponse } from "../../../_utils/http";
 import {
-  NO_STORE_HEADERS,
   getImagesPrefix,
   listTestImageMeta,
   upsertTestImageMeta,
@@ -9,19 +9,12 @@ import {
 
 type Params = { id?: string };
 
-function json(payload: unknown, status = 200): Response {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: NO_STORE_HEADERS,
-  });
-}
-
 function methodNotAllowed(): Response {
-  return json({ error: "Method not allowed." }, 405);
+  return noStoreJsonResponse({ error: "Method not allowed." }, 405);
 }
 
 function badRequest(message: string): Response {
-  return json({ error: message }, 400);
+  return noStoreJsonResponse({ error: message }, 400);
 }
 
 function extensionFromMime(mimeType = ""): string {
@@ -80,7 +73,11 @@ export async function onRequestGet(
 ): Promise<Response> {
   if (context.request.method !== "GET") return methodNotAllowed();
   const db = context.env.mbti_db;
-  if (!db) return json({ error: "D1 binding mbti_db is missing." }, 500);
+  if (!db)
+    return noStoreJsonResponse(
+      { error: "D1 binding mbti_db is missing." },
+      500,
+    );
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return json({ error: "Missing test id." }, 400);
@@ -102,9 +99,9 @@ export async function onRequestGet(
         lastModified: row.uploaded_at || null,
       };
     });
-    return json({ items });
+    return noStoreJsonResponse({ items });
   } catch (err) {
-    return json(
+    return noStoreJsonResponse(
       {
         error: err instanceof Error ? err.message : "Failed to list images.",
       },
@@ -119,9 +116,16 @@ export async function onRequestPut(
   if (context.request.method !== "PUT") return methodNotAllowed();
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket)
-    return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
+    return noStoreJsonResponse(
+      { error: "R2 binding MBTI_BUCKET is missing." },
+      500,
+    );
   const db = context.env.mbti_db;
-  if (!db) return json({ error: "D1 binding mbti_db is missing." }, 500);
+  if (!db)
+    return noStoreJsonResponse(
+      { error: "D1 binding mbti_db is missing." },
+      500,
+    );
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
@@ -166,13 +170,13 @@ export async function onRequestPut(
       sizeBytes: upload.buffer.byteLength,
     });
   } catch (err) {
-    return json(
+    return noStoreJsonResponse(
       { error: err instanceof Error ? err.message : "Failed to upload image." },
       500,
     );
   }
 
-  const cache = (globalThis.caches as { default?: Cache } | undefined)?.default;
+  const cache = getDefaultCache();
   if (cache) {
     const origin = new URL(context.request.url).origin;
     context.waitUntil(
@@ -183,5 +187,10 @@ export async function onRequestPut(
   }
 
   const publicPath = key.replace(/^assets\/?/i, "");
-  return json({ ok: true, key, path: key, url: `/assets/${publicPath}` });
+  return noStoreJsonResponse({
+    ok: true,
+    key,
+    path: key,
+    url: `/assets/${publicPath}`,
+  });
 }
