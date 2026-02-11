@@ -4,6 +4,23 @@ export const JSON_HEADERS: Readonly<Record<string, string>> = {
   "Content-Type": "application/json; charset=utf-8",
 };
 
+export const NO_STORE_HEADERS: Readonly<Record<string, string>> = {
+  ...JSON_HEADERS,
+  "Cache-Control": "no-store",
+};
+
+/** Returns the default Cache (Cache API) when available in the Cloudflare runtime. */
+export function getDefaultCache(): Cache | null {
+  const cachesApi = globalThis.caches as { default?: Cache } | undefined;
+  return cachesApi?.default ?? null;
+}
+
+/** Builds a GET request suitable as Cache API key for the given URL (origin + pathname, no query). */
+export function cacheKeyForGet(url: URL): Request {
+  const keyUrl = new URL(url.origin + url.pathname);
+  return new Request(keyUrl.toString(), { method: "GET" });
+}
+
 export function withCacheHeaders(
   headers: HeadersInit,
   opts?: {
@@ -45,4 +62,11 @@ export function jsonResponse(
   const status = init?.status ?? 200;
   const headers = init?.headers ?? JSON_HEADERS;
   return new Response(JSON.stringify(payload), { status, headers });
+}
+
+export function noStoreJsonResponse(payload: unknown, status = 200): Response {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: NO_STORE_HEADERS,
+  });
 }
