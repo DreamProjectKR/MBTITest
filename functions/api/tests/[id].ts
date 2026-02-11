@@ -10,7 +10,13 @@
  */
 import type { MbtiEnv, PagesContext } from "../../../_types";
 
-import { JSON_HEADERS, withCacheHeaders } from "../_utils/http";
+import {
+  JSON_HEADERS,
+  cacheKeyForGet,
+  getDefaultCache,
+  jsonResponse,
+  withCacheHeaders,
+} from "../_utils/http";
 
 type Params = { id?: string };
 
@@ -49,28 +55,25 @@ export async function onRequestGet(
 ): Promise<Response> {
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket) {
-    return new Response(
-      JSON.stringify({ error: "R2 binding MBTI_BUCKET is missing." }),
+    return jsonResponse(
+      { error: "R2 binding MBTI_BUCKET is missing." },
       { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
   const db = context.env.mbti_db;
   if (!db) {
-    return new Response(
-      JSON.stringify({ error: "D1 binding mbti_db is missing." }),
-      {
-        status: 500,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-      },
+    return jsonResponse(
+      { error: "D1 binding mbti_db is missing." },
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
 
   const id = context.params?.id ? String(context.params.id) : "";
   if (!id) {
-    return new Response(JSON.stringify({ error: "Missing test id." }), {
-      status: 400,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-    });
+    return jsonResponse(
+      { error: "Missing test id." },
+      { status: 400, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
+    );
   }
   const ifNoneMatch = context.request.headers.get("if-none-match");
   const kv = context.env.MBTI_KV;
@@ -96,7 +99,7 @@ export async function onRequestGet(
           });
         }
         if (cached?.body && typeof cached.body === "object") {
-          return new Response(JSON.stringify(cached.body), {
+          return jsonResponse(cached.body, {
             status: 200,
             headers: withCacheHeaders(JSON_HEADERS, {
               etag: cachedEtag || undefined,
@@ -120,20 +123,17 @@ export async function onRequestGet(
     .first<TestRow>();
 
   if (!row?.source_path) {
-    return new Response(JSON.stringify({ error: "Test not found: " + id }), {
-      status: 404,
-      headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
-    });
+    return jsonResponse(
+      { error: "Test not found: " + id },
+      { status: 404, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }) },
+    );
   }
 
   const key = normalizeR2KeyFromIndexPath(String(row.source_path));
   if (!key) {
-    return new Response(
-      JSON.stringify({ error: "Test meta has empty path: " + id }),
-      {
-        status: 500,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-      },
+    return jsonResponse(
+      { error: "Test meta has empty path: " + id },
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
 
@@ -164,12 +164,9 @@ export async function onRequestGet(
   }
 
   if (!resolvedBodyText) {
-    return new Response(
-      JSON.stringify({ error: "Test JSON not found in R2.", key }),
-      {
-        status: 404,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }),
-      },
+    return jsonResponse(
+      { error: "Test JSON not found in R2.", key },
+      { status: 404, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }) },
     );
   }
 
@@ -179,15 +176,9 @@ export async function onRequestGet(
     return `"${r2Etag}|${d1Updated}"`;
   })();
 
-  const cache =
-    (
-      globalThis.caches as unknown as
-        | { default?: Cache | undefined }
-        | undefined
-    )?.default ?? null;
+  const cache = getDefaultCache();
   const url = new URL(context.request.url);
-  const cacheKeyUrl = new URL(url.origin + url.pathname);
-  const cacheKey = new Request(cacheKeyUrl.toString(), { method: "GET" });
+  const cacheKey = cacheKeyForGet(url);
 
   if (ifNoneMatch && ifNoneMatch === etag) {
     return new Response(null, {
@@ -213,12 +204,9 @@ export async function onRequestGet(
   try {
     bodyJson = JSON.parse(resolvedBodyText) as unknown;
   } catch {
-    return new Response(
-      JSON.stringify({ error: "Test JSON is invalid JSON." }),
-      {
-        status: 500,
-        headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-      },
+    return jsonResponse(
+      { error: "Test JSON is invalid JSON." },
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
 
@@ -248,7 +236,7 @@ export async function onRequestGet(
     : {}),
   };
 
-  const response = new Response(JSON.stringify(merged), {
+  const response = jsonResponse(merged, {
     status: 200,
     headers: withCacheHeaders(JSON_HEADERS, {
       etag,
