@@ -143,6 +143,7 @@ npm run d1:migrate:remote
 
 상세 문서는 `docs/` 폴더를 참조하세요:
 
+- [AGENTS.md](AGENTS.md) — AI 어시스턴트용 프로젝트 가이드라인
 - [아키텍처 개요](docs/README.md)
 - [API 레퍼런스](docs/API.md)
 - [데이터 모델 ERD](docs/ERD.md)
