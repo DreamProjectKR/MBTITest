@@ -124,6 +124,6 @@ __pycache__/
 .prettierrc
 seed/
 scripts/
-assets/
-migrations/
+assets/*
+migrations/*
 .dev.vars
