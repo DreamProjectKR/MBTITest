@@ -31,6 +31,7 @@ export interface R2ObjectBody {
 
 export interface R2Object {
   etag?: string;
+  size?: number;
   body: R2ObjectBody | null;
   httpMetadata?: R2HttpMetadata;
   text(): Promise<string>;
@@ -47,8 +48,18 @@ export interface R2BucketListResult {
   objects: R2BucketListObject[];
 }
 
+/** Optional range for R2 get (partial content). */
+export interface R2Range {
+  offset?: number;
+  length?: number;
+  suffix?: number;
+}
+
 export interface R2Bucket {
-  get(key: string): Promise<R2Object | null>;
+  get(
+    key: string,
+    options?: { range?: R2Range | Headers },
+  ): Promise<R2Object | null>;
   list(options: { prefix: string }): Promise<R2BucketListResult>;
   put(
     key: string,
@@ -63,8 +74,16 @@ export interface D1PreparedStatement {
   all<T = Record<string, unknown>>(): Promise<{ results: T[] }>;
 }
 
+/** D1 batch result shape (one element per statement). */
+export interface D1Result {
+  results?: unknown[];
+  success?: boolean;
+  meta?: unknown;
+}
+
 export interface D1Database {
   prepare(query: string): D1PreparedStatement;
+  batch(statements: D1PreparedStatement[]): Promise<D1Result[]>;
 }
 
 export interface KVNamespace {
