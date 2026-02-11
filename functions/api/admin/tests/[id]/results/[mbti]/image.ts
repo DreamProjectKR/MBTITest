@@ -1,10 +1,13 @@
 import type { MbtiEnv, PagesContext } from "../../../../../../_types";
 
 import {
-  NO_STORE_HEADERS,
+  getDefaultCache,
+  noStoreJsonResponse,
+} from "../../../../../_utils/http";
+import {
   getImagesPrefix,
   readTest,
-  upsertTestImageMeta,
+  upsertTestImageMetaAndTouchBatch,
   writeTest,
 } from "../../../../utils/store.js";
 
@@ -29,19 +32,12 @@ const MBTI_ORDER = [
   "ESFP",
 ] as const;
 
-function json(payload: unknown, status = 200): Response {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: NO_STORE_HEADERS,
-  });
-}
-
 function methodNotAllowed(): Response {
-  return json({ error: "Method not allowed." }, 405);
+  return noStoreJsonResponse({ error: "Method not allowed." }, 405);
 }
 
 function badRequest(message: string): Response {
-  return json({ error: message }, 400);
+  return noStoreJsonResponse({ error: message }, 400);
 }
 
 function extensionFromMime(mimeType = ""): string {
@@ -72,19 +68,22 @@ async function extractUpload(
   return { buffer, contentType: contentType || "image/png" };
 }
 
-function formatIndexDate(date: Date = new Date()): string {
-  return new Date(date).toISOString().split("T")[0] ?? "";
-}
-
 export async function onRequestPut(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<Response> {
   if (context.request.method !== "PUT") return methodNotAllowed();
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket)
-    return json({ error: "R2 binding MBTI_BUCKET is missing." }, 500);
+    return noStoreJsonResponse(
+      { error: "R2 binding MBTI_BUCKET is missing." },
+      500,
+    );
   const db = context.env.mbti_db;
-  if (!db) return json({ error: "D1 binding mbti_db is missing." }, 500);
+  if (!db)
+    return noStoreJsonResponse(
+      { error: "D1 binding mbti_db is missing." },
+      500,
+    );
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
@@ -117,16 +116,20 @@ export async function onRequestPut(
     await bucket.put(key, bytes, {
       httpMetadata: { contentType: upload.contentType },
     });
-    await upsertTestImageMeta(db, {
+    await upsertTestImageMetaAndTouchBatch(
+      db,
+      {
+        testId,
+        imageKey: key,
+        imageType: "result",
+        imageName: mbtiRaw,
+        contentType: upload.contentType,
+        sizeBytes: upload.buffer.byteLength,
+      },
       testId,
-      imageKey: key,
-      imageType: "result",
-      imageName: mbtiRaw,
-      contentType: upload.contentType,
-      sizeBytes: upload.buffer.byteLength,
-    });
+    );
   } catch (err) {
-    return json(
+    return noStoreJsonResponse(
       { error: err instanceof Error ? err.message : "Failed to upload image." },
       500,
     );
@@ -135,7 +138,10 @@ export async function onRequestPut(
   // Update R2 test.json (slim body) to include result image path.
   const testJson = await readTest(bucket, testId);
   if (!testJson || typeof testJson !== "object") {
-    return json({ error: "Test JSON not found while updating image." }, 404);
+    return noStoreJsonResponse(
+      { error: "Test JSON not found while updating image." },
+      404,
+    );
   }
 
   const t = testJson as { results?: Record<string, unknown> };
@@ -155,17 +161,11 @@ export async function onRequestPut(
 
   await writeTest(bucket, testId, t);
 
-  // Touch updated_at in D1 so listing order reflects recent edits.
-  const now = formatIndexDate();
-  await db
-    .prepare("UPDATE tests SET updated_at = ?1 WHERE test_id = ?2")
-    .bind(now, testId)
-    .all();
   if (context.env.MBTI_KV) {
     context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));
   }
 
-  const cache = (globalThis.caches as { default?: Cache } | undefined)?.default;
+  const cache = getDefaultCache();
   if (cache) {
     const origin = new URL(context.request.url).origin;
     context.waitUntil(
@@ -178,7 +178,7 @@ export async function onRequestPut(
     );
   }
 
-  return json({
+  return noStoreJsonResponse({
     ok: true,
     mbti: mbtiRaw,
     path: `${getImagesPrefix(testId)}${fileName}`,
