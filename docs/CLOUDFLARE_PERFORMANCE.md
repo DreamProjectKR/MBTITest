@@ -34,7 +34,7 @@
 - `s-maxage` + `stale-while-revalidate` + `stale-if-error`로 엣지 TTL 제어
 - `Vary: Accept-Encoding`으로 압축/비압축 응답 분리
 
-**Tiered Cache 참고**: `cache.put()`는 Cloudflare Tiered Cache와 호환되지 않습니다. 현재 구현은 단일 엣지 PoP에만 캐시됩니다. 글로벌 배포가 필요하면 `fetch()` + `cf: { cacheTtl, cacheEverything: true }`로 전환 시 Tiered Cache가 활성화됩니다.
+**Tiered Cache 참고**: `cache.put()`는 Cloudflare Tiered Cache와 호환되지 않습니다. 현재 구현은 단일 엣지 PoP에만 캐시됩니다. 글로벌 Tiered Cache를 쓰려면 동일 URL로 **fetch(origin + path, { cf: { cacheTtl, cacheEverything: true } })** 를 한 번 호출하는 패턴으로 전환하면 됩니다. 이때 응답을 Worker에서 직접 만드는 대신, 자신의 origin을 fetch해 Tiered Cache에 적재하는 방식입니다. 구조 변경이 필요하므로 선택 사항이며, 자세한 계획은 [PERFORMANCE_MAINTENANCE_PLAN.md](PERFORMANCE_MAINTENANCE_PLAN.md)를 참고하세요.
 
 ### Cache-Tag (구현됨)
 
