@@ -1,6 +1,6 @@
 import type { MbtiEnv, PagesContext } from "../../../../_types";
 
-import { JSON_HEADERS, withCacheHeaders } from "../../_utils/http";
+import { noStoreJsonResponse } from "../../_utils/http";
 
 type Params = { id?: string };
 
@@ -29,13 +29,6 @@ const AXIS_TO_DIRECTIONS: Record<AxisKey, readonly [Direction, Direction]> = {
   TF: ["T", "F"],
   JP: ["J", "P"],
 };
-
-function json(payload: unknown, status = 200): Response {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }),
-  });
-}
 
 function isAxis(value: unknown): value is AxisKey {
   return value === "EI" || value === "SN" || value === "TF" || value === "JP";
@@ -104,31 +97,39 @@ export async function onRequestPost(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<Response> {
   const db = context.env.mbti_db;
-  if (!db) return json({ error: "D1 binding mbti_db is missing." }, 500);
+  if (!db)
+    return noStoreJsonResponse(
+      { error: "D1 binding mbti_db is missing." },
+      500,
+    );
 
   const testId = context.params?.id ? String(context.params.id).trim() : "";
-  if (!testId) return json({ error: "Missing test id." }, 400);
+  if (!testId) return noStoreJsonResponse({ error: "Missing test id." }, 400);
 
   const exists = await db
     .prepare("SELECT test_id FROM tests WHERE test_id = ?1 LIMIT 1")
     .bind(testId)
     .first<{ test_id?: unknown }>();
-  if (!exists?.test_id) return json({ error: "Test not found." }, 404);
+  if (!exists?.test_id)
+    return noStoreJsonResponse({ error: "Test not found." }, 404);
 
   let body: RequestBody;
   try {
     body = (await context.request.json()) as RequestBody;
   } catch {
-    return json({ error: "Request body must be valid JSON." }, 400);
+    return noStoreJsonResponse(
+      { error: "Request body must be valid JSON." },
+      400,
+    );
   }
 
   const answers =
     Array.isArray(body?.answers) ? (body.answers as SubmittedAnswer[]) : [];
   if (!answers.length)
-    return json({ error: "answers array is required." }, 400);
+    return noStoreJsonResponse({ error: "answers array is required." }, 400);
 
   const computed = computeFromAnswers(answers);
-  return json({
+  return noStoreJsonResponse({
     testId,
     mbti: computed.mbti,
     scores: {
