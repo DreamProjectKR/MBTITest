@@ -122,3 +122,8 @@ __pycache__/
 .cursor/
 .wrangler/
 .prettierrc
+seed/
+scripts/
+assets/
+migrations/
+.dev.vars
