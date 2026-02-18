@@ -2,6 +2,8 @@
 
 이 문서는 `dreamp.org`(Cloudflare Pages) 배포 환경에서 로딩 성능을 최적화하기 위한 설정과 전략을 정리합니다.
 
+**설정**: `wrangler.toml`의 `compatibility_date`는 2025-01-01로 유지하여 최신 런타임 기능을 활용한다.
+
 ## 현재 아키텍처
 
 - **Pages Functions**: API + R2 프록시

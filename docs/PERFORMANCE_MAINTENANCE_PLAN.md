@@ -74,6 +74,7 @@ Cloudflare 공식 문서 검색을 바탕으로, 현재 배포된 **Pages, Funct
 | D1Database / R2Bucket 타입 확장    | 적용   | batch, get options                                    |
 | Tiered Cache 옵션 문서화           | 적용   | CLOUDFLARE_PERFORMANCE.md                             |
 | 환경별 wrangler                    | 문서화 | 필요 시 env.dev/production 적용                       |
+| wrangler compatibility_date        | 적용   | 2025-01-01로 갱신 (Cloudflare Cursor 플러그인 계획)   |
 
 ---
 
