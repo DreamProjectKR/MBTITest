@@ -6,10 +6,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <meta
-      name="google-adsense-account"
-      content="ca-pub-9230787058024019"
-    />
     <title>MBTI ZOO | 테스트 결과</title>
     <meta
       name="description"
@@ -122,8 +118,6 @@
       rel="stylesheet"
       href="styles/testresult.css"
     />
-    <link rel="preload" href="partials/header.html" as="fetch" />
-    <link rel="preload" href="partials/footer.html" as="fetch" />
     <link
       rel="shortcut icon"
       data-asset-href="assets/images/favicon.png"
@@ -133,19 +127,30 @@
       src="./scripts/config.js"
       defer
     ></script>
-    <script
-      src="./scripts/include-partials.js"
-      defer
-    ></script>
-    <script
-      src="./scripts/header.js"
-      defer
-    ></script>
   </head>
 
   <body>
     <div class="PageShell testlistPageShell">
-      <div data-include="partials/header.html"></div>
+      <header class="Sticky">
+        <div class="Head">
+          <div class="Logo">
+            <a href="index.html">
+              <img
+                data-asset-src="assets/images/mainLogo.png"
+                data-asset-resize="width=360,quality=90,format=auto"
+                alt="MBTIZOO바로가기"
+                decoding="async"
+                fetchpriority="high"
+              />
+            </a>
+          </div>
+          <div class="HeaderGnb holographic-container">
+            <div class="holographic-card">
+              <a>나의 MBTI는?</a>
+            </div>
+          </div>
+        </div>
+      </header>
       <main class="ResultShell">
         <div class="ResultShellImg">
           <img
@@ -181,7 +186,61 @@
           </div>
         </div>
       </main>
-      <div data-include="partials/footer.html"></div>
+      <footer>
+        <ul>
+          <li>
+            <a href="#">
+              <img
+                class="icon"
+                data-asset-src="assets/images/instagram.png"
+                data-asset-resize="width=48,height=48,quality=80,fit=cover,format=auto"
+                alt="인스타그램 바로가기"
+                loading="lazy"
+                decoding="async"
+                data-asset-lazy="true"
+              />
+            </a>
+            <a href="#">
+              <img
+                class="icon"
+                data-asset-src="assets/images/katalk.png"
+                data-asset-resize="width=48,height=48,quality=80,fit=cover,format=auto"
+                alt="카카오톡 바로가기"
+                loading="lazy"
+                decoding="async"
+                data-asset-lazy="true"
+              />
+            </a>
+            <a href="#">
+              <img
+                class="icon"
+                data-asset-src="assets/images/naver.png"
+                data-asset-resize="width=48,height=48,quality=80,fit=cover,format=auto"
+                alt="네이버 바로가기"
+                loading="lazy"
+                decoding="async"
+                data-asset-lazy="true"
+              />
+            </a>
+            <a href="mailto:dreamp0403@gmail.com">
+              <img
+                class="icon"
+                data-asset-src="assets/images/mail.png"
+                data-asset-resize="width=48,height=48,quality=80,fit=cover,format=auto"
+                alt="메일 바로가기"
+                loading="lazy"
+                decoding="async"
+                data-asset-lazy="true"
+              />
+            </a>
+          </li>
+        </ul>
+        <div class="Copyright">
+          <span class="Copy">
+            Copyright &copy; 2025; Designed by DREAMPROJECT
+          </span>
+        </div>
+      </footer>
     </div>
   </body>
 

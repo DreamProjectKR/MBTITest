@@ -6,10 +6,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <meta
-      name="google-adsense-account"
-      content="ca-pub-9230787058024019"
-    />
     <title>MBTI ZOO | 테스트 소개</title>
     <meta
       name="description"
@@ -118,8 +114,6 @@
       rel="stylesheet"
       href="styles/testintro.css"
     />
-    <link rel="preload" href="partials/header.html" as="fetch" />
-    <link rel="preload" href="partials/footer.html" as="fetch" />
     <link
       rel="shortcut icon"
       data-asset-href="assets/images/favicon.png"
@@ -130,18 +124,20 @@
       defer
     ></script>
     <script
-      src="./scripts/include-partials.js"
-      defer
-    ></script>
-    <script
-      src="./scripts/header.js"
+      src="./scripts/layout.js"
       defer
     ></script>
   </head>
 
-  <body data-header-margin="35">
+  <body>
     <div class="PageShell testlistPageShell">
-      <div data-include="partials/header.html"></div>
+      <header class="Sticky">
+        <div
+          class="Head"
+          data-include="header"
+          data-include-src="partials/header.html"
+        ></div>
+      </header>
       <main class="TestIntroShell">
         <div class="IntroShellImg">
           <img
@@ -191,7 +187,12 @@
           </div>
         </div>
       </main>
-      <div data-include="partials/footer.html"></div>
+      <footer>
+        <div
+          data-include="footer"
+          data-include-src="partials/footer.html"
+        ></div>
+      </footer>
     </div>
 
     <!-- Start preloading overlay (shown only when user clicks Start) -->

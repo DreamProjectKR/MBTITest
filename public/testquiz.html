@@ -6,10 +6,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <meta
-      name="google-adsense-account"
-      content="ca-pub-9230787058024019"
-    />
     <title>MBTI ZOO | 테스트 진행</title>
     <meta
       name="description"
@@ -110,7 +106,6 @@
       rel="stylesheet"
       href="styles/testquiz.css"
     />
-    <link rel="preload" href="partials/header.html" as="fetch" />
     <link
       rel="shortcut icon"
       data-asset-href="assets/images/favicon.png"
@@ -121,18 +116,20 @@
       defer
     ></script>
     <script
-      src="./scripts/include-partials.js"
-      defer
-    ></script>
-    <script
-      src="./scripts/header.js"
+      src="./scripts/layout.js"
       defer
     ></script>
   </head>
 
   <body>
-    <div class="PageShell testlistPageShell">
-      <div data-include="partials/header.html"></div>
+    <div class="PageShell testlistPageShell quiz-page">
+      <header class="Sticky">
+        <div
+          class="Head"
+          data-include="header"
+          data-include-src="partials/header.html"
+        ></div>
+      </header>
       <main>
         <div class="ProgressBar">
           <div class="Progress"></div>

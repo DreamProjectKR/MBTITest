@@ -6,10 +6,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <meta
-      name="google-adsense-account"
-      content="ca-pub-9230787058024019"
-    />
     <title>MBTI ZOO | 심리 테스트 모음</title>
     <meta
       name="description"
@@ -117,13 +113,10 @@
     />
     <link
       rel="preload"
-      href="partials/header.html"
-      as="fetch"
-    />
-    <link
-      rel="preload"
-      href="partials/footer.html"
-      as="fetch"
+      as="image"
+      href="/cdn-cgi/image/width=360,quality=90,format=auto/assets/images/mainLogo.png"
+      fetchpriority="high"
+      data-skip-local="true"
     />
     <link
       rel="preload"
@@ -158,18 +151,24 @@
       defer
     ></script>
     <script
-      src="./scripts/include-partials.js"
-      defer
-    ></script>
-    <script
-      src="./scripts/header.js"
+      src="./scripts/layout.js"
       defer
     ></script>
   </head>
 
   <body>
     <div class="PageShell">
-      <div data-include="partials/header.html"></div>
+      <header
+        id="headerScroll"
+        class="Sticky"
+      >
+        <div
+          id="header"
+          class="Head"
+          data-include="header"
+          data-include-src="partials/header.html"
+        ></div>
+      </header>
       <main id="MainTop">
         <div class="MainBanner">
           <a href="./testlist.html">
@@ -239,13 +238,18 @@
           </div>
         </div>
       </main>
-      <div data-include="partials/footer.html"></div>
+      <footer>
+        <div
+          data-include="footer"
+          data-include-src="partials/footer.html"
+        ></div>
+      </footer>
     </div>
   </body>
 </html>
 
 <script
   type="module"
-  src="./scripts/main.js?v=2"
+  src="./scripts/main.js"
   crossorigin="anonymous"
 ></script>

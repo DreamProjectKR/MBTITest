@@ -32,6 +32,10 @@ body {
   max-width: 40%;
 }
 
+.quiz-page .HeaderGnb {
+  display: none;
+}
+
 .PageShell main {
   display: flex;
   flex-flow: column;
