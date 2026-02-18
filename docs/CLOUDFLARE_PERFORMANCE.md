@@ -76,24 +76,7 @@ Tiered Cache 퍼지가 필요한 경우: [Purge by Tag](https://developers.cloud
 
 - **HTML**: `max-age=0, must-revalidate` + `Link` 헤더 (preconnect, preload)
 - **CSS/JS**: `max-age=86400, stale-while-revalidate=604800`
-- **Partials** (`/partials/*.html`): `max-age=3600, stale-while-revalidate=86400` — 헤더/푸터 HTML을 1시간 캐시, 재검증 시 24시간 stale 허용
 - **Early Hints**: Pages가 `Link` 헤더를 캐시하여 103 Early Hints로 선행 전송 (LCP 개선)
-
-### 헤더/푸터 파셜 로딩 개선 (Cloudflare Pages 정적 배포)
-
-헤더·푸터는 `data-include`로 클라이언트에서 fetch 후 주입되므로, 본문이 먼저 보이고 약간의 지연 후 헤더/푸터가 나타날 수 있습니다. Pages 정적 배포만으로 개선할 수 있는 방법:
-
-1. **적용됨 — Preload**  
-   각 페이지 `<head>`에 `partials/header.html`, `partials/footer.html`(또는 admin용 `partials/admin-header.html`)을 `<link rel="preload" href="..." as="fetch">`로 넣어 두었습니다. 브라우저가 메인 HTML과 동시에 partial 요청을 시작하므로, `include-partials.js`가 실행될 때 이미 응답이 도착했거나 캐시에 있을 가능성이 높습니다.
-
-2. **적용됨 — Partials 캐시**  
-   `_headers`에서 `/partials/*.html`에 `max-age=3600, stale-while-revalidate=86400`를 적용했습니다. 재방문 시 partial은 브라우저/엣지 캐시에서 바로 사용됩니다.
-
-3. **선택 — 빌드 타임 인라인**  
-   배포 전 스크립트로 각 HTML의 `data-include` 자리를 실제 partial 내용으로 치환해 두면, 클라이언트에서 fetch할 필요가 없어 지연이 사라집니다. (정적 생성 시점에 header/footer를 인라인하는 방식.)
-
-4. **선택 — Pages Functions / Worker**  
-   HTML 요청을 Worker나 Pages Function에서 받아, 서버에서 partial을 읽어 넣은 뒤 한 번에 응답하는 방식도 가능합니다. 클라이언트 round-trip은 한 번이지만, 구현·운영 복잡도가 늘어납니다.
 
 ## 4. Cache Rules (대시보드, 선택)
 
@@ -123,34 +106,6 @@ Cloudflare 대시보드 **Caching Overview**에는 다음이 명시되어 있습
 - **0B라고 해서 캐시가 동작하지 않는 것은 아닙니다.** Worker 내부의 Cache API와 Tiered Cache(self.fetch + `cf`)로 R2/오리진 요청은 줄어듭니다.
 - **Cache Reserve 지표**를 올리려면: 대시보드 **Caching > Cache Rules**에서 `/assets/*`(및 필요 시 `/cdn-cgi/image/*`)에 대해 **Eligible for cache** + **Edge TTL**을 넣고, 플랜/제품에 따라 **Cache Reserve에 저장** 옵션이 있으면 해당 규칙에 켜야 합니다. (Worker가 앞단에 있으면 Worker의 `cf` 설정이 Cache Rules보다 우선하므로, Worker에서 이미 `cacheTtl` 등을 주고 있다면 엣지 캐시는 동작합니다. Cache Reserve만 별도 설정 대상입니다.)
 - **캐시 적중 여부 확인**: 같은 에셋 URL을 두 번 요청한 뒤 응답 헤더를 봅니다. `X-MBTI-Edge-Cache: HIT`(Worker가 Cache API로 준 값) 또는 Cloudflare가 붙이는 `cf-cache-status: HIT`가 있으면 엣지/캐시에서 내려온 것입니다.
-
-### 캐시 적용 여부 확인 방법
-
-배포된 사이트에서 캐시가 적용 중인지 확인하려면 아래를 사용합니다.
-
-1. **브라우저 개발자 도구 (Network)**
-   - 사이트 접속 후 F12 → **Network** 탭
-   - 해당 URL 선택 → **Headers**에서 **Response Headers** 확인
-   - **`cf-cache-status`**: `HIT` = 엣지 캐시 적중, `MISS` = 오리진에서 가져옴, `EXPIRED` = 재검증 중
-   - **`Cache-Control`**: `max-age`, `s-maxage`, `stale-while-revalidate` 등으로 캐시 정책 확인
-   - 같은 URL을 두 번 연속 요청했을 때 두 번째에서 `cf-cache-status: HIT`가 나오면 캐시가 동작하는 것입니다.
-
-2. **curl로 헤더만 확인**
-
-   ```bash
-   curl -sI "https://dreamp.org/partials/header.html"
-   ```
-
-   응답에 `cf-cache-status`, `Cache-Control`, `Age`(캐시에 머문 초 수)가 포함됩니다.
-   - **API/에셋**(Worker 경유): `X-MBTI-Edge-Cache: HIT` 여부도 확인
-
-   ```bash
-   curl -sI "https://dreamp.org/api/tests"
-   ```
-
-3. **Cloudflare 대시보드**
-   - **Caching > Configuration**: Cache Level, Browser Cache TTL
-   - **Analytics > Caching**: 캐시 적중률 (엔드유저 요청 기준이며, Worker 서브요청은 별도 집계에 포함되지 않을 수 있음)
 
 ## 5. D1 인덱스 (적용됨)
 

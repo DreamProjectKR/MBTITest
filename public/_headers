@@ -6,9 +6,6 @@
   Cache-Control: public, max-age=0, must-revalidate
   Link: <https://fonts.googleapis.com>; rel=preconnect, <https://fonts.gstatic.com>; rel=preconnect; crossorigin, </styles/reset.css>; rel=preload; as=style, </scripts/config.js>; rel=preload; as=script
 
-/partials/*.html
-  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
-
 /*.css
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
