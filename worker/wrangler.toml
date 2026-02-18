@@ -1,0 +1,34 @@
+name = "mbtitest-api"
+main = "index.ts"
+compatibility_date = "2026-02-18"
+
+# Static assets for local dev (Worker receives all requests; production routes limit to /api, /assets)
+[assets]
+directory = "../public"
+binding = "ASSETS"
+
+[[r2_buckets]]
+binding = "MBTI_BUCKET"
+bucket_name = "mbti-assets"
+
+[[d1_databases]]
+binding = "mbti_db"
+database_name = "mbti-db"
+database_id = "b3d4e76a-4e45-4070-9e89-701c35cb642f"
+
+[[kv_namespaces]]
+binding = "MBTI_KV"
+id = "c99274b4b04d4979b10507ce02e77f59"
+preview_id = "c99274b4b04d4979b10507ce02e77f59"
+
+[vars]
+R2_PUBLIC_BASE_URL = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"
+
+# Routes: add when deploying to custom domain. Replace dreamp.org with your zone.
+# [[routes]]
+# pattern = "*dreamp.org/api/*"
+# zone_name = "dreamp.org"
+#
+# [[routes]]
+# pattern = "*dreamp.org/assets/*"
+# zone_name = "dreamp.org"
