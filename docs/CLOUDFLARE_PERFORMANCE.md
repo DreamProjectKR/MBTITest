@@ -87,6 +87,26 @@ Tiered Cache 퍼지가 필요한 경우: [Purge by Tag](https://developers.cloud
 | API 캐시    | `*dreamp.org/api/tests*` | 300-600초 |
 | Assets 캐시 | `*dreamp.org/assets/*`   | 1년       |
 
+### Caching Overview / Cache Reserve가 0B인 이유
+
+Cloudflare 대시보드 **Caching Overview**에는 다음이 명시되어 있습니다.
+
+- **"Only includes data on end-user traffic to your Cloudflare-proxied hostnames."**
+- **"Subrequests from Cloud Workers are not included."**
+
+즉, **Worker 서브요청(Worker가 내부적으로 하는 fetch)은 집계에 포함되지 않습니다.**  
+`dreamp.org`의 `/api/*`, `/assets/*`는 모두 **Worker가 처리**하므로:
+
+1. **엔드유저 요청**은 매번 Worker를 거칩니다.
+2. Worker는 `self.fetch(..., { cf: { cacheTtl, cacheEverything, cacheTags } })`로 **Tiered Cache**를 채우지만, 이건 서브요청이라 Caching Overview 숫자에 반영되지 않습니다.
+3. **Cache Reserve**는 “R2에 캐시를 저장하는” 별도 기능입니다. Tiered Cache(엣지 캐시)와는 다르며, Cache Reserve를 쓰는 규칙/트래픽이 없으면 **Egress savings / Requests served by Cache Reserve**가 0으로 나오는 것이 정상입니다.
+
+**정리:**
+
+- **0B라고 해서 캐시가 동작하지 않는 것은 아닙니다.** Worker 내부의 Cache API와 Tiered Cache(self.fetch + `cf`)로 R2/오리진 요청은 줄어듭니다.
+- **Cache Reserve 지표**를 올리려면: 대시보드 **Caching > Cache Rules**에서 `/assets/*`(및 필요 시 `/cdn-cgi/image/*`)에 대해 **Eligible for cache** + **Edge TTL**을 넣고, 플랜/제품에 따라 **Cache Reserve에 저장** 옵션이 있으면 해당 규칙에 켜야 합니다. (Worker가 앞단에 있으면 Worker의 `cf` 설정이 Cache Rules보다 우선하므로, Worker에서 이미 `cacheTtl` 등을 주고 있다면 엣지 캐시는 동작합니다. Cache Reserve만 별도 설정 대상입니다.)
+- **캐시 적중 여부 확인**: 같은 에셋 URL을 두 번 요청한 뒤 응답 헤더를 봅니다. `X-MBTI-Edge-Cache: HIT`(Worker가 Cache API로 준 값) 또는 Cloudflare가 붙이는 `cf-cache-status: HIT`가 있으면 엣지/캐시에서 내려온 것입니다.
+
 ## 5. D1 인덱스 (적용됨)
 
 성능에 영향을 주는 인덱스는 마이그레이션으로 관리합니다.

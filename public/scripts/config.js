@@ -220,6 +220,7 @@
 
     return out;
   }
+  window.parseResizeOptions = parseResizeOptions;
 
   function computeMeasuredWidthPx(el, options) {
     const minWidth =
@@ -416,7 +417,7 @@
           }
           el.setAttribute("src", toUrl(path, resize, version));
 
-          // Attach one-shot fallback: if image resizing fails, retry raw `/assets/*`.
+          // On resize load error: retry same resize URL once, then fallback to raw `/assets/*`.
           try {
             const isImg =
               el.tagName &&
@@ -427,22 +428,30 @@
               el.getAttribute("data-asset-resize-fallback") === "1";
             if (shouldFallback && !already) {
               el.setAttribute("data-asset-resize-fallback", "1");
-              el.addEventListener(
-                "error",
-                () => {
-                  try {
-                    el.removeAttribute("src");
-                    el.removeAttribute("srcset");
-                    el.removeAttribute("sizes");
-                    el.removeAttribute("data-asset-resize");
-                    el.setAttribute(
-                      "src",
-                      appendVersion(window.assetUrl(path), version),
-                    );
-                  } catch (e) {}
-                },
-                { once: true },
-              );
+              el.addEventListener("error", () => {
+                try {
+                  if (
+                    el.getAttribute("data-asset-resize-fallback-done") === "1"
+                  )
+                    return;
+                  const retried =
+                    el.getAttribute("data-asset-resize-retried") === "1";
+                  if (!retried) {
+                    el.setAttribute("data-asset-resize-retried", "1");
+                    el.setAttribute("src", toUrl(path, resize, version));
+                    return;
+                  }
+                  el.setAttribute("data-asset-resize-fallback-done", "1");
+                  el.removeAttribute("src");
+                  el.removeAttribute("srcset");
+                  el.removeAttribute("sizes");
+                  el.removeAttribute("data-asset-resize");
+                  el.setAttribute(
+                    "src",
+                    appendVersion(window.assetUrl(path), version),
+                  );
+                } catch (e) {}
+              });
             }
           } catch (e) {}
         }

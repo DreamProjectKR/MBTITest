@@ -110,14 +110,46 @@ npm run dev                 # Worker 로컬 실행 (API + 정적, http://localho
 
 API 및 에셋은 Worker(`worker/`)로 라우트하여 배포합니다.
 
-**중요**: 테스트 목록·상세가 안 뜨고 "응답이 JSON이 아닙니다 (content-type: text/html)" 오류가 나면, Worker가 도메인에 연결되지 않은 상태입니다. Cloudflare 대시보드에서 **Workers & Pages → 해당 Worker → Settings → Triggers → Routes**에 다음을 추가하세요.
+### Pages에 Worker 연결하기
 
-| Route 패턴               | 설명                    |
-| ------------------------ | ----------------------- |
-| `*귀하의도메인/api/*`    | API (목록·상세·compute) |
-| `*귀하의도메인/assets/*` | R2 에셋 프록시          |
+Pages와 Worker는 **같은 커스텀 도메인**을 쓰고, **Routes**로 경로만 Worker에 넘깁니다.  
+Pages 프로젝트에 커스텀 도메인(예: `dreamp.org`)을 연결한 뒤, 아래 둘 중 한 가지 방법으로 Worker를 붙이면 됩니다.
 
-또는 `worker/wrangler.toml`에서 `[[routes]]` 주석을 해제하고 `pattern`에 사용 중인 도메인을 넣은 뒤 `npm run worker:deploy`로 재배포합니다.
+**방법 1 — 대시보드**
+
+1. [Cloudflare 대시보드](https://dash.cloudflare.com) → **Workers & Pages**
+2. Worker **mbtitest-api** 선택
+3. **Settings** → **Triggers** → **Routes** → **Add route**
+4. 다음 두 개 추가 (Zone은 Pages에 연결한 도메인의 zone 선택). **apex 도메인은 `도메인/api/*` 형식** (앞에 `*` 없음):
+
+| Route 패턴            | Zone       |
+| --------------------- | ---------- |
+| `dreamp.org/api/*`    | dreamp.org |
+| `dreamp.org/assets/*` | dreamp.org |
+
+사이트를 `www.dreamp.org`로도 쓰면 `www.dreamp.org/api/*`, `www.dreamp.org/assets/*`도 추가하세요.
+
+**방법 2 — wrangler (이미 설정된 경우)**
+
+`worker/wrangler.toml`에 `[[routes]]`가 도메인에 맞게 들어 있어 있으면, Worker만 배포하면 됩니다.
+
+```bash
+npm run worker:deploy
+```
+
+다른 도메인을 쓰는 경우 `worker/wrangler.toml`에서 `pattern`과 `zone_name`을 해당 도메인으로 바꾼 뒤 같은 명령으로 배포합니다.
+
+**동작 방식**
+
+- `https://귀하의도메인/` → Pages가 `public/` 정적 파일 제공
+- `https://귀하의도메인/api/*` → Worker가 API 처리 (D1/KV)
+- `https://귀하의도메인/assets/*` → Worker가 R2 에셋 프록시
+
+**참고**: `*.pages.dev` 전용으로만 쓰는 경우에는 Zone이 없어 Routes를 붙일 수 없습니다. 커스텀 도메인을 하나 연결한 뒤 위처럼 Routes를 설정해야 합니다.
+
+---
+
+**문제 해결**: 테스트 목록·상세가 안 뜨고 "응답이 JSON이 아닙니다 (content-type: text/html)" 오류가 나면, Worker가 도메인에 연결되지 않은 상태입니다. 위 **Routes**가 Worker에 추가돼 있는지 확인하세요.
 
 ### 필수 바인딩
 

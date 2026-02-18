@@ -164,11 +164,13 @@ export default {
         });
       }
 
-      // Edge path: cacheable GET → fetch self with cf to populate Tiered Cache.
+      // Edge path: cacheable GET → invoke self via SELF binding (so we hit this Worker, not Pages origin) to populate Tiered Cache.
       const cfOptions = getTieredCacheCf(route, params);
+      const self = env.SELF;
       if (
         request.method === "GET" &&
         cfOptions &&
+        self &&
         (route === "api/tests" ||
           route === "api/tests/:id" ||
           route === "assets")
@@ -179,10 +181,16 @@ export default {
           method: "GET",
           headers: originHeaders,
         });
-        const response = await fetch(originRequest, {
+        const response = await self.fetch(originRequest, {
           cf: cfOptions,
         } as RequestInit);
-        return new Response(response.body, response);
+        const ct = (response.headers.get("content-type") || "").toLowerCase();
+        const isApiJson = route === "api/tests" || route === "api/tests/:id";
+        const safeToReturn = !isApiJson || ct.includes("application/json");
+        if (safeToReturn) {
+          return new Response(response.body, response);
+        }
+        // SELF returned HTML (e.g. hit origin); fall through to handle directly.
       }
 
       const context = createContext(request, env, ctx, params);

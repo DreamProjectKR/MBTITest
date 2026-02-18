@@ -81,16 +81,30 @@ function renderError(message) {
   if (dom.thumbnailEl) dom.thumbnailEl.removeAttribute("src");
 }
 
-function preloadCriticalImage(path, versionRaw) {
+const RESULT_IMAGE_RESIZE = "width=480,quality=82,fit=cover,format=auto";
+
+function preloadCriticalImage(path, versionRaw, resizeRaw) {
   try {
     const p = String(path || "").trim();
     if (!p || typeof document === "undefined") return;
-    let url = typeof window.assetUrl === "function" ? window.assetUrl(p) : p;
+    let url = "";
+    if (
+      resizeRaw &&
+      typeof window.assetResizeUrl === "function" &&
+      typeof window.parseResizeOptions === "function"
+    ) {
+      url = window.assetResizeUrl(p, window.parseResizeOptions(resizeRaw));
+    } else if (typeof window.assetUrl === "function") {
+      url = window.assetUrl(p);
+    } else {
+      url = p;
+    }
     const v = String(versionRaw || "").trim();
     if (v) {
       const sep = url.includes("?") ? "&" : "?";
       url = `${url}${sep}v=${encodeURIComponent(v)}`;
     }
+    if (!url) return;
     const key = `${p}|${v}`;
     if (document.querySelector(`link[data-preload-key="${key}"]`)) return;
 
@@ -200,7 +214,8 @@ function renderResultPage(data, mbti) {
     T: getPercentParam("pT"),
     J: getPercentParam("pJ"),
   };
-  if (resultImage) preloadCriticalImage(resultImage, version);
+  if (resultImage)
+    preloadCriticalImage(resultImage, version, RESULT_IMAGE_RESIZE);
 
   if (dom.thumbnailEl) {
     if (resultImage) {

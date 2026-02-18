@@ -381,14 +381,9 @@ function initializeStateFromTestJson(testJson) {
   // Start loading first question image at all srcset widths so requests begin
   // before the img gets its src; improves chance of cache hit and reduces LCP.
   const firstQuestion = state.test?.questions?.[0];
-  if (
-    firstQuestion &&
-    typeof window.loadImageAsset === "function"
-  ) {
+  if (firstQuestion && typeof window.loadImageAsset === "function") {
     const firstPath = getQuestionImageUrlCandidates(firstQuestion)[0];
-    const version = state.test?.updatedAt ?
-      String(state.test.updatedAt)
-    : "";
+    const version = state.test?.updatedAt ? String(state.test.updatedAt) : "";
     if (firstPath) {
       QUESTION_IMAGE_SRCSET_WIDTHS.forEach((w) => {
         window.loadImageAsset(

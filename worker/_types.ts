@@ -103,6 +103,8 @@ export interface MbtiEnv {
   MBTI_KV?: KVNamespace;
   R2_PUBLIC_BASE_URL?: string;
   ASSETS?: Fetcher;
+  /** Self service binding: use for cache-fill so request hits this Worker, not Pages origin */
+  SELF?: Fetcher;
 }
 
 export interface Fetcher {

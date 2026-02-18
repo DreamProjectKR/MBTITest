@@ -127,3 +127,4 @@ scripts/
 assets/*
 migrations/*
 .dev.vars
+app/
