@@ -37,3 +37,7 @@ zone_name = "dreamp.org"
 [[routes]]
 pattern = "dreamp.org/assets/*"
 zone_name = "dreamp.org"
+
+[[routes]]
+pattern = "dreamp.org/cdn-cgi/*"
+zone_name = "dreamp.org"

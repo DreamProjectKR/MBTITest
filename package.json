@@ -25,6 +25,7 @@
     "test": "echo \"No automated tests configured\""
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.2",
