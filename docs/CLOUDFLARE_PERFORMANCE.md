@@ -128,25 +128,28 @@ Cloudflare 대시보드 **Caching Overview**에는 다음이 명시되어 있습
 
 배포된 사이트에서 캐시가 적용 중인지 확인하려면 아래를 사용합니다.
 
-1. **브라우저 개발자 도구 (Network)**  
-   - 사이트 접속 후 F12 → **Network** 탭  
-   - 해당 URL 선택 → **Headers**에서 **Response Headers** 확인  
-   - **`cf-cache-status`**: `HIT` = 엣지 캐시 적중, `MISS` = 오리진에서 가져옴, `EXPIRED` = 재검증 중  
-   - **`Cache-Control`**: `max-age`, `s-maxage`, `stale-while-revalidate` 등으로 캐시 정책 확인  
+1. **브라우저 개발자 도구 (Network)**
+   - 사이트 접속 후 F12 → **Network** 탭
+   - 해당 URL 선택 → **Headers**에서 **Response Headers** 확인
+   - **`cf-cache-status`**: `HIT` = 엣지 캐시 적중, `MISS` = 오리진에서 가져옴, `EXPIRED` = 재검증 중
+   - **`Cache-Control`**: `max-age`, `s-maxage`, `stale-while-revalidate` 등으로 캐시 정책 확인
    - 같은 URL을 두 번 연속 요청했을 때 두 번째에서 `cf-cache-status: HIT`가 나오면 캐시가 동작하는 것입니다.
 
-2. **curl로 헤더만 확인**  
+2. **curl로 헤더만 확인**
+
    ```bash
    curl -sI "https://dreamp.org/partials/header.html"
-   ```  
-   응답에 `cf-cache-status`, `Cache-Control`, `Age`(캐시에 머문 초 수)가 포함됩니다.  
-   - **API/에셋**(Worker 경유): `X-MBTI-Edge-Cache: HIT` 여부도 확인  
+   ```
+
+   응답에 `cf-cache-status`, `Cache-Control`, `Age`(캐시에 머문 초 수)가 포함됩니다.
+   - **API/에셋**(Worker 경유): `X-MBTI-Edge-Cache: HIT` 여부도 확인
+
    ```bash
    curl -sI "https://dreamp.org/api/tests"
    ```
 
-3. **Cloudflare 대시보드**  
-   - **Caching > Configuration**: Cache Level, Browser Cache TTL  
+3. **Cloudflare 대시보드**
+   - **Caching > Configuration**: Cache Level, Browser Cache TTL
    - **Analytics > Caching**: 캐시 적중률 (엔드유저 요청 기준이며, Worker 서브요청은 별도 집계에 포함되지 않을 수 있음)
 
 ## 5. D1 인덱스 (적용됨)

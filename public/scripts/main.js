@@ -114,11 +114,11 @@ function createTestCard(test, variantClass, opts = {}) {
 
 // ----- 테스트 목록 불러오기 (default: /api/tests) -----
 async function fetchTestsAjax() {
-  if (typeof window.getTestIndex === "function") {
-    const data = await window.getTestIndex();
+  if (typeof window["getTestIndex"] === "function") {
+    const data = await window["getTestIndex"]();
     return Array.isArray(data?.tests) ? data.tests : [];
   }
-  const url = window.TEST_INDEX_URL || "/api/tests";
+  const url = window["TEST_INDEX_URL"] || "/api/tests";
   const res = await fetch(url);
   if (!res.ok) throw new Error(url + " 요청 실패: " + res.status);
   const data = await res.json();

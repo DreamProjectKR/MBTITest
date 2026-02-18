@@ -16,8 +16,13 @@
     var header = document.getElementById("header");
     var headerScroll = document.getElementById("headerScroll");
     if (!header || !headerScroll) return;
-    var headerOffset =
-      typeof header.offsetTop === "number" ? header.offsetTop : 0;
+    var headerOffset = 0;
+    try {
+      if (header && typeof header.offsetTop === "number")
+        headerOffset = header.offsetTop;
+    } catch (e) {
+      /* ignore */
+    }
     var marginPx = document.body.getAttribute("data-header-margin") || "0";
 
     window.addEventListener(
