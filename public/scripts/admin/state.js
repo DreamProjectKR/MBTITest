@@ -45,22 +45,6 @@ export const elements = {
   bulkUploadButton: document.querySelector("[data-bulk-result-upload]"),
 };
 
-/** Re-query DOM refs (e.g. after header partial is injected). */
-export function refreshElements() {
-  elements.metaForm = document.querySelector("[data-test-meta-form]");
-  elements.questionForm = document.querySelector("[data-question-form]");
-  elements.questionList = document.querySelector("[data-question-list]");
-  elements.resultForm = document.querySelector("[data-result-form]");
-  elements.resultList = document.querySelector("[data-result-list]");
-  elements.testSelect = document.querySelector("[data-test-select]");
-  elements.createTestButton = document.querySelector("[data-create-test]");
-  elements.saveButton = document.querySelector("[data-save-test]");
-  elements.saveStatus = document.querySelector("[data-save-status]");
-  elements.bulkUploadButton = document.querySelector(
-    "[data-bulk-result-upload]",
-  );
-}
-
 /** Single store; updated only via setState/updateLoadedTest/setActiveTest (FP: replace, not mutate). */
 export let state = {
   tests: [],
