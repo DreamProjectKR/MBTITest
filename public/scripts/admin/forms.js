@@ -51,25 +51,28 @@ export function bindForms({
   uploadTestImage,
   uploadResultImage,
   showToast,
+  updateLoadedTest,
 }) {
   elements.metaForm?.addEventListener("input", () => {
     if (setMetaHydratingFlag()) return;
     const activeTest = getActiveTest();
     if (!activeTest || !elements.metaForm) return;
     const form = elements.metaForm;
-    activeTest.isPublished = form.elements.isPublished.checked;
-    activeTest.author = form.elements.author.value;
-    activeTest.authorImg = form.elements.authorImg.value;
-    activeTest.title = form.elements.title.value;
-    activeTest.description = parseDescriptionInput(
-      form.elements.description.value,
-    );
-    activeTest.tags = form.elements.tags.value
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean);
-    activeTest.thumbnail = form.elements.thumbnail.value;
-    syncMetaEntry(activeTest);
+    const next = {
+      ...activeTest,
+      isPublished: form.elements.isPublished.checked,
+      author: form.elements.author.value,
+      authorImg: form.elements.authorImg.value,
+      title: form.elements.title.value,
+      description: parseDescriptionInput(form.elements.description.value),
+      tags: form.elements.tags.value
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+      thumbnail: form.elements.thumbnail.value,
+    };
+    updateLoadedTest(activeTest.id, next);
+    syncMetaEntry(next);
   });
 
   elements.metaForm?.addEventListener("change", async (event) => {
@@ -86,14 +89,15 @@ export function bindForms({
       try {
         setSaveStatus(`${imageName} 이미지 업로드 중...`);
         const uploaded = await uploadTestImage(activeTest.id, file, imageName);
-        if (imageName === "thumbnail") {
-          activeTest.thumbnail = uploaded.path;
-          elements.metaForm.elements.thumbnail.value = uploaded.path;
-        } else {
-          activeTest.authorImg = uploaded.path;
-          elements.metaForm.elements.authorImg.value = uploaded.path;
-        }
-        syncMetaEntry(activeTest);
+        const next =
+          imageName === "thumbnail" ?
+            { ...activeTest, thumbnail: uploaded.path }
+          : { ...activeTest, authorImg: uploaded.path };
+        updateLoadedTest(activeTest.id, next);
+        elements.metaForm.elements[
+          imageName === "thumbnail" ? "thumbnail" : "authorImg"
+        ].value = uploaded.path;
+        syncMetaEntry(next);
         showToast("이미지 업로드 완료");
       } catch (err) {
         showToast(err?.message || "이미지 업로드 실패", true);
@@ -112,16 +116,16 @@ export function bindForms({
     event.preventDefault();
     const activeTest = getActiveTest();
     if (!activeTest || !elements.questionForm) return;
-    activeTest.questions =
+    const prevQuestions =
       Array.isArray(activeTest.questions) ? activeTest.questions : [];
-    if (activeTest.questions.length >= REQUIRED_QUESTION_COUNT) {
+    if (prevQuestions.length >= REQUIRED_QUESTION_COUNT) {
       showToast(
         `문항은 ${REQUIRED_QUESTION_COUNT}개까지 등록할 수 있습니다.`,
         true,
       );
       return;
     }
-    const nextNo = getNextQuestionNo(activeTest.questions);
+    const nextNo = getNextQuestionNo(prevQuestions);
     if (!nextNo) return;
 
     const formData = new FormData(elements.questionForm);
@@ -153,7 +157,7 @@ export function bindForms({
     const pref = String(formData.get("answerADirection") || "positive");
     const aDir = pref === "negative" ? negative : positive;
     const bDir = pref === "negative" ? positive : negative;
-    activeTest.questions.push({
+    const newQuestion = {
       id: qId,
       label: String(formData.get("questionLabel") || "").trim(),
       questionImage: imagePath,
@@ -171,8 +175,12 @@ export function bindForms({
           direction: bDir,
         },
       ],
-    });
-    renderQuestions(activeTest.questions);
+    };
+    updateLoadedTest(activeTest.id, (prev) => ({
+      ...prev,
+      questions: [...prevQuestions, newQuestion],
+    }));
+    renderQuestions(getActiveTest().questions);
     elements.questionForm.reset();
     syncAnswerDirectionOptions();
     showToast("문항 추가 완료");
@@ -184,10 +192,12 @@ export function bindForms({
     if (!btn) return;
     const activeTest = getActiveTest();
     if (!activeTest) return;
-    activeTest.questions = (activeTest.questions || []).filter(
-      (q) => q.id !== btn.dataset.removeQuestion,
-    );
-    renderQuestions(activeTest.questions);
+    const removeId = btn.dataset.removeQuestion;
+    updateLoadedTest(activeTest.id, (prev) => ({
+      ...prev,
+      questions: (prev.questions || []).filter((q) => q.id !== removeId),
+    }));
+    renderQuestions(getActiveTest().questions);
   });
 
   elements.resultForm?.addEventListener("submit", async (event) => {
@@ -208,12 +218,17 @@ export function bindForms({
     }
     try {
       const uploaded = await uploadResultImage(activeTest.id, code, file);
-      activeTest.results = activeTest.results || {};
-      activeTest.results[code] = {
-        image: uploaded.path || activeTest.results?.[code]?.image || "",
-        summary,
-      };
-      renderResults(activeTest.results);
+      updateLoadedTest(activeTest.id, (prev) => ({
+        ...prev,
+        results: {
+          ...(prev.results || {}),
+          [code]: {
+            image: uploaded.path || prev.results?.[code]?.image || "",
+            summary,
+          },
+        },
+      }));
+      renderResults(getActiveTest().results);
       showToast("결과 저장 완료");
       elements.resultForm.querySelector('input[name="resultImageFile"]').value =
         "";
@@ -229,7 +244,12 @@ export function bindForms({
     if (!btn) return;
     const activeTest = getActiveTest();
     if (!activeTest?.results) return;
-    delete activeTest.results[btn.dataset.removeResult];
-    renderResults(activeTest.results);
+    const code = btn.dataset.removeResult;
+    const { [code]: _, ...rest } = activeTest.results;
+    updateLoadedTest(activeTest.id, (prev) => ({
+      ...prev,
+      results: rest,
+    }));
+    renderResults(getActiveTest().results);
   });
 }

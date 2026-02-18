@@ -41,6 +41,7 @@ function createContext(
   };
 }
 
+/** Pure: whether route is GET-cacheable for tiered cache. */
 function isCacheableGetRoute(route: string): boolean {
   return (
     route === "api/tests" || route === "api/tests/:id" || route === "assets"
@@ -103,13 +104,16 @@ function routeTable(request: Request): Record<string, RouteHandler> {
   };
 }
 
+/** Pure: single 404 JSON response (DRY). */
+function notFoundResponse(): Response {
+  return new Response(JSON.stringify({ error: "Not Found" }), {
+    status: 404,
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+  });
+}
+
 function notFound(_ctx: PagesContext<MbtiEnv>): Promise<Response> {
-  return Promise.resolve(
-    new Response(JSON.stringify({ error: "Not Found" }), {
-      status: 404,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-    }),
-  );
+  return Promise.resolve(notFoundResponse());
 }
 
 export default {
@@ -130,12 +134,7 @@ export default {
           (() => {
             const assets = env.ASSETS;
             if (assets) return assets.fetch(request);
-            return Promise.resolve(
-              new Response(JSON.stringify({ error: "Not Found" }), {
-                status: 404,
-                headers: { "Content-Type": "application/json; charset=utf-8" },
-              }),
-            );
+            return Promise.resolve(notFoundResponse());
           });
         return handler(context);
       }
@@ -148,7 +147,7 @@ export default {
       const handler = table[route];
       if (handler) return handler(context);
       if (env.ASSETS) return env.ASSETS.fetch(request);
-      return notFound(context);
+      return Promise.resolve(notFoundResponse());
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Internal server error";

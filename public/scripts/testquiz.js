@@ -9,14 +9,18 @@
  * - Navigate to `testresult.html?testId=...&result=MBTI`
  */
 
-// --- State (single source of truth) ---
-const state = {
+// --- State (single source of truth; updated only via setQuizState) ---
+let state = {
   test: null,
   currentIndex: 0,
   totalQuestions: 0,
   scores: {},
   answers: [],
 };
+
+function setQuizState(update) {
+  state = { ...state, ...update };
+}
 
 // Quiz question images often include text; avoid cropping.
 const QUESTION_IMAGE_RESIZE = "width=720,quality=82,fit=contain,format=auto";
@@ -92,29 +96,29 @@ function randomInt(maxExclusive) {
   return Math.floor(Math.random() * max);
 }
 
-/** Pure (mutates list): Fisher-Yates shuffle in place. */
-function shuffleInPlace(list) {
-  if (!Array.isArray(list) || list.length <= 1) return list;
-  for (let i = list.length - 1; i > 0; i -= 1) {
+/** Pure: Fisher-Yates shuffle; returns new array, does not mutate input. */
+function shuffleCopy(list) {
+  if (!Array.isArray(list) || list.length <= 1) return [...(list || [])];
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i -= 1) {
     const j = randomInt(i + 1);
-    const tmp = list[i];
-    list[i] = list[j];
-    list[j] = tmp;
+    [out[i], out[j]] = [out[j], out[i]];
   }
-  return list;
+  return out;
 }
 
-/** Pure: clone questions/answers and shuffle (new array). */
+/** Pure: clone questions/answers and shuffle (new arrays, input unchanged). */
 function buildShuffledQuestions(questions) {
   const base = Array.isArray(questions) ? questions : [];
   const copied = base.map((q) => {
     const answers = Array.isArray(q?.answers) ? [...q.answers] : [];
     return { ...q, answers };
   });
-
-  shuffleInPlace(copied);
-  copied.forEach((q) => shuffleInPlace(q.answers));
-  return copied;
+  const shuffled = shuffleCopy(copied).map((q) => ({
+    ...q,
+    answers: shuffleCopy(q.answers || []),
+  }));
+  return shuffled;
 }
 
 function goToResultPage(mbti, percentages) {
@@ -150,16 +154,14 @@ function resolveAssetPath(relative) {
 }
 
 /**
- * Build a list of candidate image URLs for a question.
- * Handles:
- * - Field name differences (`questionImage`, `image`, etc.)
- * - Missing `questionImage` by guessing common filenames under `assets/<testId>/images/`
- * - Case differences (e.g. `Q7.png` vs `q7.png`) via fallback attempts
+ * Pure: build candidate image paths for a question (given testId + question).
+ * Handles field name differences and convention-based paths under assets/<testId>/images/.
  *
+ * @param {string} testId
  * @param {any} question
  * @returns {string[]}
  */
-function getQuestionImageUrlCandidates(question) {
+function getQuestionImageUrlCandidates(testId, question) {
   const raw =
     question?.questionImage ||
     question?.image ||
@@ -171,7 +173,6 @@ function getQuestionImageUrlCandidates(question) {
     return p ? [p] : [];
   }
 
-  const testId = state.test?.id;
   const questionId = String(question?.id || "").trim();
   if (!testId || !questionId) return [];
 
@@ -322,7 +323,7 @@ function renderQuestion() {
 
   if (dom.image) {
     const alt = question.id || `문항 ${state.currentIndex + 1}`;
-    const candidates = getQuestionImageUrlCandidates(question);
+    const candidates = getQuestionImageUrlCandidates(state.test?.id, question);
     setImageWithFallback(dom.image, candidates, alt);
   }
 
@@ -368,17 +369,22 @@ function initializeStateFromTestJson(testJson) {
     return false;
   }
 
-  state.test = { ...testJson, questions };
-  state.totalQuestions = total;
-  state.currentIndex = 0;
-  state.scores = {};
-  state.answers = [];
+  setQuizState({
+    test: { ...testJson, questions },
+    totalQuestions: total,
+    currentIndex: 0,
+    scores: {},
+    answers: [],
+  });
 
   // Start loading first question image at all srcset widths so requests begin
   // before the img gets its src; improves chance of cache hit and reduces LCP.
   const firstQuestion = state.test?.questions?.[0];
   if (firstQuestion && typeof window.loadImageAsset === "function") {
-    const firstPath = getQuestionImageUrlCandidates(firstQuestion)[0];
+    const firstPath = getQuestionImageUrlCandidates(
+      state.test?.id,
+      firstQuestion,
+    )[0];
     const version = state.test?.updatedAt ? String(state.test.updatedAt) : "";
     if (firstPath) {
       QUESTION_IMAGE_SRCSET_WIDTHS.forEach((w) => {
@@ -400,12 +406,18 @@ function recordScore(answer) {
   const dir = answer.direction;
   if (!axis || !dir) return;
 
-  if (!state.scores[axis]) state.scores[axis] = {};
-  state.scores[axis][dir] = (state.scores[axis][dir] || 0) + 1;
+  const prevAxis = state.scores[axis] || {};
+  const prevCount = prevAxis[dir] || 0;
+  setQuizState({
+    scores: {
+      ...state.scores,
+      [axis]: { ...prevAxis, [dir]: prevCount + 1 },
+    },
+  });
 }
 
 function handleAnswer(answer) {
-  state.answers.push(answer);
+  setQuizState({ answers: [...state.answers, answer] });
   recordScore(answer);
 
   const nextIndex = state.currentIndex + 1;
@@ -414,11 +426,11 @@ function handleAnswer(answer) {
     return;
   }
 
-  state.currentIndex = nextIndex;
+  setQuizState({ currentIndex: nextIndex });
   renderQuestion();
 }
 
-/** Pure: derive 4-letter MBTI from state.scores. */
+/** Pure: derive 4-letter MBTI from state.scores (no mutation). */
 function computeMbti() {
   const axes = [
     ["E", "I"],
@@ -426,38 +438,39 @@ function computeMbti() {
     ["T", "F"],
     ["J", "P"],
   ];
-
-  let result = "";
-  axes.forEach(([first, second]) => {
-    const key = `${first}${second}`;
-    const scores = state.scores[key] || {};
-    const firstScore = scores[first] || 0;
-    const secondScore = scores[second] || 0;
-    result += firstScore >= secondScore ? first : second;
-  });
-
-  return result;
+  return axes
+    .map(([first, second]) => {
+      const key = `${first}${second}`;
+      const scores = state.scores[key] || {};
+      const firstScore = scores[first] || 0;
+      const secondScore = scores[second] || 0;
+      return firstScore >= secondScore ? first : second;
+    })
+    .join("");
 }
 
-/** Pure: E/S/T/J percentages from state.scores. */
+/** Pure: E/S/T/J percentages from state.scores (immutable build). */
 function computePercentagesFromScores() {
-  const percentages = { E: 50, S: 50, T: 50, J: 50 };
   const pairs = [
     ["EI", "E", "I"],
     ["SN", "S", "N"],
     ["TF", "T", "F"],
     ["JP", "J", "P"],
   ];
-  pairs.forEach(([axis, first, second]) => {
-    const scores = state.scores[axis] || {};
-    const firstScore = Number(scores[first] || 0);
-    const secondScore = Number(scores[second] || 0);
-    const total = firstScore + secondScore;
-    if (total > 0) {
-      percentages[first] = Math.round((firstScore / total) * 100);
-    }
-  });
-  return percentages;
+  return pairs.reduce(
+    (acc, [axis, first, second]) => {
+      const scores = state.scores[axis] || {};
+      const firstScore = Number(scores[first] || 0);
+      const secondScore = Number(scores[second] || 0);
+      const total = firstScore + secondScore;
+      if (total <= 0) return acc;
+      return {
+        ...acc,
+        [first]: Math.round((firstScore / total) * 100),
+      };
+    },
+    { E: 50, S: 50, T: 50, J: 50 },
+  );
 }
 
 async function computeMbtiOnEdge() {

@@ -25,7 +25,10 @@ function hydrateAssetElement(el) {
 
 const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
 let lastLoadedTest = null;
-const preloadState = { started: false, criticalPromise: null };
+let preloadState = { started: false, criticalPromise: null };
+function setPreloadState(update) {
+  preloadState = { ...preloadState, ...update };
+}
 
 const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
 const QUESTION_IMAGE_SRCSET_WIDTHS = [360, 480, 720];
@@ -129,27 +132,27 @@ function getQuestionImageCandidates(testId, question) {
   return list.map(normalizeImagePath).filter(Boolean);
 }
 
-/** Pure: from test JSON return { questionPaths, resultPaths } for preload. */
+/** Pure: from test JSON return { questionPaths, resultPaths } for preload (no mutation). */
 function extractImagePaths(test) {
   const testId = test?.id ? String(test.id) : "";
   const questions = Array.isArray(test?.questions) ? test.questions : [];
   const resultsObj =
     test?.results && typeof test.results === "object" ? test.results : null;
 
-  const questionPaths = [];
-  for (const q of questions) {
+  const questionPaths = questions.flatMap((q) => {
     const candidates = getQuestionImageCandidates(testId, q);
-    if (candidates.length) questionPaths.push(candidates[0]);
-  }
+    return candidates.length ? [candidates[0]] : [];
+  });
 
-  const resultPaths = [];
-  if (resultsObj) {
-    Object.values(resultsObj).forEach((r) => {
-      const img = r && typeof r === "object" ? r.image : null;
-      const p = normalizeImagePath(img);
-      if (p) resultPaths.push(p);
-    });
-  }
+  const resultPaths =
+    resultsObj ?
+      Object.values(resultsObj)
+        .map((r) => {
+          const img = r && typeof r === "object" ? r.image : null;
+          return normalizeImagePath(img);
+        })
+        .filter(Boolean)
+    : [];
 
   return { questionPaths, resultPaths };
 }
@@ -176,15 +179,12 @@ async function fetchAndStoreInCache(url) {
  */
 async function preloadQuestionImages(paths, version, opts) {
   const list = Array.isArray(paths) ? paths.filter(Boolean) : [];
-  const tasks = [];
-  for (const p of list) {
-    for (const w of QUESTION_IMAGE_SRCSET_WIDTHS) {
-      tasks.push({
-        path: p,
-        resizeRaw: `width=${w},${QUESTION_IMAGE_RESIZE_BASE}`,
-      });
-    }
-  }
+  const tasks = list.flatMap((p) =>
+    QUESTION_IMAGE_SRCSET_WIDTHS.map((w) => ({
+      path: p,
+      resizeRaw: `width=${w},${QUESTION_IMAGE_RESIZE_BASE}`,
+    })),
+  );
   const total = tasks.length;
   if (!total) return { loaded: 0, failed: 0, total: 0 };
 
@@ -216,9 +216,8 @@ async function preloadQuestionImages(paths, version, opts) {
     }
   };
 
-  const workers = [];
   const n = Math.max(1, Math.min(concurrency, total));
-  for (let i = 0; i < n; i += 1) workers.push(worker());
+  const workers = Array.from({ length: n }, () => worker());
   await Promise.all(workers);
   return { loaded, failed, total };
 }
@@ -229,15 +228,12 @@ async function preloadQuestionImages(paths, version, opts) {
  */
 async function preloadResultImages(paths, version, opts) {
   const list = Array.isArray(paths) ? paths.filter(Boolean) : [];
-  const tasks = [];
-  for (const p of list) {
-    for (const w of RESULT_IMAGE_SRCSET_WIDTHS) {
-      tasks.push({
-        path: p,
-        resizeRaw: `width=${w},${RESULT_IMAGE_RESIZE_BASE}`,
-      });
-    }
-  }
+  const tasks = list.flatMap((p) =>
+    RESULT_IMAGE_SRCSET_WIDTHS.map((w) => ({
+      path: p,
+      resizeRaw: `width=${w},${RESULT_IMAGE_RESIZE_BASE}`,
+    })),
+  );
   const total = tasks.length;
   if (!total) return { loaded: 0, failed: 0, total: 0 };
 
@@ -269,16 +265,15 @@ async function preloadResultImages(paths, version, opts) {
     }
   };
 
-  const workers = [];
   const n = Math.max(1, Math.min(concurrency, total));
-  for (let i = 0; i < n; i += 1) workers.push(worker());
+  const workers = Array.from({ length: n }, () => worker());
   await Promise.all(workers);
   return { loaded, failed, total };
 }
 
 function startBackgroundPrefetch(test) {
   if (!test || preloadState.started) return;
-  preloadState.started = true;
+  setPreloadState({ started: true });
 
   const version = test.updatedAt ? String(test.updatedAt) : "";
   const { questionPaths, resultPaths } = extractImagePaths(test);
@@ -294,8 +289,8 @@ function startBackgroundPrefetch(test) {
   const runRest = () =>
     preloadQuestionImages(rest, version, { concurrency: 2 });
 
-  // Phase 1 quickly; Phase 2 in idle time.
-  preloadState.criticalPromise = (function () {
+  // Phase 1 quickly; Phase 2 in idle time. Update preload state immutably.
+  const criticalPromise = (function () {
     if (typeof requestIdleCallback === "function") {
       return new Promise((resolve) => {
         requestIdleCallback(
@@ -317,6 +312,7 @@ function startBackgroundPrefetch(test) {
     } catch (e) {}
     return null;
   });
+  setPreloadState({ criticalPromise });
 }
 
 /**

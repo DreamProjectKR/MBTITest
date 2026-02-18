@@ -56,25 +56,21 @@ document.querySelector(".test1").onclick = function () {
     return Array.isArray(data?.tests) ? data.tests : [];
   }
 
-  // ----- Pure: de-dupe and sort (newest first) -----
+  // ----- Pure: de-dupe and sort (newest first, no mutation) -----
   function normalizeTests(tests) {
     const seen = new Set();
-    const deduped = [];
-    tests.forEach((t) => {
-      // Filter out unpublished tests (unless we are in some debug mode, but for now strict)
-      if (!t.is_published) return;
-
+    const deduped = tests.filter((t) => {
+      if (!t.is_published) return false;
       const key = `${t.id}-${t.path}`;
-      if (seen.has(key)) return;
+      if (seen.has(key)) return false;
       seen.add(key);
-      deduped.push(t);
+      return true;
     });
-    deduped.sort((a, b) => {
+    return [...deduped].sort((a, b) => {
       const ad = new Date(a.updatedAt || a.createdAt || 0);
       const bd = new Date(b.updatedAt || b.createdAt || 0);
       return bd - ad; // 최신 먼저
     });
-    return deduped;
   }
 
   // NOTE: we intentionally avoid JS-driven image preloads/prefetches here.

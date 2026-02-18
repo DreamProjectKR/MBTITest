@@ -45,7 +45,8 @@ export const elements = {
   bulkUploadButton: document.querySelector("[data-bulk-result-upload]"),
 };
 
-export const state = {
+/** Single store; updated only via setState/updateLoadedTest/setActiveTest (FP: replace, not mutate). */
+export let state = {
   tests: [],
   loadedTests: {},
   activeTestId: null,
@@ -59,6 +60,21 @@ export const state = {
   },
 };
 
+/**
+ * Replace top-level state immutably. Merges nested `loading` so one key doesn't wipe others.
+ * Builds next in one expression (no mutation of next).
+ */
+export function setState(update) {
+  const next = {
+    ...state,
+    ...update,
+    ...(update.loading != null && typeof update.loading === "object" ?
+      { loading: { ...state.loading, ...update.loading } }
+    : {}),
+  };
+  state = next;
+}
+
 export function getActiveTest() {
   const activeId = state.activeTestId;
   if (!activeId) return null;
@@ -66,5 +82,17 @@ export function getActiveTest() {
 }
 
 export function setActiveTest(testId) {
-  state.activeTestId = testId || null;
+  setState({ activeTestId: testId || null });
+}
+
+/**
+ * Replace loaded test immutably. Accepts either a new object or a function
+ * (prev) => next. Used for FP-style updates without mutating shared refs.
+ */
+export function updateLoadedTest(testId, nextOrUpdater) {
+  const prev = state.loadedTests[testId];
+  if (prev == null) return;
+  const next =
+    typeof nextOrUpdater === "function" ? nextOrUpdater(prev) : nextOrUpdater;
+  setState({ loadedTests: { ...state.loadedTests, [testId]: next } });
 }

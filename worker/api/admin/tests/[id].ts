@@ -1,7 +1,7 @@
 import type { MbtiEnv, PagesContext } from "../../../_types";
 
 import { getDefaultCache, noStoreJsonResponse } from "../../_utils/http";
-import { writeTest } from "../utils/store";
+import { formatIndexDate, writeTest } from "../utils/store";
 
 type Params = { id?: string };
 
@@ -222,7 +222,7 @@ export async function onRequestPut(
     const slimBody = { questions, results };
     await writeTest(bucket, testId, slimBody);
 
-    const now = new Date().toISOString().split("T")[0] ?? "";
+    const now = formatIndexDate();
     const nowTs = new Date().toISOString();
     const createdAt = String(p.createdAt ?? now);
     const updatedAt = String(p.updatedAt ?? now);

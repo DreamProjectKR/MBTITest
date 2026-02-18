@@ -1,4 +1,4 @@
-import { MBTI_ORDER, elements, state } from "./state.js";
+import { MBTI_ORDER, elements, setState, state } from "./state.js";
 import { formatDescriptionForInput } from "./validation.js";
 
 /** DOM and state updates for admin UI. */
@@ -32,14 +32,14 @@ export function showToast(message, isError = false) {
 }
 
 export function setSaveStatus(message, isError = false) {
-  state.saveMessage = message;
+  setState({ saveMessage: message });
   if (!elements.saveStatus) return;
   elements.saveStatus.textContent = message;
   elements.saveStatus.classList.toggle("save-status--error", Boolean(isError));
 }
 
 export function setSavingState(isSaving) {
-  state.isSaving = isSaving;
+  setState({ isSaving });
   if (elements.saveButton)
     elements.saveButton.disabled = isSaving || !state.activeTestId;
   if (elements.createTestButton) elements.createTestButton.disabled = isSaving;
@@ -47,7 +47,7 @@ export function setSavingState(isSaving) {
 }
 
 export function setPanelLoading(panelKey, loading) {
-  state.loading[panelKey] = Boolean(loading);
+  setState({ loading: { [panelKey]: Boolean(loading) } });
   const selectorByKey = {
     meta: '[aria-labelledby="test-meta-heading"]',
     questions: '[aria-labelledby="question-builder-heading"]',

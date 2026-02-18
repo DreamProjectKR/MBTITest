@@ -33,6 +33,7 @@ type TestRow = {
   updated_at?: unknown;
 };
 
+/** Pure: normalize source_path to R2 key. */
 function normalizeR2KeyFromIndexPath(rawPath: string): string {
   const str = String(rawPath || "").trim();
   if (!str) return "";
@@ -40,6 +41,7 @@ function normalizeR2KeyFromIndexPath(rawPath: string): string {
   return clean.startsWith("assets/") ? clean : `assets/${clean}`;
 }
 
+/** Pure: parse JSON string to array or null. */
 function parseJsonArray(value: unknown): unknown[] | null {
   if (typeof value !== "string") return null;
   try {
@@ -50,6 +52,7 @@ function parseJsonArray(value: unknown): unknown[] | null {
   }
 }
 
+/** Pure: Cache-Tag value for test id. */
 function cacheTagForTest(id: string): string {
   return `api,api-tests,test-${id}`;
 }

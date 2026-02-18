@@ -142,24 +142,20 @@ async function fetchTestsAjax() {
   return Array.isArray(data?.tests) ? data.tests : [];
 }
 
-// ----- 중복 제거 + 최신순 정렬 -----
+// ----- Pure: 중복 제거 + 최신순 정렬 (입력 불변, 새 배열 반환) -----
 function normalizeTests(tests) {
   const seen = new Set();
-  const deduped = [];
-  for (const t of tests) {
+  const deduped = tests.filter((t) => {
     const key = `${t.id}-${t.path}`;
-    if (seen.has(key)) continue;
+    if (seen.has(key)) return false;
     seen.add(key);
-    deduped.push(t);
-  }
-  deduped.sort((a, b) => {
+    return true;
+  });
+  return [...deduped].sort((a, b) => {
     const ad = new Date(a.updatedAt || a.createdAt || 0);
     const bd = new Date(b.updatedAt || b.createdAt || 0);
     return bd - ad; // 최신 우선
   });
-  // Keep raw `thumbnail` path (e.g. `assets/test-x/images/thumbnail.png`).
-  // `config.js` will resolve and (in production) resize it consistently.
-  return deduped;
 }
 
 // ----- 섹션별로 순서대로 채우기 -----

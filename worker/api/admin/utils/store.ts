@@ -16,7 +16,10 @@ export function getImagesPrefix(testId: string): string {
   return `assets/${testId}/images/`;
 }
 
-/** Pure: YYYY-MM-DD from Date (default today). */
+/**
+ * YYYY-MM-DD from Date. Pure when given a date; when called with no args uses
+ * current time (impure, but required for D1 updated_at).
+ */
 export function formatIndexDate(date: Date = new Date()): string {
   return new Date(date).toISOString().split("T")[0] ?? "";
 }

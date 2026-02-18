@@ -38,17 +38,16 @@ function readSeedConfig(repoRoot) {
 
 function discoverTests(assetsDir) {
   const entries = fs.readdirSync(assetsDir, { withFileTypes: true });
-  const dirs = entries
-    .filter((e) => e.isDirectory() && e.name.startsWith("test-"))
-    .map((e) => e.name)
-    .sort((a, b) => a.localeCompare(b));
-  const out = [];
-  for (const dir of dirs) {
+  const dirs = [
+    ...entries
+      .filter((e) => e.isDirectory() && e.name.startsWith("test-"))
+      .map((e) => e.name),
+  ].sort((a, b) => a.localeCompare(b));
+  return dirs.flatMap((dir) => {
     const testJsonPath = path.join(assetsDir, dir, "test.json");
-    if (!fs.existsSync(testJsonPath)) continue;
-    out.push({ testId: dir, sourcePath: `${dir}/test.json`, testJsonPath });
-  }
-  return out;
+    if (!fs.existsSync(testJsonPath)) return [];
+    return [{ testId: dir, sourcePath: `${dir}/test.json`, testJsonPath }];
+  });
 }
 
 const MBTI_CODES = [
@@ -77,25 +76,26 @@ function discoverTestImages(assetsDir, testId) {
   const imagesDir = path.join(assetsDir, testId, "images");
   if (!fs.existsSync(imagesDir)) return [];
   const entries = fs.readdirSync(imagesDir, { withFileTypes: true });
-  const out = [];
-  for (const e of entries) {
-    if (!e.isFile()) continue;
-    const parsed = getImageTypeAndName(e.name);
-    if (!parsed) continue;
-    const imageKey = `assets/${testId}/images/${e.name}`;
-    let sizeBytes = null;
-    try {
-      sizeBytes = fs.statSync(path.join(imagesDir, e.name)).size;
-    } catch (_) {}
-    out.push({
-      image_key: imageKey,
-      image_type: parsed.imageType,
-      image_name: parsed.imageName,
-      content_type: getContentType(e.name),
-      size_bytes: sizeBytes,
-    });
-  }
-  return out.sort((a, b) => a.image_name.localeCompare(b.image_name));
+  const out = entries
+    .filter((e) => e.isFile())
+    .map((e) => {
+      const parsed = getImageTypeAndName(e.name);
+      if (!parsed) return null;
+      const imageKey = `assets/${testId}/images/${e.name}`;
+      let sizeBytes = null;
+      try {
+        sizeBytes = fs.statSync(path.join(imagesDir, e.name)).size;
+      } catch (_) {}
+      return {
+        image_key: imageKey,
+        image_type: parsed.imageType,
+        image_name: parsed.imageName,
+        content_type: getContentType(e.name),
+        size_bytes: sizeBytes,
+      };
+    })
+    .filter(Boolean);
+  return [...out].sort((a, b) => a.image_name.localeCompare(b.image_name));
 }
 
 function main() {
@@ -106,42 +106,37 @@ function main() {
   const testsMeta = seedConfig.tests;
 
   const discovered = discoverTests(assetsDir);
-  const lines = [];
-  lines.push(
+  const initialLines = [
     "-- Auto-generated from assets/<test-*>/test.json, assets/<test-*>/images/*, + seed/seed-config.json",
-  );
-  lines.push(
     "-- DO NOT EDIT BY HAND (edit config/JSON or assets, then re-run: node scripts/generate_d1_seed.cjs)",
-  );
-  lines.push("");
-  lines.push("PRAGMA foreign_keys = ON;");
-  lines.push("");
-  lines.push("DELETE FROM tests;");
-  lines.push("");
+    "",
+    "PRAGMA foreign_keys = ON;",
+    "",
+    "DELETE FROM tests;",
+    "",
+  ];
 
-  for (const { testId, sourcePath, testJsonPath } of discovered) {
-    if (excluded.has(testId)) {
-      lines.push(`-- skipped by seed-config.excludeTestIds: ${testId}`);
-      lines.push("");
-      continue;
-    }
+  const seedTimestamp = "2025-01-01T00:00:00.000Z";
+  const restLines = discovered.flatMap(
+    ({ testId, sourcePath, testJsonPath }) => {
+      if (excluded.has(testId)) {
+        return [`-- skipped by seed-config.excludeTestIds: ${testId}`, ""];
+      }
 
-    const testJson = readJson(testJsonPath);
-    const questionCount =
-      Array.isArray(testJson?.questions) ? testJson.questions.length : 0;
-    const meta = testsMeta[testId] || {};
-    const title = meta.title ?? testId;
-    const description = meta.description ?? null;
-    const author = meta.author ?? null;
-    const authorImg = meta.authorImg ?? null;
-    const thumbnail = meta.thumbnail ?? null;
-    const tags = Array.isArray(meta.tags) ? meta.tags : [];
-    const createdAt = meta.createdAt ?? null;
-    const updatedAt = meta.updatedAt ?? null;
+      const testJson = readJson(testJsonPath);
+      const questionCount =
+        Array.isArray(testJson?.questions) ? testJson.questions.length : 0;
+      const meta = testsMeta[testId] || {};
+      const title = meta.title ?? testId;
+      const description = meta.description ?? null;
+      const author = meta.author ?? null;
+      const authorImg = meta.authorImg ?? null;
+      const thumbnail = meta.thumbnail ?? null;
+      const tags = Array.isArray(meta.tags) ? meta.tags : [];
+      const createdAt = meta.createdAt ?? null;
+      const updatedAt = meta.updatedAt ?? null;
 
-    lines.push(`-- test: ${testId}`);
-    lines.push(
-      [
+      const testLine = [
         "INSERT INTO tests (test_id, title, description_json, author, author_img_path, thumbnail_path, source_path, tags_json, question_count, is_published, created_at, updated_at)",
         "VALUES (",
         [
@@ -159,14 +154,10 @@ function main() {
           sqlString(updatedAt),
         ].join(", "),
         ");",
-      ].join(" "),
-    );
-    lines.push("");
+      ].join(" ");
 
-    const seedTimestamp = "2025-01-01T00:00:00.000Z";
-    const imageRows = discoverTestImages(assetsDir, testId);
-    for (const row of imageRows) {
-      lines.push(
+      const imageRows = discoverTestImages(assetsDir, testId);
+      const imageLines = imageRows.map((row) =>
         [
           "INSERT INTO test_images (test_id, image_key, image_type, image_name, content_type, size_bytes, uploaded_at)",
           "VALUES (",
@@ -182,11 +173,17 @@ function main() {
           ");",
         ].join(" "),
       );
-    }
-    if (imageRows.length > 0) lines.push("");
-  }
+      const block = [
+        `-- test: ${testId}`,
+        testLine,
+        "",
+        ...imageLines,
+      ];
+      return imageLines.length > 0 ? [...block, ""] : block;
+    },
+  );
 
-  process.stdout.write(lines.join("\n"));
+  process.stdout.write([...initialLines, ...restLines].join("\n"));
 }
 
 main();

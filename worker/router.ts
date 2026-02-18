@@ -64,9 +64,8 @@ export function getTieredCacheCf(
       cacheTags: ["api", "api-tests", `test-${params.id}`],
     };
   if (route === "assets") {
-    const tags = ["assets"];
     const pathSeg = params.path?.split("/")[0];
-    if (pathSeg) tags.push(`test-${pathSeg}`);
+    const tags = pathSeg ? ["assets", `test-${pathSeg}`] : ["assets"];
     return { cacheTtl: 86400, cacheEverything: true, cacheTags: tags };
   }
   return null;

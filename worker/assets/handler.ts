@@ -88,10 +88,9 @@ function cacheControlForKey(key: string, isVersioned: boolean): string {
 }
 
 function buildCacheTagHeader(key: string): string {
-  const tags = ["assets"];
   const clean = String(key || "").replace(/^\/+/, "");
   const m = clean.match(/^assets\/(test-[^/]+)\//i);
-  if (m?.[1]) tags.push("test", m[1]);
+  const tags = m?.[1] ? ["assets", "test", m[1]] : ["assets"];
   return tags.join(",");
 }
 
@@ -106,9 +105,10 @@ function toggleFirstCharCase(s: string): string {
   return s;
 }
 
-function addCaseFallbackCandidates(keys: string[], tail: string): void {
+/** Pure: return extra candidate keys for case-variant filename (no mutation). */
+function getCaseFallbackCandidates(tail: string): string[] {
   const t = String(tail || "").replace(/^\/+/, "");
-  if (!t) return;
+  if (!t) return [];
   const lower = t.toLowerCase();
   const isStatic =
     lower.endsWith(".png") ||
@@ -118,18 +118,17 @@ function addCaseFallbackCandidates(keys: string[], tail: string): void {
     lower.endsWith(".gif") ||
     lower.endsWith(".svg") ||
     lower.endsWith(".woff2");
-  if (!isStatic) return;
+  if (!isStatic) return [];
 
   const parts = t.split("/");
-  const filename = parts.pop() || "";
-  if (!filename) return;
+  const filename = parts[parts.length - 1] ?? "";
+  if (!filename) return [];
 
   const toggled = toggleFirstCharCase(filename);
-  if (!toggled || toggled === filename) return;
+  if (!toggled || toggled === filename) return [];
 
-  const toggledTail = [...parts, toggled].join("/");
-  keys.push(`assets/${toggledTail}`);
-  keys.push(toggledTail);
+  const toggledTail = [...parts.slice(0, -1), toggled].join("/");
+  return [`assets/${toggledTail}`, toggledTail];
 }
 
 // --- I/O: remote fetch fallback ---
@@ -247,8 +246,12 @@ export async function handleAssetsGet(
     });
   }
 
-  const candidateKeys = [`assets/${tail}`, tail, `assets/data/${tail}`];
-  addCaseFallbackCandidates(candidateKeys, tail);
+  const candidateKeys = [
+    `assets/${tail}`,
+    tail,
+    `assets/data/${tail}`,
+    ...getCaseFallbackCandidates(tail),
+  ];
 
   let obj: R2Object | null = null;
   let key = "";

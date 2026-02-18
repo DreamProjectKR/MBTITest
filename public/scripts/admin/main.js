@@ -24,7 +24,9 @@ import {
   REQUIRED_QUESTION_COUNT,
   elements,
   setActiveTest,
+  setState,
   state,
+  updateLoadedTest,
 } from "./state.js";
 import {
   findByBaseName,
@@ -63,14 +65,16 @@ function buildMetaFromTest(test) {
 }
 
 function syncMetaEntry(test) {
-  state.tests = state.tests.map((meta) => {
-    if (meta.id !== test.id) return meta;
-    return {
-      ...meta,
-      title: test.title ?? meta.title,
-      thumbnail: test.thumbnail ?? meta.thumbnail,
-      tags: Array.isArray(test.tags) ? [...test.tags] : [...meta.tags],
-    };
+  setState({
+    tests: state.tests.map((meta) => {
+      if (meta.id !== test.id) return meta;
+      return {
+        ...meta,
+        title: test.title ?? meta.title,
+        thumbnail: test.thumbnail ?? meta.thumbnail,
+        tags: Array.isArray(test.tags) ? [...test.tags] : [...meta.tags],
+      };
+    }),
   });
   populateTestSelector();
 }
@@ -83,16 +87,16 @@ function hydrateMetaForm(test) {
 
 async function refreshImageList(testId) {
   if (!testId) {
-    state.imageList = [];
+    setState({ imageList: [] });
     return;
   }
   try {
     const data = await fetchImageList(testId);
     const items = Array.isArray(data?.items) ? data.items : [];
-    state.imageList = items;
+    setState({ imageList: items });
     syncImagesToActiveTestFromStore(items);
   } catch (err) {
-    state.imageList = [];
+    setState({ imageList: [] });
   }
 }
 
@@ -100,42 +104,52 @@ function syncImagesToActiveTestFromStore(items = []) {
   const active = getActiveTest();
   if (!active || !elements.metaForm) return;
 
+  let thumbnail = active.thumbnail;
+  let authorImg = active.authorImg;
   const thumb = findByBaseName(items, "thumbnail");
   if (thumb?.path) {
-    const v = normalizeAssetsPath(thumb.path);
-    active.thumbnail = v;
-    elements.metaForm.elements.thumbnail.value = v;
+    thumbnail = normalizeAssetsPath(thumb.path);
+    elements.metaForm.elements.thumbnail.value = thumbnail;
   }
-
   const author = findByBaseName(items, "author");
   if (author?.path) {
-    const v = normalizeAssetsPath(author.path);
-    active.authorImg = v;
-    elements.metaForm.elements.authorImg.value = v;
+    authorImg = normalizeAssetsPath(author.path);
+    elements.metaForm.elements.authorImg.value = authorImg;
   }
 
-  active.results = active.results ?? {};
-  MBTI_ORDER.forEach((code) => {
-    const hit = findByBaseName(items, code);
-    if (!hit?.path) return;
-    active.results[code] = {
-      ...(active.results[code] ?? {}),
-      image: normalizeAssetsPath(hit.path),
-    };
+  const results = MBTI_ORDER.reduce(
+    (acc, code) => {
+      const hit = findByBaseName(items, code);
+      if (!hit?.path) return acc;
+      return {
+        ...acc,
+        [code]: {
+          ...(acc[code] ?? {}),
+          image: normalizeAssetsPath(hit.path),
+        },
+      };
+    },
+    { ...(active.results ?? {}) },
+  );
+
+  const baseQuestions = Array.isArray(active.questions) ? active.questions : [];
+  const questions = baseQuestions.map((q) => {
+    const qNum = String(q?.id || "").replace(/^q/i, "");
+    const hit =
+      findByBaseName(items, `Q${qNum}`) || findByBaseName(items, `q${qNum}`);
+    if (!hit?.path || String(q?.questionImage || "").trim()) return q;
+    return { ...q, questionImage: normalizeAssetsPath(hit.path) };
   });
 
-  const questions = Array.isArray(active.questions) ? active.questions : [];
-  for (let i = 1; i <= REQUIRED_QUESTION_COUNT; i += 1) {
-    const hit =
-      findByBaseName(items, `Q${i}`) || findByBaseName(items, `q${i}`);
-    if (!hit?.path) continue;
-    const question = questions.find((q) => String(q?.id || "") === `q${i}`);
-    if (question && !String(question.questionImage || "").trim()) {
-      question.questionImage = normalizeAssetsPath(hit.path);
-    }
-  }
-
-  refreshActiveView(active);
+  const next = {
+    ...active,
+    thumbnail,
+    authorImg,
+    results,
+    questions,
+  };
+  updateLoadedTest(active.id, next);
+  refreshActiveView(next);
 }
 
 async function loadTest(testId) {
@@ -151,7 +165,7 @@ async function loadTest(testId) {
   setPanelLoading("results", true);
   try {
     const test = await fetchTestDetail(testId);
-    state.loadedTests = { ...state.loadedTests, [testId]: test };
+    setState({ loadedTests: { ...state.loadedTests, [testId]: test } });
     syncMetaEntry(test);
     hydrateMetaForm(test);
     refreshActiveView(test);
@@ -177,13 +191,15 @@ function createTest() {
     author: "",
     authorImg: "",
     questions: [],
-    results: MBTI_ORDER.reduce((acc, code) => {
-      acc[code] = { image: "", summary: "" };
-      return acc;
-    }, {}),
+    results: MBTI_ORDER.reduce(
+      (acc, code) => ({ ...acc, [code]: { image: "", summary: "" } }),
+      {},
+    ),
   };
-  state.loadedTests = { ...state.loadedTests, [newTest.id]: newTest };
-  state.tests = [...state.tests, buildMetaFromTest(newTest)];
+  setState({
+    loadedTests: { ...state.loadedTests, [newTest.id]: newTest },
+    tests: [...state.tests, buildMetaFromTest(newTest)],
+  });
   setActiveTest(newTest.id);
   populateTestSelector();
   hydrateMetaForm(newTest);
@@ -195,7 +211,7 @@ async function reloadActiveTest() {
   const testId = state.activeTestId;
   if (!testId) return;
   const test = await fetchTestDetail(testId);
-  state.loadedTests = { ...state.loadedTests, [testId]: test };
+  setState({ loadedTests: { ...state.loadedTests, [testId]: test } });
   syncMetaEntry(test);
   hydrateMetaForm(test);
   refreshActiveView(test);
@@ -238,6 +254,7 @@ async function handleBulkResultUpload() {
   }
 
   let uploadedCount = 0;
+  let nextResults = { ...(test.results ?? {}) };
   for (const file of files) {
     const name = String(file.name || "")
       .replace(/\.[^.]+$/, "")
@@ -245,10 +262,12 @@ async function handleBulkResultUpload() {
     if (!MBTI_ORDER.includes(name)) continue;
     try {
       const uploaded = await uploadResultImage(test.id, name, file);
-      test.results = test.results ?? {};
-      test.results[name] = {
-        ...(test.results[name] ?? {}),
-        image: uploaded.path || test.results[name]?.image || "",
+      nextResults = {
+        ...nextResults,
+        [name]: {
+          ...(nextResults[name] ?? {}),
+          image: uploaded.path || nextResults[name]?.image || "",
+        },
       };
       uploadedCount += 1;
     } catch (err) {
@@ -256,7 +275,13 @@ async function handleBulkResultUpload() {
     }
   }
 
-  renderResults(test.results);
+  setState({
+    loadedTests: {
+      ...state.loadedTests,
+      [test.id]: { ...test, results: nextResults },
+    },
+  });
+  renderResults(nextResults);
   input.value = "";
   if (uploadedCount > 0) {
     showToast(`${uploadedCount}개 결과 이미지를 업로드했습니다.`);
@@ -291,12 +316,13 @@ export async function initAdmin() {
     uploadTestImage,
     uploadResultImage,
     showToast,
+    updateLoadedTest,
   });
 
   try {
     const payload = await fetchTestsIndex();
     const tests = Array.isArray(payload?.tests) ? payload.tests : [];
-    state.tests = tests.map((meta) => ({
+    const normalized = tests.map((meta) => ({
       id: meta.id,
       title: meta.title ?? "",
       thumbnail: meta.thumbnail ?? "",
@@ -306,7 +332,8 @@ export async function initAdmin() {
       updatedAt: meta.updatedAt ?? "",
       isPublished: Boolean(meta.is_published), // D1 returns snake_case
     }));
-    setActiveTest(state.tests[0]?.id ?? null);
+    setState({ tests: normalized });
+    setActiveTest(normalized[0]?.id ?? null);
     populateTestSelector();
     if (state.activeTestId) await loadTest(state.activeTestId);
   } catch (err) {

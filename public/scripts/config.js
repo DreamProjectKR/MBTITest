@@ -65,32 +65,24 @@
       }
     })();
 
-    const params = [];
-    const pushParam = (key, defaultValue) => {
-      const value = options[key] ?? defaultValue;
-      if (value != null) {
-        params.push(`${key}=${value}`);
-      }
-    };
-
-    pushParam("width", options.width || "auto");
-    pushParam("height", options.height || null);
-    pushParam("quality", options.quality || "auto");
-    pushParam("fit", options.fit || "cover");
-    pushParam("format", options.format || "auto");
-
-    // Allow passing additional options (e.g., `trim`, `background`).
-    if (options?.extra) {
-      Object.entries(options.extra).forEach(([key, value]) => {
-        if (value != null) {
-          params.push(`${key}=${value}`);
-        }
-      });
-    }
+    const basePairs = [
+      ["width", options.width || "auto"],
+      ["height", options.height || null],
+      ["quality", options.quality || "auto"],
+      ["fit", options.fit || "cover"],
+      ["format", options.format || "auto"],
+    ].filter(([, v]) => v != null);
+    const extraPairs =
+      options?.extra ?
+        Object.entries(options.extra).filter(([, v]) => v != null)
+      : [];
+    const params = [...basePairs, ...extraPairs].map(
+      ([key, value]) => `${key}=${value}`,
+    );
 
     if (!params.length) return absoluteUrl;
 
-    const paramString = params.filter(Boolean).join(",");
+    const paramString = params.join(",");
     const target =
       typeof absoluteUrl === "string" && absoluteUrl.startsWith("/") ?
         absoluteUrl.replace(/^\/+/, "")
@@ -172,44 +164,42 @@
   }
 
   // --- Pure: parse resize string to options object ---
-  /** Pure: parse "width=1230,quality=85,fit=cover,format=auto" to options. */
+  /** Pure: parse "width=1230,quality=85,fit=cover,format=auto" to options (immutable). */
   function parseResizeOptions(raw) {
-    const out = {};
     const str = String(raw || "").trim();
-    if (!str) return out;
+    if (!str) return {};
 
-    str.split(",").forEach((pair) => {
+    return str.split(",").reduce((acc, pair) => {
       const p = String(pair || "").trim();
-      if (!p) return;
+      if (!p) return acc;
       const idx = p.indexOf("=");
-      if (idx <= 0) return;
+      if (idx <= 0) return acc;
       const key = p.slice(0, idx).trim();
       const value = p.slice(idx + 1).trim();
-      if (!key || !value) return;
+      if (!key || !value) return acc;
 
       if (key === "width" || key === "height") {
         const n = Number(value);
-        if (Number.isFinite(n) && n > 0) out[key] = n;
-        return;
+        return Number.isFinite(n) && n > 0 ? { ...acc, [key]: n } : acc;
       }
 
       if (key === "minWidth" || key === "maxWidth" || key === "fallbackWidth") {
         const n = Number(value);
-        if (Number.isFinite(n) && n > 0) out[key] = n;
-        return;
+        return Number.isFinite(n) && n > 0 ? { ...acc, [key]: n } : acc;
       }
 
       if (key === "quality") {
         const n = Number(value);
-        out.quality = Number.isFinite(n) && n > 0 ? n : value;
-        return;
+        return {
+          ...acc,
+          quality: Number.isFinite(n) && n > 0 ? n : value,
+        };
       }
 
-      if (key === "fit") out.fit = value;
-      if (key === "format") out.format = value;
-    });
-
-    return out;
+      if (key === "fit") return { ...acc, fit: value };
+      if (key === "format") return { ...acc, format: value };
+      return acc;
+    }, {});
   }
   window.parseResizeOptions = parseResizeOptions;
 
@@ -339,13 +329,14 @@
         .split(",")
         .map((x) => String(x || "").trim())
         .filter(Boolean);
-      const widths = [];
-      for (const item of list) {
-        const m = item.match(/^(\d+)(w)?$/i);
-        if (!m) continue;
-        const n = Number(m[1]);
-        if (Number.isFinite(n) && n > 0) widths.push(n);
-      }
+      const widths = list
+        .map((item) => {
+          const m = item.match(/^(\d+)(w)?$/i);
+          if (!m) return null;
+          const n = Number(m[1]);
+          return Number.isFinite(n) && n > 0 ? n : null;
+        })
+        .filter((n) => n != null);
       return widths;
     };
 
