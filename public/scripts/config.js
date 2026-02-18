@@ -222,6 +222,27 @@
   }
   window.parseResizeOptions = parseResizeOptions;
 
+  /** Build full absolute URL for an asset (for fetch/cache). */
+  window.buildAssetUrl = function buildAssetUrl(path, resizeRaw, versionRaw) {
+    const p = String(path || "").trim();
+    if (!p) return "";
+    let href = "";
+    if (resizeRaw && typeof window.assetResizeUrl === "function") {
+      href = appendVersion(
+        window.assetResizeUrl(p, parseResizeOptions(String(resizeRaw))),
+        versionRaw,
+      );
+    } else {
+      href = appendVersion(window.assetUrl(p), versionRaw);
+    }
+    if (!href) return "";
+    try {
+      return new URL(href, window.location.origin).href;
+    } catch (e) {
+      return href;
+    }
+  };
+
   function computeMeasuredWidthPx(el, options) {
     const minWidth =
       options && typeof options.minWidth === "number" ? options.minWidth : 160;

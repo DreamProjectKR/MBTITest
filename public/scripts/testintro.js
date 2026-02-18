@@ -24,10 +24,13 @@ const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
 let lastLoadedTest = null;
 const preloadState = { started: false, criticalPromise: null };
 
-// Preload raw assets (no `/cdn-cgi/image`) so we can reuse them as fallback
-// if Image Resizing returns intermittent 503s.
-const QUESTION_RESIZE_RAW = "";
-const RESULT_RESIZE_RAW = "";
+// Match testquiz/testresult resize and widths so preloaded URLs hit the same
+// HTTP cache and Cache API entries that quiz/result pages will request.
+const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
+const QUESTION_IMAGE_SRCSET_WIDTHS = [360, 480, 720];
+const RESULT_IMAGE_RESIZE_BASE = "quality=82,fit=cover,format=auto";
+const RESULT_IMAGE_SRCSET_WIDTHS = [360, 480, 720];
+const CACHE_NAME = "mbti-assets";
 
 function getTestCacheKey(testId) {
   if (!testId) return "";
@@ -147,9 +150,38 @@ function extractImagePaths(test) {
   return { questionPaths, resultPaths };
 }
 
-async function preloadImages(paths, resizeRaw, version, opts) {
+/** Fetch a URL; store in Cache API when available, and in HTTP cache. */
+async function fetchAndStoreInCache(url) {
+  if (!url) return false;
+  try {
+    const res = await fetch(url, { mode: "cors", credentials: "same-origin" });
+    if (!res.ok) return false;
+    if (typeof caches !== "undefined") {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(url, res.clone());
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Preload question images at quiz srcset widths; fetch and store in Cache API
+ * and HTTP cache so testquiz reuses them.
+ */
+async function preloadQuestionImages(paths, version, opts) {
   const list = Array.isArray(paths) ? paths.filter(Boolean) : [];
-  const total = list.length;
+  const tasks = [];
+  for (const p of list) {
+    for (const w of QUESTION_IMAGE_SRCSET_WIDTHS) {
+      tasks.push({
+        path: p,
+        resizeRaw: `width=${w},${QUESTION_IMAGE_RESIZE_BASE}`,
+      });
+    }
+  }
+  const total = tasks.length;
   if (!total) return { loaded: 0, failed: 0, total: 0 };
 
   const concurrency =
@@ -158,27 +190,75 @@ async function preloadImages(paths, resizeRaw, version, opts) {
     : 4;
   const onProgress =
     opts && typeof opts.onProgress === "function" ? opts.onProgress : null;
+  const buildUrl =
+    typeof window.buildAssetUrl === "function" ?
+      window.buildAssetUrl
+    : () => "";
 
   let loaded = 0;
   let failed = 0;
   let index = 0;
 
   const worker = async () => {
-    while (index < list.length) {
+    while (index < tasks.length) {
       const i = index;
       index += 1;
-      const p = list[i];
-      if (!p) continue;
+      const { path: p, resizeRaw } = tasks[i];
+      const url = buildUrl(p, resizeRaw, version);
+      const ok = url ? await fetchAndStoreInCache(url) : false;
+      if (ok) loaded += 1;
+      else failed += 1;
+      if (onProgress) onProgress({ loaded, failed, total });
+    }
+  };
 
-      let ok = false;
-      if (typeof window.loadImageAsset === "function") {
-        // eslint-disable-next-line no-await-in-loop
-        ok = await window.loadImageAsset(p, resizeRaw, version);
-      } else if (typeof window.prefetchImageAsset === "function") {
-        window.prefetchImageAsset(p, resizeRaw, version);
-        ok = true;
-      }
+  const workers = [];
+  const n = Math.max(1, Math.min(concurrency, total));
+  for (let i = 0; i < n; i += 1) workers.push(worker());
+  await Promise.all(workers);
+  return { loaded, failed, total };
+}
 
+/**
+ * Preload result images at result thumbnail srcset widths; fetch and store in
+ * Cache API and HTTP cache so testresult reuses them.
+ */
+async function preloadResultImages(paths, version, opts) {
+  const list = Array.isArray(paths) ? paths.filter(Boolean) : [];
+  const tasks = [];
+  for (const p of list) {
+    for (const w of RESULT_IMAGE_SRCSET_WIDTHS) {
+      tasks.push({
+        path: p,
+        resizeRaw: `width=${w},${RESULT_IMAGE_RESIZE_BASE}`,
+      });
+    }
+  }
+  const total = tasks.length;
+  if (!total) return { loaded: 0, failed: 0, total: 0 };
+
+  const concurrency =
+    opts && Number.isFinite(Number(opts.concurrency)) ?
+      Number(opts.concurrency)
+    : 4;
+  const onProgress =
+    opts && typeof opts.onProgress === "function" ? opts.onProgress : null;
+  const buildUrl =
+    typeof window.buildAssetUrl === "function" ?
+      window.buildAssetUrl
+    : () => "";
+
+  let loaded = 0;
+  let failed = 0;
+  let index = 0;
+
+  const worker = async () => {
+    while (index < tasks.length) {
+      const i = index;
+      index += 1;
+      const { path: p, resizeRaw } = tasks[i];
+      const url = buildUrl(p, resizeRaw, version);
+      const ok = url ? await fetchAndStoreInCache(url) : false;
       if (ok) loaded += 1;
       else failed += 1;
       if (onProgress) onProgress({ loaded, failed, total });
@@ -204,15 +284,11 @@ function startBackgroundPrefetch(test) {
 
   const runCritical = () =>
     Promise.all([
-      preloadImages(criticalQuestions, QUESTION_RESIZE_RAW, version, {
-        concurrency: 2,
-      }),
-      preloadImages(resultPaths, RESULT_RESIZE_RAW, version, {
-        concurrency: 2,
-      }),
+      preloadQuestionImages(criticalQuestions, version, { concurrency: 2 }),
+      preloadResultImages(resultPaths, version, { concurrency: 2 }),
     ]);
   const runRest = () =>
-    preloadImages(rest, QUESTION_RESIZE_RAW, version, { concurrency: 2 });
+    preloadQuestionImages(rest, version, { concurrency: 2 });
 
   // Phase 1 quickly; Phase 2 in idle time.
   preloadState.criticalPromise = (function () {
@@ -250,7 +326,9 @@ async function ensureAllTestImagesPreloaded(test, options) {
 
   const version = test.updatedAt ? String(test.updatedAt) : "";
   const { questionPaths, resultPaths } = extractImagePaths(test);
-  const total = questionPaths.length + resultPaths.length;
+  const total =
+    questionPaths.length * QUESTION_IMAGE_SRCSET_WIDTHS.length +
+    resultPaths.length * RESULT_IMAGE_SRCSET_WIDTHS.length;
 
   if (total === 0) {
     updateOverlayProgress(1, 1);
@@ -262,14 +340,14 @@ async function ensureAllTestImagesPreloaded(test, options) {
   updateOverlayProgress(0, total);
 
   const allDone = Promise.all([
-    preloadImages(questionPaths, QUESTION_RESIZE_RAW, version, {
+    preloadQuestionImages(questionPaths, version, {
       concurrency: 4,
       onProgress: ({ loaded, failed }) => {
         qDone = loaded + failed;
         updateOverlayProgress(qDone + rDone, total);
       },
     }),
-    preloadImages(resultPaths, RESULT_RESIZE_RAW, version, {
+    preloadResultImages(resultPaths, version, {
       concurrency: 4,
       onProgress: ({ loaded, failed }) => {
         rDone = loaded + failed;
@@ -477,6 +555,14 @@ function renderIntro(data) {
 }
 
 document.addEventListener("DOMContentLoaded", loadIntroData);
+
+if (
+  typeof navigator !== "undefined" &&
+  navigator.serviceWorker &&
+  typeof navigator.serviceWorker.register === "function"
+) {
+  navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+}
 
 function setupShareButton(test) {
   const shareBtn = document.querySelector(".TestShare button");
