@@ -1,9 +1,5 @@
-/**
- * Shared footer styles (partials/footer.html).
- * Load in <head> on pages that use the footer partial.
- */
+/* Shared footer layout. Depends on :root in header.css for --asset-footer-bg. */
 footer {
-  /* Sticky footer: keep footer at the bottom when content is short */
   margin-top: auto;
 }
 

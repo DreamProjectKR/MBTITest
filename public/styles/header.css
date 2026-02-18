@@ -1,12 +1,11 @@
-/**
- * Shared header styles (partials/header.html).
- * Load in <head> on pages that use the header partial.
- */
+/* Shared header: variables and layout. Load before footer.css. */
+:root {
+  --asset-header-bg: none;
+  --asset-header-bg-non: none;
+  --asset-footer-bg: none;
+}
+
 header {
-  background-image: var(--asset-header-bg);
-  padding: 20px 5px 80px;
-  background-size: cover;
-  background-position: center;
   transition: all 0.5s ease;
 }
 
@@ -35,8 +34,7 @@ header .Head .Logo {
   width: 18%;
 }
 
-header .Head .Logo a {
-}
+header .Head .Logo a {}
 
 header .Head .Logo a img {
   transition:
@@ -88,12 +86,10 @@ header .Head .Logo:hover img {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(
-    0deg,
-    transparent,
-    transparent 30%,
-    rgba(0, 255, 255, 0.3)
-  );
+  background: linear-gradient(0deg,
+      transparent,
+      transparent 30%,
+      rgba(0, 255, 255, 0.3));
   transform: rotate(-45deg);
   transition: all 0.5s ease;
   opacity: 0;

@@ -7,13 +7,6 @@ body {
   font-family: "Noto Sans", sans-serif;
 }
 
-:root {
-  /* Assets are injected by `public/scripts/config.js` as CSS variables. */
-  --asset-header-bg: none;
-  --asset-header-bg-non: none;
-  --asset-footer-bg: none;
-}
-
 .PageShell {
   display: flex;
   flex-flow: column;
@@ -30,14 +23,11 @@ main {
 }
 
 /* 배너 */
-main .MainBanner {
-}
+main .MainBanner {}
 
-main .MainBanner a {
-}
+main .MainBanner a {}
 
-main .MainBanner a img {
-}
+main .MainBanner a img {}
 
 /* 새로운 테스트 리스트 */
 main .NewTestList {
@@ -108,17 +98,9 @@ main .NewTestList .NewTestListShell .NewTestShell .NewTest h4 {
   padding: 12px 0 12px;
 }
 
-main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag {
-}
+main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag {}
 
-main
-  .NewTestList
-  .NewTestListShell
-  .NewTestShell
-  .NewTest
-  .NewTestHashTag
-  > span {
-}
+main .NewTestList .NewTestListShell .NewTestShell .NewTest .NewTestHashTag > span {}
 
 .TestMoreBtn {
   display: flex;
@@ -261,4 +243,5 @@ main
   .Morebutton a {
     width: 100%;
   }
+
 }
