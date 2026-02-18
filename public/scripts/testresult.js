@@ -20,17 +20,17 @@ const dom = {
 // --- DOM / side effects ---
 function hydrateAssetElement(el) {
   if (!el) return;
-  if (typeof window.applyAssetAttributes === "function") {
-    window.applyAssetAttributes(el);
+  if (typeof window["applyAssetAttributes"] === "function") {
+    window["applyAssetAttributes"](el);
   }
 }
 
-const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
+const RESULT_TEST_CACHE_PREFIX = "mbtitest:testdata:";
 
 /** Pure: cache key for test JSON. */
 function getTestCacheKey(testId) {
   if (!testId) return "";
-  return `${TEST_JSON_CACHE_PREFIX}${testId}`;
+  return `${RESULT_TEST_CACHE_PREFIX}${testId}`;
 }
 
 function readCachedTestJson(testId) {
@@ -101,9 +101,9 @@ function preloadCriticalImage(path, versionRaw, resizeRaw) {
     if (
       resizeRaw &&
       typeof window.assetResizeUrl === "function" &&
-      typeof window.parseResizeOptions === "function"
+      typeof window["parseResizeOptions"] === "function"
     ) {
-      url = window.assetResizeUrl(p, window.parseResizeOptions(resizeRaw));
+      url = window.assetResizeUrl(p, window["parseResizeOptions"](resizeRaw));
     } else if (typeof window.assetUrl === "function") {
       url = window.assetUrl(p);
     } else {
@@ -238,7 +238,7 @@ function renderResultPage(data, mbti) {
       if (version) dom.thumbnailEl.setAttribute("data-asset-version", version);
       hydrateAssetElement(dom.thumbnailEl);
     }
-    dom.thumbnailEl.alt = mbti ? `${mbti} 결과` : "결과 이미지";
+    dom.thumbnailEl.setAttribute("alt", mbti ? `${mbti} 결과` : "결과 이미지");
   }
 
   if (dom.titleEl) {
