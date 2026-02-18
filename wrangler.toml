@@ -2,20 +2,6 @@ name = "mbtitest"
 compatibility_date = "2026-02-18"
 pages_build_output_dir = "./public"
 
-[[r2_buckets]]
-binding = "MBTI_BUCKET" # 또는 ASSETS
-bucket_name = "mbti-assets"
-
-[[d1_databases]]
-binding = "mbti_db"
-database_name = "mbti-db"
-database_id = "b3d4e76a-4e45-4070-9e89-701c35cb642f"
-
-[[kv_namespaces]]
-binding = "MBTI_KV"
-id = "c99274b4b04d4979b10507ce02e77f59"
-preview_id = "c99274b4b04d4979b10507ce02e77f59"
-
-[vars]
-ASSETS_BASE = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"
-R2_PUBLIC_BASE_URL = "https://pub-9394623df95a4f669f145a4ede63d588.r2.dev"
+# Pages serves static files only. API and assets are handled by mbtitest-api Worker.
+# Deploy Worker: wrangler deploy --config worker/wrangler.toml
+# Deploy Pages: wrangler pages deploy public (or via Git integration)
