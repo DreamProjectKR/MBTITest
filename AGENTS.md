@@ -5,7 +5,7 @@ This file is the **primary context for AI assistants** (e.g. Cursor, Copilot) wo
 ## Core Conventions
 
 - Prefer small, pure functions; immutable data where possible; explicit types; no side effects in shared helpers.
-- When in doubt: match existing patterns in `functions/` and `public/scripts/`; link to docs for architecture.
+- When in doubt: match existing patterns in `worker/` and `public/scripts/`; link to docs for architecture.
 - See [docs/README.md](docs/README.md) for architecture and data flow.
 
 ---
@@ -21,7 +21,7 @@ This file is the **primary context for AI assistants** (e.g. Cursor, Copilot) wo
 
 ## Project Stack
 
-Cloudflare Pages + Functions, D1 (SQLite), R2 (object storage), KV (cache). Frontend: HTML/CSS/JS (no framework). API handlers in TypeScript under `functions/api/`.
+Cloudflare Pages (정적만) + Worker (API + 에셋), D1 (SQLite), R2 (object storage), KV (cache). Frontend: HTML/CSS/JS (no framework). API handlers in TypeScript under `worker/api/`; Worker 진입점 `worker/index.ts`.
 
 - Architecture: [docs/README.md](docs/README.md)
 - API reference: [docs/API.md](docs/API.md)
@@ -46,19 +46,19 @@ Cloudflare Pages + Functions, D1 (SQLite), R2 (object storage), KV (cache). Fron
 
 - Use Cache API by URL for purgeability; avoid ETag-only cache keys when purge is needed.
 - Set `Cache-Control`, `Vary: Accept-Encoding`, and `stale-if-error` for API responses.
-- Mutations: `Cache-Control: no-store`; invalidate KV + Cache API on save (see `functions/api/admin/tests/[id].ts`).
+- Mutations: `Cache-Control: no-store`; invalidate KV + Cache API on save (see `worker/api/admin/tests/[id].ts`). Worker 바인딩은 `worker/wrangler.toml`에 정의.
 - Details: [docs/CLOUDFLARE_PERFORMANCE.md](docs/CLOUDFLARE_PERFORMANCE.md)
 
 ### D1
 
 - Use parameterized queries only: `.bind(...)`.
-- Keep queries in handlers or a thin data layer (e.g. `functions/api/admin/utils/store.ts`).
+- Keep queries in handlers or a thin data layer (e.g. `worker/api/admin/utils/store.ts`).
 - Avoid N+1; prefer batch or single queries.
 
 ### R2
 
 - Use existing key patterns: `assets/${testId}/test.json`, `assets/${testId}/images/...`.
-- Be consistent with stream vs buffer; see `functions/assets/[[path]].ts` and `writeTest` in store.ts.
+- Be consistent with stream vs buffer; see `worker/assets/handler.ts` and `writeTest` in store.ts.
 
 ### Errors
 
@@ -78,7 +78,7 @@ Cloudflare Pages + Functions, D1 (SQLite), R2 (object storage), KV (cache). Fron
 
 ### Assets
 
-- Serve via `functions/assets/[[path]].ts`.
+- Serve via Worker (`worker/assets/handler.ts` 핸들러).
 - Set Cache-Tag for purge (`assets`, `test-{testId}`).
 - Avoid duplicate R2 lookups for the same key in one request.
 
@@ -100,7 +100,7 @@ Cloudflare Pages + Functions, D1 (SQLite), R2 (object storage), KV (cache). Fron
 ### S (Single Responsibility)
 
 - One handler per route; shared logic in `_utils` or `utils`.
-- Example: `functions/api/_utils/http.ts` for headers; `functions/api/admin/utils/store.ts` for D1/R2.
+- Example: `worker/api/_utils/http.ts` for headers; `worker/api/admin/utils/store.ts` for D1/R2.
 
 ### O (Open/Closed)
 
@@ -114,7 +114,7 @@ Cloudflare Pages + Functions, D1 (SQLite), R2 (object storage), KV (cache). Fron
 
 ### I (Interface Segregation)
 
-- Types in `functions/_types.ts` (e.g. `MbtiEnv`, `PagesContext`).
+- Types in `worker/_types.ts` (e.g. `MbtiEnv`, `PagesContext`).
 - Payload types local to handlers; avoid fat request/response types.
 
 ### D (Dependency Inversion)
@@ -151,34 +151,36 @@ Cloudflare Pages + Functions, D1 (SQLite), R2 (object storage), KV (cache). Fron
 
 ## File and Naming Conventions
 
-| Area         | Path                                 |
-| ------------ | ------------------------------------ |
-| API handlers | `functions/api/`                     |
-| Asset proxy  | `functions/assets/[[path]].ts`       |
-| Shared types | `functions/_types.ts`                |
-| HTTP utils   | `functions/api/_utils/http.ts`       |
-| Admin utils  | `functions/api/admin/utils/store.ts` |
+| Area         | Path                              |
+| ------------ | --------------------------------- |
+| Worker entry | `worker/index.ts`                 |
+| API handlers | `worker/api/`                     |
+| Asset proxy  | `worker/assets/handler.ts`        |
+| Shared types | `worker/_types.ts`                |
+| HTTP utils   | `worker/api/_utils/http.ts`       |
+| Admin utils  | `worker/api/admin/utils/store.ts` |
 
 - Naming: `onRequestGet` / `onRequestPut`; camelCase for functions and variables; kebab-case for routes and static assets.
-- Admin endpoints: all under `functions/api/admin/`; use `store.ts` for D1/R2 helpers.
+- Admin endpoints: all under `worker/api/admin/`; use `store.ts` for D1/R2 helpers.
 
 ---
 
 ## Testing and Safety
 
 - Before changing behavior: run `npm run format`, `npm run build` (if applicable), and any project tests.
-- When adding APIs or env bindings: update `docs/API.md` or `docs/README.md` and `wrangler.toml` if needed.
+- When adding APIs or env bindings: update `docs/API.md` or `docs/README.md` and `worker/wrangler.toml` if needed.
 - Prefer minimal, backward-compatible changes; document breaking changes in commit or PR.
 
 ---
 
 ## Quick Reference
 
-| Task                     | Location                             |
-| ------------------------ | ------------------------------------ |
-| Change API cache headers | `functions/api/_utils/http.ts`       |
-| Add admin mutation       | `functions/api/admin/tests/...`      |
-| Asset cache policy       | `functions/assets/[[path]].ts`       |
-| D1/R2 helpers            | `functions/api/admin/utils/store.ts` |
-| Shared types             | `functions/_types.ts`                |
-| Caching strategy         | `docs/CLOUDFLARE_PERFORMANCE.md`     |
+| Task                     | Location                          |
+| ------------------------ | --------------------------------- |
+| Worker routing           | `worker/index.ts`                 |
+| Change API cache headers | `worker/api/_utils/http.ts`       |
+| Add admin mutation       | `worker/api/admin/tests/...`      |
+| Asset cache policy       | `worker/assets/handler.ts`        |
+| D1/R2 helpers            | `worker/api/admin/utils/store.ts` |
+| Shared types             | `worker/_types.ts`                |
+| Caching strategy         | `docs/CLOUDFLARE_PERFORMANCE.md`  |

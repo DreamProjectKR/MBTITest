@@ -4,7 +4,7 @@ Cloudflare Pages + D1 + R2 + KV 기반의 MBTI 테스트 플랫폼입니다.
 관리자가 어드민 페이지에서 테스트를 생성하면, 사용자는 퀴즈를 풀고 MBTI 결과를 확인하고 공유할 수 있습니다.
 
 - **프론트엔드**: HTML/CSS/JS (프레임워크 없음)
-- **백엔드**: Cloudflare Pages Functions (TypeScript)
+- **백엔드**: Cloudflare Worker (TypeScript, API + 에셋)
 - **데이터베이스**: Cloudflare D1 (SQLite) -- 테스트 메타 + 이미지 메타
 - **스토리지**: Cloudflare R2 -- 테스트 본문 JSON + 이미지 바이너리
 - **캐시**: Cloudflare KV -- 테스트 상세 응답 캐시 (TTL 5분)
@@ -23,20 +23,21 @@ mbtitest/
 │   ├── CLOUDFLARE_PERFORMANCE.md  # Cloudflare 성능 최적화 가이드
 │   ├── ERD.md                  # D1 + R2 데이터 모델 ERD
 │   └── README.md               # 아키텍처 개요
-├── functions/                  # Cloudflare Pages Functions (백엔드)
-│   ├── _types.ts               # 공유 TypeScript 타입 정의
+├── worker/                     # Cloudflare Worker (API + 에셋)
+│   ├── index.ts                # Worker 진입점 (라우팅)
+│   ├── _types.ts                # 공유 TypeScript 타입 정의
 │   ├── api/
-│   │   ├── _utils/http.ts      # 공용 HTTP 유틸 (캐시 헤더, JSON 응답)
-│   │   ├── admin/              # 어드민 전용 API
-│   │   │   ├── tests/[id].ts           # PUT /api/admin/tests/:id
-│   │   │   ├── tests/[id]/images.ts    # GET/PUT /api/admin/tests/:id/images
+│   │   ├── _utils/http.ts       # 공용 HTTP 유틸 (캐시 헤더, JSON 응답)
+│   │   ├── admin/               # 어드민 전용 API
+│   │   │   ├── tests/[id].ts            # PUT /api/admin/tests/:id
+│   │   │   ├── tests/[id]/images.ts     # GET/PUT /api/admin/tests/:id/images
 │   │   │   ├── tests/[id]/results/[mbti]/image.ts  # PUT 결과 이미지
-│   │   │   └── utils/store.ts          # D1/R2 스토리지 유틸
+│   │   │   └── utils/store.ts           # D1/R2 스토리지 유틸
 │   │   └── tests/
-│   │       ├── index.ts                # GET /api/tests
-│   │       ├── [id].ts                 # GET /api/tests/:id
-│   │       └── [id]/compute.ts         # POST /api/tests/:id/compute
-│   └── assets/[[path]].ts      # GET /assets/* (R2 프록시)
+│   │       ├── index.ts                 # GET /api/tests
+│   │       ├── [id].ts                  # GET /api/tests/:id
+│   │       └── [id]/compute.ts          # POST /api/tests/:id/compute
+│   └── assets/handler.ts        # GET /assets/* (R2 프록시)
 ├── migrations/                 # D1 스키마 마이그레이션
 │   ├── 0001_schema.sql         # 초기 tests 테이블
 │   ├── 0002_add_indexes.sql    # 정렬 인덱스
@@ -66,7 +67,8 @@ mbtitest/
 │   │   └── testresult.js       # 결과 페이지 로직
 │   └── styles/                 # 페이지별 CSS
 ├── scripts/                    # 빌드/시드 유틸리티 스크립트
-├── wrangler.toml               # Cloudflare 설정 (D1, R2, KV 바인딩)
+├── worker/wrangler.toml         # Worker 설정 (D1, R2, KV, routes)
+├── wrangler.toml               # Pages 설정 (정적 출력)
 └── package.json
 ```
 
@@ -101,11 +103,12 @@ npm run dev                 # wrangler pages dev 실행 (http://localhost:8788)
 
 ### Pages 대시보드 설정
 
-| 설정 항목           | 값          |
-| ------------------- | ----------- |
-| Build command       | (비움)      |
-| Output directory    | `public`    |
-| Functions directory | `functions` |
+| 설정 항목        | 값       |
+| ---------------- | -------- |
+| Build command    | (비움)   |
+| Output directory | `public` |
+
+API 및 에셋은 Worker(`worker/`)로 라우트하여 배포합니다.
 
 ### 필수 바인딩
 
@@ -115,11 +118,10 @@ npm run dev                 # wrangler pages dev 실행 (http://localhost:8788)
 | `mbti_db`     | D1   | `mbti-db`     | 테스트 메타 + 이미지 메타   |
 | `MBTI_KV`     | KV   | --            | 테스트 상세 캐시 (TTL 300s) |
 
-### 환경 변수
+### 환경 변수 (Worker)
 
 | 변수                 | 설명                                 |
 | -------------------- | ------------------------------------ |
-| `ASSETS_BASE`        | R2 공개 URL (로컬 폴백용)            |
 | `R2_PUBLIC_BASE_URL` | R2 공개 URL (로컬 개발 시 원격 폴백) |
 
 ### D1 마이그레이션

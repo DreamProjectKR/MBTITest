@@ -1,12 +1,13 @@
 # Cloudflare 성능 최적화 가이드
 
-이 문서는 `dreamp.org`(Cloudflare Pages) 배포 환경에서 로딩 성능을 최적화하기 위한 설정과 전략을 정리합니다.
+이 문서는 `dreamp.org`(Pages 정적 + Worker API) 배포 환경에서 로딩 성능을 최적화하기 위한 설정과 전략을 정리합니다.
 
-**설정**: `wrangler.toml`의 `compatibility_date`는 2025-01-01로 유지하여 최신 런타임 기능을 활용한다.
+**설정**: `worker/wrangler.toml`의 `compatibility_date`로 최신 런타임 기능을 활용한다.
 
 ## 현재 아키텍처
 
-- **Pages Functions**: API + R2 프록시
+- **Pages**: 정적 HTML/CSS/JS만 호스팅
+- **Worker**: API + R2 에셋 프록시 (Tiered Cache 활용)
 - **D1**: 테스트 메타데이터
 - **R2**: 테스트 본문 JSON + 이미지
 - **KV**: 테스트 상세 응답 캐시 (TTL 300초)
@@ -26,24 +27,26 @@
 
 - **읽기**: KV 히트 → 즉시 반환 (D1+R2 접근 없음)
 - **쓰기**: 어드민 저장 시 KV 키 삭제
-- **바인딩**: `MBTI_KV` (wrangler.toml)
+- **바인딩**: `MBTI_KV` (worker/wrangler.toml)
 
-### Cache API (구현됨)
+### Tiered Cache (Worker) — fetch+cf 적용됨
 
-`caches.default`를 이용한 엣지 캐시입니다.
+Worker가 캐시 가능한 GET 요청(`/api/tests`, `/api/tests/:id`, `/assets/*`)에 대해 **fetch(self, cf)** 패턴을 사용해 Tiered Cache를 채웁니다. 내부 헤더 `X-Mbti-Origin-Request`로 subrequest를 구분하고, 오리진 처리 시 D1/R2/KV 응답이 `cf: { cacheTtl, cacheEverything, cacheTags }`에 의해 Tiered Cache에 적재됩니다.
 
-- URL 기반 캐시 키 (어드민 저장 시 `cache.delete()`로 퍼지)
+- **라우트별 TTL**: 목록 300초, 테스트 상세 600초, 에셋 86400초
+- **cacheTags**: `api`, `api-tests`, `test-{id}`(에셋은 경로에서 testId 추출 시 추가)
 - `s-maxage` + `stale-while-revalidate` + `stale-if-error`로 엣지 TTL 제어
 - `Vary: Accept-Encoding`으로 압축/비압축 응답 분리
+- **Purge by Tag**: `Cache-Tag` 헤더로 태그별 선택 퍼지 (대시보드 또는 API)
 
-**Tiered Cache 참고**: `cache.put()`는 Cloudflare Tiered Cache와 호환되지 않습니다. 현재 구현은 단일 엣지 PoP에만 캐시됩니다. 글로벌 Tiered Cache를 쓰려면 동일 URL로 **fetch(origin + path, { cf: { cacheTtl, cacheEverything: true } })** 를 한 번 호출하는 패턴으로 전환하면 됩니다. 이때 응답을 Worker에서 직접 만드는 대신, 자신의 origin을 fetch해 Tiered Cache에 적재하는 방식입니다. 구조 변경이 필요하므로 선택 사항이며, 자세한 계획은 [PERFORMANCE_MAINTENANCE_PLAN.md](PERFORMANCE_MAINTENANCE_PLAN.md)를 참고하세요.
+**참고**: Tiered Cache는 존 단위로 대시보드 또는 API에서 별도 활성화해야 합니다.
 
 ### Cache-Tag (구현됨)
 
-`/assets/*` 응답에 `Cache-Tag` 헤더를 추가하여 선택적 퍼지가 가능합니다.
+API 및 에셋 응답에 `Cache-Tag` 헤더를 추가하여 선택적 퍼지가 가능합니다.
 
-- `assets` -- 모든 에셋
-- `test-{testId}` -- 특정 테스트의 에셋만
+- **API**: `GET /api/tests` → `api`, `api-tests`; `GET /api/tests/:id` → `api`, `api-tests`, `test-{id}`
+- **에셋** (`/assets/*`): `assets`, `test-{testId}`
 
 특정 테스트 에셋만 퍼지하려면:
 
@@ -59,11 +62,13 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/{zone_id}/purge_cache" 
 
 ### 자동 캐시 퍼지 (구현됨)
 
-어드민에서 테스트 저장 또는 이미지 업로드 시, Cache API에서 해당 엔드포인트를 자동으로 퍼지합니다.
+어드민에서 테스트 저장 또는 이미지 업로드 시, Worker가 KV 키 삭제 및 Cache API 퍼지를 수행합니다.
 
-- `PUT /api/admin/tests/:id` → `/api/tests`, `/api/tests/:id` 퍼지
-- `PUT /api/admin/tests/:id/images` → `/api/tests/:id` 퍼지
-- `PUT /api/admin/tests/:id/results/:mbti/image` → `/api/tests`, `/api/tests/:id` 퍼지
+- `PUT /api/admin/tests/:id` → KV `test:{id}` 삭제, Cache API `/api/tests`, `/api/tests/:id` 퍼지
+- `PUT /api/admin/tests/:id/images` → Cache API `/api/tests/:id` 퍼지
+- `PUT /api/admin/tests/:id/results/:mbti/image` → KV 삭제, Cache API 퍼지
+
+Tiered Cache 퍼지가 필요한 경우: [Purge by Tag](https://developers.cloudflare.com/cache/how-to/purge-cache/purge-by-tags/) 또는 Purge by URL 사용.
 
 ## 3. 정적 에셋 헤더 (구현됨)
 
@@ -77,10 +82,10 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/{zone_id}/purge_cache" 
 
 코드 헤더가 실수로 변경되어도 캐시를 안정적으로 유지하려면 대시보드 규칙을 추가합니다.
 
-| 규칙        | 매치                     | Edge TTL |
-| ----------- | ------------------------ | -------- |
-| API 캐시    | `*dreamp.org/api/tests*` | 60초     |
-| Assets 캐시 | `*dreamp.org/assets/*`   | 1년      |
+| 규칙        | 매치                     | Edge TTL  |
+| ----------- | ------------------------ | --------- |
+| API 캐시    | `*dreamp.org/api/tests*` | 300-600초 |
+| Assets 캐시 | `*dreamp.org/assets/*`   | 1년       |
 
 ## 5. D1 인덱스 (적용됨)
 
@@ -123,7 +128,7 @@ npm run d1:migrate:remote   # 프로덕션
 
 ## 7. 에셋 프록시 캐시 정책
 
-`functions/assets/[[path]].ts`에서 키 유형별 캐시 정책:
+Worker의 `worker/assets/handler.ts` (에셋 핸들러)에서 키 유형별 캐시 정책:
 
 | 에셋 유형        | Cache-Control                                      | 조건                      |
 | ---------------- | -------------------------------------------------- | ------------------------- |

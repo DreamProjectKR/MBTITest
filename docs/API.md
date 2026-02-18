@@ -1,8 +1,8 @@
 # API 레퍼런스
 
-MBTI ZOO의 Cloudflare Pages Functions API 문서입니다.
+MBTI ZOO의 Worker API 문서입니다.
 
-Base URL: `https://dreamp.org` (프로덕션) / `http://localhost:8788` (로컬)
+Base URL: `https://dreamp.org` (프로덕션) / `http://localhost:8789` (Worker 로컬)
 
 ## Public API
 

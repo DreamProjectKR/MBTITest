@@ -8,24 +8,27 @@ MBTI ZOO는 Cloudflare의 엣지 인프라 위에서 동작합니다.
 ┌─────────────────────────────────────────────────────────────────┐
 │  브라우저                                                        │
 │                                                                   │
-│  index.html ──── /api/tests ─────────► Pages Function ──► D1      │
-│  testquiz.html ─ /api/tests/:id ─────► Pages Function ──► D1+R2  │
-│                  /api/tests/:id/compute ► Pages Function ──► D1   │
-│  *.html ──────── /assets/* ──────────► Pages Function ──► R2      │
-│  admin.html ──── /api/admin/tests/* ──► Pages Function ──► D1+R2  │
+│  index.html ──── / ────────────────► Pages (정적만) ──► HTML/CSS/JS │
+│  *.html ──────── /admin.html 등 ──► Pages (정적만)                │
+│                                                                   │
+│  /api/tests ────────────────► Worker (API 게이트웨이) ──► D1      │
+│  /api/tests/:id ────────────► Worker ──► KV → D1+R2              │
+│  /api/tests/:id/compute ────► Worker ──► D1                       │
+│  /assets/* ─────────────────► Worker ──► R2                     │
+│  /api/admin/tests/* ────────► Worker ──► D1+R2                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Cloudflare 서비스 역할
 
-| 서비스              | 바인딩           | 역할                                           |
-| ------------------- | ---------------- | ---------------------------------------------- |
-| **Pages**           | --               | 정적 HTML/CSS/JS 호스팅 + Functions 라우팅     |
-| **Pages Functions** | --               | API 엔드포인트 + R2 프록시                     |
-| **D1**              | `mbti_db`        | 테스트 메타데이터 + 이미지 메타데이터 (SQLite) |
-| **R2**              | `MBTI_BUCKET`    | 테스트 본문 JSON + 이미지 바이너리             |
-| **KV**              | `MBTI_KV`        | 테스트 상세 응답 캐시 (TTL 300초)              |
-| **Image Resizing**  | `/cdn-cgi/image` | 이미지 포맷 변환(WebP) + 리사이징              |
+| 서비스             | 바인딩           | 역할                                           |
+| ------------------ | ---------------- | ---------------------------------------------- |
+| **Pages**          | --               | 정적 HTML/CSS/JS만 호스팅 (Functions 없음)     |
+| **Worker**         | mbti_db, R2, KV  | API 엔드포인트 + R2 에셋 프록시 (Tiered Cache) |
+| **D1**             | `mbti_db`        | 테스트 메타데이터 + 이미지 메타데이터 (SQLite) |
+| **R2**             | `MBTI_BUCKET`    | 테스트 본문 JSON + 이미지 바이너리             |
+| **KV**             | `MBTI_KV`        | 테스트 상세 응답 캐시 (TTL 300초)              |
+| **Image Resizing** | `/cdn-cgi/image` | 이미지 포맷 변환(WebP) + 리사이징              |
 
 ## 데이터 흐름
 
@@ -55,9 +58,9 @@ MBTI ZOO는 Cloudflare의 엣지 인프라 위에서 동작합니다.
 | 계층                     | 대상                      | TTL       | 무효화                   |
 | ------------------------ | ------------------------- | --------- | ------------------------ |
 | **KV**                   | `GET /api/tests/:id` 응답 | 300초     | 어드민 저장 시 삭제      |
-| **Cache API**            | `GET /api/tests/:id` 응답 | ETag 기반 | 콘텐츠 변경 시 자동      |
-| **Edge** (`s-maxage`)    | API 응답                  | 60-300초  | `stale-while-revalidate` |
-| **Edge** (`Cache-Tag`)   | `/assets/*`               | 최대 1년  | 태그별 선택 퍼지         |
+| **Tiered Cache**         | Worker API/에셋 응답      | fetch+cf  | Purge by Tag/URL         |
+| **Edge** (`s-maxage`)    | API 응답                  | 300-600초 | `stale-while-revalidate` |
+| **Edge** (`Cache-Tag`)   | API 응답, `/assets/*`     | 최대 1년  | 태그별 선택 퍼지         |
 | **브라우저** (`max-age`) | API/assets                | 60초-1년  | 버전 쿼리(`?v=`)         |
 
 ## 프론트엔드 구조
@@ -81,14 +84,16 @@ public/scripts/admin/
 
 ## 주요 파일
 
-| 파일                                 | 설명                                           |
-| ------------------------------------ | ---------------------------------------------- |
-| `wrangler.toml`                      | D1, R2, KV 바인딩 + 환경 변수 설정             |
-| `public/_routes.json`                | Pages Functions 라우팅 (`/api/*`, `/assets/*`) |
-| `functions/_types.ts`                | 공유 TypeScript 타입 (MbtiEnv, KVNamespace 등) |
-| `functions/api/admin/utils/store.ts` | D1/R2 읽기/쓰기/이미지 메타 관리 유틸          |
-| `functions/assets/[[path]].ts`       | R2 에셋 프록시 (Cache-Tag, ETag, 폴백)         |
-| `public/scripts/config.js`           | 프론트엔드 에셋 URL/이미지 설정 중앙 관리      |
+| 파일                              | 설명                                           |
+| --------------------------------- | ---------------------------------------------- |
+| `wrangler.toml`                   | Pages 설정 (정적 출력 디렉터리)                |
+| `worker/wrangler.toml`            | Worker 설정 (D1, R2, KV 바인딩, routes)        |
+| `worker/index.ts`                 | Worker 진입점 (API/에셋 라우팅)                |
+| `public/_routes.json`             | Pages Functions 비활성화 (`include: []`)       |
+| `worker/_types.ts`                | 공유 TypeScript 타입 (MbtiEnv, KVNamespace 등) |
+| `worker/api/admin/utils/store.ts` | D1/R2 읽기/쓰기/이미지 메타 관리 유틸          |
+| `worker/assets/handler.ts`        | R2 에셋 프록시 (Cache-Tag, ETag, 폴백)         |
+| `public/scripts/config.js`        | 프론트엔드 에셋 URL/이미지 설정 중앙 관리      |
 
 ## 관련 문서
 
