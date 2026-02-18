@@ -99,7 +99,7 @@ export interface KVNamespace {
 
 export interface MbtiEnv {
   MBTI_BUCKET?: R2Bucket;
-  mbti_db?: D1Database;
+  MBTI_DB?: D1Database;
   MBTI_KV?: KVNamespace;
   R2_PUBLIC_BASE_URL?: string;
   ASSETS?: Fetcher;

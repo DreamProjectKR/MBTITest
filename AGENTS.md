@@ -35,11 +35,11 @@ Cloudflare Pages (정적만) + Worker (API + 에셋), D1 (SQLite), R2 (object st
 
 ### Bindings
 
-- Use `context.env` (mbti_db, MBTI_BUCKET, MBTI_KV). Never assume bindings exist.
+- Use `context.env` (MBTI_DB, MBTI_BUCKET, MBTI_KV). Never assume bindings exist.
 - Check before use; return 500 with a clear message if missing:
   ```ts
-  if (!context.env.mbti_db)
-    return json({ error: "D1 binding mbti_db is missing." }, 500);
+  if (!context.env.MBTI_DB)
+    return json({ error: "D1 binding MBTI_DB is missing." }, 500);
   ```
 
 ### Edge and Caching

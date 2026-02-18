@@ -24,8 +24,8 @@ MBTI ZOO는 Cloudflare의 엣지 인프라 위에서 동작합니다.
 | 서비스             | 바인딩           | 역할                                           |
 | ------------------ | ---------------- | ---------------------------------------------- |
 | **Pages**          | --               | 정적 HTML/CSS/JS만 호스팅 (Functions 없음)     |
-| **Worker**         | mbti_db, R2, KV  | API 엔드포인트 + R2 에셋 프록시 (Tiered Cache) |
-| **D1**             | `mbti_db`        | 테스트 메타데이터 + 이미지 메타데이터 (SQLite) |
+| **Worker**         | MBTI_DB, R2, KV  | API 엔드포인트 + R2 에셋 프록시 (Tiered Cache) |
+| **D1**             | `MBTI_DB`        | 테스트 메타데이터 + 이미지 메타데이터 (SQLite) |
 | **R2**             | `MBTI_BUCKET`    | 테스트 본문 JSON + 이미지 바이너리             |
 | **KV**             | `MBTI_KV`        | 테스트 상세 응답 캐시 (TTL 300초)              |
 | **Image Resizing** | `/cdn-cgi/image` | 이미지 포맷 변환(WebP) + 리사이징              |

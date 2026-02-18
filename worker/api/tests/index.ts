@@ -53,10 +53,10 @@ const CACHE_TAG_API_TESTS = "api,api-tests";
 export async function onRequestGet(
   context: PagesContext<MbtiEnv>,
 ): Promise<Response> {
-  const db = context.env.mbti_db;
+  const db = context.env.MBTI_DB;
   if (!db) {
     return jsonResponse(
-      { error: "D1 binding mbti_db is missing." },
+      { error: "D1 binding MBTI_DB is missing." },
       { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }

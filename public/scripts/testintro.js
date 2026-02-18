@@ -239,21 +239,30 @@ function startBackgroundPrefetch(test) {
   });
 }
 
-async function ensureCriticalPreloaded(test, timeoutMs) {
+/**
+ * Preload all quiz question images and result images; progress overlay shows 0..100%.
+ * Resolves when every image has been attempted (success or fail). Optional safety timeout.
+ * @param {object} test - Test JSON (questions, results)
+ * @param {{ safetyTimeoutMs?: number }} [options] - Optional. safetyTimeoutMs: max wait (e.g. 60000) before resolving anyway.
+ */
+async function ensureAllTestImagesPreloaded(test, options) {
   if (!test) return;
-  if (!preloadState.started) startBackgroundPrefetch(test);
 
   const version = test.updatedAt ? String(test.updatedAt) : "";
   const { questionPaths, resultPaths } = extractImagePaths(test);
-  const criticalQuestions = questionPaths.slice(0, 3);
-  const total = criticalQuestions.length + resultPaths.length;
+  const total = questionPaths.length + resultPaths.length;
+
+  if (total === 0) {
+    updateOverlayProgress(1, 1);
+    return;
+  }
 
   let qDone = 0;
   let rDone = 0;
   updateOverlayProgress(0, total);
 
-  const p = Promise.all([
-    preloadImages(criticalQuestions, QUESTION_RESIZE_RAW, version, {
+  const allDone = Promise.all([
+    preloadImages(questionPaths, QUESTION_RESIZE_RAW, version, {
       concurrency: 4,
       onProgress: ({ loaded, failed }) => {
         qDone = loaded + failed;
@@ -267,9 +276,16 @@ async function ensureCriticalPreloaded(test, timeoutMs) {
         updateOverlayProgress(qDone + rDone, total);
       },
     }),
-  ]);
+  ]).then(() => {
+    updateOverlayProgress(total, total);
+  });
 
-  await promiseWithTimeout(p, timeoutMs);
+  const safetyMs =
+    options && Number.isFinite(Number(options.safetyTimeoutMs)) ?
+      Number(options.safetyTimeoutMs)
+    : 60000;
+  await promiseWithTimeout(allDone, safetyMs);
+  updateOverlayProgress(total, total);
 }
 
 // NOTE: preloading/prefetching is intentionally removed elsewhere; this file uses config.js helpers.
@@ -498,7 +514,7 @@ function setupStartButton(testId) {
           questions: [],
           results: {},
         };
-      await ensureCriticalPreloaded(test, 2500);
+      await ensureAllTestImagesPreloaded(test, { safetyTimeoutMs: 60000 });
     } catch (e) {
       // Ignore preload errors; proceed.
     } finally {

@@ -78,10 +78,10 @@ export async function onRequestPut(
       { error: "R2 binding MBTI_BUCKET is missing." },
       500,
     );
-  const db = context.env.mbti_db;
+  const db = context.env.MBTI_DB;
   if (!db)
     return noStoreJsonResponse(
-      { error: "D1 binding mbti_db is missing." },
+      { error: "D1 binding MBTI_DB is missing." },
       500,
     );
 

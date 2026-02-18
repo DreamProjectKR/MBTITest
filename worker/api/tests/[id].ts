@@ -64,10 +64,10 @@ export async function onRequestGet(
       { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
-  const db = context.env.mbti_db;
+  const db = context.env.MBTI_DB;
   if (!db) {
     return jsonResponse(
-      { error: "D1 binding mbti_db is missing." },
+      { error: "D1 binding MBTI_DB is missing." },
       { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
