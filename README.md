@@ -84,20 +84,20 @@ mbtitest/
 ```bash
 npm install
 npm run d1:migrate:local    # D1 로컬 마이그레이션 적용
-npm run dev                 # wrangler pages dev 실행 (http://localhost:8788)
+npm run dev                 # Worker 로컬 실행 (API + 정적, http://localhost:8787)
 ```
 
 ### 주요 npm 스크립트
 
-| 스크립트                    | 설명                                              |
-| --------------------------- | ------------------------------------------------- |
-| `npm run dev`               | 로컬 개발 서버 (Pages + Functions + D1 + R2 + KV) |
-| `npm run pages:dev`         | `dev`와 동일                                      |
-| `npm run pages:publish`     | Cloudflare Pages에 배포                           |
-| `npm run d1:migrate:local`  | D1 마이그레이션 로컬 적용                         |
-| `npm run d1:migrate:remote` | D1 마이그레이션 프로덕션 적용                     |
-| `npm run format`            | Prettier 포맷 검사                                |
-| `npm run format:write`      | Prettier 자동 수정                                |
+| 스크립트                    | 설명                                               |
+| --------------------------- | -------------------------------------------------- |
+| `npm run dev`               | 로컬 개발 (Worker: /api, /assets + 정적, D1/R2/KV) |
+| `npm run pages:dev`         | 정적만 (Pages dev, API 없음)                       |
+| `npm run pages:publish`     | Cloudflare Pages에 배포                            |
+| `npm run d1:migrate:local`  | D1 마이그레이션 로컬 적용                          |
+| `npm run d1:migrate:remote` | D1 마이그레이션 프로덕션 적용                      |
+| `npm run format`            | Prettier 포맷 검사                                 |
+| `npm run format:write`      | Prettier 자동 수정                                 |
 
 ## Cloudflare Pages 배포
 
@@ -109,6 +109,15 @@ npm run dev                 # wrangler pages dev 실행 (http://localhost:8788)
 | Output directory | `public` |
 
 API 및 에셋은 Worker(`worker/`)로 라우트하여 배포합니다.
+
+**중요**: 테스트 목록·상세가 안 뜨고 "응답이 JSON이 아닙니다 (content-type: text/html)" 오류가 나면, Worker가 도메인에 연결되지 않은 상태입니다. Cloudflare 대시보드에서 **Workers & Pages → 해당 Worker → Settings → Triggers → Routes**에 다음을 추가하세요.
+
+| Route 패턴               | 설명                    |
+| ------------------------ | ----------------------- |
+| `*귀하의도메인/api/*`    | API (목록·상세·compute) |
+| `*귀하의도메인/assets/*` | R2 에셋 프록시          |
+
+또는 `worker/wrangler.toml`에서 `[[routes]]` 주석을 해제하고 `pattern`에 사용 중인 도메인을 넣은 뒤 `npm run worker:deploy`로 재배포합니다.
 
 ### 필수 바인딩
 

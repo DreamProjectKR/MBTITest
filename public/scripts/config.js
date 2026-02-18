@@ -124,15 +124,14 @@
         if (!contentType.includes("application/json")) {
           const text = await res.text();
           const head = text.slice(0, 80).replace(/\s+/g, " ");
-          throw new Error(
-            "index.json 응답이 JSON이 아닙니다: " +
+          const isHtml = contentType.includes("text/html");
+          const hint =
+            isHtml ?
+              " API 경로(" +
               url +
-              " (content-type: " +
-              contentType +
-              ', head: "' +
-              head +
-              '")',
-          );
+              ")가 Worker가 아닌 정적 페이지로 갔습니다. Cloudflare에서 Worker 라우트(*도메인/api/*, *도메인/assets/*)를 연결했는지 확인하세요."
+            : " (content-type: " + contentType + ', head: "' + head + '")';
+          throw new Error("테스트 목록 응답이 JSON이 아닙니다." + hint);
         }
         return res.json();
       });
