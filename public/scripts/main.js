@@ -4,11 +4,9 @@
  * What it does:
  * - Fetches the test index from the API (`/api/tests`).
  * - Renders two sections (newest/top) and wires up clicks to `testintro.html?testId=...`.
- * - Handles the sticky header UI on scroll.
+ * Sticky header is handled by scripts/header.js.
  */
-const header = document.getElementById("header");
-const headerScroll = document.getElementById("headerScroll");
-const MainTop = document.getElementById("MainTop");
+
 /**
  * Resolve an asset path into a browser URL.
  * Keep this dynamic because Rocket Loader can delay `config.js`.
@@ -22,8 +20,8 @@ function assetUrl(path) {
     return window.assetUrl(path);
   }
   const base = String(
-    typeof window !== "undefined" && window.ASSETS_BASE ?
-      window.ASSETS_BASE
+    typeof window !== "undefined" && window["ASSETS_BASE"] ?
+      window["ASSETS_BASE"]
     : "/assets",
   ).replace(/\/+$/, "");
   let clean = String(path).replace(/^\.?\/+/, "");
@@ -40,21 +38,6 @@ function assetResizeUrl(path, options) {
   }
   return assetUrl(path);
 }
-
-// 헤더 원래 위치 저장 (스크롤로 fixed 전환 시 기준점)
-const headerOffset = header.offsetTop;
-
-window.addEventListener(
-  "scroll",
-  () => {
-    if (window.scrollY > headerOffset) {
-      header.classList.add("fixed-header", "bg-on");
-    } else {
-      header.classList.remove("fixed-header", "bg-on");
-    }
-  },
-  { passive: true },
-);
 
 // ----- 유틸: 썸네일 경로 보정 -----
 function resolveThumbnailPath(thumbnail) {
@@ -152,8 +135,8 @@ function normalizeTests(tests) {
     return true;
   });
   return [...deduped].sort((a, b) => {
-    const ad = new Date(a.updatedAt || a.createdAt || 0);
-    const bd = new Date(b.updatedAt || b.createdAt || 0);
+    const ad = new Date(a.updatedAt || a.createdAt || 0).getTime();
+    const bd = new Date(b.updatedAt || b.createdAt || 0).getTime();
     return bd - ad; // 최신 우선
   });
 }

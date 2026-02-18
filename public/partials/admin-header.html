@@ -1,0 +1,41 @@
+<header class="site-header admin-header">
+  <div class="admin-header__group">
+    <a
+      class="brand"
+      href="./index.html"
+      >MBTI Zoo</a
+    >
+    <div class="admin-header__controls">
+      <label class="form-field form-field--inline">
+        <span>테스트 선택</span>
+        <select
+          id="testSelect"
+          name="testSelect"
+          data-test-select
+          aria-label="현재 편집할 테스트 선택"
+        ></select>
+      </label>
+      <button
+        class="ds-button ds-button--secondary"
+        type="button"
+        data-create-test
+      >
+        새 테스트
+      </button>
+    </div>
+  </div>
+  <div class="admin-header__actions">
+    <button
+      class="ds-button ds-button--primary"
+      type="button"
+      data-save-test
+    >
+      저장하기
+    </button>
+    <span
+      class="save-status"
+      data-save-status
+      >저장 준비</span
+    >
+  </div>
+</header>

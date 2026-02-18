@@ -28,51 +28,15 @@
       rel="stylesheet"
       href="./styles/admin.css"
     />
+    <script
+      src="./scripts/include-partials.js"
+      defer
+    ></script>
   </head>
 
   <body>
     <div class="page-shell admin-shell">
-      <header class="site-header admin-header">
-        <div class="admin-header__group">
-          <a
-            class="brand"
-            href="./index.html"
-            >MBTI Zoo</a
-          >
-          <div class="admin-header__controls">
-            <label class="form-field form-field--inline">
-              <span>테스트 선택</span>
-              <select
-                id="testSelect"
-                name="testSelect"
-                data-test-select
-                aria-label="현재 편집할 테스트 선택"
-              ></select>
-            </label>
-            <button
-              class="ds-button ds-button--secondary"
-              type="button"
-              data-create-test
-            >
-              새 테스트
-            </button>
-          </div>
-        </div>
-        <div class="admin-header__actions">
-          <button
-            class="ds-button ds-button--primary"
-            type="button"
-            data-save-test
-          >
-            저장하기
-          </button>
-          <span
-            class="save-status"
-            data-save-status
-            >저장 준비</span
-          >
-        </div>
-      </header>
+      <div data-include="partials/admin-header.html"></div>
 
       <main class="admin-main">
         <section
@@ -86,10 +50,16 @@
             class="form-grid"
             data-test-meta-form
           >
-            <div class="form-field" style="grid-column: 1 / -1;">
+            <div
+              class="form-field"
+              style="grid-column: 1 / -1"
+            >
               <span>공개 설정</span>
               <label class="ds-toggle">
-                <input type="checkbox" name="isPublished" />
+                <input
+                  type="checkbox"
+                  name="isPublished"
+                />
                 <span class="ds-toggle__track"></span>
                 <span class="ds-toggle__label">테스트 공개 (메인 노출)</span>
               </label>

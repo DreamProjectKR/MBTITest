@@ -3,12 +3,8 @@
  *
  * Responsibilities (SRP): load test data, render intro UI, preload quiz/result
  * images into HTTP cache + Cache API, navigate to quiz on Start.
- * Pure helpers are grouped below; side effects (DOM, fetch, cache) are isolated.
+ * Sticky header is handled by scripts/header.js (data-header-margin="35" on body).
  */
-const header = document.querySelector(".Head");
-const headerScroll = document.querySelector("header");
-const headerOffset = header ? header.offsetTop : 0;
-
 // --- Pure helpers (no I/O, no DOM; same input => same output) ---
 function computeProgressPercent(done, total) {
   if (total <= 0) return 0;
@@ -18,12 +14,12 @@ function computeProgressPercent(done, total) {
 // --- DOM: delegate to config.js for asset URL resolution ---
 function hydrateAssetElement(el) {
   if (!el) return;
-  if (typeof window.applyAssetAttributes === "function") {
-    window.applyAssetAttributes(el);
+  if (typeof window["applyAssetAttributes"] === "function") {
+    window["applyAssetAttributes"](el);
   }
 }
 
-const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
+const INTRO_TEST_CACHE_PREFIX = "mbtitest:testdata:";
 let lastLoadedTest = null;
 let preloadState = { started: false, criticalPromise: null };
 function setPreloadState(update) {
@@ -39,7 +35,7 @@ const CACHE_NAME = "mbti-assets";
 /** Pure: cache key for test JSON. */
 function getTestCacheKey(testId) {
   if (!testId) return "";
-  return `${TEST_JSON_CACHE_PREFIX}${testId}`;
+  return `${INTRO_TEST_CACHE_PREFIX}${testId}`;
 }
 
 function readCachedTestJson(testId) {
@@ -85,7 +81,8 @@ function updateOverlayProgress(done, total) {
   const pct = computeProgressPercent(done, total);
   const bar = document.querySelector("[data-preload-progress]");
   const text = document.querySelector("[data-preload-text]");
-  if (bar && bar.style) bar.style.width = `${pct}%`;
+  const barEl = bar && "style" in bar ? /** @type {HTMLElement} */ (bar) : null;
+  if (barEl) barEl.style.width = `${pct}%`;
   if (text) text.textContent = `테스트 준비 중... (${pct}%)`;
 }
 
@@ -195,8 +192,8 @@ async function preloadQuestionImages(paths, version, opts) {
   const onProgress =
     opts && typeof opts.onProgress === "function" ? opts.onProgress : null;
   const buildUrl =
-    typeof window.buildAssetUrl === "function" ?
-      window.buildAssetUrl
+    typeof window["buildAssetUrl"] === "function" ?
+      window["buildAssetUrl"]
     : () => "";
 
   let loaded = 0;
@@ -244,8 +241,8 @@ async function preloadResultImages(paths, version, opts) {
   const onProgress =
     opts && typeof opts.onProgress === "function" ? opts.onProgress : null;
   const buildUrl =
-    typeof window.buildAssetUrl === "function" ?
-      window.buildAssetUrl
+    typeof window["buildAssetUrl"] === "function" ?
+      window["buildAssetUrl"]
     : () => "";
 
   let loaded = 0;
@@ -368,26 +365,6 @@ async function ensureAllTestImagesPreloaded(test, options) {
 
 // NOTE: preloading/prefetching is intentionally removed elsewhere; this file uses config.js helpers.
 
-window.addEventListener(
-  "scroll",
-  () => {
-    if (!header) return;
-    const isMobile = window.matchMedia("(max-width: 900px)").matches;
-    if (window.scrollY > headerOffset) {
-      header.classList.add("fixed-header", "bg-on");
-      if (isMobile && headerScroll) {
-        headerScroll.style.marginBottom = "35px";
-      }
-    } else {
-      header.classList.remove("fixed-header", "bg-on");
-      if (headerScroll) {
-        headerScroll.style.marginBottom = "";
-      }
-    }
-  },
-  { passive: true },
-);
-
 function getTestIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get("testId");
@@ -417,7 +394,7 @@ async function loadIntroData() {
   try {
     // 1) Try API first (fast path when Functions routes are available)
     // 2) If API is missing (404) or fails, fall back to index.json -> assets/<id>/test.json
-    const apiBase = window.API_TESTS_BASE || "/api/tests";
+    const apiBase = window["API_TESTS_BASE"] || "/api/tests";
     let data = null;
 
     try {
@@ -525,7 +502,7 @@ function renderIntro(data) {
       if (version) thumbnailEl.setAttribute("data-asset-version", version);
       hydrateAssetElement(thumbnailEl);
     }
-    if (data.title) thumbnailEl.alt = data.title;
+    if (data.title) thumbnailEl.setAttribute("alt", data.title);
   }
 
   renderTags(tagsEl, data.tags);
@@ -545,7 +522,7 @@ function renderIntro(data) {
       if (version) authorImgEl.setAttribute("data-asset-version", version);
       hydrateAssetElement(authorImgEl);
     }
-    if (authorName) authorImgEl.alt = `제작자 ${authorName}`;
+    if (authorName) authorImgEl.setAttribute("alt", `제작자 ${authorName}`);
   }
 
   if (authorNameEl && authorName)

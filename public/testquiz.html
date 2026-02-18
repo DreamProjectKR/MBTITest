@@ -100,6 +100,10 @@
     />
     <link
       rel="stylesheet"
+      href="styles/header.css"
+    />
+    <link
+      rel="stylesheet"
       href="styles/testquiz.css"
     />
     <link
@@ -111,25 +115,19 @@
       src="./scripts/config.js"
       defer
     ></script>
+    <script
+      src="./scripts/include-partials.js"
+      defer
+    ></script>
+    <script
+      src="./scripts/header.js"
+      defer
+    ></script>
   </head>
 
   <body>
     <div class="PageShell testlistPageShell">
-      <header class="Sticky">
-        <div class="Head">
-          <div class="Logo">
-            <a href="index.html">
-              <img
-                data-asset-src="assets/images/mainLogo.png"
-                data-asset-resize="width=360,quality=90,format=auto"
-                alt="MBTIZOO바로가기"
-                decoding="async"
-                fetchpriority="high"
-              />
-            </a>
-          </div>
-        </div>
-      </header>
+      <div data-include="partials/header.html"></div>
       <main>
         <div class="ProgressBar">
           <div class="Progress"></div>
