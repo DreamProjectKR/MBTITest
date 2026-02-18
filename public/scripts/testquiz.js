@@ -18,6 +18,8 @@ const state = {
 
 // Quiz question images often include text; avoid cropping.
 const QUESTION_IMAGE_RESIZE = "width=720,quality=82,fit=contain,format=auto";
+const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
+const QUESTION_IMAGE_SRCSET_WIDTHS = [360, 480, 720];
 
 /**
  * Cached DOM references for render/update.
@@ -156,31 +158,6 @@ function resolveAssetPath(relative) {
   return String(relative || "");
 }
 
-function preloadCriticalImage(path, resizeRaw, versionRaw) {
-  try {
-    const p = String(path || "").trim();
-    if (!p || typeof document === "undefined") return;
-    let url = typeof window.assetUrl === "function" ? window.assetUrl(p) : p;
-    const v = String(versionRaw || "").trim();
-    if (v) {
-      const sep = url.includes("?") ? "&" : "?";
-      url = `${url}${sep}v=${encodeURIComponent(v)}`;
-    }
-
-    const key = `${p}|${v}`;
-    if (document.querySelector(`link[data-preload-key="${key}"]`)) return;
-
-    const link = document.createElement("link");
-    link.rel = "preload";
-    link.as = "image";
-    link.href = url;
-    link.setAttribute("data-preload-key", key);
-    document.head.appendChild(link);
-  } catch (err) {
-    // Best-effort only.
-  }
-}
-
 /**
  * Build a list of candidate image URLs for a question.
  * Handles:
@@ -271,6 +248,8 @@ function setImageWithFallback(imgEl, paths, alt) {
   imgEl.setAttribute("data-asset-resize", QUESTION_IMAGE_RESIZE);
   imgEl.setAttribute("data-asset-srcset", "360,480,720");
   imgEl.setAttribute("data-asset-sizes", "(max-width: 476px) 70vw, 350px");
+  imgEl.setAttribute("loading", "eager");
+  imgEl.setAttribute("fetchpriority", "high");
   hydrateAssetElement(imgEl);
 }
 
@@ -399,14 +378,26 @@ function initializeStateFromTestJson(testJson) {
   state.scores = {};
   state.answers = [];
 
+  // Start loading first question image at all srcset widths so requests begin
+  // before the img gets its src; improves chance of cache hit and reduces LCP.
   const firstQuestion = state.test?.questions?.[0];
-  if (firstQuestion) {
+  if (
+    firstQuestion &&
+    typeof window.loadImageAsset === "function"
+  ) {
     const firstPath = getQuestionImageUrlCandidates(firstQuestion)[0];
-    preloadCriticalImage(
-      firstPath,
-      QUESTION_IMAGE_RESIZE,
-      state.test?.updatedAt,
-    );
+    const version = state.test?.updatedAt ?
+      String(state.test.updatedAt)
+    : "";
+    if (firstPath) {
+      QUESTION_IMAGE_SRCSET_WIDTHS.forEach((w) => {
+        window.loadImageAsset(
+          firstPath,
+          `width=${w},${QUESTION_IMAGE_RESIZE_BASE}`,
+          version,
+        );
+      });
+    }
   }
 
   renderQuestion();
