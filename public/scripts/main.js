@@ -174,7 +174,7 @@ function renderSections(tests) {
   });
 }
 
-// ----- 초기화 -----
+// ----- 초기화 (header/footer partial 로딩 후 실행) -----
 function initTestSectionsAjax() {
   fetchTestsAjax()
     .then(normalizeTests)
@@ -182,4 +182,14 @@ function initTestSectionsAjax() {
     .catch((err) => console.error("테스트 목록 로딩 실패:", err));
 }
 
-document.addEventListener("DOMContentLoaded", initTestSectionsAjax);
+function runWhenReady() {
+  if (window["partialsReady"]) {
+    initTestSectionsAjax();
+  } else {
+    window.addEventListener("partialsReady", initTestSectionsAjax, {
+      once: true,
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", runWhenReady);
