@@ -4,9 +4,11 @@
  * What it does:
  * - Fetches the test index from the API (`/api/tests`).
  * - Renders two sections (newest/top) and wires up clicks to `testintro.html?testId=...`.
- * Sticky header is handled by scripts/header.js.
+ * - Handles the sticky header UI on scroll.
  */
-
+const header = document.getElementById("header");
+const headerScroll = document.getElementById("headerScroll");
+const MainTop = document.getElementById("MainTop");
 /**
  * Resolve an asset path into a browser URL.
  * Keep this dynamic because Rocket Loader can delay `config.js`.
@@ -20,8 +22,8 @@ function assetUrl(path) {
     return window.assetUrl(path);
   }
   const base = String(
-    typeof window !== "undefined" && window["ASSETS_BASE"] ?
-      window["ASSETS_BASE"]
+    typeof window !== "undefined" && window.ASSETS_BASE ?
+      window.ASSETS_BASE
     : "/assets",
   ).replace(/\/+$/, "");
   let clean = String(path).replace(/^\.?\/+/, "");
@@ -38,6 +40,21 @@ function assetResizeUrl(path, options) {
   }
   return assetUrl(path);
 }
+
+// 헤더 원래 위치 저장 (스크롤로 fixed 전환 시 기준점)
+const headerOffset = header.offsetTop;
+
+window.addEventListener(
+  "scroll",
+  () => {
+    if (window.scrollY > headerOffset) {
+      header.classList.add("fixed-header", "bg-on");
+    } else {
+      header.classList.remove("fixed-header", "bg-on");
+    }
+  },
+  { passive: true },
+);
 
 // ----- 유틸: 썸네일 경로 보정 -----
 function resolveThumbnailPath(thumbnail) {
@@ -114,11 +131,11 @@ function createTestCard(test, variantClass, opts = {}) {
 
 // ----- 테스트 목록 불러오기 (default: /api/tests) -----
 async function fetchTestsAjax() {
-  if (typeof window["getTestIndex"] === "function") {
-    const data = await window["getTestIndex"]();
+  if (typeof window.getTestIndex === "function") {
+    const data = await window.getTestIndex();
     return Array.isArray(data?.tests) ? data.tests : [];
   }
-  const url = window["TEST_INDEX_URL"] || "/api/tests";
+  const url = window.TEST_INDEX_URL || "/api/tests";
   const res = await fetch(url);
   if (!res.ok) throw new Error(url + " 요청 실패: " + res.status);
   const data = await res.json();
@@ -135,8 +152,8 @@ function normalizeTests(tests) {
     return true;
   });
   return [...deduped].sort((a, b) => {
-    const ad = new Date(a.updatedAt || a.createdAt || 0).getTime();
-    const bd = new Date(b.updatedAt || b.createdAt || 0).getTime();
+    const ad = new Date(a.updatedAt || a.createdAt || 0);
+    const bd = new Date(b.updatedAt || b.createdAt || 0);
     return bd - ad; // 최신 우선
   });
 }
@@ -174,7 +191,7 @@ function renderSections(tests) {
   });
 }
 
-// ----- 초기화 (header/footer partial 로딩 후 실행) -----
+// ----- 초기화 -----
 function initTestSectionsAjax() {
   fetchTestsAjax()
     .then(normalizeTests)
@@ -182,14 +199,4 @@ function initTestSectionsAjax() {
     .catch((err) => console.error("테스트 목록 로딩 실패:", err));
 }
 
-function runWhenReady() {
-  if (window["partialsReady"]) {
-    initTestSectionsAjax();
-  } else {
-    window.addEventListener("partialsReady", initTestSectionsAjax, {
-      once: true,
-    });
-  }
-}
-
-document.addEventListener("DOMContentLoaded", runWhenReady);
+document.addEventListener("DOMContentLoaded", initTestSectionsAjax);
