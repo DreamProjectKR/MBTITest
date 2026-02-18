@@ -18,6 +18,8 @@ import { getDefaultCache } from "../api/_utils/http";
 
 type Params = PagesParams & { path?: string | string[] };
 
+// --- Pure helpers (no I/O) ---
+
 function parseRangeHeader(header: string | null): R2Range | null {
   if (!header || !header.toLowerCase().startsWith("bytes=")) return null;
   const value = header.slice(6).trim();
@@ -130,6 +132,8 @@ function addCaseFallbackCandidates(keys: string[], tail: string): void {
   keys.push(toggledTail);
 }
 
+// --- I/O: remote fetch fallback ---
+
 async function tryFetchRemote(
   candidates: string[],
   publicBase: string,
@@ -201,6 +205,8 @@ function buildObjectResponse(
   }
   return new Response(obj.body, { status: 200, headers });
 }
+
+// --- Handler: cache → R2 → optional remote fallback ---
 
 export async function handleAssetsGet(
   context: PagesContext<MbtiEnv, Params>,

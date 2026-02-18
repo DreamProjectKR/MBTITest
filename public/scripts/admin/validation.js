@@ -1,5 +1,7 @@
 import { AXIS_MAP, MBTI_ORDER, REQUIRED_QUESTION_COUNT } from "./state.js";
 
+/** Pure: validation and parsing helpers (no I/O). */
+
 export function formatDescriptionForInput(description) {
   if (Array.isArray(description)) return description.join("\n");
   return description ?? "";

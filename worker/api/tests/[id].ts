@@ -54,6 +54,46 @@ function cacheTagForTest(id: string): string {
   return `api,api-tests,test-${id}`;
 }
 
+/** Pure: build ETag from D1 row and R2 response. */
+function buildEtag(
+  row: TestRow | null,
+  resolvedBodyEtag: string | null,
+): string {
+  const d1Updated = row?.updated_at ? String(row.updated_at) : "";
+  const r2Etag = resolvedBodyEtag ? String(resolvedBodyEtag) : "";
+  return `"${r2Etag}|${d1Updated}"`;
+}
+
+/** Pure: merge D1 row + parsed JSON body into API payload. */
+function buildMergedPayload(
+  row: TestRow,
+  bodyJson: unknown,
+): Record<string, unknown> {
+  const description =
+    parseJsonArray(row?.description_json)?.filter(Boolean) ?? null;
+  const tags = (() => {
+    const parsed = parseJsonArray(row?.tags_json);
+    return parsed ?
+        parsed.filter((x): x is string => typeof x === "string")
+      : [];
+  })();
+  return {
+    id: String(row.test_id ?? ""),
+    title: row.title ? String(row.title) : "",
+    description,
+    author: row.author ? String(row.author) : "",
+    authorImg: row.author_img_path ? String(row.author_img_path) : "",
+    thumbnail: row.thumbnail_path ? String(row.thumbnail_path) : "",
+    tags,
+    path: row.source_path ? String(row.source_path) : "",
+    createdAt: row.created_at ? String(row.created_at) : "",
+    updatedAt: row.updated_at ? String(row.updated_at) : "",
+    ...(bodyJson && typeof bodyJson === "object" ?
+      (bodyJson as Record<string, unknown>)
+    : {}),
+  };
+}
+
 export async function onRequestGet(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<Response> {
@@ -170,11 +210,7 @@ export async function onRequestGet(
     );
   }
 
-  const etag = (() => {
-    const d1Updated = row?.updated_at ? String(row.updated_at) : "";
-    const r2Etag = resolvedBodyEtag ? String(resolvedBodyEtag) : "";
-    return `"${r2Etag}|${d1Updated}"`;
-  })();
+  const etag = buildEtag(row, resolvedBodyEtag);
 
   const cache = getDefaultCache();
   const url = new URL(context.request.url);
@@ -209,31 +245,7 @@ export async function onRequestGet(
     );
   }
 
-  const description =
-    parseJsonArray(row?.description_json)?.filter(Boolean) ?? null;
-
-  const tags = (() => {
-    const parsed = parseJsonArray(row?.tags_json);
-    return parsed ?
-        parsed.filter((x): x is string => typeof x === "string")
-      : [];
-  })();
-
-  const merged = {
-    id: String(row.test_id ?? ""),
-    title: row.title ? String(row.title) : "",
-    description,
-    author: row.author ? String(row.author) : "",
-    authorImg: row.author_img_path ? String(row.author_img_path) : "",
-    thumbnail: row.thumbnail_path ? String(row.thumbnail_path) : "",
-    tags,
-    path: row.source_path ? String(row.source_path) : "",
-    createdAt: row.created_at ? String(row.created_at) : "",
-    updatedAt: row.updated_at ? String(row.updated_at) : "",
-    ...(bodyJson && typeof bodyJson === "object" ?
-      (bodyJson as Record<string, unknown>)
-    : {}),
-  };
+  const merged = buildMergedPayload(row, bodyJson);
 
   const response = jsonResponse(merged, {
     status: 200,

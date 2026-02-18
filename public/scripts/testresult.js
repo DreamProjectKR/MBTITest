@@ -7,6 +7,8 @@
  * - Renders `results[MBTI].image`.
  * - Provides Restart + Share interactions.
  */
+
+// --- DOM refs ---
 const dom = {
   thumbnailEl: document.querySelector(".ResultShellImg img"),
   titleEl: document.querySelector(".ResultShellTextBox h2"),
@@ -15,7 +17,7 @@ const dom = {
   shareBtn: document.querySelector(".ResultBtnShell .TestShare button"),
 };
 
-// Asset URL building is centralized in `public/scripts/config.js`.
+// --- DOM / side effects ---
 function hydrateAssetElement(el) {
   if (!el) return;
   if (typeof window.applyAssetAttributes === "function") {
@@ -25,6 +27,7 @@ function hydrateAssetElement(el) {
 
 const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
 
+/** Pure: cache key for test JSON. */
 function getTestCacheKey(testId) {
   if (!testId) return "";
   return `${TEST_JSON_CACHE_PREFIX}${testId}`;
@@ -54,22 +57,29 @@ function persistTestJson(testId, data) {
   }
 }
 
-/**
- * Read a URL query parameter.
- * @param {string} name
- * @returns {string}
- */
+/** Pure: read a single query param from current URL. */
 function getParam(name) {
   const params = new URLSearchParams(window.location.search);
   const value = params.get(name);
   return value ? decodeURIComponent(value) : "";
 }
 
+/** Pure: read query param as clamped 0–100 percent or null. */
 function getPercentParam(name) {
   const raw = getParam(name);
   const num = Number(raw);
   if (!Number.isFinite(num)) return null;
   return Math.max(0, Math.min(100, Math.round(num)));
+}
+
+/** Pure: E/S/T/J percent map from current URL query. */
+function getResultPercentsFromQuery() {
+  return {
+    E: getPercentParam("pE"),
+    S: getPercentParam("pS"),
+    T: getPercentParam("pT"),
+    J: getPercentParam("pJ"),
+  };
 }
 
 /**
@@ -208,12 +218,7 @@ function renderResultPage(data, mbti) {
   const resultData = data.results?.[mbti];
   const resultImage = resultData?.image ? String(resultData.image) : "";
   const version = data.updatedAt ? String(data.updatedAt) : "";
-  const percents = {
-    E: getPercentParam("pE"),
-    S: getPercentParam("pS"),
-    T: getPercentParam("pT"),
-    J: getPercentParam("pJ"),
-  };
+  const percents = getResultPercentsFromQuery();
   if (resultImage)
     preloadCriticalImage(resultImage, version, RESULT_IMAGE_RESIZE);
 

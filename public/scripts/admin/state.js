@@ -1,3 +1,5 @@
+/** Constants and single source of state for admin UI. */
+
 export const API_TESTS_BASE = window.API_TESTS_BASE || "/api/tests";
 export const API_ADMIN_TESTS_BASE =
   window.API_ADMIN_TESTS_BASE || "/api/admin/tests";

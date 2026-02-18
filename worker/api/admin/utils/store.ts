@@ -6,18 +6,22 @@ export { JSON_HEADERS, NO_STORE_HEADERS };
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 
+/** Pure: R2 key for test JSON body. */
 export function getTestKey(testId: string): string {
   return `assets/${testId}/test.json`;
 }
 
+/** Pure: R2 key prefix for test images. */
 export function getImagesPrefix(testId: string): string {
   return `assets/${testId}/images/`;
 }
 
+/** Pure: YYYY-MM-DD from Date (default today). */
 export function formatIndexDate(date: Date = new Date()): string {
   return new Date(date).toISOString().split("T")[0] ?? "";
 }
 
+/** I/O: read test JSON from R2. */
 export async function readTest(
   bucket: R2Bucket,
   testId: string,
@@ -33,6 +37,7 @@ export async function readTest(
   }
 }
 
+/** I/O: write test JSON to R2. */
 export async function writeTest(
   bucket: R2Bucket,
   testId: string,
@@ -46,6 +51,7 @@ export async function writeTest(
   );
 }
 
+/** I/O: update tests.updated_at in D1. */
 export async function touchTestUpdatedAt(
   db: D1Database,
   testId: string,

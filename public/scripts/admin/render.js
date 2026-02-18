@@ -1,6 +1,8 @@
 import { MBTI_ORDER, elements, state } from "./state.js";
 import { formatDescriptionForInput } from "./validation.js";
 
+/** DOM and state updates for admin UI. */
+
 function toImageUrl(path) {
   const raw = String(path || "").trim();
   if (!raw) return "";

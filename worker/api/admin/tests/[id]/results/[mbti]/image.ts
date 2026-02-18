@@ -40,6 +40,7 @@ function badRequest(message: string): Response {
   return noStoreJsonResponse({ error: message }, 400);
 }
 
+/** Pure: map MIME type to file extension. */
 function extensionFromMime(mimeType = ""): string {
   const type = String(mimeType || "").toLowerCase();
   if (type === "image/jpeg" || type === "image/jpg") return "jpg";
@@ -48,6 +49,23 @@ function extensionFromMime(mimeType = ""): string {
   return "png";
 }
 
+/** Pure: return new test object with results[mbti].image set (immutable). */
+function mergeResultImageIntoTest(
+  test: { results?: Record<string, unknown> },
+  mbti: string,
+  imagePath: string,
+): Record<string, unknown> {
+  const prev =
+    test.results && typeof test.results === "object" ? test.results : {};
+  const existing =
+    prev[mbti] && typeof prev[mbti] === "object" ?
+      (prev[mbti] as Record<string, unknown>)
+    : {};
+  const results = { ...prev, [mbti]: { ...existing, image: imagePath } };
+  return { ...test, results };
+}
+
+/** I/O: parse multipart or body into buffer + contentType. */
 async function extractUpload(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<{ buffer: ArrayBuffer; contentType: string } | null> {
@@ -143,22 +161,12 @@ export async function onRequestPut(
     );
   }
 
-  const t = testJson as { results?: Record<string, unknown> };
-  const results =
-    t.results && typeof t.results === "object" ?
-      (t.results as Record<string, unknown>)
-    : {};
-  const existing =
-    results[mbtiRaw] && typeof results[mbtiRaw] === "object" ?
-      (results[mbtiRaw] as Record<string, unknown>)
-    : {};
-  results[mbtiRaw] = {
-    ...existing,
-    image: `${getImagesPrefix(testId)}${fileName}`,
-  };
-  t.results = results;
-
-  await writeTest(bucket, testId, t);
+  const updated = mergeResultImageIntoTest(
+    testJson as { results?: Record<string, unknown> },
+    mbtiRaw,
+    `${getImagesPrefix(testId)}${fileName}`,
+  );
+  await writeTest(bucket, testId, updated);
 
   if (context.env.MBTI_KV) {
     context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));

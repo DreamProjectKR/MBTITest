@@ -1,6 +1,8 @@
 import { AXIS_MAP, REQUIRED_QUESTION_COUNT, elements } from "./state.js";
 import { parseDescriptionInput } from "./validation.js";
 
+/** Form bindings and DOM for question/result/meta forms. */
+
 export function syncAnswerDirectionOptions() {
   const formEl = elements.questionForm;
   if (!formEl) return;
@@ -21,6 +23,7 @@ export function syncAnswerDirectionOptions() {
   select.value = current === "negative" ? "negative" : "positive";
 }
 
+/** Pure: next available question number 1..REQUIRED_QUESTION_COUNT. */
 function getNextQuestionNo(questions) {
   const used = new Set(
     (Array.isArray(questions) ? questions : [])

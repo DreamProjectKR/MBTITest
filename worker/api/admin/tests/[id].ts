@@ -76,6 +76,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object";
 }
 
+/** Pure: validate test payload; returns error message or null. */
 function validateTestPayload(test: {
   id: string;
   title: string;

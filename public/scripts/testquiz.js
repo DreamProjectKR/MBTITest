@@ -8,6 +8,8 @@
  * - Track scores and compute MBTI
  * - Navigate to `testresult.html?testId=...&result=MBTI`
  */
+
+// --- State (single source of truth) ---
 const state = {
   test: null,
   currentIndex: 0,
@@ -32,7 +34,7 @@ const dom = {
   pageShell: document.querySelector(".PageShell"),
 };
 
-// Asset URL building is centralized in `public/scripts/config.js`.
+// --- DOM / side effects ---
 function hydrateAssetElement(el) {
   if (!el) return;
   if (typeof window.applyAssetAttributes === "function") {
@@ -42,6 +44,7 @@ function hydrateAssetElement(el) {
 
 const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
 
+/** Pure: cache key for test JSON. */
 function getTestCacheKey(testId) {
   if (!testId) return "";
   return `${TEST_JSON_CACHE_PREFIX}${testId}`;
@@ -71,12 +74,7 @@ function persistTestJson(testId, data) {
   }
 }
 
-/**
- * Generate a random integer in [0, maxExclusive).
- * Uses `crypto.getRandomValues` when available for better randomness.
- * @param {number} maxExclusive
- * @returns {number}
- */
+/** Pure: random integer in [0, maxExclusive). Uses crypto.getRandomValues when available. */
 function randomInt(maxExclusive) {
   const max = Math.floor(Number(maxExclusive));
   if (!Number.isFinite(max) || max <= 0) return 0;
@@ -94,12 +92,7 @@ function randomInt(maxExclusive) {
   return Math.floor(Math.random() * max);
 }
 
-/**
- * In-place Fisher-Yates shuffle.
- * @template T
- * @param {T[]} list
- * @returns {T[]}
- */
+/** Pure (mutates list): Fisher-Yates shuffle in place. */
 function shuffleInPlace(list) {
   if (!Array.isArray(list) || list.length <= 1) return list;
   for (let i = list.length - 1; i > 0; i -= 1) {
@@ -111,11 +104,7 @@ function shuffleInPlace(list) {
   return list;
 }
 
-/**
- * Clone questions/answers and shuffle them so each run feels fresh.
- * @param {any[]} questions
- * @returns {any[]}
- */
+/** Pure: clone questions/answers and shuffle (new array). */
 function buildShuffledQuestions(questions) {
   const base = Array.isArray(questions) ? questions : [];
   const copied = base.map((q) => {
@@ -148,12 +137,14 @@ function goToResultPage(mbti, percentages) {
   window.location.href = url.toString();
 }
 
+/** Pure: read testId from current URL query. */
 function getTestIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get("testId");
   return id ? decodeURIComponent(id) : "";
 }
 
+/** Pure: normalize relative path string. */
 function resolveAssetPath(relative) {
   return String(relative || "");
 }
@@ -293,11 +284,16 @@ function toggleResultFooter(show) {
   footer.style.display = shouldShow ? "" : "none";
 }
 
+/** Pure: progress percent from current index and total. */
+function computeProgressPercent(index, total) {
+  if (total === 0) return 0;
+  return Math.min(100, Math.round(((index + 1) / total) * 100));
+}
+
 function updateProgressBar(index, total) {
   const fill = ensureProgressFill();
   if (!fill || !dom.progress) return;
-  const percent =
-    total === 0 ? 0 : Math.min(100, Math.round(((index + 1) / total) * 100));
+  const percent = computeProgressPercent(index, total);
   fill.style.width = `${percent}%`;
   fill.style.setProperty("--quiz-progress", `${percent}%`);
   dom.progress.setAttribute("aria-valuemin", "0");
@@ -422,6 +418,7 @@ function handleAnswer(answer) {
   renderQuestion();
 }
 
+/** Pure: derive 4-letter MBTI from state.scores. */
 function computeMbti() {
   const axes = [
     ["E", "I"],
@@ -442,6 +439,7 @@ function computeMbti() {
   return result;
 }
 
+/** Pure: E/S/T/J percentages from state.scores. */
 function computePercentagesFromScores() {
   const percentages = { E: 50, S: 50, T: 50, J: 50 };
   const pairs = [

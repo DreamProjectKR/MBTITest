@@ -1,5 +1,6 @@
 import type { HeadersInit } from "../../_types";
 
+/** Shared headers (immutable). */
 export const JSON_HEADERS: Readonly<Record<string, string>> = {
   "Content-Type": "application/json; charset=utf-8",
 };
@@ -9,16 +10,19 @@ export const NO_STORE_HEADERS: Readonly<Record<string, string>> = {
   "Cache-Control": "no-store",
 };
 
+/** Access Cache API (edge); null when unavailable. */
 export function getDefaultCache(): Cache | null {
   const cachesApi = globalThis.caches as { default?: Cache } | undefined;
   return cachesApi?.default ?? null;
 }
 
+/** Pure: build cache key Request for GET by URL. */
 export function cacheKeyForGet(url: URL): Request {
   const keyUrl = new URL(url.origin + url.pathname);
   return new Request(keyUrl.toString(), { method: "GET" });
 }
 
+/** Pure: build Headers with Cache-Control and optional ETag. */
 export function withCacheHeaders(
   headers: HeadersInit,
   opts?: {
@@ -53,6 +57,7 @@ export function withCacheHeaders(
   return h;
 }
 
+/** Pure: JSON Response with status and headers. */
 export function jsonResponse(
   payload: unknown,
   init?: { status?: number; headers?: HeadersInit },
@@ -62,6 +67,7 @@ export function jsonResponse(
   return new Response(JSON.stringify(payload), { status, headers });
 }
 
+/** Pure: JSON Response with no-store. */
 export function noStoreJsonResponse(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {
     status,

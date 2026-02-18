@@ -105,6 +105,7 @@ Cloudflare Pages (정적만) + Worker (API + 에셋), D1 (SQLite), R2 (object st
 ### O (Open/Closed)
 
 - Extend via new Functions or new exports in utils instead of editing core request flow.
+- Worker routing: add handlers and route table entries in `worker/index.ts`; path parsing lives in `worker/router.ts` (extend routes without changing parsePath logic).
 - Keep validation and serialization in dedicated functions.
 
 ### L (Liskov)
@@ -175,12 +176,12 @@ Cloudflare Pages (정적만) + Worker (API + 에셋), D1 (SQLite), R2 (object st
 
 ## Quick Reference
 
-| Task                     | Location                          |
-| ------------------------ | --------------------------------- |
-| Worker routing           | `worker/index.ts`                 |
-| Change API cache headers | `worker/api/_utils/http.ts`       |
-| Add admin mutation       | `worker/api/admin/tests/...`      |
-| Asset cache policy       | `worker/assets/handler.ts`        |
-| D1/R2 helpers            | `worker/api/admin/utils/store.ts` |
-| Shared types             | `worker/_types.ts`                |
-| Caching strategy         | `docs/CLOUDFLARE_PERFORMANCE.md`  |
+| Task                     | Location                               |
+| ------------------------ | -------------------------------------- |
+| Worker routing           | `worker/index.ts` + `worker/router.ts` |
+| Change API cache headers | `worker/api/_utils/http.ts`            |
+| Add admin mutation       | `worker/api/admin/tests/...`           |
+| Asset cache policy       | `worker/assets/handler.ts`             |
+| D1/R2 helpers            | `worker/api/admin/utils/store.ts`      |
+| Shared types             | `worker/_types.ts`                     |
+| Caching strategy         | `docs/CLOUDFLARE_PERFORMANCE.md`       |

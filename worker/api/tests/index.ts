@@ -36,6 +36,7 @@ type TestMeta = {
   is_published: boolean;
 };
 
+/** Pure: parse tags_json string to string[]. */
 function safeJsonArray(value: unknown): string[] {
   if (typeof value !== "string") return [];
   try {
@@ -46,6 +47,32 @@ function safeJsonArray(value: unknown): string[] {
   } catch {
     return [];
   }
+}
+
+/** Pure: map D1 row to TestMeta. */
+function rowToTestMeta(r: TestRow): TestMeta {
+  const tags = safeJsonArray(
+    typeof r?.tags_json === "string" ? r.tags_json : "",
+  );
+  return {
+    id: String(r?.test_id ?? ""),
+    title: String(r?.title ?? ""),
+    thumbnail: r?.thumbnail_path ? String(r.thumbnail_path) : "",
+    tags,
+    path: r?.source_path ? String(r.source_path) : "",
+    createdAt: r?.created_at ? String(r.created_at) : "",
+    updatedAt: r?.updated_at ? String(r.updated_at) : "",
+    is_published: Boolean(r?.is_published),
+  };
+}
+
+/** Pure: compute ETag for tests index from list. */
+function computeIndexEtag(tests: TestMeta[]): string {
+  const maxUpdated = tests.reduce(
+    (acc, t) => (t.updatedAt > acc ? t.updatedAt : acc),
+    "",
+  );
+  return `"${tests.length}-${maxUpdated}"`;
 }
 
 const CACHE_TAG_API_TESTS = "api,api-tests";
@@ -67,29 +94,8 @@ export async function onRequestGet(
     )
     .all<TestRow>();
 
-  const tests: TestMeta[] = (rows?.results ?? []).map((r) => {
-    const tags = safeJsonArray(
-      typeof r?.tags_json === "string" ? r.tags_json : "",
-    );
-    return {
-      id: String(r?.test_id ?? ""),
-      title: String(r?.title ?? ""),
-      thumbnail: r?.thumbnail_path ? String(r.thumbnail_path) : "",
-      tags,
-      path: r?.source_path ? String(r.source_path) : "",
-      createdAt: r?.created_at ? String(r.created_at) : "",
-      updatedAt: r?.updated_at ? String(r.updated_at) : "",
-      is_published: Boolean(r?.is_published),
-    };
-  });
-
-  const etag = (() => {
-    const maxUpdated = tests.reduce(
-      (acc, t) => (t.updatedAt > acc ? t.updatedAt : acc),
-      "",
-    );
-    return `"${tests.length}-${maxUpdated}"`;
-  })();
+  const tests: TestMeta[] = (rows?.results ?? []).map(rowToTestMeta);
+  const etag = computeIndexEtag(tests);
 
   const cache = getDefaultCache();
   const url = new URL(context.request.url);

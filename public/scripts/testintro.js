@@ -1,18 +1,21 @@
 /**
  * Test intro page controller (`public/testintro.html` -> `public/scripts/testintro.js`).
  *
- * What it does:
- * - Reads `testId` from the query string.
- * - Fetches test JSON via `GET /api/tests/:id`.
- * - Renders thumbnail/tags/author/description and wires Start/Share buttons.
- * - Renders intro UI and navigates to quiz.
+ * Responsibilities (SRP): load test data, render intro UI, preload quiz/result
+ * images into HTTP cache + Cache API, navigate to quiz on Start.
+ * Pure helpers are grouped below; side effects (DOM, fetch, cache) are isolated.
  */
 const header = document.querySelector(".Head");
 const headerScroll = document.querySelector("header");
 const headerOffset = header ? header.offsetTop : 0;
-// Asset URL building is centralized in `public/scripts/config.js`.
-// This file only sets `data-asset-*` and asks config.js to hydrate.
 
+// --- Pure helpers (no I/O, no DOM; same input => same output) ---
+function computeProgressPercent(done, total) {
+  if (total <= 0) return 0;
+  return Math.max(0, Math.min(100, Math.round((done / total) * 100)));
+}
+
+// --- DOM: delegate to config.js for asset URL resolution ---
 function hydrateAssetElement(el) {
   if (!el) return;
   if (typeof window.applyAssetAttributes === "function") {
@@ -24,14 +27,13 @@ const TEST_JSON_CACHE_PREFIX = "mbtitest:testdata:";
 let lastLoadedTest = null;
 const preloadState = { started: false, criticalPromise: null };
 
-// Match testquiz/testresult resize and widths so preloaded URLs hit the same
-// HTTP cache and Cache API entries that quiz/result pages will request.
 const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
 const QUESTION_IMAGE_SRCSET_WIDTHS = [360, 480, 720];
 const RESULT_IMAGE_RESIZE_BASE = "quality=82,fit=cover,format=auto";
 const RESULT_IMAGE_SRCSET_WIDTHS = [360, 480, 720];
 const CACHE_NAME = "mbti-assets";
 
+/** Pure: cache key for test JSON. */
 function getTestCacheKey(testId) {
   if (!testId) return "";
   return `${TEST_JSON_CACHE_PREFIX}${testId}`;
@@ -74,13 +76,12 @@ function setOverlayVisible(visible) {
   }
 }
 
+// --- DOM / side effects (single responsibility: overlay UI only)
+
 function updateOverlayProgress(done, total) {
+  const pct = computeProgressPercent(done, total);
   const bar = document.querySelector("[data-preload-progress]");
   const text = document.querySelector("[data-preload-text]");
-  const pct =
-    total > 0 ?
-      Math.max(0, Math.min(100, Math.round((done / total) * 100)))
-    : 0;
   if (bar && bar.style) bar.style.width = `${pct}%`;
   if (text) text.textContent = `테스트 준비 중... (${pct}%)`;
 }
@@ -94,11 +95,13 @@ function promiseWithTimeout(promise, timeoutMs) {
   ]);
 }
 
+/** Pure: normalize path string. */
 function normalizeImagePath(p) {
   const s = String(p || "").trim();
   return s ? s : "";
 }
 
+/** Pure: candidate paths for a question image (from field or convention). */
 function getQuestionImageCandidates(testId, question) {
   const raw =
     question?.questionImage ||
@@ -126,6 +129,7 @@ function getQuestionImageCandidates(testId, question) {
   return list.map(normalizeImagePath).filter(Boolean);
 }
 
+/** Pure: from test JSON return { questionPaths, resultPaths } for preload. */
 function extractImagePaths(test) {
   const testId = test?.id ? String(test.id) : "";
   const questions = Array.isArray(test?.questions) ? test.questions : [];
@@ -150,7 +154,7 @@ function extractImagePaths(test) {
   return { questionPaths, resultPaths };
 }
 
-/** Fetch a URL; store in Cache API when available, and in HTTP cache. */
+// --- I/O: fetch + Cache API ---
 async function fetchAndStoreInCache(url) {
   if (!url) return false;
   try {

@@ -2,6 +2,7 @@ import type { MbtiEnv, PagesContext } from "../../../../_types";
 
 import { getDefaultCache, noStoreJsonResponse } from "../../../_utils/http";
 import {
+  type TestImageMetaRow,
   getImagesPrefix,
   listTestImageMeta,
   upsertTestImageMeta,
@@ -17,6 +18,7 @@ function badRequest(message: string): Response {
   return noStoreJsonResponse({ error: message }, 400);
 }
 
+/** Pure: map MIME type to file extension. */
 function extensionFromMime(mimeType = ""): string {
   const type = String(mimeType || "").toLowerCase();
   if (type === "image/jpeg" || type === "image/jpg") return "jpg";
@@ -26,12 +28,14 @@ function extensionFromMime(mimeType = ""): string {
   return "png";
 }
 
+/** Pure: sanitize name for use as file base name. */
 function sanitizeBaseName(value: unknown): string {
   const raw = String(value || "").trim();
   if (!raw) return "";
   return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80);
 }
 
+/** Pure: infer image type from base name. */
 function inferImageType(baseName: string): string {
   const base = String(baseName || "")
     .trim()
@@ -43,6 +47,34 @@ function inferImageType(baseName: string): string {
   return "misc";
 }
 
+/** Pure: map DB row to API item shape. */
+function rowToImageItem(row: TestImageMetaRow): {
+  id: number | null;
+  key: string;
+  path: string;
+  url: string;
+  imageType: string;
+  imageName: string;
+  contentType: string;
+  size: number;
+  lastModified: string | null;
+} {
+  const key = String(row.image_key || "");
+  const path = key.replace(/^assets\/?/i, "");
+  return {
+    id: (row.id ?? null) as number | null,
+    key,
+    path,
+    url: `/assets/${path}`,
+    imageType: row.image_type ? String(row.image_type) : "",
+    imageName: row.image_name ? String(row.image_name) : "",
+    contentType: row.content_type ? String(row.content_type) : "",
+    size: Number(row.size_bytes || 0),
+    lastModified: row.uploaded_at ? String(row.uploaded_at) : null,
+  };
+}
+
+/** I/O: parse multipart or body into buffer + contentType + name. */
 async function extractUpload(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<{ buffer: ArrayBuffer; contentType: string; name: string } | null> {
@@ -84,21 +116,7 @@ export async function onRequestGet(
 
   try {
     const rows = await listTestImageMeta(db, testId);
-    const items = rows.map((row) => {
-      const key = String(row.image_key || "");
-      const path = key.replace(/^assets\/?/i, "");
-      return {
-        id: row.id ?? null,
-        key,
-        path,
-        url: `/assets/${path}`,
-        imageType: row.image_type || "",
-        imageName: row.image_name || "",
-        contentType: row.content_type || "",
-        size: Number(row.size_bytes || 0),
-        lastModified: row.uploaded_at || null,
-      };
-    });
+    const items = rows.map(rowToImageItem);
     return noStoreJsonResponse({ items });
   } catch (err) {
     return noStoreJsonResponse(

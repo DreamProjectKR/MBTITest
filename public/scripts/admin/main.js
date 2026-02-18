@@ -1,3 +1,4 @@
+/** Admin entry: orchestration (load test, save, hydrate forms). */
 import {
   fetchImageList,
   fetchTestDetail,

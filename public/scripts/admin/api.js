@@ -1,5 +1,7 @@
 import { API_ADMIN_TESTS_BASE, API_TESTS_BASE } from "./state.js";
 
+/** API layer: all network I/O for admin. */
+
 export function fetchJson(url, options) {
   return fetch(url, options).then(async (response) => {
     const body = await response.json().catch(() => ({}));

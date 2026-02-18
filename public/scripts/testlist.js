@@ -56,12 +56,7 @@ document.querySelector(".test1").onclick = function () {
     return Array.isArray(data?.tests) ? data.tests : [];
   }
 
-  // ----- 데이터 정규화: 중복 제거 + 최신순 정렬 -----
-  /**
-   * De-duplicate and sort tests (newest first).
-   * @param {any[]} tests
-   * @returns {any[]}
-   */
+  // ----- Pure: de-dupe and sort (newest first) -----
   function normalizeTests(tests) {
     const seen = new Set();
     const deduped = [];
@@ -85,12 +80,7 @@ document.querySelector(".test1").onclick = function () {
   // NOTE: we intentionally avoid JS-driven image preloads/prefetches here.
   // Static assets are hydrated by `config.js`; thumbnails are sized by `data-asset-resize`.
 
-  // ----- 태그 DOM 생성 -----
-  /**
-   * Build hashtag DOM nodes (up to 3 tags).
-   * @param {string[]} tags
-   * @returns {DocumentFragment}
-   */
+  // ----- Pure: build hashtag fragment (up to 3 tags) -----
   function buildTags(tags) {
     const frag = document.createDocumentFragment();
     if (!Array.isArray(tags)) return frag;
@@ -103,12 +93,7 @@ document.querySelector(".test1").onclick = function () {
     return frag;
   }
 
-  // ----- 카드 DOM 생성 -----
-  /**
-   * Build a single test card.
-   * @param {any} test
-   * @param {{ isFirst?: boolean }} [opts]
-   */
+  // ----- DOM: single test card -----
   function buildCard(test, opts = {}) {
     const shell = document.createElement("div");
     shell.className = "NewTestShell";
@@ -176,7 +161,7 @@ document.querySelector(".test1").onclick = function () {
     return shell;
   }
 
-  // ----- 4개씩 행(row)으로 렌더링 -----
+  // ----- DOM: render grid (4 per row) -----
   function renderTests(tests) {
     const root = document.querySelector(".NewTestList");
     if (!root) return;

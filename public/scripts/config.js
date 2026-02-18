@@ -1,11 +1,6 @@
 (function () {
-  // Pages Functions로 /assets/* 를 R2에서 프록시하도록 구성하면
-  // 프런트는 같은 도메인(dreamp.org)만 바라보게 되어 CORS/CORP 이슈가 사라진다.
-  // Public asset base URL (browser-facing).
-  // Production default: same-origin `/assets/*` (served by Pages Functions using the R2 binding).
-  // This avoids CORS issues when loading images from R2.
-  // You can override by setting `window.ASSETS_BASE` before this script runs.
-  // Keep the default explicit so callers can pass clean paths like `images/x.png`.
+  // Public asset base URL (same-origin `/assets/*` avoids CORS).
+  // Override via `window.ASSETS_BASE` / `window.API_TESTS_BASE` before this script.
   const DEFAULT_ASSETS_BASE = "/assets";
   const DEFAULT_API_TESTS_BASE = "/api/tests";
 
@@ -30,6 +25,7 @@
     return `${ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
   };
 
+  /** Pure: append ?v= or &v= to URL. */
   function appendVersion(url, versionRaw) {
     const v = String(versionRaw || "").trim();
     if (!v) return url;
@@ -175,13 +171,8 @@
     root.setProperty("--asset-footer-bg", `url(${resizedFooter})`);
   }
 
-  // data-asset-* 속성 자동 주입 (img/src, link/href, bg)
-  /**
-   * Parse a resize option string like:
-   * - "width=1230,quality=85,fit=cover,format=auto"
-   * @param {string} raw
-   * @returns {{ width?: number, height?: number, quality?: number|string, fit?: string, format?: string }}
-   */
+  // --- Pure: parse resize string to options object ---
+  /** Pure: parse "width=1230,quality=85,fit=cover,format=auto" to options. */
   function parseResizeOptions(raw) {
     const out = {};
     const str = String(raw || "").trim();

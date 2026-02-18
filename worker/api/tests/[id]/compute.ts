@@ -47,6 +47,7 @@ function isDirection(value: unknown): value is Direction {
   );
 }
 
+/** Pure: compute MBTI string and percentages from submitted answers. */
 function computeFromAnswers(answers: SubmittedAnswer[]): {
   mbti: string;
   scores: Record<AxisKey, Record<Direction, number>>;
