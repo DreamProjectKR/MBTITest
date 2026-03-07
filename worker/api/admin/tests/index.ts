@@ -1,6 +1,6 @@
-import type { MbtiEnv, PagesContext } from "../../../_types";
+import type { MbtiEnv, PagesContext } from "../../../_types.ts";
 
-import { listTests } from "../../tests/index";
+import { listTests } from "../../tests/index.ts";
 
 export async function onRequestGet(
   context: PagesContext<MbtiEnv>,

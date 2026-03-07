@@ -1,36 +1,13 @@
-import type { MbtiEnv, PagesContext } from "../../../_types";
+import type { MbtiEnv, PagesContext } from "../../../_types.ts";
 
-import { getDefaultCache, noStoreJsonResponse } from "../../_utils/http";
-import { loadTestDetail } from "../../tests/[id]";
-import { formatIndexDate, normalizeAssetKey, writeTest } from "../utils/store";
+import {
+  SaveTestValidationError,
+  saveTestWorkflow,
+} from "../../../application/workflows/saveTest.ts";
+import { noStoreJsonResponse } from "../../_utils/http.ts";
+import { loadTestDetail } from "../../tests/[id].ts";
 
 type Params = { id?: string };
-
-const AXIS_SET = new Set(["EI", "SN", "TF", "JP"]);
-const AXIS_MAP: Record<string, readonly [string, string]> = {
-  EI: ["E", "I"],
-  SN: ["S", "N"],
-  TF: ["T", "F"],
-  JP: ["J", "P"],
-};
-const MBTI_ORDER = [
-  "INTJ",
-  "INTP",
-  "ENTJ",
-  "ENTP",
-  "INFJ",
-  "INFP",
-  "ENFJ",
-  "ENFP",
-  "ISTJ",
-  "ISTP",
-  "ESTJ",
-  "ESTP",
-  "ISFJ",
-  "ISFP",
-  "ESFJ",
-  "ESFP",
-] as const;
 
 type TestPayload = {
   id?: unknown;
@@ -48,23 +25,6 @@ type TestPayload = {
   results?: unknown;
 };
 
-type Question = {
-  label?: unknown;
-  questionImage?: unknown;
-  answers?: unknown;
-};
-
-type Answer = {
-  label?: unknown;
-  mbtiAxis?: unknown;
-  direction?: unknown;
-};
-
-type ResultEntry = {
-  image?: unknown;
-  summary?: unknown;
-};
-
 function badRequest(message: string): Response {
   return noStoreJsonResponse({ error: message }, 400);
 }
@@ -75,101 +35,6 @@ function methodNotAllowed(): Response {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object";
-}
-
-/** Pure: normalize stored asset paths to canonical `assets/...` keys. */
-function normalizeAssetPath(value: unknown): string {
-  return normalizeAssetKey(String(value || ""));
-}
-
-/** Pure: validate test payload; returns error message or null. */
-function validateTestPayload(test: {
-  id: string;
-  title: string;
-  thumbnail: string;
-  authorImg: string;
-  questions: Question[];
-  results: Record<string, ResultEntry>;
-}): string | null {
-  if (!test.id) return "Missing test id.";
-  if (!test.title || !String(test.title).trim()) return "Test title required.";
-  if (!test.thumbnail || !String(test.thumbnail).trim())
-    return "Test needs a thumbnail path.";
-  if (!test.authorImg || !String(test.authorImg).trim())
-    return "Test needs an author image path.";
-  if (!Array.isArray(test.questions) || test.questions.length !== 12)
-    return "Test must have exactly 12 questions.";
-
-  if (/^https?:\/\//i.test(String(test.thumbnail)))
-    return "Thumbnail must be an uploaded R2 asset path (not an external URL).";
-  if (/^https?:\/\//i.test(String(test.authorImg)))
-    return "Author image must be an uploaded R2 asset path (not an external URL).";
-
-  for (let i = 0; i < test.questions.length; i += 1) {
-    const question = test.questions[i];
-    if (!question || typeof question !== "object")
-      return `Question ${i + 1} is invalid.`;
-    if (!question.label || !String(question.label).trim())
-      return `Question ${i + 1} needs a label.`;
-    if (!question.questionImage || !String(question.questionImage).trim())
-      return `Question ${i + 1} needs a questionImage path.`;
-    if (/^https?:\/\//i.test(String(question.questionImage)))
-      return `Question ${i + 1} image must be an uploaded R2 asset path (not an external URL).`;
-
-    const answers =
-      Array.isArray(question.answers) ? (question.answers as Answer[]) : [];
-    if (answers.length !== 2)
-      return `Question ${i + 1} needs exactly two answers.`;
-    const axisRaw = answers?.[0]?.mbtiAxis;
-    const axis = typeof axisRaw === "string" ? axisRaw : "";
-    if (!axis || !AXIS_SET.has(axis))
-      return `Question ${i + 1} has invalid mbtiAxis.`;
-    const pair = AXIS_MAP[axis];
-    const pos = pair?.[0] ?? "";
-    const neg = pair?.[1] ?? "";
-
-    for (let j = 0; j < answers.length; j += 1) {
-      const answer = answers[j];
-      if (!answer || typeof answer !== "object")
-        return `Question ${i + 1} answer ${j + 1} is invalid.`;
-      if (!answer.label || !String(answer.label).trim())
-        return `Question ${i + 1} answer ${j + 1} needs a label.`;
-      if (!answer.mbtiAxis || !AXIS_SET.has(String(answer.mbtiAxis)))
-        return `Question ${i + 1} answer ${j + 1} has invalid mbtiAxis.`;
-      if (!answer.direction || !String(answer.direction).trim())
-        return `Question ${i + 1} answer ${j + 1} needs a direction.`;
-    }
-
-    if (String(answers[1]?.mbtiAxis || "") !== axis)
-      return `Question ${i + 1} answers must share the same mbtiAxis.`;
-    const dirSet = new Set([
-      String(answers[0]?.direction || ""),
-      String(answers[1]?.direction || ""),
-    ]);
-    if (!(dirSet.has(pos) && dirSet.has(neg)))
-      return `Question ${i + 1} answers must cover both poles for ${axis}.`;
-  }
-
-  const results = test.results;
-  const codes = Object.keys(results);
-  if (codes.length !== MBTI_ORDER.length)
-    return "Results must contain exactly 16 MBTI entries.";
-
-  for (const code of codes) {
-    if (!MBTI_ORDER.includes(code as (typeof MBTI_ORDER)[number]))
-      return `Result code "${code}" is not a valid MBTI type.`;
-    const details = results[code];
-    if (!details || typeof details !== "object")
-      return `Result ${code} must be an object.`;
-    if (!details.image || !String(details.image).trim())
-      return `Result ${code} needs an image path.`;
-    if (/^https?:\/\//i.test(String(details.image)))
-      return `Result ${code} image must be an uploaded R2 asset path (not an external URL).`;
-    if (!details.summary || !String(details.summary).trim())
-      return `Result ${code} needs a summary.`;
-  }
-
-  return null;
 }
 
 export async function onRequestPut(
@@ -204,114 +69,13 @@ export async function onRequestPut(
   if (p.id && String(p.id) !== testId)
     return badRequest("Payload id must match the URL parameter.");
 
-  const title = String(p.title ?? "");
-  const thumbnail = normalizeAssetPath(p.thumbnail);
-  const authorImg = normalizeAssetPath(p.authorImg);
-  const isPublished = Boolean(p.isPublished) ? 1 : 0;
-
-  const rawQuestions =
-    Array.isArray(p.questions) ? (p.questions as Question[]) : [];
-  const questions: Question[] = rawQuestions.map((question) => ({
-    ...(isObject(question) ? question : {}),
-    questionImage: normalizeAssetPath(
-      isObject(question) ? question.questionImage : "",
-    ),
-  }));
-  const rawResults =
-    isObject(p.results) ? (p.results as Record<string, ResultEntry>) : {};
-  const results = Object.fromEntries(
-    Object.entries(rawResults).map(([code, entry]) => {
-      const detail = isObject(entry) ? entry : {};
-      return [
-        code,
-        {
-          ...detail,
-          image: normalizeAssetPath(detail.image),
-        } as ResultEntry,
-      ];
-    }),
-  ) as Record<string, ResultEntry>;
-
-  const validationError = validateTestPayload({
-    id: testId,
-    title,
-    thumbnail,
-    authorImg,
-    questions,
-    results,
-  });
-  if (validationError) return badRequest(validationError);
-
   try {
-    const slimBody = { questions, results };
-    await writeTest(bucket, testId, slimBody);
-
-    const now = formatIndexDate();
-    const nowTs = new Date().toISOString();
-    const createdAt = String(p.createdAt ?? now);
-    const updatedAt = String(p.updatedAt ?? now);
-    const tagsJson = JSON.stringify(Array.isArray(p.tags) ? p.tags : []);
-    const descriptionJson = JSON.stringify(p.description ?? null);
-    const questionCount = questions.length;
-
-    await db
-      .prepare(
-        `
-        INSERT INTO tests (test_id, title, description_json, author, author_img_path, thumbnail_path, source_path, tags_json, question_count, is_published, created_at, updated_at, created_ts, updated_ts)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)
-        ON CONFLICT(test_id) DO UPDATE SET
-          title = excluded.title,
-          description_json = excluded.description_json,
-          author = excluded.author,
-          author_img_path = excluded.author_img_path,
-          thumbnail_path = excluded.thumbnail_path,
-          source_path = excluded.source_path,
-          tags_json = excluded.tags_json,
-          question_count = excluded.question_count,
-          is_published = excluded.is_published,
-          created_at = COALESCE(tests.created_at, excluded.created_at),
-          updated_at = excluded.updated_at,
-          created_ts = COALESCE(tests.created_ts, excluded.created_ts),
-          updated_ts = excluded.updated_ts
-        `,
-      )
-      .bind(
-        testId,
-        title,
-        descriptionJson,
-        String(p.author ?? ""),
-        authorImg,
-        thumbnail,
-        String(p.path ?? `${testId}/test.json`),
-        tagsJson,
-        questionCount,
-        isPublished,
-        createdAt,
-        updatedAt,
-        nowTs,
-        nowTs,
-      )
-      .all();
-
-    if (context.env.MBTI_KV) {
-      context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));
-    }
-
-    const cache = getDefaultCache();
-    if (cache) {
-      const origin = new URL(context.request.url).origin;
-      context.waitUntil(
-        cache.delete(new Request(`${origin}/api/tests`, { method: "GET" })),
-      );
-      context.waitUntil(
-        cache.delete(
-          new Request(`${origin}/api/tests/${testId}`, { method: "GET" }),
-        ),
-      );
-    }
-
-    return noStoreJsonResponse({ ok: true });
+    const result = await saveTestWorkflow(context, testId, p);
+    return noStoreJsonResponse(result);
   } catch (err) {
+    if (err instanceof SaveTestValidationError) {
+      return badRequest(err.message);
+    }
     const message = err instanceof Error ? err.message : "Failed to save test.";
     return noStoreJsonResponse({ error: message }, 500);
   }

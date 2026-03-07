@@ -1,4 +1,21 @@
-# 아키텍처 개요
+# 설계 문서 인덱스
+
+이 디렉터리의 문서는 아래 우선순위로 읽습니다.
+
+1. `ARCHITECTURE_CONSTRAINTS.md`
+   구현이 따라야 하는 설계 제약 조건
+2. `WORKFLOW_SPECS.md`
+   public/admin/save/upload/asset workflow 기준
+3. `API.md`
+   API 계약과 응답 정책
+4. `ERD.md`
+   D1/R2 데이터 소유권과 저장 구조
+5. `TEST_STRATEGY.md`
+   자동 테스트 계층과 최소 커버리지 기준
+
+아래 내용은 시스템 개요와 배경 설명입니다.
+
+## 아키텍처 개요
 
 ## 시스템 구성
 
@@ -95,9 +112,18 @@ public/scripts/admin/
 | `worker/assets/handler.ts`        | R2 에셋 프록시 (Cache-Tag, ETag, 폴백)         |
 | `public/scripts/config.js`        | 프론트엔드 에셋 URL/이미지 설정 중앙 관리      |
 
-## 관련 문서
+## 기준 문서
+
+- [ARCHITECTURE_CONSTRAINTS.md](ARCHITECTURE_CONSTRAINTS.md) — 설계 제약 문서
+- [WORKFLOW_SPECS.md](WORKFLOW_SPECS.md) — workflow 기준 문서
+- [API.md](API.md) — API 계약 문서
+- [ERD.md](ERD.md) — 저장 구조/데이터 소유권 문서
+- [TEST_STRATEGY.md](TEST_STRATEGY.md) — 테스트 전략 문서
+
+## 참고 문서
 
 - [API.md](API.md) — API 레퍼런스
+- [ERD.md](ERD.md) — 데이터 모델 ERD
 - [CLOUDFLARE_PERFORMANCE.md](CLOUDFLARE_PERFORMANCE.md) — 캐시·성능 가이드
 - [cloudflare_online.md](cloudflare_online.md) — Cloudflare 무료/유료 대시보드 설정 정리
 - [PERFORMANCE_MAINTENANCE_PLAN.md](PERFORMANCE_MAINTENANCE_PLAN.md) — 성능·유지보수 개선 계획 (Cloudflare 문서 기반)

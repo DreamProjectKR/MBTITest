@@ -12,9 +12,9 @@ import type {
   PagesParams,
   R2Object,
   R2Range,
-} from "../_types";
+} from "../_types.ts";
 
-import { getDefaultCache, setServerTiming } from "../api/_utils/http";
+import { getDefaultCache, setServerTiming } from "../api/_utils/http.ts";
 
 type Params = PagesParams & { path?: string | string[] };
 

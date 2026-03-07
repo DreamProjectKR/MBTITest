@@ -1,4 +1,4 @@
-import type { HeadersInit } from "../../_types";
+import type { HeadersInit } from "../../_types.ts";
 
 /** Shared headers (immutable). */
 export const JSON_HEADERS: Readonly<Record<string, string>> = {

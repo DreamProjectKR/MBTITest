@@ -1,343 +1,41 @@
-/** Admin entry: orchestration (load test, save, hydrate forms). */
-import {
-  fetchImageList,
-  fetchTestDetail,
-  fetchTestsIndex,
-  saveTest,
-  uploadResultImage,
-  uploadTestImage,
-} from "./api.js";
+/** Admin entry: bootstrap store, effects, and render subscription. */
+import { elements } from "./dom.js";
+import { createAdminEffects } from "./effects.js";
 import { bindForms } from "./forms.js";
-import {
-  hydrateForms,
-  populateTestSelector,
-  refreshActiveView,
-  renderQuestions,
-  renderResults,
-  setPanelLoading,
-  setSaveStatus,
-  setSavingState,
-  showToast,
-} from "./render.js";
-import {
-  MBTI_ORDER,
-  REQUIRED_QUESTION_COUNT,
-  elements,
-  setActiveTest,
-  setState,
-  state,
-  updateLoadedTest,
-} from "./state.js";
-import {
-  findByBaseName,
-  normalizeAssetsPath,
-  validateTestForSave,
-} from "./validation.js";
+import { adminReducer, initialAdminState } from "./reducer.js";
+import { renderAdmin, showToast } from "./render.js";
+import { createStore } from "./store.js";
 
-let isHydratingMeta = false;
-
-function getActiveTest() {
-  const id = state.activeTestId;
-  if (!id) return null;
-  return state.loadedTests[id] ?? null;
-}
-
-function setMetaHydratingFlag(next) {
-  if (typeof next === "boolean") {
-    isHydratingMeta = next;
-    return isHydratingMeta;
-  }
-  return isHydratingMeta;
-}
-
-function buildMetaFromTest(test) {
-  const now = new Date().toISOString().split("T")[0];
-  return {
-    id: test.id,
-    title: test.title ?? "",
-    thumbnail: test.thumbnail ?? "",
-    tags: Array.isArray(test.tags) ? [...test.tags] : [],
-    path: test.path ?? `${test.id}/test.json`,
-    createdAt: test.createdAt ?? now,
-    updatedAt: test.updatedAt ?? now,
-    isPublished: Boolean(test.isPublished),
-  };
-}
-
-function syncMetaEntry(test) {
-  setState({
-    tests: state.tests.map((meta) => {
-      if (meta.id !== test.id) return meta;
-      return {
-        ...meta,
-        title: test.title ?? meta.title,
-        thumbnail: test.thumbnail ?? meta.thumbnail,
-        tags: Array.isArray(test.tags) ? [...test.tags] : [...meta.tags],
-      };
-    }),
-  });
-  populateTestSelector();
-}
-
-function hydrateMetaForm(test) {
-  setMetaHydratingFlag(true);
-  hydrateForms(test);
-  setMetaHydratingFlag(false);
-}
-
-async function refreshImageList(testId) {
-  if (!testId) {
-    setState({ imageList: [] });
-    return;
-  }
-  try {
-    const data = await fetchImageList(testId);
-    const items = Array.isArray(data?.items) ? data.items : [];
-    setState({ imageList: items });
-    syncImagesToActiveTestFromStore(items);
-  } catch (err) {
-    setState({ imageList: [] });
-  }
-}
-
-function syncImagesToActiveTestFromStore(items = []) {
-  const active = getActiveTest();
-  if (!active || !elements.metaForm) return;
-
-  let thumbnail = active.thumbnail;
-  let authorImg = active.authorImg;
-  const thumb = findByBaseName(items, "thumbnail");
-  if (thumb?.path) {
-    thumbnail = normalizeAssetsPath(thumb.path);
-    elements.metaForm.elements.thumbnail.value = thumbnail;
-  }
-  const author = findByBaseName(items, "author");
-  if (author?.path) {
-    authorImg = normalizeAssetsPath(author.path);
-    elements.metaForm.elements.authorImg.value = authorImg;
-  }
-
-  const results = MBTI_ORDER.reduce(
-    (acc, code) => {
-      const hit = findByBaseName(items, code);
-      if (!hit?.path) return acc;
-      return {
-        ...acc,
-        [code]: {
-          ...(acc[code] ?? {}),
-          image: normalizeAssetsPath(hit.path),
-        },
-      };
-    },
-    { ...(active.results ?? {}) },
+function wireHeaderEvents(effects) {
+  elements.createTestButton?.addEventListener("click", () =>
+    effects.createTest(),
   );
-
-  const baseQuestions = Array.isArray(active.questions) ? active.questions : [];
-  const questions = baseQuestions.map((q) => {
-    const qNum = String(q?.id || "").replace(/^q/i, "");
-    const hit =
-      findByBaseName(items, `Q${qNum}`) || findByBaseName(items, `q${qNum}`);
-    if (!hit?.path || String(q?.questionImage || "").trim()) return q;
-    return { ...q, questionImage: normalizeAssetsPath(hit.path) };
-  });
-
-  const next = {
-    ...active,
-    thumbnail,
-    authorImg,
-    results,
-    questions,
-  };
-  updateLoadedTest(active.id, next);
-  refreshActiveView(next);
-}
-
-async function loadTest(testId) {
-  if (!testId) return;
-  setActiveTest(testId);
-  if (state.loadedTests[testId]) {
-    refreshActiveView(state.loadedTests[testId]);
-    await refreshImageList(testId);
-    return;
-  }
-  setPanelLoading("meta", true);
-  setPanelLoading("questions", true);
-  setPanelLoading("results", true);
-  try {
-    const test = await fetchTestDetail(testId);
-    setState({ loadedTests: { ...state.loadedTests, [testId]: test } });
-    syncMetaEntry(test);
-    hydrateMetaForm(test);
-    refreshActiveView(test);
-  } catch (err) {
-    showToast(err?.message || "테스트 로딩 실패", true);
-  } finally {
-    setPanelLoading("meta", false);
-    setPanelLoading("questions", false);
-    setPanelLoading("results", false);
-    await refreshImageList(testId);
-  }
-}
-
-function createTest() {
-  const rawId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
-  const newTest = {
-    id: `test-${rawId.slice(0, 8)}`,
-    title: "새 테스트",
-    isPublished: false,
-    description: [],
-    tags: [],
-    thumbnail: "",
-    author: "",
-    authorImg: "",
-    questions: [],
-    results: MBTI_ORDER.reduce(
-      (acc, code) => ({ ...acc, [code]: { image: "", summary: "" } }),
-      {},
-    ),
-  };
-  setState({
-    loadedTests: { ...state.loadedTests, [newTest.id]: newTest },
-    tests: [...state.tests, buildMetaFromTest(newTest)],
-  });
-  setActiveTest(newTest.id);
-  populateTestSelector();
-  hydrateMetaForm(newTest);
-  refreshActiveView(newTest);
-  showToast("새 테스트를 만들었습니다.");
-}
-
-async function reloadActiveTest() {
-  const testId = state.activeTestId;
-  if (!testId) return;
-  const test = await fetchTestDetail(testId);
-  setState({ loadedTests: { ...state.loadedTests, [testId]: test } });
-  syncMetaEntry(test);
-  hydrateMetaForm(test);
-  refreshActiveView(test);
-}
-
-async function saveActiveTest() {
-  const test = getActiveTest();
-  if (!test || !state.activeTestId) return;
-  const error = validateTestForSave(test);
-  if (error) {
-    showToast(error, true);
-    setSaveStatus(error, true);
-    return;
-  }
-  setSavingState(true);
-  setSaveStatus("저장 중...");
-  try {
-    await saveTest(state.activeTestId, test);
-    await reloadActiveTest();
-    setSaveStatus("저장 완료");
-    showToast("저장 완료");
-  } catch (err) {
-    setSaveStatus(err?.message || "저장 실패", true);
-    showToast(err?.message || "저장 실패", true);
-  } finally {
-    setSavingState(false);
-  }
-}
-
-async function handleBulkResultUpload() {
-  const test = getActiveTest();
-  if (!test || !elements.resultForm) return;
-  const input = elements.resultForm.querySelector(
-    'input[name="bulkResultFiles"]',
-  );
-  const files = Array.from(input?.files || []);
-  if (!files.length) {
-    showToast("일괄 업로드할 이미지를 선택해주세요.", true);
-    return;
-  }
-
-  let uploadedCount = 0;
-  let nextResults = { ...(test.results ?? {}) };
-  for (const file of files) {
-    const name = String(file.name || "")
-      .replace(/\.[^.]+$/, "")
-      .toUpperCase();
-    if (!MBTI_ORDER.includes(name)) continue;
-    try {
-      const uploaded = await uploadResultImage(test.id, name, file);
-      nextResults = {
-        ...nextResults,
-        [name]: {
-          ...(nextResults[name] ?? {}),
-          image: uploaded.path || nextResults[name]?.image || "",
-        },
-      };
-      uploadedCount += 1;
-    } catch (err) {
-      // Continue best-effort uploads.
-    }
-  }
-
-  setState({
-    loadedTests: {
-      ...state.loadedTests,
-      [test.id]: { ...test, results: nextResults },
-    },
-  });
-  renderResults(nextResults);
-  input.value = "";
-  if (uploadedCount > 0) {
-    showToast(`${uploadedCount}개 결과 이미지를 업로드했습니다.`);
-    await refreshImageList(test.id);
-  } else {
-    showToast("MBTI 파일명(INTJ.png 등)과 일치하는 파일이 없습니다.", true);
-  }
-}
-
-function wireHeaderEvents() {
-  elements.createTestButton?.addEventListener("click", createTest);
   elements.testSelect?.addEventListener("change", (event) => {
-    loadTest(event.target.value);
+    effects.loadTest(event.target.value);
   });
-  elements.saveButton?.addEventListener("click", saveActiveTest);
-  elements.bulkUploadButton?.addEventListener("click", handleBulkResultUpload);
+  elements.saveButton?.addEventListener("click", () =>
+    effects.saveActiveTest(),
+  );
+  elements.bulkUploadButton?.addEventListener("click", () =>
+    effects.handleBulkResultUpload(),
+  );
 }
 
 export async function initAdmin() {
   if (!elements.metaForm) return;
+  const store = createStore(adminReducer, initialAdminState);
+  const effects = createAdminEffects(store, { showToast });
+  store.subscribe((nextState, previousState) =>
+    renderAdmin(nextState, previousState),
+  );
+  renderAdmin(store.getState(), null);
 
-  setSaveStatus("저장 준비");
-  wireHeaderEvents();
-  bindForms({
-    getActiveTest,
-    setMetaHydratingFlag,
-    setSaveStatus,
-    renderQuestions,
-    renderResults,
-    syncMetaEntry,
-    refreshImageList,
-    uploadTestImage,
-    uploadResultImage,
-    showToast,
-    updateLoadedTest,
-  });
+  wireHeaderEvents(effects);
+  bindForms({ store, effects });
 
   try {
-    const payload = await fetchTestsIndex();
-    const tests = Array.isArray(payload?.tests) ? payload.tests : [];
-    const normalized = tests.map((meta) => ({
-      id: meta.id,
-      title: meta.title ?? "",
-      thumbnail: meta.thumbnail ?? "",
-      tags: Array.isArray(meta.tags) ? [...meta.tags] : [],
-      path: meta.path ?? `${meta.id}/test.json`,
-      createdAt: meta.createdAt ?? "",
-      updatedAt: meta.updatedAt ?? "",
-      isPublished: Boolean(meta.is_published), // D1 returns snake_case
-    }));
-    setState({ tests: normalized });
-    setActiveTest(normalized[0]?.id ?? null);
-    populateTestSelector();
-    if (state.activeTestId) await loadTest(state.activeTestId);
-  } catch (err) {
-    showToast(err?.message || "초기 목록 로딩 실패", true);
-    refreshActiveView(null);
+    await effects.bootstrap();
+  } catch (error) {
+    showToast(error?.message || "초기 목록 로딩 실패", true);
   }
 }

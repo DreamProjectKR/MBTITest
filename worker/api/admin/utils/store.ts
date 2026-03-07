@@ -1,64 +1,35 @@
-import type { D1Database, R2Bucket } from "../../../_types";
+import type { D1Database, R2Bucket } from "../../../_types.ts";
 
-import { JSON_HEADERS, NO_STORE_HEADERS } from "../../_utils/http";
+import {
+  formatIndexDate,
+  getImagesPrefix,
+  getTestKey,
+  normalizeAssetKey,
+} from "../../../domain/tests/assetKeys.ts";
+import {
+  type TestImageMetaInput,
+  type TestImageMetaRow,
+  listTestImageMetadata,
+  upsertTestImageMetadata,
+  upsertTestImageMetadataAndTouch,
+} from "../../../infrastructure/repositories/d1/testImageRepository.ts";
+import { touchTestUpdatedAt as touchTestMetadataUpdatedAt } from "../../../infrastructure/repositories/d1/testMetadataRepository.ts";
+import {
+  readTestBody,
+  writeTestBody,
+} from "../../../infrastructure/repositories/r2/testBodyRepository.ts";
+import { JSON_HEADERS, NO_STORE_HEADERS } from "../../_utils/http.ts";
 
 export { JSON_HEADERS, NO_STORE_HEADERS };
-
-const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
-
-/** Pure: keep only key-safe path segment characters. */
-function sanitizePathSegment(value: string): string {
-  return String(value || "")
-    .trim()
-    .replace(/[^a-zA-Z0-9_-]/g, "");
-}
-
-/** Pure: normalize path to `assets/...` canonical format. */
-export function normalizeAssetKey(path: string): string {
-  const raw = String(path || "").trim();
-  const withoutLeading = raw.replace(/^\.?\/+/, "").replace(/^assets\/+/i, "");
-  const segments = withoutLeading
-    .split("/")
-    .map((segment) => segment.trim())
-    .filter(Boolean)
-    .filter((segment) => segment !== "." && segment !== "..");
-  return segments.length ? `assets/${segments.join("/")}` : "";
-}
-
-/** Pure: R2 key for test JSON body. */
-export function getTestKey(testId: string): string {
-  const safeId = sanitizePathSegment(testId);
-  return normalizeAssetKey(`${safeId}/test.json`);
-}
-
-/** Pure: R2 key prefix for test images. */
-export function getImagesPrefix(testId: string): string {
-  const safeId = sanitizePathSegment(testId);
-  return `${normalizeAssetKey(`${safeId}/images`)}/`;
-}
-
-/**
- * YYYY-MM-DD from Date. Pure when given a date; when called with no args uses
- * current time (impure, but required for D1 updated_at).
- */
-export function formatIndexDate(date: Date = new Date()): string {
-  return new Date(date).toISOString().split("T")[0] ?? "";
-}
+export { formatIndexDate, getImagesPrefix, getTestKey, normalizeAssetKey };
+export type { TestImageMetaInput, TestImageMetaRow };
 
 /** I/O: read test JSON from R2. */
 export async function readTest(
   bucket: R2Bucket,
   testId: string,
 ): Promise<unknown | null> {
-  const key = getTestKey(testId);
-  const obj = await bucket.get(key);
-  if (!obj) return null;
-  const text = await obj.text();
-  try {
-    return JSON.parse(text) as unknown;
-  } catch {
-    throw new Error(`Test JSON at ${key} is not valid JSON.`);
-  }
+  return readTestBody(bucket, testId);
 }
 
 /** I/O: write test JSON to R2. */
@@ -67,12 +38,7 @@ export async function writeTest(
   testId: string,
   test: unknown,
 ): Promise<void> {
-  const key = getTestKey(testId);
-  await bucket.put(
-    key,
-    new TextEncoder().encode(JSON.stringify(test, null, 2)),
-    { httpMetadata: { contentType: JSON_CONTENT_TYPE } },
-  );
+  return writeTestBody(bucket, testId, test);
 }
 
 /** I/O: update tests.updated_at in D1. */
@@ -81,113 +47,27 @@ export async function touchTestUpdatedAt(
   testId: string,
   date: Date = new Date(),
 ): Promise<void> {
-  const now = formatIndexDate(date);
-  await db
-    .prepare("UPDATE tests SET updated_at = ?1 WHERE test_id = ?2")
-    .bind(now, testId)
-    .all();
+  return touchTestMetadataUpdatedAt(db, testId, date);
 }
-
-export type TestImageMetaInput = {
-  testId: string;
-  imageKey: string;
-  imageType: string;
-  imageName: string;
-  contentType?: string;
-  sizeBytes?: number;
-  uploadedAt?: string;
-};
-
-export type TestImageMetaRow = {
-  id?: number;
-  test_id?: string;
-  image_key?: string;
-  image_type?: string;
-  image_name?: string;
-  content_type?: string;
-  size_bytes?: number;
-  uploaded_at?: string;
-};
 
 export async function upsertTestImageMeta(
   db: D1Database,
   input: TestImageMetaInput,
 ): Promise<void> {
-  const uploadedAt = input.uploadedAt || new Date().toISOString();
-  await db
-    .prepare(
-      `
-      INSERT INTO test_images (test_id, image_key, image_type, image_name, content_type, size_bytes, uploaded_at)
-      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
-      ON CONFLICT(test_id, image_name) DO UPDATE SET
-        image_key = excluded.image_key,
-        image_type = excluded.image_type,
-        content_type = excluded.content_type,
-        size_bytes = excluded.size_bytes,
-        uploaded_at = excluded.uploaded_at
-      `,
-    )
-    .bind(
-      input.testId,
-      input.imageKey,
-      input.imageType,
-      input.imageName,
-      input.contentType || null,
-      Number.isFinite(input.sizeBytes) ? Number(input.sizeBytes) : null,
-      uploadedAt,
-    )
-    .all();
+  return upsertTestImageMetadata(db, input);
 }
-
-const UPSERT_TEST_IMAGE_SQL = `
-  INSERT INTO test_images (test_id, image_key, image_type, image_name, content_type, size_bytes, uploaded_at)
-  VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
-  ON CONFLICT(test_id, image_name) DO UPDATE SET
-    image_key = excluded.image_key,
-    image_type = excluded.image_type,
-    content_type = excluded.content_type,
-    size_bytes = excluded.size_bytes,
-    uploaded_at = excluded.uploaded_at
-`;
 
 export async function upsertTestImageMetaAndTouchBatch(
   db: D1Database,
   input: TestImageMetaInput,
   testId: string,
 ): Promise<void> {
-  const uploadedAt = input.uploadedAt || new Date().toISOString();
-  const now = formatIndexDate();
-  const stmt1 = db
-    .prepare(UPSERT_TEST_IMAGE_SQL)
-    .bind(
-      input.testId,
-      input.imageKey,
-      input.imageType,
-      input.imageName,
-      input.contentType || null,
-      Number.isFinite(input.sizeBytes) ? Number(input.sizeBytes) : null,
-      uploadedAt,
-    );
-  const stmt2 = db
-    .prepare("UPDATE tests SET updated_at = ?1 WHERE test_id = ?2")
-    .bind(now, testId);
-  await db.batch([stmt1, stmt2]);
+  return upsertTestImageMetadataAndTouch(db, input, testId);
 }
 
 export async function listTestImageMeta(
   db: D1Database,
   testId: string,
 ): Promise<TestImageMetaRow[]> {
-  const rows = await db
-    .prepare(
-      `
-      SELECT id, test_id, image_key, image_type, image_name, content_type, size_bytes, uploaded_at
-      FROM test_images
-      WHERE test_id = ?1
-      ORDER BY image_name ASC
-      `,
-    )
-    .bind(testId)
-    .all<TestImageMetaRow>();
-  return Array.isArray(rows.results) ? rows.results : [];
+  return listTestImageMetadata(db, testId);
 }

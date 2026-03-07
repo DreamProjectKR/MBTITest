@@ -1,4 +1,6 @@
-import { AXIS_MAP, REQUIRED_QUESTION_COUNT, elements } from "./state.js";
+import { elements, isMetaHydrating } from "./dom.js";
+import { getActiveTest } from "./selectors.js";
+import { AXIS_MAP, REQUIRED_QUESTION_COUNT } from "./state.js";
 import { parseDescriptionInput } from "./validation.js";
 
 /** Form bindings and DOM for question/result/meta forms. */
@@ -40,43 +42,14 @@ function getNextQuestionNo(questions) {
   return 0;
 }
 
-export function bindForms({
-  getActiveTest,
-  setMetaHydratingFlag,
-  setSaveStatus,
-  renderQuestions,
-  renderResults,
-  syncMetaEntry,
-  refreshImageList,
-  uploadTestImage,
-  uploadResultImage,
-  showToast,
-  updateLoadedTest,
-}) {
+export function bindForms({ store, effects }) {
   elements.metaForm?.addEventListener("input", () => {
-    if (setMetaHydratingFlag()) return;
-    const activeTest = getActiveTest();
-    if (!activeTest || !elements.metaForm) return;
-    const form = elements.metaForm;
-    const next = {
-      ...activeTest,
-      isPublished: form.elements.isPublished.checked,
-      author: form.elements.author.value,
-      authorImg: form.elements.authorImg.value,
-      title: form.elements.title.value,
-      description: parseDescriptionInput(form.elements.description.value),
-      tags: form.elements.tags.value
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean),
-      thumbnail: form.elements.thumbnail.value,
-    };
-    updateLoadedTest(activeTest.id, next);
-    syncMetaEntry(next);
+    if (isMetaHydrating() || !elements.metaForm) return;
+    effects.updateMetaFromForm(elements.metaForm);
   });
 
   elements.metaForm?.addEventListener("change", async (event) => {
-    const activeTest = getActiveTest();
+    const activeTest = getActiveTest(store.getState());
     if (!activeTest || !elements.metaForm) return;
     const target = event.target;
     if (!target || target.tagName !== "INPUT") return;
@@ -84,23 +57,8 @@ export function bindForms({
     if (target.name === "thumbnailFile" || target.name === "authorImgFile") {
       const file = target.files?.[0];
       if (!file) return;
-      const imageName =
-        target.name === "thumbnailFile" ? "thumbnail" : "author";
       try {
-        setSaveStatus(`${imageName} 이미지 업로드 중...`);
-        const uploaded = await uploadTestImage(activeTest.id, file, imageName);
-        const next =
-          imageName === "thumbnail" ?
-            { ...activeTest, thumbnail: uploaded.path }
-          : { ...activeTest, authorImg: uploaded.path };
-        updateLoadedTest(activeTest.id, next);
-        elements.metaForm.elements[
-          imageName === "thumbnail" ? "thumbnail" : "authorImg"
-        ].value = uploaded.path;
-        syncMetaEntry(next);
-        showToast("이미지 업로드 완료");
-      } catch (err) {
-        showToast(err?.message || "이미지 업로드 실패", true);
+        await effects.handleMetaImageUpload(target.name, file);
       } finally {
         target.value = "";
       }
@@ -114,142 +72,38 @@ export function bindForms({
 
   elements.questionForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const activeTest = getActiveTest();
-    if (!activeTest || !elements.questionForm) return;
-    const prevQuestions =
-      Array.isArray(activeTest.questions) ? activeTest.questions : [];
-    if (prevQuestions.length >= REQUIRED_QUESTION_COUNT) {
-      showToast(
-        `문항은 ${REQUIRED_QUESTION_COUNT}개까지 등록할 수 있습니다.`,
-        true,
-      );
-      return;
-    }
-    const nextNo = getNextQuestionNo(prevQuestions);
-    if (!nextNo) return;
-
-    const formData = new FormData(elements.questionForm);
+    if (!elements.questionForm) return;
     const imageFile = elements.questionForm.querySelector(
       'input[name="questionImageFile"]',
     )?.files?.[0];
-    let imagePath = String(formData.get("questionImage") || "").trim();
-    if (imageFile) {
-      try {
-        const uploaded = await uploadTestImage(
-          activeTest.id,
-          imageFile,
-          `Q${nextNo}`,
-        );
-        imagePath = uploaded.path;
-      } catch (err) {
-        showToast(err?.message || "질문 이미지 업로드 실패", true);
-        return;
-      }
-    }
-    if (!imagePath) {
-      showToast("질문 이미지를 먼저 업로드해주세요.", true);
-      return;
-    }
-
-    const qId = `q${nextNo}`;
-    const axis = String(formData.get("axis") || "EI");
-    const [positive, negative] = AXIS_MAP[axis] ?? AXIS_MAP.EI;
-    const pref = String(formData.get("answerADirection") || "positive");
-    const aDir = pref === "negative" ? negative : positive;
-    const bDir = pref === "negative" ? positive : negative;
-    const newQuestion = {
-      id: qId,
-      label: String(formData.get("questionLabel") || "").trim(),
-      questionImage: imagePath,
-      answers: [
-        {
-          id: `${qId}_a`,
-          label: String(formData.get("answerAText") || "").trim(),
-          mbtiAxis: axis,
-          direction: aDir,
-        },
-        {
-          id: `${qId}_b`,
-          label: String(formData.get("answerBText") || "").trim(),
-          mbtiAxis: axis,
-          direction: bDir,
-        },
-      ],
-    };
-    updateLoadedTest(activeTest.id, (prev) => ({
-      ...prev,
-      questions: [...prevQuestions, newQuestion],
-    }));
-    renderQuestions(getActiveTest().questions);
+    await effects.addQuestion(new FormData(elements.questionForm), imageFile);
     elements.questionForm.reset();
     syncAnswerDirectionOptions();
-    showToast("문항 추가 완료");
-    await refreshImageList(activeTest.id);
   });
 
   elements.questionList?.addEventListener("click", (event) => {
     const btn = event.target.closest("[data-remove-question]");
     if (!btn) return;
-    const activeTest = getActiveTest();
-    if (!activeTest) return;
-    const removeId = btn.dataset.removeQuestion;
-    updateLoadedTest(activeTest.id, (prev) => ({
-      ...prev,
-      questions: (prev.questions || []).filter((q) => q.id !== removeId),
-    }));
-    renderQuestions(getActiveTest().questions);
+    effects.removeQuestion(btn.dataset.removeQuestion);
   });
 
   elements.resultForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const activeTest = getActiveTest();
-    if (!activeTest || !elements.resultForm) return;
-    const data = new FormData(elements.resultForm);
-    const code = String(data.get("code") || "")
-      .toUpperCase()
-      .trim();
-    const summary = String(data.get("summary") || "").trim();
+    if (!elements.resultForm) return;
     const file = elements.resultForm.querySelector(
       'input[name="resultImageFile"]',
     )?.files?.[0];
-    if (!code || !summary || !file) {
-      showToast("MBTI/요약/이미지를 모두 입력하세요.", true);
-      return;
-    }
-    try {
-      const uploaded = await uploadResultImage(activeTest.id, code, file);
-      updateLoadedTest(activeTest.id, (prev) => ({
-        ...prev,
-        results: {
-          ...(prev.results || {}),
-          [code]: {
-            image: uploaded.path || prev.results?.[code]?.image || "",
-            summary,
-          },
-        },
-      }));
-      renderResults(getActiveTest().results);
-      showToast("결과 저장 완료");
-      elements.resultForm.querySelector('input[name="resultImageFile"]').value =
-        "";
-      elements.resultForm.elements.summary.value = "";
-      await refreshImageList(activeTest.id);
-    } catch (err) {
-      showToast(err?.message || "결과 저장 실패", true);
-    }
+    await effects.saveResult(new FormData(elements.resultForm), file);
+    const fileInput = elements.resultForm.querySelector(
+      'input[name="resultImageFile"]',
+    );
+    if (fileInput) fileInput.value = "";
+    elements.resultForm.elements.summary.value = "";
   });
 
   elements.resultList?.addEventListener("click", (event) => {
     const btn = event.target.closest("[data-remove-result]");
     if (!btn) return;
-    const activeTest = getActiveTest();
-    if (!activeTest?.results) return;
-    const code = btn.dataset.removeResult;
-    const { [code]: _, ...rest } = activeTest.results;
-    updateLoadedTest(activeTest.id, (prev) => ({
-      ...prev,
-      results: rest,
-    }));
-    renderResults(getActiveTest().results);
+    effects.removeResult(btn.dataset.removeResult);
   });
 }

@@ -8,8 +8,14 @@
  * - Supports ETag / If-None-Match
  * - KV + Cache API; strengthened s-maxage / swr
  */
-import type { MbtiEnv, PagesContext } from "../../_types";
+import type { MbtiEnv, PagesContext } from "../../_types.ts";
 
+import { getAdminTestDetailQuery } from "../../application/queries/getAdminTestDetail.ts";
+import { getPublicTestDetailQuery } from "../../application/queries/getPublicTestDetail.ts";
+import {
+  readTestDetailCache,
+  writeTestDetailCache,
+} from "../../infrastructure/repositories/kv/testDetailCacheRepository.ts";
 import {
   JSON_HEADERS,
   cacheKeyForGet,
@@ -18,86 +24,12 @@ import {
   noStoreJsonResponse,
   setServerTiming,
   withCacheHeaders,
-} from "../_utils/http";
+} from "../_utils/http.ts";
 
 type Params = { id?: string };
 
-export type TestRow = {
-  test_id?: unknown;
-  title?: unknown;
-  description_json?: unknown;
-  author?: unknown;
-  author_img_path?: unknown;
-  thumbnail_path?: unknown;
-  tags_json?: unknown;
-  source_path?: unknown;
-  created_at?: unknown;
-  updated_at?: unknown;
-  is_published?: unknown;
-};
-
-export function normalizeR2KeyFromIndexPath(rawPath: string): string {
-  const str = String(rawPath || "").trim();
-  if (!str) return "";
-  const clean = str.replace(/^\.?\/+/, "");
-  return clean.startsWith("assets/") ? clean : `assets/${clean}`;
-}
-
-function parseJsonArray(value: unknown): unknown[] | null {
-  if (typeof value !== "string") return null;
-  try {
-    const parsed: unknown = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
 function cacheTagForTest(id: string): string {
   return `api,api-tests,test-${id}`;
-}
-
-export function isPublishedRow(row: TestRow | null): boolean {
-  return Boolean(row?.is_published);
-}
-
-export function buildEtag(
-  row: TestRow | null,
-  resolvedBodyEtag: string | null,
-): string {
-  const d1Updated = row?.updated_at ? String(row.updated_at) : "";
-  const r2Etag = resolvedBodyEtag ? String(resolvedBodyEtag) : "";
-  return `"${r2Etag}|${d1Updated}"`;
-}
-
-export function buildMergedPayload(
-  row: TestRow,
-  bodyJson: unknown,
-): Record<string, unknown> {
-  const description =
-    parseJsonArray(row?.description_json)?.filter(Boolean) ?? null;
-  const tags = (() => {
-    const parsed = parseJsonArray(row?.tags_json);
-    return parsed ?
-        parsed.filter((x): x is string => typeof x === "string")
-      : [];
-  })();
-  return {
-    id: String(row.test_id ?? ""),
-    title: row.title ? String(row.title) : "",
-    description,
-    author: row.author ? String(row.author) : "",
-    authorImg: row.author_img_path ? String(row.author_img_path) : "",
-    thumbnail: row.thumbnail_path ? String(row.thumbnail_path) : "",
-    tags,
-    path: row.source_path ? String(row.source_path) : "",
-    createdAt: row.created_at ? String(row.created_at) : "",
-    updatedAt: row.updated_at ? String(row.updated_at) : "",
-    isPublished: isPublishedRow(row),
-    ...(bodyJson && typeof bodyJson === "object" ?
-      (bodyJson as Record<string, unknown>)
-    : {}),
-  };
 }
 
 type LoadTestDetailOptions = {
@@ -142,17 +74,12 @@ export async function loadTestDetail(
   const cacheKey = cacheKeyForGet(url);
 
   const kv = options.useCache ? context.env.MBTI_KV : undefined;
-  const kvKey = `test:${id}`;
   if (kv) {
     try {
       const kvStart = performance.now();
-      const cachedRaw = await kv.get(kvKey);
+      const cached = await readTestDetailCache(kv, id);
       kvMs = performance.now() - kvStart;
-      if (cachedRaw) {
-        const cached = JSON.parse(cachedRaw) as {
-          etag?: string;
-          body?: Record<string, unknown>;
-        };
+      if (cached) {
         const cachedEtag = cached?.etag ? String(cached.etag) : "";
         if (ifNoneMatch && cachedEtag && ifNoneMatch === cachedEtag) {
           const headers = withCacheHeaders(JSON_HEADERS, {
@@ -212,70 +139,51 @@ export async function loadTestDetail(
     }
   }
 
-  const d1Start = performance.now();
-  const row = await db
-    .prepare(
-      "SELECT test_id, title, description_json, author, author_img_path, thumbnail_path, tags_json, source_path, created_at, updated_at, is_published FROM tests WHERE test_id = ?1 LIMIT 1",
-    )
-    .bind(id)
-    .first<TestRow>();
-  d1Ms = performance.now() - d1Start;
+  const queryStart = performance.now();
+  const detail =
+    options.enforcePublished ?
+      await getPublicTestDetailQuery(
+        db,
+        bucket,
+        id,
+        context.request.url,
+        context.env.R2_PUBLIC_BASE_URL,
+      )
+    : await getAdminTestDetailQuery(
+        db,
+        bucket,
+        id,
+        context.request.url,
+        context.env.R2_PUBLIC_BASE_URL,
+      );
+  d1Ms = performance.now() - queryStart;
 
-  if (!row?.source_path) {
+  if (detail.kind === "not_found" || detail.kind === "forbidden_draft") {
     return jsonResponse(
       { error: "Test not found: " + id },
       { status: 404, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }) },
     );
   }
-  if (options.enforcePublished && !isPublishedRow(row)) {
-    return jsonResponse(
-      { error: "Test not found: " + id },
-      { status: 404, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }) },
-    );
-  }
-
-  const key = normalizeR2KeyFromIndexPath(String(row.source_path));
-  if (!key) {
+  if (detail.kind === "invalid_path") {
     return jsonResponse(
       { error: "Test meta has empty path: " + id },
       { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
     );
   }
-
-  const r2Start = performance.now();
-  const obj = await bucket.get(key);
-  const requestHost = new URL(context.request.url).hostname;
-  const isLocalhost =
-    requestHost === "localhost" || requestHost === "127.0.0.1";
-  const publicBase =
-    context.env.R2_PUBLIC_BASE_URL ?
-      String(context.env.R2_PUBLIC_BASE_URL).replace(/\/+$/, "")
-    : "";
-
-  let resolvedBodyText: string | null = null;
-  let resolvedBodyEtag: string | null = null;
-
-  if (obj) {
-    resolvedBodyText = await obj.text();
-    resolvedBodyEtag = obj.etag ? String(obj.etag) : null;
-  } else if (isLocalhost && publicBase) {
-    const remoteUrl = `${publicBase}/${key.replace(/^\/+/, "")}`;
-    const resp = await fetch(remoteUrl);
-    if (resp.ok) {
-      resolvedBodyText = await resp.text();
-      resolvedBodyEtag = resp.headers.get("etag");
-    }
-  }
-  r2Ms = performance.now() - r2Start;
-
-  if (!resolvedBodyText) {
+  if (detail.kind === "missing_body") {
     return jsonResponse(
-      { error: "Test JSON not found in R2.", key },
+      { error: "Test JSON not found in R2.", key: detail.key },
       { status: 404, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }) },
     );
   }
+  if (detail.kind === "invalid_body_json") {
+    return jsonResponse(
+      { error: "Test JSON is invalid JSON." },
+      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
+    );
+  }
 
-  const etag = buildEtag(row, resolvedBodyEtag);
+  const etag = detail.etag;
   if (ifNoneMatch && ifNoneMatch === etag) {
     const headers =
       options.useCache ?
@@ -319,20 +227,9 @@ export async function loadTestDetail(
     return new Response(null, { status: 304, headers });
   }
 
-  let bodyJson: unknown = null;
-  try {
-    bodyJson = JSON.parse(resolvedBodyText) as unknown;
-  } catch {
-    return jsonResponse(
-      { error: "Test JSON is invalid JSON." },
-      { status: 500, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 0 }) },
-    );
-  }
-
-  const merged = buildMergedPayload(row, bodyJson);
   const response =
     options.useCache ?
-      jsonResponse(merged, {
+      jsonResponse(detail.payload, {
         status: 200,
         headers: withCacheHeaders(JSON_HEADERS, {
           etag,
@@ -341,7 +238,7 @@ export async function loadTestDetail(
           staleWhileRevalidate: 3600,
         }),
       })
-    : noStoreJsonResponse(merged);
+    : noStoreJsonResponse(detail.payload);
 
   if (options.useCache) {
     response.headers.set("Cache-Tag", cacheTagForTest(id));
@@ -371,9 +268,7 @@ export async function loadTestDetail(
   ]);
   if (kv) {
     context.waitUntil(
-      kv.put(kvKey, JSON.stringify({ etag, body: merged }), {
-        expirationTtl: 300,
-      }),
+      writeTestDetailCache(kv, id, { etag, body: detail.payload }),
     );
   }
   if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));

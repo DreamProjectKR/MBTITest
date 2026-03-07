@@ -106,11 +106,11 @@ npm run dev                 # Worker 로컬 실행 (API + 정적, http://localho
 | --------------------------- | -------------------------------------------------- |
 | `npm run dev`               | 로컬 개발 (Worker: /api, /assets + 정적, D1/R2/KV) |
 | `npm run pages:dev`         | 정적만 (Pages dev, API 없음)                       |
-| `npm run pages:publish`     | Cloudflare Pages에 배포                            |
+| `npm run pages:deploy`      | Cloudflare Pages에 배포                            |
 | `npm run d1:migrate:local`  | D1 마이그레이션 로컬 적용                          |
 | `npm run d1:migrate:remote` | D1 마이그레이션 프로덕션 적용                      |
-| `npm run format`            | Prettier 포맷 검사                                 |
-| `npm run format:write`      | Prettier 자동 수정                                 |
+| `npm run format`            | Prettier 자동 수정                                 |
+| `npm test`                  | Node 내장 테스트 러너 실행                         |
 
 ## Cloudflare Pages 배포
 
@@ -197,10 +197,13 @@ npm run d1:migrate:remote
 
 ## 아키텍처
 
-상세 문서는 `docs/` 폴더를 참조하세요:
+설계와 구현 기준 문서는 `docs/` 폴더를 참조하세요:
 
 - [AGENTS.md](AGENTS.md) — AI 어시스턴트용 프로젝트 가이드라인
-- [아키텍처 개요](docs/README.md)
-- [API 레퍼런스](docs/API.md)
+- [설계 문서 인덱스](docs/README.md)
+- [설계 제약](docs/ARCHITECTURE_CONSTRAINTS.md)
+- [Workflow 기준](docs/WORKFLOW_SPECS.md)
+- [API 계약](docs/API.md)
 - [데이터 모델 ERD](docs/ERD.md)
+- [테스트 전략](docs/TEST_STRATEGY.md)
 - [Cloudflare 성능 최적화](docs/CLOUDFLARE_PERFORMANCE.md)

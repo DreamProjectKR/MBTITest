@@ -1,21 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { onRequestPut as testImagePut } from "../worker/api/admin/tests/[id]/images.ts";
-import { onRequestPut as resultImagePut } from "../worker/api/admin/tests/[id]/results/[mbti]/image.ts";
-
-function createContext(url, env, params = {}) {
-  return {
-    request: new Request(url, {
-      method: "PUT",
-      headers: { "content-type": "image/png" },
-      body: new Uint8Array([1, 2, 3, 4]),
-    }),
-    env,
-    params,
-    waitUntil() {},
-  };
-}
+import { onRequestPut as testImagePut } from "../../worker/api/admin/tests/[id]/images.ts";
+import { onRequestPut as resultImagePut } from "../../worker/api/admin/tests/[id]/results/[mbti]/image.ts";
+import { createContext } from "../shared/worker-harness.mjs";
 
 test("result image upload validates test.json before writing image", async () => {
   const bucketCalls = [];
@@ -57,11 +45,14 @@ test("result image upload validates test.json before writing image", async () =>
   };
 
   const response = await resultImagePut(
-    createContext(
-      "https://example.com/api/admin/tests/draft-test/results/ENFP/image",
+    createContext({
+      url: "https://example.com/api/admin/tests/draft-test/results/ENFP/image",
+      method: "PUT",
       env,
-      { id: "draft-test", mbti: "ENFP" },
-    ),
+      params: { id: "draft-test", mbti: "ENFP" },
+      headers: { "content-type": "image/png" },
+      body: new Uint8Array([1, 2, 3, 4]),
+    }),
   );
   const body = await response.json();
 
@@ -128,11 +119,14 @@ test("result image upload restores original test.json when metadata write fails"
   };
 
   const response = await resultImagePut(
-    createContext(
-      "https://example.com/api/admin/tests/draft-test/results/ENFP/image",
+    createContext({
+      url: "https://example.com/api/admin/tests/draft-test/results/ENFP/image",
+      method: "PUT",
       env,
-      { id: "draft-test", mbti: "ENFP" },
-    ),
+      params: { id: "draft-test", mbti: "ENFP" },
+      headers: { "content-type": "image/png" },
+      body: new Uint8Array([1, 2, 3, 4]),
+    }),
   );
   const body = await response.json();
 
@@ -189,13 +183,14 @@ test("generic image upload deletes the object on metadata failure", async () => 
   };
 
   const response = await testImagePut(
-    createContext(
-      "https://example.com/api/admin/tests/draft-test/images",
+    createContext({
+      url: "https://example.com/api/admin/tests/draft-test/images",
+      method: "PUT",
       env,
-      {
-        id: "draft-test",
-      },
-    ),
+      params: { id: "draft-test" },
+      headers: { "content-type": "image/png" },
+      body: new Uint8Array([1, 2, 3, 4]),
+    }),
   );
   const body = await response.json();
 

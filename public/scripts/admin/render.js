@@ -1,7 +1,11 @@
-import { MBTI_ORDER, elements, setState, state } from "./state.js";
+import { elements, getPanelElement, setMetaHydrating } from "./dom.js";
+import {
+  getActiveTest,
+  getSaveStatus,
+  shouldHydrateMeta,
+} from "./selectors.js";
+import { MBTI_ORDER } from "./state.js";
 import { formatDescriptionForInput } from "./validation.js";
-
-/** DOM and state updates for admin UI. */
 
 function toImageUrl(path) {
   const raw = String(path || "").trim();
@@ -31,34 +35,7 @@ export function showToast(message, isError = false) {
   }, 2400);
 }
 
-export function setSaveStatus(message, isError = false) {
-  setState({ saveMessage: message });
-  if (!elements.saveStatus) return;
-  elements.saveStatus.textContent = message;
-  elements.saveStatus.classList.toggle("save-status--error", Boolean(isError));
-}
-
-export function setSavingState(isSaving) {
-  setState({ isSaving });
-  if (elements.saveButton)
-    elements.saveButton.disabled = isSaving || !state.activeTestId;
-  if (elements.createTestButton) elements.createTestButton.disabled = isSaving;
-  if (!isSaving && !state.saveMessage) setSaveStatus("저장 준비");
-}
-
-export function setPanelLoading(panelKey, loading) {
-  setState({ loading: { [panelKey]: Boolean(loading) } });
-  const selectorByKey = {
-    meta: '[aria-labelledby="test-meta-heading"]',
-    questions: '[aria-labelledby="question-builder-heading"]',
-    results: '[aria-labelledby="result-heading"]',
-  };
-  const panel = document.querySelector(selectorByKey[panelKey] || "");
-  if (!panel) return;
-  panel.classList.toggle("is-loading", Boolean(loading));
-}
-
-export function populateTestSelector() {
+function populateTestSelector(state) {
   if (!elements.testSelect) return;
   elements.testSelect.innerHTML = "";
   state.tests.forEach((test) => {
@@ -71,8 +48,9 @@ export function populateTestSelector() {
   elements.testSelect.disabled = state.tests.length === 0;
 }
 
-export function hydrateForms(test) {
+function hydrateForms(test) {
   if (!elements.metaForm) return;
+  setMetaHydrating(true);
   const form = elements.metaForm;
   form.elements.isPublished.checked = Boolean(test?.isPublished);
   form.elements.author.value = test?.author ?? "";
@@ -85,6 +63,7 @@ export function hydrateForms(test) {
     ", ",
   );
   form.elements.thumbnail.value = test?.thumbnail ?? "";
+  setMetaHydrating(false);
 }
 
 export function renderQuestions(questions) {
@@ -200,14 +179,50 @@ export function renderResults(results = {}) {
   });
 }
 
-export function refreshActiveView(activeTest) {
+function renderSaveStatus(state) {
+  const saveStatus = getSaveStatus(state);
+  if (!elements.saveStatus) return;
+  elements.saveStatus.textContent = saveStatus.message || "저장 준비";
+  elements.saveStatus.classList.toggle(
+    "save-status--error",
+    Boolean(saveStatus.isError),
+  );
+}
+
+function renderSavingControls(state) {
+  if (elements.saveButton) {
+    elements.saveButton.disabled = state.ui.isSaving || !state.activeTestId;
+  }
+  if (elements.createTestButton) {
+    elements.createTestButton.disabled = state.ui.isSaving;
+  }
+}
+
+function renderPanelLoading(state) {
+  Object.entries(state.ui.loading).forEach(([panelKey, loading]) => {
+    const panel = getPanelElement(panelKey);
+    if (!panel) return;
+    panel.classList.toggle("is-loading", Boolean(loading));
+  });
+}
+
+export function renderAdmin(state, previousState) {
+  populateTestSelector(state);
+  renderSaveStatus(state);
+  renderSavingControls(state);
+  renderPanelLoading(state);
+
+  const activeTest = getActiveTest(state);
   if (!activeTest) {
-    hydrateForms(null);
+    if (shouldHydrateMeta(state, previousState)) hydrateForms(null);
     renderQuestions([]);
     renderResults({});
     return;
   }
-  hydrateForms(activeTest);
+
+  if (shouldHydrateMeta(state, previousState)) {
+    hydrateForms(activeTest);
+  }
   renderQuestions(activeTest.questions ?? []);
   renderResults(activeTest.results ?? {});
 }

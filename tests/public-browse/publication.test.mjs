@@ -1,94 +1,19 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { onRequestGet as adminTestDetailGet } from "../worker/api/admin/tests/[id].ts";
-import { onRequestGet as adminTestsIndexGet } from "../worker/api/admin/tests/index.ts";
-import { onRequestGet as publicTestDetailGet } from "../worker/api/tests/[id].ts";
-import { onRequestGet as publicTestsIndexGet } from "../worker/api/tests/index.ts";
+import { onRequestGet as adminTestDetailGet } from "../../worker/api/admin/tests/[id].ts";
+import { onRequestGet as adminTestsIndexGet } from "../../worker/api/admin/tests/index.ts";
+import { onRequestGet as publicTestDetailGet } from "../../worker/api/tests/[id].ts";
+import { onRequestGet as publicTestsIndexGet } from "../../worker/api/tests/index.ts";
+import {
+  createContext,
+  createDetailDb,
+  createIndexDb,
+  createJsonBucket,
+  installDefaultCacheStub,
+} from "../shared/worker-harness.mjs";
 
-globalThis.caches = {
-  default: {
-    match: async () => null,
-    put: async () => {},
-    delete: async () => true,
-  },
-};
-
-function createContext(url, env, params = {}) {
-  return {
-    request: new Request(url),
-    env,
-    params,
-    waitUntil() {},
-  };
-}
-
-function createIndexDb(rows) {
-  return {
-    prepare(query) {
-      return {
-        bind() {
-          return this;
-        },
-        async all() {
-          const publishedOnly = query.includes("WHERE is_published = 1");
-          return {
-            results:
-              publishedOnly ?
-                rows.filter((row) => Boolean(row.is_published))
-              : rows,
-          };
-        },
-        async first() {
-          return null;
-        },
-      };
-    },
-    async batch() {
-      return [];
-    },
-  };
-}
-
-function createDetailDb(row) {
-  return {
-    prepare() {
-      return {
-        bind() {
-          return this;
-        },
-        async first() {
-          return row;
-        },
-        async all() {
-          return { results: [] };
-        },
-      };
-    },
-    async batch() {
-      return [];
-    },
-  };
-}
-
-function createBucket(bodyText) {
-  return {
-    async get() {
-      return {
-        etag: "body-etag",
-        body: {},
-        async text() {
-          return bodyText;
-        },
-      };
-    },
-    async list() {
-      return { objects: [] };
-    },
-    async put() {},
-    async delete() {},
-  };
-}
+installDefaultCacheStub();
 
 test("GET /api/tests only returns published tests", async () => {
   const env = {
@@ -116,7 +41,7 @@ test("GET /api/tests only returns published tests", async () => {
     ]),
   };
   const response = await publicTestsIndexGet(
-    createContext("https://example.com/api/tests", env),
+    createContext({ url: "https://example.com/api/tests", env }),
   );
   const body = await response.json();
 
@@ -153,7 +78,7 @@ test("GET /api/admin/tests includes drafts for editor flows", async () => {
     ]),
   };
   const response = await adminTestsIndexGet(
-    createContext("https://example.com/api/admin/tests", env),
+    createContext({ url: "https://example.com/api/admin/tests", env }),
   );
   const body = await response.json();
 
@@ -165,6 +90,9 @@ test("GET /api/admin/tests includes drafts for editor flows", async () => {
 });
 
 test("GET /api/tests/:id returns 404 for draft tests", async () => {
+  const { bucket } = createJsonBucket({
+    "assets/draft/test.json": JSON.stringify({ questions: [], results: {} }),
+  });
   const env = {
     MBTI_DB: createDetailDb({
       test_id: "draft-test",
@@ -179,11 +107,13 @@ test("GET /api/tests/:id returns 404 for draft tests", async () => {
       updated_at: "2026-03-07",
       is_published: 0,
     }),
-    MBTI_BUCKET: createBucket(JSON.stringify({ questions: [], results: {} })),
+    MBTI_BUCKET: bucket,
   };
   const response = await publicTestDetailGet(
-    createContext("https://example.com/api/tests/draft-test", env, {
-      id: "draft-test",
+    createContext({
+      url: "https://example.com/api/tests/draft-test",
+      env,
+      params: { id: "draft-test" },
     }),
   );
   const body = await response.json();
@@ -193,6 +123,9 @@ test("GET /api/tests/:id returns 404 for draft tests", async () => {
 });
 
 test("GET /api/admin/tests/:id can still read draft details", async () => {
+  const { bucket } = createJsonBucket({
+    "assets/draft/test.json": JSON.stringify({ questions: [], results: {} }),
+  });
   const env = {
     MBTI_DB: createDetailDb({
       test_id: "draft-test",
@@ -207,16 +140,13 @@ test("GET /api/admin/tests/:id can still read draft details", async () => {
       updated_at: "2026-03-07",
       is_published: 0,
     }),
-    MBTI_BUCKET: createBucket(
-      JSON.stringify({
-        questions: [],
-        results: {},
-      }),
-    ),
+    MBTI_BUCKET: bucket,
   };
   const response = await adminTestDetailGet(
-    createContext("https://example.com/api/admin/tests/draft-test", env, {
-      id: "draft-test",
+    createContext({
+      url: "https://example.com/api/admin/tests/draft-test",
+      env,
+      params: { id: "draft-test" },
     }),
   );
   const body = await response.json();

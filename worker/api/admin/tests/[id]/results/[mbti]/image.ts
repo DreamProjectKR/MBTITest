@@ -1,16 +1,7 @@
-import type { MbtiEnv, PagesContext } from "../../../../../_types";
+import type { MbtiEnv, PagesContext } from "../../../../../_types.ts";
 
-import {
-  getDefaultCache,
-  noStoreJsonResponse,
-} from "../../../../../_utils/http";
-import {
-  getImagesPrefix,
-  normalizeAssetKey,
-  readTest,
-  upsertTestImageMetaAndTouchBatch,
-  writeTest,
-} from "../../../../utils/store";
+import { uploadResultImageWorkflow } from "../../../../../../application/workflows/uploadResultImage.ts";
+import { noStoreJsonResponse } from "../../../../../_utils/http.ts";
 
 type Params = { id?: string; mbti?: string };
 
@@ -41,18 +32,6 @@ function badRequest(message: string): Response {
   return noStoreJsonResponse({ error: message }, 400);
 }
 
-async function rollbackUploadedObject(
-  bucket: MbtiEnv["MBTI_BUCKET"],
-  key: string,
-): Promise<void> {
-  if (!bucket || !key) return;
-  try {
-    await bucket.delete(key);
-  } catch {
-    // Best effort cleanup for partial uploads.
-  }
-}
-
 /** Pure: map MIME type to file extension. */
 function extensionFromMime(mimeType = ""): string {
   const type = String(mimeType || "").toLowerCase();
@@ -60,22 +39,6 @@ function extensionFromMime(mimeType = ""): string {
   if (type === "image/webp") return "webp";
   if (type === "image/gif") return "gif";
   return "png";
-}
-
-/** Pure: return new test object with results[mbti].image set (immutable). */
-function mergeResultImageIntoTest(
-  test: { results?: Record<string, unknown> },
-  mbti: string,
-  imagePath: string,
-): Record<string, unknown> {
-  const prev =
-    test.results && typeof test.results === "object" ? test.results : {};
-  const existing =
-    prev[mbti] && typeof prev[mbti] === "object" ?
-      (prev[mbti] as Record<string, unknown>)
-    : {};
-  const results = { ...prev, [mbti]: { ...existing, image: imagePath } };
-  return { ...test, results };
 }
 
 /** I/O: parse multipart or body into buffer + contentType. */
@@ -138,83 +101,29 @@ export async function onRequestPut(
   }
   if (!upload) return badRequest("File upload required.");
 
-  const bytes = new Uint8Array(upload.buffer);
   const extension = extensionFromMime(upload.contentType);
-  const fileName = `${mbtiRaw}.${extension}`;
-  const key = normalizeAssetKey(`${getImagesPrefix(testId)}${fileName}`);
-  const testJson = await readTest(bucket, testId);
-  if (!testJson || typeof testJson !== "object") {
-    return noStoreJsonResponse(
-      { error: "Test JSON not found while updating image." },
-      404,
-    );
-  }
-
-  const updated = mergeResultImageIntoTest(
-    testJson as { results?: Record<string, unknown> },
-    mbtiRaw,
-    key,
-  );
-  let wroteImage = false;
-  let wroteTestJson = false;
 
   try {
-    await bucket.put(key, bytes, {
-      httpMetadata: { contentType: upload.contentType },
-    });
-    wroteImage = true;
-    await writeTest(bucket, testId, updated);
-    wroteTestJson = true;
-    await upsertTestImageMetaAndTouchBatch(
-      db,
-      {
+    return noStoreJsonResponse(
+      await uploadResultImageWorkflow(context, {
         testId,
-        imageKey: key,
-        imageType: "result",
-        imageName: mbtiRaw,
+        mbti: mbtiRaw,
+        extension,
         contentType: upload.contentType,
-        sizeBytes: upload.buffer.byteLength,
-      },
-      testId,
+        buffer: upload.buffer,
+      }),
     );
   } catch (err) {
-    if (wroteTestJson) {
-      try {
-        await writeTest(bucket, testId, testJson);
-      } catch {
-        // Best effort cleanup for partial test.json updates.
-      }
-    }
-    if (wroteImage) {
-      await rollbackUploadedObject(bucket, key);
-    }
+    const message =
+      err instanceof Error ? err.message : "Failed to upload image.";
     return noStoreJsonResponse(
-      { error: err instanceof Error ? err.message : "Failed to upload image." },
-      500,
+      {
+        error:
+          message === "Test JSON not found while updating image." ? message : (
+            message
+          ),
+      },
+      message === "Test JSON not found while updating image." ? 404 : 500,
     );
   }
-
-  if (context.env.MBTI_KV) {
-    context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));
-  }
-
-  const cache = getDefaultCache();
-  if (cache) {
-    const origin = new URL(context.request.url).origin;
-    context.waitUntil(
-      cache.delete(new Request(`${origin}/api/tests`, { method: "GET" })),
-    );
-    context.waitUntil(
-      cache.delete(
-        new Request(`${origin}/api/tests/${testId}`, { method: "GET" }),
-      ),
-    );
-  }
-
-  return noStoreJsonResponse({
-    ok: true,
-    mbti: mbtiRaw,
-    path: key,
-    url: `/assets/${key.replace(/^assets\/?/i, "")}`,
-  });
 }

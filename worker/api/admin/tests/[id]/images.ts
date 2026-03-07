@@ -1,13 +1,14 @@
-import type { MbtiEnv, PagesContext } from "../../../../_types";
+import type { MbtiEnv, PagesContext } from "../../../../_types.ts";
 
-import { getDefaultCache, noStoreJsonResponse } from "../../../_utils/http";
+import { uploadTestImageWorkflow } from "../../../../application/workflows/uploadTestImage.ts";
+import { noStoreJsonResponse } from "../../../_utils/http.ts";
 import {
   type TestImageMetaRow,
   getImagesPrefix,
   listTestImageMeta,
   normalizeAssetKey,
   upsertTestImageMeta,
-} from "../../utils/store";
+} from "../../utils/store.ts";
 
 type Params = { id?: string };
 
@@ -17,18 +18,6 @@ function methodNotAllowed(): Response {
 
 function badRequest(message: string): Response {
   return noStoreJsonResponse({ error: message }, 400);
-}
-
-async function rollbackUploadedObject(
-  bucket: MbtiEnv["MBTI_BUCKET"],
-  key: string,
-): Promise<void> {
-  if (!bucket || !key) return;
-  try {
-    await bucket.delete(key);
-  } catch {
-    // Best effort cleanup for partial uploads.
-  }
 }
 
 /** Pure: map MIME type to file extension. */
@@ -196,45 +185,20 @@ export async function onRequestPut(
     : `img-${Date.now()}`);
   const base = canonicalBaseName(baseRaw);
 
-  const prefix = getImagesPrefix(testId);
-  const key = normalizeAssetKey(`${prefix}${base}.${ext}`);
-  const imageType = inferImageType(base);
-
   try {
-    await bucket.put(key, new Uint8Array(upload.buffer), {
-      httpMetadata: { contentType: upload.contentType },
-    });
-    await upsertTestImageMeta(db, {
-      testId,
-      imageKey: key,
-      imageType,
-      imageName: base,
-      contentType: upload.contentType,
-      sizeBytes: upload.buffer.byteLength,
-    });
+    return noStoreJsonResponse(
+      await uploadTestImageWorkflow(context, {
+        testId,
+        baseName: base,
+        extension: ext,
+        contentType: upload.contentType,
+        buffer: upload.buffer,
+      }),
+    );
   } catch (err) {
-    await rollbackUploadedObject(bucket, key);
     return noStoreJsonResponse(
       { error: err instanceof Error ? err.message : "Failed to upload image." },
       500,
     );
   }
-
-  const cache = getDefaultCache();
-  if (cache) {
-    const origin = new URL(context.request.url).origin;
-    context.waitUntil(
-      cache.delete(
-        new Request(`${origin}/api/tests/${testId}`, { method: "GET" }),
-      ),
-    );
-  }
-
-  const publicPath = key.replace(/^assets\/?/i, "");
-  return noStoreJsonResponse({
-    ok: true,
-    key,
-    path: key,
-    url: `/assets/${publicPath}`,
-  });
 }

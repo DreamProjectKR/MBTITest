@@ -1,8 +1,11 @@
-# API 레퍼런스
+# API 계약 문서
 
 MBTI ZOO의 Worker API 문서입니다.
 
 Base URL: `https://dreamp.org` (프로덕션) / `http://localhost:8789` (Worker 로컬)
+
+이 문서는 **외부 계약 기준 문서**입니다.
+핸들러 구조가 바뀌더라도 여기 정의된 public/admin visibility, 응답 형태, 에러 envelope는 유지해야 합니다.
 
 ## Public API
 
