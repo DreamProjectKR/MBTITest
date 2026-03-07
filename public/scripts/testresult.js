@@ -230,7 +230,7 @@ function renderResultPage(data, mbti) {
         "data-asset-resize",
         "width=480,quality=82,fit=cover,format=auto",
       );
-      dom.thumbnailEl.setAttribute("data-asset-srcset", "360,480,720");
+      dom.thumbnailEl.setAttribute("data-asset-srcset", "320,480,640");
       dom.thumbnailEl.setAttribute(
         "data-asset-sizes",
         "(max-width: 900px) 92vw, 350px",

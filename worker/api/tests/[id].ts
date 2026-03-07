@@ -15,6 +15,7 @@ import {
   cacheKeyForGet,
   getDefaultCache,
   jsonResponse,
+  setServerTiming,
   withCacheHeaders,
 } from "../_utils/http";
 
@@ -100,6 +101,11 @@ function buildMergedPayload(
 export async function onRequestGet(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<Response> {
+  const startedAt = performance.now();
+  let kvMs = 0;
+  let cacheMs = 0;
+  let d1Ms = 0;
+  let r2Ms = 0;
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket) {
     return jsonResponse(
@@ -123,11 +129,17 @@ export async function onRequestGet(
     );
   }
   const ifNoneMatch = context.request.headers.get("if-none-match");
+  const cache = getDefaultCache();
+  const url = new URL(context.request.url);
+  const cacheKey = cacheKeyForGet(url);
+
   const kv = context.env.MBTI_KV;
   const kvKey = `test:${id}`;
   if (kv) {
     try {
+      const kvStart = performance.now();
       const cachedRaw = await kv.get(kvKey);
+      kvMs = performance.now() - kvStart;
       if (cachedRaw) {
         const cached = JSON.parse(cachedRaw) as {
           etag?: string;
@@ -142,6 +154,12 @@ export async function onRequestGet(
             staleWhileRevalidate: 3600,
           });
           headers.set("Cache-Tag", cacheTagForTest(id));
+          headers.set("X-MBTI-Edge-Cache", "BYPASS");
+          setServerTiming(headers, [
+            { name: "kv", dur: kvMs, desc: "HIT" },
+            { name: "cache", dur: cacheMs, desc: "BYPASS" },
+            { name: "total", dur: performance.now() - startedAt },
+          ]);
           return new Response(null, { status: 304, headers });
         }
         if (cached?.body && typeof cached.body === "object") {
@@ -152,6 +170,12 @@ export async function onRequestGet(
             staleWhileRevalidate: 3600,
           });
           headers.set("Cache-Tag", cacheTagForTest(id));
+          headers.set("X-MBTI-Edge-Cache", "BYPASS");
+          setServerTiming(headers, [
+            { name: "kv", dur: kvMs, desc: "HIT" },
+            { name: "cache", dur: cacheMs, desc: "BYPASS" },
+            { name: "total", dur: performance.now() - startedAt },
+          ]);
           return jsonResponse(cached.body, { status: 200, headers });
         }
       }
@@ -160,12 +184,34 @@ export async function onRequestGet(
     }
   }
 
+  if (cache) {
+    const cacheStart = performance.now();
+    const cached = await cache.match(cacheKey);
+    cacheMs = performance.now() - cacheStart;
+    if (cached) {
+      const headers = new Headers(cached.headers);
+      const cachedEtag = headers.get("ETag");
+      headers.set("X-MBTI-Edge-Cache", "HIT");
+      setServerTiming(headers, [
+        { name: "kv", dur: kvMs, desc: kvMs > 0 ? "MISS" : "BYPASS" },
+        { name: "cache", dur: cacheMs, desc: "HIT" },
+        { name: "total", dur: performance.now() - startedAt },
+      ]);
+      if (ifNoneMatch && cachedEtag && ifNoneMatch === cachedEtag) {
+        return new Response(null, { status: 304, headers });
+      }
+      return new Response(cached.body, { status: cached.status, headers });
+    }
+  }
+
+  const d1Start = performance.now();
   const row = await db
     .prepare(
       "SELECT test_id, title, description_json, author, author_img_path, thumbnail_path, tags_json, source_path, created_at, updated_at FROM tests WHERE test_id = ?1 LIMIT 1",
     )
     .bind(id)
     .first<TestRow>();
+  d1Ms = performance.now() - d1Start;
 
   if (!row?.source_path) {
     return jsonResponse(
@@ -182,6 +228,7 @@ export async function onRequestGet(
     );
   }
 
+  const r2Start = performance.now();
   const obj = await bucket.get(key);
   const requestHost = new URL(context.request.url).hostname;
   const isLocalhost =
@@ -205,6 +252,7 @@ export async function onRequestGet(
       resolvedBodyEtag = resp.headers.get("etag");
     }
   }
+  r2Ms = performance.now() - r2Start;
 
   if (!resolvedBodyText) {
     return jsonResponse(
@@ -215,10 +263,6 @@ export async function onRequestGet(
 
   const etag = buildEtag(row, resolvedBodyEtag);
 
-  const cache = getDefaultCache();
-  const url = new URL(context.request.url);
-  const cacheKey = cacheKeyForGet(url);
-
   if (ifNoneMatch && ifNoneMatch === etag) {
     const headers = withCacheHeaders(JSON_HEADERS, {
       etag,
@@ -227,15 +271,15 @@ export async function onRequestGet(
       staleWhileRevalidate: 3600,
     });
     headers.set("Cache-Tag", cacheTagForTest(id));
+    headers.set("X-MBTI-Edge-Cache", "MISS");
+    setServerTiming(headers, [
+      { name: "kv", dur: kvMs, desc: kvMs > 0 ? "MISS" : "BYPASS" },
+      { name: "cache", dur: cacheMs, desc: "MISS" },
+      { name: "d1", dur: d1Ms },
+      { name: "r2", dur: r2Ms },
+      { name: "total", dur: performance.now() - startedAt },
+    ]);
     return new Response(null, { status: 304, headers });
-  }
-
-  if (cache) {
-    const cached = await cache.match(cacheKey);
-    if (cached) {
-      const headers = new Headers(cached.headers);
-      return new Response(cached.body, { status: cached.status, headers });
-    }
   }
 
   let bodyJson: unknown = null;
@@ -260,6 +304,14 @@ export async function onRequestGet(
     }),
   });
   response.headers.set("Cache-Tag", cacheTagForTest(id));
+  response.headers.set("X-MBTI-Edge-Cache", "MISS");
+  setServerTiming(response.headers, [
+    { name: "kv", dur: kvMs, desc: kvMs > 0 ? "MISS" : "BYPASS" },
+    { name: "cache", dur: cacheMs, desc: "MISS" },
+    { name: "d1", dur: d1Ms },
+    { name: "r2", dur: r2Ms },
+    { name: "total", dur: performance.now() - startedAt },
+  ]);
   if (kv) {
     context.waitUntil(
       kv.put(kvKey, JSON.stringify({ etag, body: merged }), {

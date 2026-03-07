@@ -1,7 +1,7 @@
 import type { MbtiEnv, PagesContext } from "../../../_types";
 
 import { getDefaultCache, noStoreJsonResponse } from "../../_utils/http";
-import { formatIndexDate, writeTest } from "../utils/store";
+import { formatIndexDate, normalizeAssetKey, writeTest } from "../utils/store";
 
 type Params = { id?: string };
 
@@ -74,6 +74,11 @@ function methodNotAllowed(): Response {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object";
+}
+
+/** Pure: normalize stored asset paths to canonical `assets/...` keys. */
+function normalizeAssetPath(value: unknown): string {
+  return normalizeAssetKey(String(value || ""));
 }
 
 /** Pure: validate test payload; returns error message or null. */
@@ -199,14 +204,32 @@ export async function onRequestPut(
     return badRequest("Payload id must match the URL parameter.");
 
   const title = String(p.title ?? "");
-  const thumbnail = String(p.thumbnail ?? "");
-  const authorImg = String(p.authorImg ?? "");
+  const thumbnail = normalizeAssetPath(p.thumbnail);
+  const authorImg = normalizeAssetPath(p.authorImg);
   const isPublished = Boolean(p.isPublished) ? 1 : 0;
 
-  const questions =
+  const rawQuestions =
     Array.isArray(p.questions) ? (p.questions as Question[]) : [];
-  const results =
+  const questions: Question[] = rawQuestions.map((question) => ({
+    ...(isObject(question) ? question : {}),
+    questionImage: normalizeAssetPath(
+      isObject(question) ? question.questionImage : "",
+    ),
+  }));
+  const rawResults =
     isObject(p.results) ? (p.results as Record<string, ResultEntry>) : {};
+  const results = Object.fromEntries(
+    Object.entries(rawResults).map(([code, entry]) => {
+      const detail = isObject(entry) ? entry : {};
+      return [
+        code,
+        {
+          ...detail,
+          image: normalizeAssetPath(detail.image),
+        } as ResultEntry,
+      ];
+    }),
+  ) as Record<string, ResultEntry>;
 
   const validationError = validateTestPayload({
     id: testId,

@@ -10,6 +10,12 @@ export const NO_STORE_HEADERS: Readonly<Record<string, string>> = {
   "Cache-Control": "no-store",
 };
 
+export type ServerTimingMetric = {
+  name: string;
+  dur?: number;
+  desc?: string;
+};
+
 /** Access Cache API (edge); null when unavailable. */
 export function getDefaultCache(): Cache | null {
   const cachesApi = globalThis.caches as { default?: Cache } | undefined;
@@ -58,6 +64,34 @@ export function withCacheHeaders(
   h.set("Vary", "Accept-Encoding");
   if (etag) h.set("ETag", etag);
   return h;
+}
+
+/** Pure: build `Server-Timing` header from metrics. */
+export function serverTimingHeader(metrics: ServerTimingMetric[]): string {
+  const parts = metrics
+    .filter((metric) => metric && metric.name)
+    .map((metric) => {
+      const chunks = [metric.name];
+      if (typeof metric.dur === "number" && Number.isFinite(metric.dur)) {
+        const dur = Math.max(0, Number(metric.dur));
+        chunks.push(`dur=${dur.toFixed(1)}`);
+      }
+      if (typeof metric.desc === "string" && metric.desc.trim()) {
+        const escaped = metric.desc.replace(/"/g, '\\"').trim();
+        chunks.push(`desc="${escaped}"`);
+      }
+      return chunks.join(";");
+    });
+  return parts.join(", ");
+}
+
+/** Mutates headers to include Server-Timing when metrics are present. */
+export function setServerTiming(
+  headers: Headers,
+  metrics: ServerTimingMetric[],
+): void {
+  const value = serverTimingHeader(metrics);
+  if (value) headers.set("Server-Timing", value);
 }
 
 /** Pure: JSON Response with status and headers. */

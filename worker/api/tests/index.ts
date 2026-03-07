@@ -11,6 +11,7 @@ import {
   cacheKeyForGet,
   getDefaultCache,
   jsonResponse,
+  setServerTiming,
   withCacheHeaders,
 } from "../_utils/http";
 
@@ -80,6 +81,9 @@ const CACHE_TAG_API_TESTS = "api,api-tests";
 export async function onRequestGet(
   context: PagesContext<MbtiEnv>,
 ): Promise<Response> {
+  const startedAt = performance.now();
+  let d1Ms = 0;
+  let cacheMs = 0;
   const db = context.env.MBTI_DB;
   if (!db) {
     return jsonResponse(
@@ -88,20 +92,39 @@ export async function onRequestGet(
     );
   }
 
+  const cache = getDefaultCache();
+  const url = new URL(context.request.url);
+  const cacheKey = cacheKeyForGet(url);
+  const ifNoneMatch = context.request.headers.get("if-none-match");
+  if (cache) {
+    const cacheStart = performance.now();
+    const cached = await cache.match(cacheKey);
+    cacheMs = performance.now() - cacheStart;
+    if (cached) {
+      const headers = new Headers(cached.headers);
+      const cachedEtag = headers.get("ETag");
+      headers.set("X-MBTI-Edge-Cache", "HIT");
+      setServerTiming(headers, [
+        { name: "cache", dur: cacheMs, desc: "HIT" },
+        { name: "total", dur: performance.now() - startedAt },
+      ]);
+      if (ifNoneMatch && cachedEtag && ifNoneMatch === cachedEtag) {
+        return new Response(null, { status: 304, headers });
+      }
+      return new Response(cached.body, { status: cached.status, headers });
+    }
+  }
+
+  const d1Start = performance.now();
   const rows = await db
     .prepare(
       "SELECT test_id, title, thumbnail_path, tags_json, source_path, created_at, updated_at, is_published FROM tests ORDER BY updated_at DESC, test_id ASC",
     )
     .all<TestRow>();
+  d1Ms = performance.now() - d1Start;
 
   const tests: TestMeta[] = (rows?.results ?? []).map(rowToTestMeta);
   const etag = computeIndexEtag(tests);
-
-  const cache = getDefaultCache();
-  const url = new URL(context.request.url);
-  const cacheKey = cacheKeyForGet(url);
-
-  const ifNoneMatch = context.request.headers.get("if-none-match");
   if (ifNoneMatch && ifNoneMatch === etag) {
     const headers = withCacheHeaders(JSON_HEADERS, {
       etag,
@@ -110,15 +133,13 @@ export async function onRequestGet(
       staleWhileRevalidate: 600,
     });
     headers.set("Cache-Tag", CACHE_TAG_API_TESTS);
+    headers.set("X-MBTI-Edge-Cache", "MISS");
+    setServerTiming(headers, [
+      { name: "cache", dur: cacheMs, desc: "MISS" },
+      { name: "d1", dur: d1Ms },
+      { name: "total", dur: performance.now() - startedAt },
+    ]);
     return new Response(null, { status: 304, headers });
-  }
-
-  if (cache) {
-    const cached = await cache.match(cacheKey);
-    if (cached) {
-      const headers = new Headers(cached.headers);
-      return new Response(cached.body, { status: cached.status, headers });
-    }
   }
 
   const response = jsonResponse(
@@ -134,6 +155,12 @@ export async function onRequestGet(
     },
   );
   response.headers.set("Cache-Tag", CACHE_TAG_API_TESTS);
+  response.headers.set("X-MBTI-Edge-Cache", "MISS");
+  setServerTiming(response.headers, [
+    { name: "cache", dur: cacheMs, desc: "MISS" },
+    { name: "d1", dur: d1Ms },
+    { name: "total", dur: performance.now() - startedAt },
+  ]);
   if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));
   return response;
 }

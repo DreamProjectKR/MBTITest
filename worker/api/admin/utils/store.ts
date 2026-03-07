@@ -6,14 +6,35 @@ export { JSON_HEADERS, NO_STORE_HEADERS };
 
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 
+/** Pure: keep only key-safe path segment characters. */
+function sanitizePathSegment(value: string): string {
+  return String(value || "")
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
+/** Pure: normalize path to `assets/...` canonical format. */
+export function normalizeAssetKey(path: string): string {
+  const raw = String(path || "").trim();
+  const withoutLeading = raw.replace(/^\.?\/+/, "").replace(/^assets\/+/i, "");
+  const segments = withoutLeading
+    .split("/")
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .filter((segment) => segment !== "." && segment !== "..");
+  return segments.length ? `assets/${segments.join("/")}` : "";
+}
+
 /** Pure: R2 key for test JSON body. */
 export function getTestKey(testId: string): string {
-  return `assets/${testId}/test.json`;
+  const safeId = sanitizePathSegment(testId);
+  return normalizeAssetKey(`${safeId}/test.json`);
 }
 
 /** Pure: R2 key prefix for test images. */
 export function getImagesPrefix(testId: string): string {
-  return `assets/${testId}/images/`;
+  const safeId = sanitizePathSegment(testId);
+  return `${normalizeAssetKey(`${safeId}/images`)}/`;
 }
 
 /**

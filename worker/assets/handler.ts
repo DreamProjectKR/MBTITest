@@ -14,7 +14,7 @@ import type {
   R2Range,
 } from "../_types";
 
-import { getDefaultCache } from "../api/_utils/http";
+import { getDefaultCache, setServerTiming } from "../api/_utils/http";
 
 type Params = PagesParams & { path?: string | string[] };
 
@@ -94,41 +94,31 @@ function buildCacheTagHeader(key: string): string {
   return tags.join(",");
 }
 
-function toggleFirstCharCase(s: string): string {
-  if (!s) return s;
-  const first = s[0];
-  const code = first.charCodeAt(0);
-  if (code >= 65 && code <= 90)
-    return String.fromCharCode(code + 32) + s.slice(1);
-  if (code >= 97 && code <= 122)
-    return String.fromCharCode(code - 32) + s.slice(1);
-  return s;
+/** Pure: normalize incoming `/assets/*` tail path to key-safe segments. */
+function normalizeAssetTail(rawTail: string): string {
+  const raw = String(rawTail || "").trim();
+  const noLeading = raw.replace(/^\/+/, "").replace(/^assets\/+/i, "");
+  const segments = noLeading
+    .split("/")
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .filter((segment) => segment !== "." && segment !== "..");
+  return segments.join("/");
 }
 
-/** Pure: return extra candidate keys for case-variant filename (no mutation). */
-function getCaseFallbackCandidates(tail: string): string[] {
-  const t = String(tail || "").replace(/^\/+/, "");
-  if (!t) return [];
-  const lower = t.toLowerCase();
-  const isStatic =
-    lower.endsWith(".png") ||
-    lower.endsWith(".jpg") ||
-    lower.endsWith(".jpeg") ||
-    lower.endsWith(".webp") ||
-    lower.endsWith(".gif") ||
-    lower.endsWith(".svg") ||
-    lower.endsWith(".woff2");
-  if (!isStatic) return [];
-
-  const parts = t.split("/");
-  const filename = parts[parts.length - 1] ?? "";
-  if (!filename) return [];
-
-  const toggled = toggleFirstCharCase(filename);
-  if (!toggled || toggled === filename) return [];
-
-  const toggledTail = [...parts.slice(0, -1), toggled].join("/");
-  return [`assets/${toggledTail}`, toggledTail];
+/** Pure: build canonical + backward-compatible candidate keys. */
+function buildAssetLookupKeys(tail: string): string[] {
+  const normalized = normalizeAssetTail(tail);
+  if (!normalized) return [];
+  const canonical = `assets/${normalized}`;
+  const keys = [canonical];
+  // Legacy fallback: previous datasets stored content under `assets/data/*`.
+  if (!normalized.startsWith("data/")) {
+    keys.push(`assets/data/${normalized}`);
+  }
+  // Legacy fallback: some older objects may exist without the `assets/` prefix.
+  if (normalized !== canonical) keys.push(normalized);
+  return [...new Set(keys)];
 }
 
 // --- I/O: remote fetch fallback ---
@@ -181,6 +171,7 @@ function buildObjectResponse(
     "Content-Type",
     obj.httpMetadata?.contentType || guessContentType(key),
   );
+  headers.set("Vary", "Accept-Encoding");
   headers.set("X-MBTI-Assets-Proxy", "1");
   headers.set("X-MBTI-R2-Key", key);
   headers.set("X-MBTI-Edge-Cache", hit);
@@ -210,6 +201,9 @@ function buildObjectResponse(
 export async function handleAssetsGet(
   context: PagesContext<MbtiEnv, Params>,
 ): Promise<Response> {
+  const startedAt = performance.now();
+  let cacheMs = 0;
+  let r2Ms = 0;
   const bucket = context.env.MBTI_BUCKET;
   if (!bucket)
     return new Response("MBTI_BUCKET binding missing.", { status: 500 });
@@ -230,10 +224,16 @@ export async function handleAssetsGet(
     context.request.headers.has("pragma");
 
   if (!bypassCache && cache) {
+    const cacheStart = performance.now();
     const cached = await cache.match(cacheKey);
+    cacheMs = performance.now() - cacheStart;
     if (cached) {
       const headers = new Headers(cached.headers);
       headers.set("X-MBTI-Edge-Cache", "HIT");
+      setServerTiming(headers, [
+        { name: "cache", dur: cacheMs, desc: "HIT" },
+        { name: "total", dur: performance.now() - startedAt },
+      ]);
       return new Response(cached.body, { status: cached.status, headers });
     }
   }
@@ -246,15 +246,17 @@ export async function handleAssetsGet(
     });
   }
 
-  const candidateKeys = [
-    `assets/${tail}`,
-    tail,
-    `assets/data/${tail}`,
-    ...getCaseFallbackCandidates(tail),
-  ];
+  const candidateKeys = buildAssetLookupKeys(tail);
+  if (!candidateKeys.length) {
+    return new Response("Not Found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
 
   let obj: R2Object | null = null;
   let key = "";
+  const r2Start = performance.now();
   for (const candidate of candidateKeys) {
     const hit = await bucket.get(
       candidate,
@@ -266,6 +268,7 @@ export async function handleAssetsGet(
       break;
     }
   }
+  r2Ms = performance.now() - r2Start;
 
   if (!obj) {
     const hostname = url.hostname;
@@ -280,7 +283,16 @@ export async function handleAssetsGet(
         publicBase,
         isVersioned,
       );
-      if (remote) return remote;
+      if (remote) {
+        const headers = new Headers(remote.headers);
+        headers.set("X-MBTI-Edge-Cache", "MISS");
+        setServerTiming(headers, [
+          { name: "cache", dur: cacheMs, desc: "MISS" },
+          { name: "r2", dur: r2Ms, desc: "REMOTE" },
+          { name: "total", dur: performance.now() - startedAt },
+        ]);
+        return new Response(remote.body, { status: remote.status, headers });
+      }
     }
     return new Response("Not Found", {
       status: 404,
@@ -290,14 +302,19 @@ export async function handleAssetsGet(
 
   const ifNoneMatch = context.request.headers.get("if-none-match");
   if (ifNoneMatch && obj.etag && ifNoneMatch === obj.etag) {
-    return new Response(null, {
-      status: 304,
-      headers: {
-        ETag: obj.etag,
-        "Cache-Control": cacheControlForKey(key, isVersioned),
-        "Cache-Tag": buildCacheTagHeader(key),
-      },
+    const headers = new Headers({
+      ETag: obj.etag,
+      "Cache-Control": cacheControlForKey(key, isVersioned),
+      "Cache-Tag": buildCacheTagHeader(key),
+      Vary: "Accept-Encoding",
+      "X-MBTI-Edge-Cache": "MISS",
     });
+    setServerTiming(headers, [
+      { name: "cache", dur: cacheMs, desc: "MISS" },
+      { name: "r2", dur: r2Ms },
+      { name: "total", dur: performance.now() - startedAt },
+    ]);
+    return new Response(null, { status: 304, headers });
   }
 
   const rangeForResponse =
@@ -319,6 +336,11 @@ export async function handleAssetsGet(
     isVersioned,
     rangeForResponse,
   );
+  setServerTiming(response.headers, [
+    { name: "cache", dur: cacheMs, desc: "MISS" },
+    { name: "r2", dur: r2Ms },
+    { name: "total", dur: performance.now() - startedAt },
+  ]);
   const respCacheControl = (
     response.headers.get("cache-control") || ""
   ).toLowerCase();

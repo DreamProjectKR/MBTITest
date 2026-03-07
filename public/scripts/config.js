@@ -226,9 +226,9 @@
 
   function computeMeasuredWidthPx(el, options) {
     const minWidth =
-      options && typeof options.minWidth === "number" ? options.minWidth : 160;
+      options && typeof options.minWidth === "number" ? options.minWidth : 120;
     const maxWidth =
-      options && typeof options.maxWidth === "number" ? options.maxWidth : 1280;
+      options && typeof options.maxWidth === "number" ? options.maxWidth : 960;
 
     if (!el || typeof el.getBoundingClientRect !== "function") return null;
     const rect = el.getBoundingClientRect();
@@ -410,7 +410,7 @@
                 opts.fallbackWidth
               : undefined) ||
               (typeof opts.width === "number" ? opts.width : undefined) ||
-              520;
+              420;
             const url = appendVersion(
               window.assetResizeUrl(path, { ...opts, width }),
               version,

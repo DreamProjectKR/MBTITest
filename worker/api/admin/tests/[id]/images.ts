@@ -5,6 +5,7 @@ import {
   type TestImageMetaRow,
   getImagesPrefix,
   listTestImageMeta,
+  normalizeAssetKey,
   upsertTestImageMeta,
 } from "../../utils/store";
 
@@ -33,6 +34,17 @@ function sanitizeBaseName(value: unknown): string {
   const raw = String(value || "").trim();
   if (!raw) return "";
   return raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80);
+}
+
+/** Pure: canonicalize base name to reduce lookup variants. */
+function canonicalBaseName(baseName: string): string {
+  const base = String(baseName || "").trim();
+  if (!base) return "";
+  if (/^q\d{1,2}$/i.test(base)) return `Q${base.replace(/^q/i, "")}`;
+  if (/^[ei][ns][tf][jp]$/i.test(base)) return base.toUpperCase();
+  if (base.toLowerCase() === "thumbnail") return "thumbnail";
+  if (base.toLowerCase() === "author") return "author";
+  return base;
 }
 
 /** Pure: infer image type from base name. */
@@ -161,7 +173,7 @@ export async function onRequestPut(
   if (!upload) return badRequest("File upload required.");
 
   const ext = extensionFromMime(upload.contentType);
-  const base =
+  const baseRaw =
     sanitizeBaseName(upload.name) ||
     ((
       typeof crypto !== "undefined" &&
@@ -170,9 +182,10 @@ export async function onRequestPut(
     ) ?
       crypto.randomUUID()
     : `img-${Date.now()}`);
+  const base = canonicalBaseName(baseRaw);
 
   const prefix = getImagesPrefix(testId);
-  const key = `${prefix}${base}.${ext}`;
+  const key = normalizeAssetKey(`${prefix}${base}.${ext}`);
   const imageType = inferImageType(base);
 
   try {

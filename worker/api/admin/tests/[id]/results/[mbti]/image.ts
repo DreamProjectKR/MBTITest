@@ -6,6 +6,7 @@ import {
 } from "../../../../../_utils/http";
 import {
   getImagesPrefix,
+  normalizeAssetKey,
   readTest,
   upsertTestImageMetaAndTouchBatch,
   writeTest,
@@ -128,7 +129,7 @@ export async function onRequestPut(
   const bytes = new Uint8Array(upload.buffer);
   const extension = extensionFromMime(upload.contentType);
   const fileName = `${mbtiRaw}.${extension}`;
-  const key = `${getImagesPrefix(testId)}${fileName}`;
+  const key = normalizeAssetKey(`${getImagesPrefix(testId)}${fileName}`);
 
   try {
     await bucket.put(key, bytes, {
@@ -164,7 +165,7 @@ export async function onRequestPut(
   const updated = mergeResultImageIntoTest(
     testJson as { results?: Record<string, unknown> },
     mbtiRaw,
-    `${getImagesPrefix(testId)}${fileName}`,
+    key,
   );
   await writeTest(bucket, testId, updated);
 
@@ -188,7 +189,7 @@ export async function onRequestPut(
   return noStoreJsonResponse({
     ok: true,
     mbti: mbtiRaw,
-    path: `${getImagesPrefix(testId)}${fileName}`,
-    url: `/assets/${getImagesPrefix(testId).replace(/^assets\/?/i, "")}${fileName}`,
+    path: key,
+    url: `/assets/${key.replace(/^assets\/?/i, "")}`,
   });
 }

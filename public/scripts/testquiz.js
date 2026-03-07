@@ -23,9 +23,9 @@ function setQuizState(update) {
 }
 
 // Quiz question images often include text; avoid cropping.
-const QUESTION_IMAGE_RESIZE = "width=720,quality=82,fit=contain,format=auto";
+const QUESTION_IMAGE_RESIZE = "width=640,quality=82,fit=contain,format=auto";
 const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
-const QUESTION_IMAGE_SRCSET_WIDTHS = [360, 480, 720];
+const QUESTION_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
 
 /**
  * Cached DOM references for render/update.
@@ -238,7 +238,7 @@ function setImageWithFallback(imgEl, paths, alt) {
   imgEl.setAttribute("data-asset-src", primaryPath);
   if (version) imgEl.setAttribute("data-asset-version", version);
   imgEl.setAttribute("data-asset-resize", QUESTION_IMAGE_RESIZE);
-  imgEl.setAttribute("data-asset-srcset", "360,480,720");
+  imgEl.setAttribute("data-asset-srcset", "320,480,640");
   imgEl.setAttribute("data-asset-sizes", "(max-width: 476px) 70vw, 350px");
   imgEl.setAttribute("loading", "eager");
   imgEl.setAttribute("fetchpriority", "high");

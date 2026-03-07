@@ -9,12 +9,6 @@ const header = document.querySelector(".Head");
 const headerScroll = document.querySelector("header");
 const headerOffset = header ? header.offsetTop : 0;
 
-// --- Pure helpers (no I/O, no DOM; same input => same output) ---
-function computeProgressPercent(done, total) {
-  if (total <= 0) return 0;
-  return Math.max(0, Math.min(100, Math.round((done / total) * 100)));
-}
-
 // --- DOM: delegate to config.js for asset URL resolution ---
 function hydrateAssetElement(el) {
   if (!el) return;
@@ -31,9 +25,9 @@ function setPreloadState(update) {
 }
 
 const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
-const QUESTION_IMAGE_SRCSET_WIDTHS = [360, 480, 720];
+const QUESTION_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
 const RESULT_IMAGE_RESIZE_BASE = "quality=82,fit=cover,format=auto";
-const RESULT_IMAGE_SRCSET_WIDTHS = [360, 480, 720];
+const RESULT_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
 const CACHE_NAME = "mbti-assets";
 
 /** Pure: cache key for test JSON. */
@@ -65,28 +59,6 @@ function persistTestJson(testId, data) {
   } catch (err) {
     // Ignore storage errors (private mode/quota)
   }
-}
-
-function setOverlayVisible(visible) {
-  const overlay = document.getElementById("preloadOverlay");
-  if (!overlay) return;
-  if (visible) {
-    overlay.classList.add("active");
-    overlay.setAttribute("aria-hidden", "false");
-  } else {
-    overlay.classList.remove("active");
-    overlay.setAttribute("aria-hidden", "true");
-  }
-}
-
-// --- DOM / side effects (single responsibility: overlay UI only)
-
-function updateOverlayProgress(done, total) {
-  const pct = computeProgressPercent(done, total);
-  const bar = document.querySelector("[data-preload-progress]");
-  const text = document.querySelector("[data-preload-text]");
-  if (bar && bar.style) bar.style.width = `${pct}%`;
-  if (text) text.textContent = `테스트 준비 중... (${pct}%)`;
 }
 
 function promiseWithTimeout(promise, timeoutMs) {
@@ -179,8 +151,15 @@ async function fetchAndStoreInCache(url) {
  */
 async function preloadQuestionImages(paths, version, opts) {
   const list = Array.isArray(paths) ? paths.filter(Boolean) : [];
+  const widthsRaw =
+    opts && Array.isArray(opts.widths) ?
+      opts.widths
+    : QUESTION_IMAGE_SRCSET_WIDTHS;
+  const widths = widthsRaw
+    .map((w) => Number(w))
+    .filter((w) => Number.isFinite(w) && w > 0);
   const tasks = list.flatMap((p) =>
-    QUESTION_IMAGE_SRCSET_WIDTHS.map((w) => ({
+    widths.map((w) => ({
       path: p,
       resizeRaw: `width=${w},${QUESTION_IMAGE_RESIZE_BASE}`,
     })),
@@ -228,8 +207,15 @@ async function preloadQuestionImages(paths, version, opts) {
  */
 async function preloadResultImages(paths, version, opts) {
   const list = Array.isArray(paths) ? paths.filter(Boolean) : [];
+  const widthsRaw =
+    opts && Array.isArray(opts.widths) ?
+      opts.widths
+    : RESULT_IMAGE_SRCSET_WIDTHS;
+  const widths = widthsRaw
+    .map((w) => Number(w))
+    .filter((w) => Number.isFinite(w) && w > 0);
   const tasks = list.flatMap((p) =>
-    RESULT_IMAGE_SRCSET_WIDTHS.map((w) => ({
+    widths.map((w) => ({
       path: p,
       resizeRaw: `width=${w},${RESULT_IMAGE_RESIZE_BASE}`,
     })),
@@ -278,16 +264,29 @@ function startBackgroundPrefetch(test) {
   const version = test.updatedAt ? String(test.updatedAt) : "";
   const { questionPaths, resultPaths } = extractImagePaths(test);
 
-  const criticalQuestions = questionPaths.slice(0, 3);
-  const rest = questionPaths.slice(3);
+  const criticalQuestions = questionPaths.slice(0, 2);
+  const restQuestions = questionPaths.slice(2);
+  const likelyResults = resultPaths.slice(0, 2);
 
   const runCritical = () =>
     Promise.all([
-      preloadQuestionImages(criticalQuestions, version, { concurrency: 2 }),
-      preloadResultImages(resultPaths, version, { concurrency: 2 }),
+      preloadQuestionImages(criticalQuestions, version, {
+        concurrency: 2,
+        widths: [320],
+      }),
+      preloadResultImages(likelyResults, version, {
+        concurrency: 1,
+        widths: [320],
+      }),
     ]);
   const runRest = () =>
-    preloadQuestionImages(rest, version, { concurrency: 2 });
+    Promise.all([
+      preloadQuestionImages(restQuestions, version, { concurrency: 2 }),
+      preloadResultImages(resultPaths, version, {
+        concurrency: 2,
+        widths: [320, 480],
+      }),
+    ]);
 
   // Phase 1 quickly; Phase 2 in idle time. Update preload state immutably.
   const criticalPromise = (function () {
@@ -316,54 +315,24 @@ function startBackgroundPrefetch(test) {
 }
 
 /**
- * Preload all quiz question images and result images; progress overlay shows 0..100%.
- * Resolves when every image has been attempted (success or fail). Optional safety timeout.
- * @param {object} test - Test JSON (questions, results)
- * @param {{ safetyTimeoutMs?: number }} [options] - Optional. safetyTimeoutMs: max wait (e.g. 60000) before resolving anyway.
+ * Start-click fast warm-up:
+ * only fetch a tiny critical subset and bound wait time.
  */
-async function ensureAllTestImagesPreloaded(test, options) {
+async function preloadCriticalBeforeStart(test) {
   if (!test) return;
-
   const version = test.updatedAt ? String(test.updatedAt) : "";
   const { questionPaths, resultPaths } = extractImagePaths(test);
-  const total =
-    questionPaths.length * QUESTION_IMAGE_SRCSET_WIDTHS.length +
-    resultPaths.length * RESULT_IMAGE_SRCSET_WIDTHS.length;
-
-  if (total === 0) {
-    updateOverlayProgress(1, 1);
-    return;
-  }
-
-  let qDone = 0;
-  let rDone = 0;
-  updateOverlayProgress(0, total);
-
-  const allDone = Promise.all([
-    preloadQuestionImages(questionPaths, version, {
-      concurrency: 4,
-      onProgress: ({ loaded, failed }) => {
-        qDone = loaded + failed;
-        updateOverlayProgress(qDone + rDone, total);
-      },
+  const quickWarm = Promise.all([
+    preloadQuestionImages(questionPaths.slice(0, 2), version, {
+      concurrency: 2,
+      widths: [320],
     }),
-    preloadResultImages(resultPaths, version, {
-      concurrency: 4,
-      onProgress: ({ loaded, failed }) => {
-        rDone = loaded + failed;
-        updateOverlayProgress(qDone + rDone, total);
-      },
+    preloadResultImages(resultPaths.slice(0, 1), version, {
+      concurrency: 1,
+      widths: [320],
     }),
-  ]).then(() => {
-    updateOverlayProgress(total, total);
-  });
-
-  const safetyMs =
-    options && Number.isFinite(Number(options.safetyTimeoutMs)) ?
-      Number(options.safetyTimeoutMs)
-    : 60000;
-  await promiseWithTimeout(allDone, safetyMs);
-  updateOverlayProgress(total, total);
+  ]);
+  await promiseWithTimeout(quickWarm, 900);
 }
 
 // NOTE: preloading/prefetching is intentionally removed elsewhere; this file uses config.js helpers.
@@ -517,7 +486,7 @@ function renderIntro(data) {
         "data-asset-resize",
         "width=480,quality=82,fit=cover,format=auto",
       );
-      thumbnailEl.setAttribute("data-asset-srcset", "360,480,720");
+      thumbnailEl.setAttribute("data-asset-srcset", "320,480,640");
       thumbnailEl.setAttribute(
         "data-asset-sizes",
         "(max-width: 900px) 92vw, 350px",
@@ -592,7 +561,9 @@ function setupStartButton(testId) {
   if (!startBtn) return;
   const targetUrl = `./testquiz.html?testId=${encodeURIComponent(testId)}`;
   startBtn.addEventListener("click", async () => {
-    setOverlayVisible(true);
+    if (startBtn.getAttribute("data-loading") === "1") return;
+    startBtn.setAttribute("data-loading", "1");
+    startBtn.setAttribute("disabled", "true");
     try {
       const test = lastLoadedTest ||
         readCachedTestJson(testId) || {
@@ -600,9 +571,9 @@ function setupStartButton(testId) {
           questions: [],
           results: {},
         };
-      await ensureAllTestImagesPreloaded(test, { safetyTimeoutMs: 60000 });
+      await preloadCriticalBeforeStart(test);
     } catch (e) {
-      // Ignore preload errors; proceed.
+      // Ignore warm-up errors; proceed immediately.
     } finally {
       window.location.href = targetUrl;
     }
