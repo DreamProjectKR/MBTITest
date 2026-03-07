@@ -22,7 +22,7 @@
     "d1:migrate:remote": "wrangler d1 migrations apply mbti-db --remote --config worker/wrangler.toml",
     "seed:generate": "node scripts/generate_d1_seed.cjs > seed/d1_seed_from_assets.sql",
     "format": "prettier --write \"./**/*.{ts,tsx,js,jsx,json,css,md,mdx}\"",
-    "test": "echo \"No automated tests configured\""
+    "test": "node --test --experimental-strip-types tests/*.test.mjs"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",

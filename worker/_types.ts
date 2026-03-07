@@ -68,6 +68,7 @@ export interface R2Bucket {
     value: Uint8Array,
     options?: { httpMetadata?: R2HttpMetadata },
   ): Promise<void>;
+  delete(key: string): Promise<void>;
 }
 
 export interface D1PreparedStatement {

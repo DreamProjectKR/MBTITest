@@ -19,6 +19,18 @@ function badRequest(message: string): Response {
   return noStoreJsonResponse({ error: message }, 400);
 }
 
+async function rollbackUploadedObject(
+  bucket: MbtiEnv["MBTI_BUCKET"],
+  key: string,
+): Promise<void> {
+  if (!bucket || !key) return;
+  try {
+    await bucket.delete(key);
+  } catch {
+    // Best effort cleanup for partial uploads.
+  }
+}
+
 /** Pure: map MIME type to file extension. */
 function extensionFromMime(mimeType = ""): string {
   const type = String(mimeType || "").toLowerCase();
@@ -201,6 +213,7 @@ export async function onRequestPut(
       sizeBytes: upload.buffer.byteLength,
     });
   } catch (err) {
+    await rollbackUploadedObject(bucket, key);
     return noStoreJsonResponse(
       { error: err instanceof Error ? err.message : "Failed to upload image." },
       500,

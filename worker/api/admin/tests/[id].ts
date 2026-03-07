@@ -1,6 +1,7 @@
 import type { MbtiEnv, PagesContext } from "../../../_types";
 
 import { getDefaultCache, noStoreJsonResponse } from "../../_utils/http";
+import { loadTestDetail } from "../../tests/[id]";
 import { formatIndexDate, normalizeAssetKey, writeTest } from "../utils/store";
 
 type Params = { id?: string };
@@ -314,4 +315,10 @@ export async function onRequestPut(
     const message = err instanceof Error ? err.message : "Failed to save test.";
     return noStoreJsonResponse({ error: message }, 500);
   }
+}
+
+export async function onRequestGet(
+  context: PagesContext<MbtiEnv, Params>,
+): Promise<Response> {
+  return loadTestDetail(context, { enforcePublished: false, useCache: false });
 }

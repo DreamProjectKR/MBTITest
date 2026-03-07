@@ -4,18 +4,19 @@
  * Reads the test index from D1 (`mbti_db.tests`) and returns it in the same shape
  * as the legacy `assets/index.json` response: `{ tests: [...] }`.
  */
-import type { MbtiEnv, PagesContext } from "../../_types";
+import type { HeadersInit, MbtiEnv, PagesContext } from "../../_types";
 
 import {
   JSON_HEADERS,
   cacheKeyForGet,
   getDefaultCache,
   jsonResponse,
+  noStoreJsonResponse,
   setServerTiming,
   withCacheHeaders,
 } from "../_utils/http";
 
-type TestRow = {
+export type TestRow = {
   test_id?: unknown;
   title?: unknown;
   thumbnail_path?: unknown;
@@ -26,7 +27,7 @@ type TestRow = {
   is_published?: unknown;
 };
 
-type TestMeta = {
+export type TestMeta = {
   id: string;
   title: string;
   thumbnail: string;
@@ -51,7 +52,7 @@ function safeJsonArray(value: unknown): string[] {
 }
 
 /** Pure: map D1 row to TestMeta. */
-function rowToTestMeta(r: TestRow): TestMeta {
+export function rowToTestMeta(r: TestRow): TestMeta {
   const tags = safeJsonArray(
     typeof r?.tags_json === "string" ? r.tags_json : "",
   );
@@ -68,7 +69,7 @@ function rowToTestMeta(r: TestRow): TestMeta {
 }
 
 /** Pure: compute ETag for tests index from list. */
-function computeIndexEtag(tests: TestMeta[]): string {
+export function computeIndexEtag(tests: TestMeta[]): string {
   const maxUpdated = tests.reduce(
     (acc, t) => (t.updatedAt > acc ? t.updatedAt : acc),
     "",
@@ -78,8 +79,16 @@ function computeIndexEtag(tests: TestMeta[]): string {
 
 const CACHE_TAG_API_TESTS = "api,api-tests";
 
-export async function onRequestGet(
+type ListTestsOptions = {
+  publishedOnly: boolean;
+  useCache: boolean;
+  headersFactory?: (etag: string) => Headers;
+  responseHeaders?: HeadersInit;
+};
+
+export async function listTests(
   context: PagesContext<MbtiEnv>,
+  options: ListTestsOptions,
 ): Promise<Response> {
   const startedAt = performance.now();
   let d1Ms = 0;
@@ -92,7 +101,7 @@ export async function onRequestGet(
     );
   }
 
-  const cache = getDefaultCache();
+  const cache = options.useCache ? getDefaultCache() : null;
   const url = new URL(context.request.url);
   const cacheKey = cacheKeyForGet(url);
   const ifNoneMatch = context.request.headers.get("if-none-match");
@@ -116,51 +125,87 @@ export async function onRequestGet(
   }
 
   const d1Start = performance.now();
-  const rows = await db
-    .prepare(
-      "SELECT test_id, title, thumbnail_path, tags_json, source_path, created_at, updated_at, is_published FROM tests ORDER BY updated_at DESC, test_id ASC",
-    )
-    .all<TestRow>();
+  const query =
+    options.publishedOnly ?
+      "SELECT test_id, title, thumbnail_path, tags_json, source_path, created_at, updated_at, is_published FROM tests WHERE is_published = 1 ORDER BY updated_at DESC, test_id ASC"
+    : "SELECT test_id, title, thumbnail_path, tags_json, source_path, created_at, updated_at, is_published FROM tests ORDER BY updated_at DESC, test_id ASC";
+  const rows = await db.prepare(query).all<TestRow>();
   d1Ms = performance.now() - d1Start;
 
   const tests: TestMeta[] = (rows?.results ?? []).map(rowToTestMeta);
   const etag = computeIndexEtag(tests);
   if (ifNoneMatch && ifNoneMatch === etag) {
-    const headers = withCacheHeaders(JSON_HEADERS, {
-      etag,
-      maxAge: 30,
-      sMaxAge: 300,
-      staleWhileRevalidate: 600,
-    });
-    headers.set("Cache-Tag", CACHE_TAG_API_TESTS);
-    headers.set("X-MBTI-Edge-Cache", "MISS");
+    const headers =
+      options.useCache ?
+        (options.headersFactory?.(etag) ??
+        withCacheHeaders(JSON_HEADERS, {
+          etag,
+          maxAge: 30,
+          sMaxAge: 300,
+          staleWhileRevalidate: 600,
+        }))
+      : new Headers({
+          ...JSON_HEADERS,
+          "Cache-Control": "no-store",
+          ETag: etag,
+        });
+    if (options.useCache) {
+      headers.set("Cache-Tag", CACHE_TAG_API_TESTS);
+      headers.set("X-MBTI-Edge-Cache", "MISS");
+    } else {
+      headers.set("X-MBTI-Edge-Cache", "BYPASS");
+    }
     setServerTiming(headers, [
-      { name: "cache", dur: cacheMs, desc: "MISS" },
+      {
+        name: "cache",
+        dur: cacheMs,
+        desc: options.useCache ? "MISS" : "BYPASS",
+      },
       { name: "d1", dur: d1Ms },
       { name: "total", dur: performance.now() - startedAt },
     ]);
     return new Response(null, { status: 304, headers });
   }
 
-  const response = jsonResponse(
-    { tests },
-    {
-      status: 200,
-      headers: withCacheHeaders(JSON_HEADERS, {
-        etag,
-        maxAge: 30,
-        sMaxAge: 300,
-        staleWhileRevalidate: 600,
-      }),
-    },
-  );
-  response.headers.set("Cache-Tag", CACHE_TAG_API_TESTS);
-  response.headers.set("X-MBTI-Edge-Cache", "MISS");
+  const response =
+    options.useCache ?
+      jsonResponse(
+        { tests },
+        {
+          status: 200,
+          headers:
+            options.headersFactory?.(etag) ??
+            withCacheHeaders(JSON_HEADERS, {
+              etag,
+              maxAge: 30,
+              sMaxAge: 300,
+              staleWhileRevalidate: 600,
+            }),
+        },
+      )
+    : noStoreJsonResponse({ tests });
+
+  if (options.useCache) {
+    response.headers.set("Cache-Tag", CACHE_TAG_API_TESTS);
+    response.headers.set("X-MBTI-Edge-Cache", "MISS");
+  } else {
+    response.headers.set("X-MBTI-Edge-Cache", "BYPASS");
+  }
+  if (options.responseHeaders) {
+    const extra = new Headers(options.responseHeaders);
+    extra.forEach((value, key) => response.headers.set(key, value));
+  }
   setServerTiming(response.headers, [
-    { name: "cache", dur: cacheMs, desc: "MISS" },
+    { name: "cache", dur: cacheMs, desc: options.useCache ? "MISS" : "BYPASS" },
     { name: "d1", dur: d1Ms },
     { name: "total", dur: performance.now() - startedAt },
   ]);
   if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));
   return response;
+}
+
+export async function onRequestGet(
+  context: PagesContext<MbtiEnv>,
+): Promise<Response> {
+  return listTests(context, { publishedOnly: true, useCache: true });
 }

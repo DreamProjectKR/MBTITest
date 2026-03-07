@@ -154,8 +154,10 @@ assets/
 
 | API                               | 데이터 소스           | 설명                                |
 | --------------------------------- | --------------------- | ----------------------------------- |
-| `GET /api/tests`                  | D1                    | 테스트 목록 반환                    |
-| `GET /api/tests/:id`              | KV → D1 + R2          | 메타 + 본문 병합 반환 (KV 캐시)     |
+| `GET /api/tests`                  | D1                    | published 테스트 목록 반환          |
+| `GET /api/tests/:id`              | KV → D1 + R2          | published 메타 + 본문 병합 반환     |
+| `GET /api/admin/tests`            | D1                    | draft + published 목록 반환         |
+| `GET /api/admin/tests/:id`        | D1 + R2               | draft + published 상세 반환         |
 | `POST /api/tests/:id/compute`     | D1 (존재 확인)        | MBTI 결과 계산                      |
 | `PUT /api/admin/tests/:id`        | D1 + R2               | 메타 upsert + 본문 저장 + KV 무효화 |
 | `PUT /api/admin/tests/:id/images` | R2 + D1 `test_images` | 이미지 업로드 + 메타 기록           |

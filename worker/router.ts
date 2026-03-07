@@ -16,6 +16,8 @@ export function parsePath(pathname: string): RouteMatch {
         return { route: "api/tests/:id/compute", params: { id } };
     }
     if (segments[1] === "admin" && segments[2] === "tests") {
+      if (segments.length === 3)
+        return { route: "api/admin/tests", params: {} };
       const id = segments[3];
       if (id && segments.length === 4)
         return { route: "api/admin/tests/:id", params: { id } };

@@ -5,10 +5,14 @@
  */
 import type { ExecutionContext, MbtiEnv, PagesContext } from "./_types";
 
-import { onRequestPut as adminTestPut } from "./api/admin/tests/[id]";
+import {
+  onRequestGet as adminTestGet,
+  onRequestPut as adminTestPut,
+} from "./api/admin/tests/[id]";
 import { onRequestGet as adminImagesGet } from "./api/admin/tests/[id]/images";
 import { onRequestPut as adminImagesPut } from "./api/admin/tests/[id]/images";
 import { onRequestPut as adminResultImagePut } from "./api/admin/tests/[id]/results/[mbti]/image";
+import { onRequestGet as adminTestsIndexGet } from "./api/admin/tests/index";
 import { onRequestGet as testsIdGet } from "./api/tests/[id]";
 import { onRequestPost as computePost } from "./api/tests/[id]/compute";
 import { onRequestGet as testsIndexGet } from "./api/tests/index";
@@ -91,8 +95,12 @@ function routeTable(request: Request): Record<string, RouteHandler> {
       method === "GET" ? testsIdGet(ctx) : notFound(ctx),
     "api/tests/:id/compute": (ctx) =>
       method === "POST" ? computePost(ctx) : notFound(ctx),
+    "api/admin/tests": (ctx) =>
+      method === "GET" ? adminTestsIndexGet(ctx) : notFound(ctx),
     "api/admin/tests/:id": (ctx) =>
-      method === "PUT" ? adminTestPut(ctx) : notFound(ctx),
+      method === "GET" ? adminTestGet(ctx)
+      : method === "PUT" ? adminTestPut(ctx)
+      : notFound(ctx),
     "api/admin/tests/:id/images": (ctx) => {
       if (method === "GET") return adminImagesGet(ctx);
       if (method === "PUT") return adminImagesPut(ctx);

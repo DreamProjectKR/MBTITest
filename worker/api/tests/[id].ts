@@ -15,13 +15,14 @@ import {
   cacheKeyForGet,
   getDefaultCache,
   jsonResponse,
+  noStoreJsonResponse,
   setServerTiming,
   withCacheHeaders,
 } from "../_utils/http";
 
 type Params = { id?: string };
 
-type TestRow = {
+export type TestRow = {
   test_id?: unknown;
   title?: unknown;
   description_json?: unknown;
@@ -32,17 +33,16 @@ type TestRow = {
   source_path?: unknown;
   created_at?: unknown;
   updated_at?: unknown;
+  is_published?: unknown;
 };
 
-/** Pure: normalize source_path to R2 key. */
-function normalizeR2KeyFromIndexPath(rawPath: string): string {
+export function normalizeR2KeyFromIndexPath(rawPath: string): string {
   const str = String(rawPath || "").trim();
   if (!str) return "";
   const clean = str.replace(/^\.?\/+/, "");
   return clean.startsWith("assets/") ? clean : `assets/${clean}`;
 }
 
-/** Pure: parse JSON string to array or null. */
 function parseJsonArray(value: unknown): unknown[] | null {
   if (typeof value !== "string") return null;
   try {
@@ -53,13 +53,15 @@ function parseJsonArray(value: unknown): unknown[] | null {
   }
 }
 
-/** Pure: Cache-Tag value for test id. */
 function cacheTagForTest(id: string): string {
   return `api,api-tests,test-${id}`;
 }
 
-/** Pure: build ETag from D1 row and R2 response. */
-function buildEtag(
+export function isPublishedRow(row: TestRow | null): boolean {
+  return Boolean(row?.is_published);
+}
+
+export function buildEtag(
   row: TestRow | null,
   resolvedBodyEtag: string | null,
 ): string {
@@ -68,8 +70,7 @@ function buildEtag(
   return `"${r2Etag}|${d1Updated}"`;
 }
 
-/** Pure: merge D1 row + parsed JSON body into API payload. */
-function buildMergedPayload(
+export function buildMergedPayload(
   row: TestRow,
   bodyJson: unknown,
 ): Record<string, unknown> {
@@ -92,14 +93,21 @@ function buildMergedPayload(
     path: row.source_path ? String(row.source_path) : "",
     createdAt: row.created_at ? String(row.created_at) : "",
     updatedAt: row.updated_at ? String(row.updated_at) : "",
+    isPublished: isPublishedRow(row),
     ...(bodyJson && typeof bodyJson === "object" ?
       (bodyJson as Record<string, unknown>)
     : {}),
   };
 }
 
-export async function onRequestGet(
+type LoadTestDetailOptions = {
+  enforcePublished: boolean;
+  useCache: boolean;
+};
+
+export async function loadTestDetail(
   context: PagesContext<MbtiEnv, Params>,
+  options: LoadTestDetailOptions,
 ): Promise<Response> {
   const startedAt = performance.now();
   let kvMs = 0;
@@ -129,11 +137,11 @@ export async function onRequestGet(
     );
   }
   const ifNoneMatch = context.request.headers.get("if-none-match");
-  const cache = getDefaultCache();
+  const cache = options.useCache ? getDefaultCache() : null;
   const url = new URL(context.request.url);
   const cacheKey = cacheKeyForGet(url);
 
-  const kv = context.env.MBTI_KV;
+  const kv = options.useCache ? context.env.MBTI_KV : undefined;
   const kvKey = `test:${id}`;
   if (kv) {
     try {
@@ -207,13 +215,19 @@ export async function onRequestGet(
   const d1Start = performance.now();
   const row = await db
     .prepare(
-      "SELECT test_id, title, description_json, author, author_img_path, thumbnail_path, tags_json, source_path, created_at, updated_at FROM tests WHERE test_id = ?1 LIMIT 1",
+      "SELECT test_id, title, description_json, author, author_img_path, thumbnail_path, tags_json, source_path, created_at, updated_at, is_published FROM tests WHERE test_id = ?1 LIMIT 1",
     )
     .bind(id)
     .first<TestRow>();
   d1Ms = performance.now() - d1Start;
 
   if (!row?.source_path) {
+    return jsonResponse(
+      { error: "Test not found: " + id },
+      { status: 404, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }) },
+    );
+  }
+  if (options.enforcePublished && !isPublishedRow(row)) {
     return jsonResponse(
       { error: "Test not found: " + id },
       { status: 404, headers: withCacheHeaders(JSON_HEADERS, { maxAge: 30 }) },
@@ -262,19 +276,42 @@ export async function onRequestGet(
   }
 
   const etag = buildEtag(row, resolvedBodyEtag);
-
   if (ifNoneMatch && ifNoneMatch === etag) {
-    const headers = withCacheHeaders(JSON_HEADERS, {
-      etag,
-      maxAge: 60,
-      sMaxAge: 600,
-      staleWhileRevalidate: 3600,
-    });
-    headers.set("Cache-Tag", cacheTagForTest(id));
-    headers.set("X-MBTI-Edge-Cache", "MISS");
+    const headers =
+      options.useCache ?
+        withCacheHeaders(JSON_HEADERS, {
+          etag,
+          maxAge: 60,
+          sMaxAge: 600,
+          staleWhileRevalidate: 3600,
+        })
+      : new Headers({
+          ...JSON_HEADERS,
+          "Cache-Control": "no-store",
+          ETag: etag,
+        });
+    if (options.useCache) {
+      headers.set("Cache-Tag", cacheTagForTest(id));
+      headers.set("X-MBTI-Edge-Cache", "MISS");
+    } else {
+      headers.set("X-MBTI-Edge-Cache", "BYPASS");
+    }
     setServerTiming(headers, [
-      { name: "kv", dur: kvMs, desc: kvMs > 0 ? "MISS" : "BYPASS" },
-      { name: "cache", dur: cacheMs, desc: "MISS" },
+      {
+        name: "kv",
+        dur: kvMs,
+        desc:
+          options.useCache ?
+            kvMs > 0 ?
+              "MISS"
+            : "BYPASS"
+          : "BYPASS",
+      },
+      {
+        name: "cache",
+        dur: cacheMs,
+        desc: options.useCache ? "MISS" : "BYPASS",
+      },
       { name: "d1", dur: d1Ms },
       { name: "r2", dur: r2Ms },
       { name: "total", dur: performance.now() - startedAt },
@@ -293,21 +330,41 @@ export async function onRequestGet(
   }
 
   const merged = buildMergedPayload(row, bodyJson);
+  const response =
+    options.useCache ?
+      jsonResponse(merged, {
+        status: 200,
+        headers: withCacheHeaders(JSON_HEADERS, {
+          etag,
+          maxAge: 60,
+          sMaxAge: 600,
+          staleWhileRevalidate: 3600,
+        }),
+      })
+    : noStoreJsonResponse(merged);
 
-  const response = jsonResponse(merged, {
-    status: 200,
-    headers: withCacheHeaders(JSON_HEADERS, {
-      etag,
-      maxAge: 60,
-      sMaxAge: 600,
-      staleWhileRevalidate: 3600,
-    }),
-  });
-  response.headers.set("Cache-Tag", cacheTagForTest(id));
-  response.headers.set("X-MBTI-Edge-Cache", "MISS");
+  if (options.useCache) {
+    response.headers.set("Cache-Tag", cacheTagForTest(id));
+    response.headers.set("X-MBTI-Edge-Cache", "MISS");
+  } else {
+    response.headers.set("X-MBTI-Edge-Cache", "BYPASS");
+  }
   setServerTiming(response.headers, [
-    { name: "kv", dur: kvMs, desc: kvMs > 0 ? "MISS" : "BYPASS" },
-    { name: "cache", dur: cacheMs, desc: "MISS" },
+    {
+      name: "kv",
+      dur: kvMs,
+      desc:
+        options.useCache ?
+          kvMs > 0 ?
+            "MISS"
+          : "BYPASS"
+        : "BYPASS",
+    },
+    {
+      name: "cache",
+      dur: cacheMs,
+      desc: options.useCache ? "MISS" : "BYPASS",
+    },
     { name: "d1", dur: d1Ms },
     { name: "r2", dur: r2Ms },
     { name: "total", dur: performance.now() - startedAt },
@@ -321,4 +378,10 @@ export async function onRequestGet(
   }
   if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));
   return response;
+}
+
+export async function onRequestGet(
+  context: PagesContext<MbtiEnv, Params>,
+): Promise<Response> {
+  return loadTestDetail(context, { enforcePublished: true, useCache: true });
 }

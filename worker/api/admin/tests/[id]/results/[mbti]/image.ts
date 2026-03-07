@@ -41,6 +41,18 @@ function badRequest(message: string): Response {
   return noStoreJsonResponse({ error: message }, 400);
 }
 
+async function rollbackUploadedObject(
+  bucket: MbtiEnv["MBTI_BUCKET"],
+  key: string,
+): Promise<void> {
+  if (!bucket || !key) return;
+  try {
+    await bucket.delete(key);
+  } catch {
+    // Best effort cleanup for partial uploads.
+  }
+}
+
 /** Pure: map MIME type to file extension. */
 function extensionFromMime(mimeType = ""): string {
   const type = String(mimeType || "").toLowerCase();
@@ -130,30 +142,6 @@ export async function onRequestPut(
   const extension = extensionFromMime(upload.contentType);
   const fileName = `${mbtiRaw}.${extension}`;
   const key = normalizeAssetKey(`${getImagesPrefix(testId)}${fileName}`);
-
-  try {
-    await bucket.put(key, bytes, {
-      httpMetadata: { contentType: upload.contentType },
-    });
-    await upsertTestImageMetaAndTouchBatch(
-      db,
-      {
-        testId,
-        imageKey: key,
-        imageType: "result",
-        imageName: mbtiRaw,
-        contentType: upload.contentType,
-        sizeBytes: upload.buffer.byteLength,
-      },
-      testId,
-    );
-  } catch (err) {
-    return noStoreJsonResponse(
-      { error: err instanceof Error ? err.message : "Failed to upload image." },
-      500,
-    );
-  }
-
   const testJson = await readTest(bucket, testId);
   if (!testJson || typeof testJson !== "object") {
     return noStoreJsonResponse(
@@ -167,7 +155,44 @@ export async function onRequestPut(
     mbtiRaw,
     key,
   );
-  await writeTest(bucket, testId, updated);
+  let wroteImage = false;
+  let wroteTestJson = false;
+
+  try {
+    await bucket.put(key, bytes, {
+      httpMetadata: { contentType: upload.contentType },
+    });
+    wroteImage = true;
+    await writeTest(bucket, testId, updated);
+    wroteTestJson = true;
+    await upsertTestImageMetaAndTouchBatch(
+      db,
+      {
+        testId,
+        imageKey: key,
+        imageType: "result",
+        imageName: mbtiRaw,
+        contentType: upload.contentType,
+        sizeBytes: upload.buffer.byteLength,
+      },
+      testId,
+    );
+  } catch (err) {
+    if (wroteTestJson) {
+      try {
+        await writeTest(bucket, testId, testJson);
+      } catch {
+        // Best effort cleanup for partial test.json updates.
+      }
+    }
+    if (wroteImage) {
+      await rollbackUploadedObject(bucket, key);
+    }
+    return noStoreJsonResponse(
+      { error: err instanceof Error ? err.message : "Failed to upload image." },
+      500,
+    );
+  }
 
   if (context.env.MBTI_KV) {
     context.waitUntil(context.env.MBTI_KV.delete(`test:${testId}`));

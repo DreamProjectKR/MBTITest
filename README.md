@@ -10,6 +10,19 @@ Cloudflare Pages + D1 + R2 + KV 기반의 MBTI 테스트 플랫폼입니다.
 - **캐시**: Cloudflare KV -- 테스트 상세 응답 캐시 (TTL 5분)
 - **이미지 최적화**: Cloudflare Image Resizing (`/cdn-cgi/image`)
 
+## 도메인 범위
+
+이 저장소의 현재 도메인은 `테스트 콘텐츠 관리 + 공개 테스트 제공`입니다.
+
+- 포함: 테스트 메타데이터, 문항/결과 본문, 이미지 업로드, draft/publish 상태, public 조회 API
+- 포함: 관리자용 콘텐츠 편집 API (`/api/admin/tests*`)
+- 제외: users, accounts, auth, roles, sessions 같은 일반적인 User Management 도메인
+
+즉 `isPublished`는 단순 표시용 필드가 아니라, public API 노출 여부를 결정하는 서버 정책입니다.
+
+- `GET /api/tests`, `GET /api/tests/:id`는 published 테스트만 반환합니다.
+- admin API는 편집 흐름을 위해 draft와 published를 모두 조회할 수 있습니다.
+
 ## 폴더 구조
 
 ```text

@@ -1,4 +1,4 @@
-import { API_ADMIN_TESTS_BASE, API_TESTS_BASE } from "./state.js";
+import { API_ADMIN_TESTS_BASE } from "./state.js";
 
 /** API layer: all network I/O for admin. */
 
@@ -13,11 +13,11 @@ export function fetchJson(url, options) {
 }
 
 export function fetchTestsIndex() {
-  return fetchJson(API_TESTS_BASE);
+  return fetchJson(API_ADMIN_TESTS_BASE);
 }
 
 export function fetchTestDetail(testId) {
-  return fetchJson(`${API_TESTS_BASE}/${encodeURIComponent(testId)}`);
+  return fetchJson(`${API_ADMIN_TESTS_BASE}/${encodeURIComponent(testId)}`);
 }
 
 export function saveTest(testId, payload) {
