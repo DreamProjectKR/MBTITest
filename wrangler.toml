@@ -3,5 +3,5 @@ compatibility_date = "2026-02-18"
 pages_build_output_dir = "./public"
 
 # Pages serves static files only. API and assets are handled by mbtitest-api Worker.
-# Deploy Worker: wrangler deploy --config worker/wrangler.toml
-# Deploy Pages: wrangler pages deploy public (or via Git integration)
+# Deploy Worker: npx wrangler deploy --config worker/wrangler.toml
+# Deploy Pages: npx wrangler pages deploy public (or via Git integration)
