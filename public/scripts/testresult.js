@@ -91,7 +91,7 @@ function renderError(message) {
   if (dom.thumbnailEl) dom.thumbnailEl.removeAttribute("src");
 }
 
-const RESULT_IMAGE_RESIZE = "width=480,quality=82,fit=cover,format=auto";
+const RESULT_IMAGE_RESIZE = "width=480,quality=82,fit=cover,format=webp";
 
 function preloadCriticalImage(path, versionRaw, resizeRaw) {
   try {
@@ -228,7 +228,7 @@ function renderResultPage(data, mbti) {
       dom.thumbnailEl.setAttribute("data-asset-src", resultImage);
       dom.thumbnailEl.setAttribute(
         "data-asset-resize",
-        "width=480,quality=82,fit=cover,format=auto",
+        "width=480,quality=82,fit=cover,format=webp",
       );
       dom.thumbnailEl.setAttribute("data-asset-srcset", "320,480,640");
       dom.thumbnailEl.setAttribute(

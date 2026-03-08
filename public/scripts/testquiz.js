@@ -23,8 +23,9 @@ function setQuizState(update) {
 }
 
 // Quiz question images often include text; avoid cropping.
-const QUESTION_IMAGE_RESIZE = "width=640,quality=82,fit=contain,format=auto";
-const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
+// format=webp: faster encode than AVIF, reduces 400~800ms cold latency (Image.md B.2)
+const QUESTION_IMAGE_RESIZE = "width=640,quality=82,fit=contain,format=webp";
+const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=webp";
 
 /**
  * Cached DOM references for render/update.
@@ -237,7 +238,7 @@ function setImageWithFallback(imgEl, paths, alt) {
   imgEl.setAttribute("data-asset-src", primaryPath);
   if (version) imgEl.setAttribute("data-asset-version", version);
   imgEl.setAttribute("data-asset-resize", QUESTION_IMAGE_RESIZE);
-  imgEl.setAttribute("data-asset-srcset", "320,480,640");
+  imgEl.setAttribute("data-asset-srcset", "320,480");
   imgEl.setAttribute("data-asset-sizes", "(max-width: 476px) 70vw, 350px");
   imgEl.setAttribute("loading", "eager");
   imgEl.setAttribute("fetchpriority", "high");
@@ -376,8 +377,43 @@ function initializeStateFromTestJson(testJson) {
     answers: [],
   });
 
+  injectFirstQuestionPreload();
+
   renderQuestion();
   return true;
+}
+
+/** Inject preload for first question image to improve LCP (Image.md B.1). */
+function injectFirstQuestionPreload() {
+  try {
+    const firstQuestion = state.test?.questions?.[0];
+    if (!firstQuestion || typeof document === "undefined") return;
+    const firstPath = getQuestionImageUrlCandidates(
+      state.test?.id,
+      firstQuestion,
+    )[0];
+    if (!firstPath) return;
+    const version = state.test?.updatedAt ? String(state.test.updatedAt) : "";
+    const resizeRaw = `width=320,${QUESTION_IMAGE_RESIZE_BASE}`;
+    const url =
+      typeof window.buildAssetUrl === "function" ?
+        window.buildAssetUrl(firstPath, resizeRaw, version)
+      : "";
+    if (!url) return;
+    const key = `quiz-first:${firstPath}|${version}`;
+    if (document.querySelector(`link[data-preload-key="${key}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = url;
+    link.setAttribute("data-preload-key", key);
+    try {
+      link.fetchPriority = "high";
+    } catch (e) {}
+    document.head.appendChild(link);
+  } catch (e) {
+    // Best-effort only.
+  }
 }
 
 function recordScore(answer) {

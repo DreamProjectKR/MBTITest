@@ -24,9 +24,9 @@ function setPreloadState(update) {
   preloadState = { ...preloadState, ...update };
 }
 
-const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
+const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=webp";
 const QUESTION_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
-const RESULT_IMAGE_RESIZE_BASE = "quality=82,fit=cover,format=auto";
+const RESULT_IMAGE_RESIZE_BASE = "quality=82,fit=cover,format=webp";
 const RESULT_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
 const CACHE_NAME = "mbti-assets-v2";
 
@@ -484,7 +484,7 @@ function renderIntro(data) {
       thumbnailEl.setAttribute("data-asset-src", String(data.thumbnail));
       thumbnailEl.setAttribute(
         "data-asset-resize",
-        "width=480,quality=82,fit=cover,format=auto",
+        "width=480,quality=82,fit=cover,format=webp",
       );
       thumbnailEl.setAttribute("data-asset-srcset", "320,480,640");
       thumbnailEl.setAttribute(
@@ -509,7 +509,7 @@ function renderIntro(data) {
       authorImgEl.setAttribute("data-asset-src", String(data.authorImg));
       authorImgEl.setAttribute(
         "data-asset-resize",
-        "width=200,quality=85,fit=cover,format=auto",
+        "width=200,quality=85,fit=cover,format=webp",
       );
       if (version) authorImgEl.setAttribute("data-asset-version", version);
       hydrateAssetElement(authorImgEl);
