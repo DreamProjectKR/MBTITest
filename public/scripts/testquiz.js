@@ -25,7 +25,6 @@ function setQuizState(update) {
 // Quiz question images often include text; avoid cropping.
 const QUESTION_IMAGE_RESIZE = "width=640,quality=82,fit=contain,format=auto";
 const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
-const QUESTION_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
 
 /**
  * Cached DOM references for render/update.
@@ -376,26 +375,6 @@ function initializeStateFromTestJson(testJson) {
     scores: {},
     answers: [],
   });
-
-  // Start loading first question image at all srcset widths so requests begin
-  // before the img gets its src; improves chance of cache hit and reduces LCP.
-  const firstQuestion = state.test?.questions?.[0];
-  if (firstQuestion && typeof window.loadImageAsset === "function") {
-    const firstPath = getQuestionImageUrlCandidates(
-      state.test?.id,
-      firstQuestion,
-    )[0];
-    const version = state.test?.updatedAt ? String(state.test.updatedAt) : "";
-    if (firstPath) {
-      QUESTION_IMAGE_SRCSET_WIDTHS.forEach((w) => {
-        window.loadImageAsset(
-          firstPath,
-          `width=${w},${QUESTION_IMAGE_RESIZE_BASE}`,
-          version,
-        );
-      });
-    }
-  }
 
   renderQuestion();
   return true;
