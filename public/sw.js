@@ -27,11 +27,20 @@ function isStorableResponse(response) {
   return !cacheControl.includes("no-store");
 }
 
+const RECENTLY_REVALIDATED = new Map();
+const REVALIDATE_DEBOUNCE_MS = 30_000;
+
 async function updateCache(cache, request) {
+  const url = request.url;
+  const now = Date.now();
+  if (RECENTLY_REVALIDATED.get(url) > now - REVALIDATE_DEBOUNCE_MS) {
+    return null;
+  }
   try {
     const response = await fetch(request);
     if (isStorableResponse(response)) {
       await cache.put(request, response.clone());
+      RECENTLY_REVALIDATED.set(url, now);
     }
     return response;
   } catch {
