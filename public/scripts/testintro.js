@@ -28,7 +28,7 @@ const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=auto";
 const QUESTION_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
 const RESULT_IMAGE_RESIZE_BASE = "quality=82,fit=cover,format=auto";
 const RESULT_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
-const CACHE_NAME = "mbti-assets";
+const CACHE_NAME = "mbti-assets-v2";
 
 /** Pure: cache key for test JSON. */
 function getTestCacheKey(testId) {
