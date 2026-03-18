@@ -80,6 +80,13 @@ MBTI ZOO는 Cloudflare의 엣지 인프라 위에서 동작합니다.
 | **Edge** (`Cache-Tag`)   | API 응답, `/assets/*`     | 최대 1년  | 태그별 선택 퍼지         |
 | **브라우저** (`max-age`) | API/assets                | 60초-1년  | 버전 쿼리(`?v=`)         |
 
+### 이미지 성능 (측정·해결)
+
+| 문서                       | 역할                                 |
+| -------------------------- | ------------------------------------ |
+| [Result.md](../Result.md)  | dreamp.org Network 측정·원인 분석    |
+| [Solution.md](Solution.md) | Result.md 기준 실행 가능한 해결 순서 |
+
 ## 프론트엔드 구조
 
 프레임워크 없이 HTML/CSS/JS로 구성되어 있습니다.

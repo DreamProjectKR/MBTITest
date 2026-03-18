@@ -102,7 +102,7 @@ document.querySelector(".test1").onclick = function () {
       width: opts.isFirst ? 640 : 520,
       quality: opts.isFirst ? 82 : 78,
       fit: "cover",
-      format: "auto",
+      format: "webp",
     };
     if (test.thumbnail) {
       img.setAttribute("data-asset-src", String(test.thumbnail));

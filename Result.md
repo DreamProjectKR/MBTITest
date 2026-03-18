@@ -1,75 +1,161 @@
-# User Management 모듈 평가 결과
+# dreamp.org 이미지 로딩 속도 분석 결과
 
-## 전제
+**분석 일시**: 2026-03-08  
+**방법**: Playwright MCP (Network 탭 캡처) + Cloudflare MCP (인프라 확인) + 코드 로직 분석
 
-이 평가는 **현재 저장소 기준**으로 진행했습니다.
+---
 
-결론부터 말하면, 이 저장소에는 일반적으로 의미하는 **User Management 모듈(사용자, 계정, 인증, 권한, 세션, 역할 관리)** 이 존재하지 않습니다.  
-실제로 존재하는 것은 **테스트 콘텐츠를 수정/업로드하는 admin 성격의 관리 기능**에 가깝습니다.
+## 1. 측정 요약 (Playwright Network 탭)
 
-즉, 아래 평가는 두 층으로 읽어야 합니다.
+### 1.1 홈페이지 (https://dreamp.org)
 
-1. "`User Management`가 완성되었다"는 주장 자체에 대한 평가
-2. 현재 저장소에 실제로 존재하는 관리 기능 구조에 대한 품질 평가
+| 이미지                         | Duration (ms) | Size   | Initiator      |
+| ------------------------------ | ------------- | ------ | -------------- |
+| mainLogo.png                   | 944           | 12 KB  | link (preload) |
+| mainbanner.png                 | 1,276         | 118 KB | link (preload) |
+| new.png                        | 776           | 2 KB   | img            |
+| fire.png                       | 719           | 2 KB   | img            |
+| FooterBackgroundImg.png        | 237           | 11 KB  | css            |
+| test-root-vegetables/thumbnail | 1,351         | 46 KB  | img            |
+| test-summer/thumbnail          | 1,136         | 36 KB  | img            |
+| favicon.png                    | 636           | 1 KB   | other          |
 
-## 핵심 발견사항
+**특징**: 홈페이지 이미지 700ms~1,350ms 소요. preload된 mainLogo·mainbanner도 1초 이상.
 
-| 심각도    | 항목                           | 설명                                                                                                                                                                    |
-| --------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Critical  | 실제 User Management 부재      | `users` 테이블, 로그인/로그아웃, 세션, 권한 체크, 역할 모델, auth middleware가 없습니다. 따라서 "User Management 완료"라는 주장은 이 저장소 기준으로 성립하지 않습니다. |
-| Critical  | 관리자 기능 무인증 공개        | `worker/index.ts`, `worker/router.ts` 기준 `/api/admin/tests/*` 경로가 인증 없이 직접 노출됩니다. `public/admin.html`도 일반 정적 페이지로 접근 가능합니다.             |
-| Important | publish/draft 의미 불일치      | `isPublished`가 존재하지만 `GET /api/tests`, `GET /api/tests/:id`에서 공개 여부를 실질적으로 강제하지 않습니다. UI/문서와 서버 동작이 어긋납니다.                       |
-| Important | 업로드 처리 순서의 일관성 문제 | 일부 업로드 핸들러는 R2/D1 변경을 먼저 수행한 뒤 전체 정합성을 확인합니다. 중간 실패 시 orphan 상태가 남을 수 있습니다.                                                 |
-| Important | 테스트 안전망 부족             | `package.json` 기준 자동 테스트가 사실상 없습니다. 완료 선언을 뒷받침할 회귀 방지 장치가 약합니다.                                                                      |
+---
 
-## 종합 평가표
+### 1.2 Test intro (https://dreamp.org/testintro.html?testId=test-summer)
 
-| Criteria                                  | Score (1-10) | Detailed Reason & Examples of Small Mistakes                                                                                                                                                                                                                                                                                                                                    |
-| ----------------------------------------- | -----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Readability                               |            6 | 코드 자체는 비교적 짧은 함수, 분리된 파일 구조, 이름의 일관성이 있어서 읽기 어렵지는 않습니다. 다만 "User Management"라고 부를 수 있는 구조가 아니고 실제로는 테스트 관리 기능이라, 기능명과 코드 현실이 어긋납니다. 이런 의미 불일치는 읽는 사람의 이해를 크게 방해합니다. 예: `isPublished`가 존재하지만 공개 API에서 강제되지 않아, 이름이 주는 기대와 실제 동작이 다릅니다. |
-| Ease of Writing / Extensibility           |            4 | 현재 구조는 테스트 콘텐츠 관리에는 어느 정도 확장 가능하지만, 사용자/권한/세션 기반 구조로 확장하기엔 기초가 없습니다. auth boundary, user domain model, role policy layer, session storage abstraction이 전혀 없습니다. 예: `/api/admin/tests/*` 라우트는 그대로 핸들러로 연결되며 인증 주입 지점이 없습니다.                                                                  |
-| Long-running Stability (drift prevention) |            3 | 장기적으로 드리프트를 막는 장치가 매우 약합니다. 문서/화면에서 의미가 있어 보이는 값(`isPublished`)이 실제 backend enforcement와 다르고, 자동 테스트도 거의 없어서 시간이 지나면 의도와 구현의 차이가 계속 커질 가능성이 큽니다. 예: admin UI에서 draft/publish가 있어 보여도 public API는 모두 노출할 수 있습니다.                                                             |
-| Small Mistake Rate                        |            4 | 코드가 완전히 난잡하지는 않지만, 작은 실수의 빈도는 낮지 않습니다. 특히 "동작은 하지만 의미적으로 틀린 상태"가 눈에 띕니다. 예: result image 업로드는 일부 저장을 먼저 하고 나중에 `test.json` 유효성을 확인하므로 실패 시 반쯤 반영될 수 있습니다. 예: 공개 여부 필드가 있으나 실제 필터링 누락.                                                                               |
-| Overall Satisfaction                      |            4 | 코드 스타일만 보면 아주 나쁘지는 않지만, "User Management 완료"라는 목표 대비 만족도는 낮습니다. 이유는 핵심 도메인 자체가 없고, 현재 관리 기능도 인증/권한/회귀 방지 측면에서 완료 상태로 보기 어렵기 때문입니다.                                                                                                                                                              |
+| 이미지                 | Duration (ms) | Size       | Initiator |
+| ---------------------- | ------------- | ---------- | --------- |
+| TestStart.png          | 1,187         | 8 KB       | img       |
+| TestShare.png          | 756           | 8 KB       | img       |
+| HeaderBackgroundImg    | 1,002         | 13 KB      | css       |
+| SNS 아이콘 (4개)       | 599~1,352     | 1 KB each  | img       |
+| thumbnail (webp)       | 333           | 0 (cached) | img       |
+| author.png             | 706           | 0 (cached) | img       |
+| **퀴즈 preload (40+)** | 242~1,547     | 0          | fetch     |
 
-## 객관적 총평
+**특징**: testintro에서 `startBackgroundPrefetch`가 40개 이상 이미지를 fetch로 preload. ENFJ.png, ENFP.png 등 404 발생.
 
-가장 중요한 판단은 이것입니다.
+---
 
-- **이 저장소에는 User Management 모듈이 완성된 것이 아니라, 인증 없는 테스트 콘텐츠 관리 기능이 일부 정리되어 있는 상태**입니다.
-- 따라서 코드 스타일 점수와 별개로, 기능 완성도 평가는 낮게 줄 수밖에 없습니다.
+### 1.3 Test quiz (https://dreamp.org/testquiz.html?testId=test-summer)
 
-## .cursorrules에 추가할 만한 규칙 5개
+| 이미지                     | Duration (ms) | Size | Initiator      |
+| -------------------------- | ------------- | ---- | -------------- |
+| q4.png (320w)              | 2             | 300  | link (preload) |
+| q4.png (480w)              | 2             | 300  | img            |
+| q4.png (480w, format=auto) | 468           | 0    | img            |
+| mainLogo                   | 4             | 0    | img            |
 
-1. **관리자/수정 API는 인증 체크 없이 merge 금지**
-   - `/api/admin/*`, `/admin/*` 성격의 엔드포인트는 인증/권한 체크가 없으면 구현 완료로 간주하지 않는다.
+**특징**: testquiz는 캐시 히트 시 2~4ms로 매우 빠름. 일부 q4.png variant 실패.
 
-2. **UI에 존재하는 상태값은 서버에서 반드시 강제**
-   - 예: `isPublished`, `role`, `status` 같은 필드는 화면에만 존재하면 안 되고, public API 또는 query layer에서 반드시 enforcement해야 한다.
+---
 
-3. **외부 저장소(R2/D1/KV) 변경 전 전체 정합성 먼저 검증**
-   - 업로드/저장 핸들러는 파일 저장, DB upsert, 캐시 무효화 전에 선행 검증을 완료해야 하며, partial write 가능성이 있으면 거부한다.
+## 2. 로직적 원인 분석
 
-4. **새로운 관리 기능은 최소 1개 성공 케이스 + 1개 실패 케이스 테스트 없이 완료 선언 금지**
-   - 특히 권한, 공개 여부, mutation consistency는 테스트가 없으면 완료로 보지 않는다.
+### 2.1 홈페이지 (700ms~1,350ms)
 
-5. **기능 이름과 실제 도메인이 다르면 명칭 수정 또는 문서 경고 필수**
-   - "User Management"처럼 이름이 큰데 실제 구현이 "content admin" 수준이면, 코드/문서/PR 설명에서 정확한 명칭으로 수정한다.
+| 원인             | 설명                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| **콜드 캐시**    | 첫 방문 시 `/cdn-cgi/image` → Cloudflare Image Resizing → Worker → R2 전체 경로 왕복 |
+| **format=auto**  | index.html, main.js의 카드 이미지가 여전히 `format=auto` 사용 → AVIF 인코딩 비용     |
+| **preload 중복** | mainLogo, mainbanner가 preload + img src로 이중 요청 가능                            |
+| **srcset 3폭**   | 320, 480, 640 (또는 480, 768, 1230) → 브라우저가 1개 선택하지만 URL 생성 시점에 처리 |
 
-## 다음 유사 규모 작업에서 개선할 점 3개
+### 2.2 Test intro (600ms~1,500ms + 40+ preload)
 
-1. **도메인 정의를 먼저 고정해야 합니다**
-   - 이번 상태에서 가장 큰 문제는 "User Management"라는 이름과 실제 구현 범위가 다르다는 점입니다. 다음에는 시작 전에 users/accounts/auth/roles/sessions 범위를 문서로 먼저 확정해야 합니다.
+| 원인                    | 설명                                                                                                                                               |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **과도한 preload**      | `startBackgroundPrefetch`가 40개 이상 이미지를 fetch로 preload. `preloadQuestionImages` + `preloadResultImages`가 q1~q12, 16개 MBTI 결과 이미지 등 |
+| **동시 요청 병목**      | concurrency 2~4로 동시 fetch → Cloudflare Image Resizing / Worker / R2에서 경쟁                                                                    |
+| **404 이미지**          | ENFJ.png, ENFP.png 등 result 이미지 경로 불일치 (대소문자, 확장자)                                                                                 |
+| **requestIdleCallback** | Phase 1은 1200ms timeout, Phase 2는 2000ms 후 실행 → 초기 로드 시점과 겹치며 네트워크 경쟁                                                         |
 
-2. **공개 API와 관리자 API의 경계부터 세워야 합니다**
-   - route layer에서 인증/권한 체크 지점을 먼저 만들고, 그 위에 기능을 쌓아야 이후 확장이 훨씬 안정적입니다.
+### 2.3 Test quiz (2~4ms 캐시 히트 vs 468ms 미스)
 
-3. **UI/문서/DB 필드 의미를 서버 동작과 동기화해야 합니다**
-   - `isPublished`처럼 의미가 있는 필드는 backend query와 response policy까지 포함해 끝까지 연결해야 합니다.
+| 원인                           | 설명                                                                             |
+| ------------------------------ | -------------------------------------------------------------------------------- |
+| **캐시 히트**                  | testintro preload 또는 SW 캐시로 q4.png 320w, 480w가 즉시 반환                   |
+| **format 불일치**              | q4.png 480w variant 중 `format=auto` URL이 468ms 소요 → 캐시 키가 달라 별도 요청 |
+| **injectFirstQuestionPreload** | 첫 질문 이미지 preload가 LCP 개선에 기여                                         |
 
-## 이번 작업에서 가장 잘 유지된 점 1개
+### 2.4 공통 로직 이슈
 
-**코드의 국소적 가독성과 파일 분리 자체는 비교적 잘 유지되었습니다.**
+| 항목      | 파일         | 내용                                                            |
+| --------- | ------------ | --------------------------------------------------------------- |
+| srcset    | config.js    | `maybeApplySrcset`가 320,480,640 등 3폭 생성 → 요청 수 증가     |
+| 에러 폴백 | config.js    | `error` 시 1회 재시도 후 `/assets/*` 원본으로 폴백 (구현됨)     |
+| SW 캐시   | sw.js        | `/cdn-cgi/image`, `/assets` 캐시. revalidate 30초 디바운스 적용 |
+| 캐시 이름 | testintro.js | `mbti-assets-v2`로 SW와 통일됨                                  |
 
-- admin 관련 코드가 `api.js`, `forms.js`, `validation.js`, `main.js`처럼 나뉘어 있어, 최소한 "한 파일에 모든 것이 뒤엉킨 상태"는 아닙니다.
-- 즉, **구조적 정리감은 어느 정도 유지되었지만, 도메인 완성도와 보안 경계는 그 수준에 못 미쳤다**고 보는 것이 가장 정확합니다.
+---
+
+## 3. Cloudflare 인프라 분석 (MCP)
+
+### 3.1 확인된 리소스
+
+| 리소스      | 값                                                           |
+| ----------- | ------------------------------------------------------------ |
+| Worker      | mbtitest-api (id: fa2e9eb86b054d2388ead6605b696fbb)          |
+| R2 Bucket   | mbti-assets (created 2025-12-08)                             |
+| D1 Database | mbti-db (uuid: b3d4e76a-4e45-4070-9e89-701c35cb642f)         |
+| Routes      | dreamp.org/api/_, dreamp.org/assets/_, dreamp.org/cdn-cgi/\* |
+
+### 3.2 요청 경로 (Cold Path)
+
+```
+사용자 → Cloudflare Edge
+         → /cdn-cgi/image/* (Image Resizing)
+              → origin fetch: GET /assets/test-xxx/images/q1.png
+                   → Worker (mbtitest-api)
+                        → R2 (mbti-assets)
+         → 리사이즈 + 포맷 변환
+         → 사용자 응답
+```
+
+### 3.3 Cloudflare 측 지연 원인
+
+| 원인                   | 설명                                                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tiered Cache**       | Worker가 `/assets/*`에 `cacheTtl: 86400` 적용. Image Resizing의 origin fetch가 Worker를 거치므로 Tiered Cache가 채워짐. 단, **콜드 시** 첫 요청은 R2까지 왕복 |
+| **R2 리전**            | mbti-assets 버킷. 리전 미명시 시 기본(APAC 등) 가능. 사용자 ↔ 엣지 ↔ R2 거리에 따라 50~200ms 추가                                                             |
+| **Image Resizing**     | `/cdn-cgi/image` 출력은 Cloudflare의 별도 캐시. **Cache Rules**에서 `*dreamp.org/cdn-cgi/image/*` Edge TTL 1일 설정 시 두 번째 요청부터 50ms 이하 수준 기대   |
+| **Cache Rules 미확인** | CLOUDFLARE_PERFORMANCE.md에 `/cdn-cgi/image/*` Cache Rules 권장. 대시보드에서 미설정 시 매 요청마다 Image Resizing 처리                                       |
+| **MCP 한계**           | cloudflare-bindings MCP는 zones, cache, analytics 미지원. Cache Rules·캐시 적중률은 대시보드 또는 REST/GraphQL API로 확인 필요                                |
+
+### 3.4 Worker / R2 설정
+
+| 항목                | Worker                                        | 비고                              |
+| ------------------- | --------------------------------------------- | --------------------------------- |
+| assets Tiered Cache | cacheTtl: 86400, cacheTags: assets, test-{id} | `worker/http/routes.ts`           |
+| R2 바인딩           | MBTI_BUCKET → mbti-assets                     | `worker/wrangler.toml`            |
+| SELF 바인딩         | mbtitest-api                                  | Tiered Cache 채우기용 self-invoke |
+
+---
+
+## 4. 종합 요약
+
+### 4.1 홈페이지·testintro 지연 (700ms~1,500ms)
+
+| 구분           | 원인                                                           |
+| -------------- | -------------------------------------------------------------- |
+| **로직**       | format=auto, 과도한 preload(40+), 동시 요청 병목               |
+| **Cloudflare** | 콜드 캐시, `/cdn-cgi/image` Cache Rules 미설정 가능성, R2 왕복 |
+
+### 4.2 testquiz 빠른 응답 (2~4ms)
+
+| 구분           | 원인                                      |
+| -------------- | ----------------------------------------- |
+| **로직**       | testintro preload + SW 캐시로 q4.png 히트 |
+| **Cloudflare** | Tiered Cache / Worker Cache API 적중      |
+
+### 4.3 권장 조치
+
+| 우선순위 | 조치                                                                   | 효과                    |
+| -------- | ---------------------------------------------------------------------- | ----------------------- |
+| 1        | **Cache Rules**: `*dreamp.org/cdn-cgi/image/*` Edge TTL 1일            | 콜드 이후 50ms 이하     |
+| 2        | **testintro preload 축소**: 40+ → 4~8개(첫 2문항 + 결과 2개)           | 503 병목·병렬 경쟁 감소 |
+| 3        | **홈 format=webp**: index.html, main.js 카드 이미지 format=auto → webp | 100~200ms 처리 단축     |
+| 4        | **404 수정**: ENFJ.png, ENFP.png 등 result 이미지 경로 검증            | 불필요한 실패 요청 제거 |

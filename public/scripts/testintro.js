@@ -29,6 +29,8 @@ const QUESTION_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
 const RESULT_IMAGE_RESIZE_BASE = "quality=82,fit=cover,format=webp";
 const RESULT_IMAGE_SRCSET_WIDTHS = [320, 480, 640];
 const CACHE_NAME = "mbti-assets-v2";
+/** Phase 2 idle prefetch cap (Solution.md — Network fetch ≤ ~8 total with Phase 1). */
+const PRELOAD_PHASE2_MAX_FETCHES = 6;
 
 /** Pure: cache key for test JSON. */
 function getTestCacheKey(testId) {
@@ -264,31 +266,40 @@ function startBackgroundPrefetch(test) {
   const version = test.updatedAt ? String(test.updatedAt) : "";
   const { questionPaths, resultPaths } = extractImagePaths(test);
 
-  const criticalQuestions = questionPaths.slice(0, 2);
-  const restQuestions = questionPaths.slice(2);
-  const likelyResults = resultPaths.slice(0, 2);
+  const criticalQuestions = questionPaths.slice(0, 1);
+  const criticalResults = resultPaths.slice(0, 1);
 
   const runCritical = () =>
     Promise.all([
       preloadQuestionImages(criticalQuestions, version, {
-        concurrency: 2,
+        concurrency: 1,
         widths: [320],
       }),
-      preloadResultImages(likelyResults, version, {
+      preloadResultImages(criticalResults, version, {
         concurrency: 1,
         widths: [320],
       }),
     ]);
-  const runRest = () =>
-    Promise.all([
-      preloadQuestionImages(restQuestions, version, { concurrency: 2 }),
-      preloadResultImages(resultPaths, version, {
-        concurrency: 2,
-        widths: [320, 480],
+
+  const runRest = () => {
+    const qRest = questionPaths.slice(1);
+    const rRest = resultPaths.slice(1);
+    let qBudget = Math.min(3, PRELOAD_PHASE2_MAX_FETCHES);
+    const qTake = qRest.slice(0, qBudget);
+    const rBudget = Math.max(0, PRELOAD_PHASE2_MAX_FETCHES - qTake.length);
+    const rTake = rRest.slice(0, Math.min(rBudget, 3));
+    return Promise.all([
+      preloadQuestionImages(qTake, version, {
+        concurrency: 1,
+        widths: [320],
+      }),
+      preloadResultImages(rTake, version, {
+        concurrency: 1,
+        widths: [320],
       }),
     ]);
+  };
 
-  // Phase 1 quickly; Phase 2 in idle time. Update preload state immutably.
   const criticalPromise = (function () {
     if (typeof requestIdleCallback === "function") {
       return new Promise((resolve) => {
@@ -323,8 +334,8 @@ async function preloadCriticalBeforeStart(test) {
   const version = test.updatedAt ? String(test.updatedAt) : "";
   const { questionPaths, resultPaths } = extractImagePaths(test);
   const quickWarm = Promise.all([
-    preloadQuestionImages(questionPaths.slice(0, 2), version, {
-      concurrency: 2,
+    preloadQuestionImages(questionPaths.slice(0, 1), version, {
+      concurrency: 1,
       widths: [320],
     }),
     preloadResultImages(resultPaths.slice(0, 1), version, {

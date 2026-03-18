@@ -24,7 +24,8 @@ function setQuizState(update) {
 
 // Quiz question images often include text; avoid cropping.
 // format=webp: faster encode than AVIF, reduces 400~800ms cold latency (Image.md B.2)
-const QUESTION_IMAGE_RESIZE = "width=640,quality=82,fit=contain,format=webp";
+/** Single display width + webp only — avoids 320/480 double fetch + format split (Solution.md §5). */
+const QUESTION_IMAGE_RESIZE = "width=480,quality=82,fit=contain,format=webp";
 const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=webp";
 
 /**
@@ -238,7 +239,7 @@ function setImageWithFallback(imgEl, paths, alt) {
   imgEl.setAttribute("data-asset-src", primaryPath);
   if (version) imgEl.setAttribute("data-asset-version", version);
   imgEl.setAttribute("data-asset-resize", QUESTION_IMAGE_RESIZE);
-  imgEl.setAttribute("data-asset-srcset", "320,480");
+  imgEl.setAttribute("data-asset-srcset", "480");
   imgEl.setAttribute("data-asset-sizes", "(max-width: 476px) 70vw, 350px");
   imgEl.setAttribute("loading", "eager");
   imgEl.setAttribute("fetchpriority", "high");
@@ -394,7 +395,7 @@ function injectFirstQuestionPreload() {
     )[0];
     if (!firstPath) return;
     const version = state.test?.updatedAt ? String(state.test.updatedAt) : "";
-    const resizeRaw = `width=320,${QUESTION_IMAGE_RESIZE_BASE}`;
+    const resizeRaw = `width=480,${QUESTION_IMAGE_RESIZE_BASE}`;
     const url =
       typeof window.buildAssetUrl === "function" ?
         window.buildAssetUrl(firstPath, resizeRaw, version)

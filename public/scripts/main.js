@@ -74,8 +74,8 @@ function createTestCard(test, variantClass, opts = {}) {
   const img = document.createElement("img");
   const size =
     variantClass === "newtest" ?
-      { width: 640, quality: 82, fit: "cover", format: "auto" }
-    : { width: 520, quality: 78, fit: "cover", format: "auto" };
+      { width: 640, quality: 82, fit: "cover", format: "webp" }
+    : { width: 520, quality: 78, fit: "cover", format: "webp" };
   // Single place for asset URL building: `config.js` hydrates `data-asset-*` into real URLs.
   if (test.thumbnail) {
     img.setAttribute("data-asset-src", String(test.thumbnail));

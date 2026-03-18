@@ -137,7 +137,7 @@
         width: 1440,
         quality: 72,
         fit: "cover",
-        format: "auto",
+        format: "webp",
       },
     );
     const resizedHeaderNon = window.assetResizeUrl(
@@ -146,7 +146,7 @@
         width: 1440,
         quality: 72,
         fit: "cover",
-        format: "auto",
+        format: "webp",
       },
     );
     const resizedFooter = window.assetResizeUrl(
@@ -155,7 +155,7 @@
         width: 1440,
         quality: 72,
         fit: "cover",
-        format: "auto",
+        format: "webp",
       },
     );
     root.setProperty("--asset-header-bg", `url(${resizedHeader})`);
