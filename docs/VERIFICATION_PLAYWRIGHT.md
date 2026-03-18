@@ -1,110 +1,70 @@
-# Playwright MCP 검증 보고서
+# Playwright 검증 보고서 (dreamp.org)
 
-**대상**: `https://dreamp.org` (프로덕션)  
-**일시**: 2026-03-18  
-**도구**: Cursor **user-Playwright** MCP `browser_run_code`
+**대상**: `https://dreamp.org` (프로덕션)
 
 ---
 
-## 1. 검증 절차
+## 배포 후 재검증 (2026-03-18)
 
-1. `page.on('request')`로 이미지·`/cdn-cgi/image/` URL 수집 (쿼리 제외 dedupe)
-2. **홈** `/` — `load` 후 6초 대기
-3. **testintro** `testintro.html?testId=test-summer` — `load` 후 12초 대기 (idle preload 구간)
-4. **testquiz** `testquiz.html?testId=test-summer` — `load` 후 6초 대기
+### 사용 도구
 
----
+1. **Playwright MCP** `browser_run_code` — 홈/intro/quiz CDN URL·포맷 요약
+2. **로컬 스크립트** `npm run verify:dreamp` — intro **고유 자산 파일 수**, testquiz **질문 이미지 width|format**
 
-## 2. 목표(Solution.md) 대비 결과
+### 1) MCP 측정 요약
 
-| 목표                                | 기준                                                | 프로덕션 측정                                              | 판정                               |
-| ----------------------------------- | --------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- |
-| 홈 format=webp                      | 카드·배너 등 `format=webp` 위주                     | CDN 9건 중 webp 4, **auto 5** (썸네일 등)                  | **부분** — 구버전·캐시 또는 미배포 |
-| intro preload ≤8 (퀴즈·결과 이미지) | `test-summer/images` 내 q/MBTI URL **≤8** 고유 요청 | **quiz 관련 64건** 고유 URL                                | **미달** — 코드상 8건 제한 미반영  |
-| testquiz 단일 포맷·폭               | 질문 이미지 `format=webp`, `width=480`만            | **q10 기준** 320 webp + 480 webp + **480 format=auto** 3종 | **미달** — 구버전 퀴즈 스크립트    |
-| 콘솔                                | 503/404 최소화                                      | ENFJ·ENFP·q10.png 로드 실패 로그                           | **별도 이슈** (R2/503)             |
+| 구간                        | 관측                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| **홈**                      | CDN 9건 — webp 4, **auto 5** (다른 테스트 썸네일 등)                                     |
+| **testintro**               | CDN 전체 75건 중 **webp 73, auto 2** (배너/헤더) — 포맷은 개선된 편                      |
+| **testintro** quiz URL 변형 | 쿼리 제외 고유 CDN URL **64건** (폭 320/480/640 조합으로 팽창)                           |
+| **testquiz**                | 첫 화면 질문에 **320 webp + 480 webp** 동시 요청 (`format=auto` 혼입은 이번 런에서 없음) |
+| **콘솔**                    | **503** 리소스 실패 (ENFJ, ENFP, q1 등 — Image Resizing/R2 쪽)                           |
 
----
+### 2) `verify:dreamp` 측정 (자산 파일 기준)
 
-## 3. 측정 수치 요약
+- **testintro** `test-summer/images` 내 **고유 파일**(qN·MBTI): **28개** (질문 12 + MBTI 16 전부 네트워크 요청 관측)
+- 저장소 `testintro.js` 의도: Phase1·2 합쳐 **약 8개 이하** 프리로드 → **불일치**
+- 일부 파일은 폭 **320만**, 일부는 **320+480+640** (썸네일 `srcset` 등으로 보임)
 
-### 홈
+**testquiz** (첫 문제, 셔플로 q2 관측):
 
-- 고유 CDN 이미지 URL: **9**
-- `format=webp`: **4** (예: mainLogo, mainbanner)
-- `format=auto`: **5**
+- 질문 CDN 요청: **`320|webp` + `480|webp`** → **단일 480 webp 목표 미달**
 
-### testintro
+### 3) 판정
 
-- CDN 이미지 URL 전체: **75** (고유)
-- `test-summer/images` 경로: **66**
-- 그중 질문(qN)·결과(MBTI) 패턴: **64** → Solution 목표 **≤8** 대비 **대량 초과**
+| 목표 (Solution.md)              | 배포 후 프로덕션                  |
+| ------------------------------- | --------------------------------- |
+| intro 프리로드 소량 (~8 자산)   | **미달** — 28개 파일 요청         |
+| testquiz 질문 **480 webp 단일** | **미달** — 320+480 병행           |
+| 홈/intro webp 비중              | **부분 달성** — intro는 webp 위주 |
+| 503 제거                        | **미해결**                        |
 
-### testquiz
+### 4) 해석
 
-- 수집된 질문 이미지 URL 예시:
-  - `width=320,…,format=webp,…/q10.png`
-  - `width=480,…,format=webp,…/q10.png`
-  - `width=480,quality=auto,…,format=auto,…/q10.png`
-
-- 최신 저장소 의도(480 + webp **단일**)와 **불일치**
-
----
-
-## 4. 해석
-
-1. **프로덕션 정적 자산(Pages `public/`)이 최신 커밋과 다름**
-   - testintro preload 축소, testquiz 단일 srcset/480 webp, 홈·카드 webp 일괄 반영이 **배포되지 않았거나** 이전 빌드가 캐시됨.
-
-2. **검증 재실행 조건**
-   - `npm run pages:deploy`(또는 사용 중인 배포 파이프라인)로 **public 반영 후**
-   - 동일 Playwright 스크립트로 재측정하면 intro **quiz 관련 ≤~10**, quiz **q 이미지 URL 1종·format=webp**에 가까워져야 함.
-
-3. **ENFJ/ENFP/q10 503·404**
-   - R2 객체 존재·대소문자·Worker/Image Resizing 503은 **배포와 별도**로 인프라 점검 필요.
+- **정적 배포가 일부 반영**된 정황은 있음(intro 전체 webp 비중↑).
+- **프리로드 캡·퀴즈 단일 폭**은 프로덕션에서 기대대로 동작하지 않음 → `testintro.js` / `testquiz.js` **구버전 캐시**(CDN·브라우저·SW) 또는 **실제 배포 바이너리가 저장소 최신과 다름** 가능성.
+- 다음 확인: 브라우저에서 `testintro.js`·`testquiz.js` 직접 열어 `PRELOAD_PHASE2_MAX_FETCHES` / `480` 단일 srcset 문자열 존재 여부.
 
 ---
 
-## 5. 재검증용 Playwright 스니펫
+## 이전 측정 (배포 전 참고)
 
-아래는 MCP `browser_run_code`에 넣을 수 있는 동일 로직 요약입니다.
+- 고유 CDN URL만 세면 intro **64건** 등으로 팽창 → **동일 자산 path 기준**으로도 재집계 필요.
+- 상세는 위 배포 후 절차 참고.
 
-```js
-async (page) => {
-  const sets = [new Set(), new Set(), new Set()];
-  const urls = [
-    "https://dreamp.org/",
-    "https://dreamp.org/testintro.html?testId=test-summer",
-    "https://dreamp.org/testquiz.html?testId=test-summer",
-  ];
-  for (let i = 0; i < 3; i++) {
-    const s = sets[i];
-    page.on("request", (req) => {
-      const u = req.url();
-      if (u.includes("dreamp.org") && u.includes("/cdn-cgi/image/"))
-        s.add(u.split("?")[0]);
-    });
-    await page.goto(urls[i], { waitUntil: "load", timeout: 60000 });
-    await page.waitForTimeout(i === 1 ? 12000 : 6000);
-    page.removeAllListeners("request");
-  }
-  const intro = [...sets[1]].filter(
-    (u) =>
-      u.includes("test-summer/images") &&
-      /q\d+|\/[EI][NS][FT][JP]\.png/i.test(u),
-  );
-  return {
-    introQuizLike: intro.length,
-    quizQ: [...sets[2]].filter((u) => /test-summer.*q\d+\.png/i.test(u)),
-  };
-};
+---
+
+## 재실행
+
+```bash
+npm run verify:dreamp
 ```
 
+(Chromium 필요: `npx playwright install chromium`)
+
 ---
 
-## 6. 결론
+## MCP용 스니펫 (요약)
 
-| 질문                                                  | 답                                                                       |
-| ----------------------------------------------------- | ------------------------------------------------------------------------ |
-| Playwright로 목표 개선이 **프로덕션에서** 달성됐는가? | **아니요.** intro·quiz 동작은 배포 전(또는 캐시된 구버전) 상태로 관측됨. |
-| 저장소 코드와 일치하려면?                             | **Pages(정적) 재배포 후** 동일 절차로 재검증.                            |
+`browser_run_code`에 넣을 수 있는 홈→intro→quiz 순회 예시는 Git 히스토리 또는 `scripts/verify-dreamp.mjs` 로직과 동일하게 구성하면 됩니다.

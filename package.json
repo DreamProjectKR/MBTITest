@@ -22,11 +22,13 @@
     "d1:migrate:remote": "wrangler d1 migrations apply mbti-db --remote --config worker/wrangler.toml",
     "seed:generate": "node scripts/generate_d1_seed.cjs > seed/d1_seed_from_assets.sql",
     "format": "prettier --write \"./**/*.{ts,tsx,js,jsx,json,css,md,mdx}\"",
-    "test": "node --test --experimental-strip-types"
+    "test": "node --test --experimental-strip-types",
+    "verify:dreamp": "node scripts/verify-dreamp.mjs"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "concurrently": "^9.1.2",
+    "playwright": "^1.49.1",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "wrangler": "^4.71.0"
