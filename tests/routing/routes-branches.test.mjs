@@ -10,6 +10,24 @@ import {
 test("route matchers return null for non-matching segment shapes", () => {
   const byRoute = Object.fromEntries(routeDescriptors.map((d) => [d.route, d]));
 
+  assert.deepEqual(byRoute["api/tests/:id"].match(["api", "tests", "tid"]), {
+    id: "tid",
+  });
+  assert.deepEqual(
+    byRoute["api/admin/tests/:id"].match(["api", "admin", "tests", "aid"]),
+    { id: "aid" },
+  );
+  assert.deepEqual(
+    byRoute["api/admin/tests/:id/images"].match([
+      "api",
+      "admin",
+      "tests",
+      "iid",
+      "images",
+    ]),
+    { id: "iid" },
+  );
+
   assert.equal(byRoute["api/tests/:id"].match(["api", "tests", ""]), null);
   assert.equal(byRoute["api/tests/:id"].match(["api", "tests"]), null);
   assert.equal(

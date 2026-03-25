@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { cacheKeyForGet } from "../../worker/api/_utils/http.ts";
+import {
+  JSON_HEADERS,
+  cacheKeyForGet,
+  withCacheHeaders,
+} from "../../worker/api/_utils/http.ts";
 import { listTests } from "../../worker/api/tests/index.ts";
 import {
   createContext,
@@ -62,4 +66,26 @@ test("listTests: responseHeaders merged into response", async () => {
     },
   );
   assert.equal(res.headers.get("X-Test-Extra"), "1");
+});
+
+test("listTests: headersFactory overrides default cache headers when useCache", async () => {
+  const res = await listTests(
+    createContext({
+      url: "https://example.com/api/tests",
+      env: { MBTI_DB: createIndexDb([ROW]) },
+    }),
+    {
+      publishedOnly: true,
+      useCache: true,
+      headersFactory: (etag) =>
+        withCacheHeaders(JSON_HEADERS, {
+          etag,
+          maxAge: 30,
+          sMaxAge: 300,
+          staleWhileRevalidate: 600,
+        }),
+    },
+  );
+  assert.equal(res.status, 200);
+  assert.ok(res.headers.get("ETag"));
 });
