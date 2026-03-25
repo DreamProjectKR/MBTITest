@@ -201,3 +201,53 @@ test("assets handler: versioned ?v= uses immutable cache-control branch", async 
   assert.equal(res.status, 200);
   assert.match(res.headers.get("Cache-Control"), /immutable/);
 });
+
+test("assets handler: second GET hits Cache API (HIT)", async () => {
+  installInMemoryCacheStub();
+  const { bucket } = createJsonBucket({ "assets/hit.png": "payload" });
+  const url = "https://example.com/assets/hit.png";
+  const first = await handleAssetsGet(
+    createContext({
+      url,
+      env: { MBTI_BUCKET: bucket },
+      params: { path: "hit.png" },
+    }),
+  );
+  assert.equal(first.headers.get("X-MBTI-Edge-Cache"), "MISS");
+  await caches.default.put(new Request(url, { method: "GET" }), first.clone());
+  const second = await handleAssetsGet(
+    createContext({
+      url,
+      env: { MBTI_BUCKET: bucket },
+      params: { path: "hit.png" },
+    }),
+  );
+  assert.equal(second.headers.get("X-MBTI-Edge-Cache"), "HIT");
+});
+
+test("assets handler: UI images path uses long-cache branch", async () => {
+  installInMemoryCacheStub();
+  const { bucket } = createJsonBucket({ "assets/images/ui.png": "x" });
+  const res = await handleAssetsGet(
+    createContext({
+      url: "https://example.com/assets/images/ui.png",
+      env: { MBTI_BUCKET: bucket },
+      params: { path: "images/ui.png" },
+    }),
+  );
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("Cache-Control"), /immutable/);
+});
+
+test("assets handler: tail that normalizes to empty segments -> 404", async () => {
+  installInMemoryCacheStub();
+  const { bucket } = createJsonBucket({});
+  const res = await handleAssetsGet(
+    createContext({
+      url: "https://example.com/assets/../",
+      env: { MBTI_BUCKET: bucket },
+      params: { path: ".." },
+    }),
+  );
+  assert.equal(res.status, 404);
+});

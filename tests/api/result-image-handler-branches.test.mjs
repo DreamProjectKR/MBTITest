@@ -70,6 +70,36 @@ test("result image PUT: invalid MBTI code -> 400", async () => {
   assert.equal(res.status, 400);
 });
 
+test("result image PUT: no test.json in R2 -> 404", async () => {
+  installDefaultCacheStub();
+  const { bucket } = createJsonBucket({});
+  const db = {
+    prepare() {
+      return {
+        bind() {
+          return this;
+        },
+      };
+    },
+    async batch() {
+      return [];
+    },
+  };
+  const res = await onRequestPut(
+    createContext({
+      url,
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1", mbti: "ENFP" },
+      headers: { "content-type": "application/octet-stream" },
+      body: new Uint8Array([1, 2]),
+    }),
+  );
+  assert.equal(res.status, 404);
+  const j = await res.json();
+  assert.match(j.error, /Test JSON not found/);
+});
+
 test("result image PUT: generic workflow error -> 500", async () => {
   installDefaultCacheStub();
   const bucket = {

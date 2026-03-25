@@ -48,3 +48,11 @@ test("getRouteDescriptor returns null for unknown route", () => {
 test("matchRoute falls through to unknown", () => {
   assert.equal(matchRoute("/nope/here").route, "unknown");
 });
+
+test("assets route tieredCache tags with and without first path segment", () => {
+  const assets = routeDescriptors.find((d) => d.route === "assets");
+  assert.ok(assets);
+  assert.deepEqual(assets.tieredCache({ path: "" }).cacheTags, ["assets"]);
+  const withSeg = assets.tieredCache({ path: "test-z/foo.png" });
+  assert.ok(withSeg.cacheTags.includes("test-test-z"));
+});
