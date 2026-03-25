@@ -38,3 +38,15 @@ test("mergeTestDetailPayload: tags_json drops non-string entries", () => {
   );
   assert.deepEqual(p.tags, ["a", "b"]);
 });
+
+test("mergeTestDetailPayload: tags_json empty JSON array yields empty tags", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "x",
+      title: "T",
+      tags_json: "[]",
+    },
+    {},
+  );
+  assert.deepEqual(p.tags, []);
+});

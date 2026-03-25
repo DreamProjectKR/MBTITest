@@ -44,6 +44,24 @@ test("dispatchWorkerRequest: tiered cache returns null when SELF omits content-t
   assert.equal(j.tests.length, 1);
 });
 
+test("dispatchWorkerRequest: tiered cache SELF.fetch rejection returns 500", async () => {
+  const env = {
+    SELF: {
+      fetch() {
+        return Promise.reject(new Error("SELF tiered fetch failed"));
+      },
+    },
+  };
+  const res = await dispatchWorkerRequest(
+    new Request("https://example.com/api/tests"),
+    env,
+    { waitUntil() {} },
+  );
+  assert.equal(res.status, 500);
+  const j = await res.json();
+  assert.equal(j.error, "An unexpected error occurred.");
+});
+
 test("dispatchWorkerRequest: tiered cache uses SELF.fetch for GET /api/tests", async () => {
   let originSeen = false;
   const env = {
@@ -85,6 +103,72 @@ test("dispatchWorkerRequest: tiered cache returns null for non-JSON content-type
         thumbnail_path: "assets/t/images/thumbnail.png",
         tags_json: "[]",
         source_path: "t/test.json",
+        created_at: "2026-01-01",
+        updated_at: "2026-01-01",
+        is_published: 1,
+      },
+    ]),
+  };
+  const res = await dispatchWorkerRequest(
+    new Request("https://example.com/api/tests"),
+    env,
+    { waitUntil() {} },
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.equal(j.tests.length, 1);
+});
+
+test("dispatchWorkerRequest: tiered cache accepts SELF JSON when content-type uses uppercase APPLICATION/JSON", async () => {
+  const env = {
+    SELF: {
+      async fetch() {
+        return new Response(JSON.stringify({ tests: [] }), {
+          status: 200,
+          headers: { "content-type": "APPLICATION/JSON; charset=utf-8" },
+        });
+      },
+    },
+    MBTI_DB: createIndexDb([
+      {
+        test_id: "only",
+        title: "Only",
+        thumbnail_path: "assets/only/images/thumbnail.png",
+        tags_json: "[]",
+        source_path: "only/test.json",
+        created_at: "2026-01-01",
+        updated_at: "2026-01-01",
+        is_published: 1,
+      },
+    ]),
+  };
+  const res = await dispatchWorkerRequest(
+    new Request("https://example.com/api/tests"),
+    env,
+    { waitUntil() {} },
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.ok(Array.isArray(j.tests));
+});
+
+test("dispatchWorkerRequest: tiered cache returns null when SELF returns application/hal+json on GET /api/tests", async () => {
+  const env = {
+    SELF: {
+      async fetch() {
+        return new Response(JSON.stringify({ tests: [] }), {
+          status: 200,
+          headers: { "content-type": "application/hal+json" },
+        });
+      },
+    },
+    MBTI_DB: createIndexDb([
+      {
+        test_id: "only",
+        title: "Only",
+        thumbnail_path: "assets/only/images/thumbnail.png",
+        tags_json: "[]",
+        source_path: "only/test.json",
         created_at: "2026-01-01",
         updated_at: "2026-01-01",
         is_published: 1,

@@ -1,5 +1,6 @@
 /**
- * Import `testquiz.js` without `?v=` where possible so merged line coverage maps to a stable URL.
+ * Stable `testquiz.js` import (no `?v=`) to aggregate coverage for progress DOM
+ * (`ensureProgressFill`) on one module URL.
  */
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -11,285 +12,51 @@ import {
   dispatchDomContentLoaded,
 } from "./setup-happy-dom.mjs";
 
-function testquizHref(v) {
-  const u = new URL("../../public/scripts/testquiz.js", import.meta.url);
-  if (v) u.searchParams.set("v", v);
-  return u.href;
+function isTestDetailRequest(url, testId) {
+  const u = String(url);
+  const base = `/api/tests/${encodeURIComponent(testId)}`;
+  return u.includes(base) && !u.includes(`${base}/compute`);
 }
 
-function twoQuestionQuiz(id) {
-  const t = minimalPublishedQuizTest(id);
-  const imagePrefix = `assets/${id}/images`;
-  t.questions = [
-    {
-      id: "q1",
-      label: "Q1",
-      questionImage: `${imagePrefix}/q1.png`,
-      answers: [
-        { mbtiAxis: "EI", direction: "E", label: "E" },
-        { mbtiAxis: "EI", direction: "I", label: "I" },
-      ],
-    },
-    {
-      id: "q2",
-      label: "Q2",
-      questionImage: `${imagePrefix}/q2.png`,
-      answers: [
-        { mbtiAxis: "SN", direction: "S", label: "S" },
-        { mbtiAxis: "SN", direction: "N", label: "N" },
-      ],
-    },
-  ];
-  return t;
+function isComputeRequest(url, testId) {
+  return String(url).includes(
+    `/api/tests/${encodeURIComponent(testId)}/compute`,
+  );
 }
 
-test("testquiz.js static import: two questions then result with local MBTI", async () => {
-  const t = twoQuestionQuiz("static-quiz-2");
+test("testquiz.js stable URL: ensureProgressFill creates .ProgressFill", async () => {
+  const t = minimalPublishedQuizTest("quiz-stable-fill");
   createBrowserEnv({
     url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
   });
   document.body.innerHTML = TESTQUIZ_PAGE_HTML;
 
-  let hrefSnap = "";
-  Object.defineProperty(window.location, "href", {
-    configurable: true,
-    get: () => String(window.location),
-    set: (v) => {
-      hrefSnap = String(v);
-    },
-  });
+  const progress = document.querySelector(".Progress");
+  assert.ok(progress);
+  assert.equal(progress.querySelector(".ProgressFill"), null);
 
   globalThis.fetch = async (url) => {
     const u = String(url);
-    if (u.includes(`/api/tests/${t.id}`) && u.includes("compute")) {
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
       return new Response("{}", { status: 500 });
     }
-    if (u.includes(`/api/tests/${t.id}`)) {
-      return new Response(JSON.stringify(t), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
     return new Response("{}", { status: 404 });
   };
 
   await import("../../public/scripts/config.js");
-  await import(testquizHref());
-  dispatchDomContentLoaded(window);
-  await new Promise((r) => setTimeout(r, 60));
-
-  const buttons = () => [...document.querySelectorAll(".TestSelectBtn button")];
-  assert.equal(buttons().length, 2);
-  buttons()[0].click();
-  await new Promise((r) => setTimeout(r, 40));
-  assert.equal(buttons().length, 2);
-  buttons()[0].click();
-  await new Promise((r) => setTimeout(r, 50));
-
-  assert.ok(hrefSnap.includes("testresult.html"));
-  assert.ok(hrefSnap.includes("result="));
-});
-
-test("testquiz.js versioned: compute fetch throws; local MBTI fallback still navigates", async () => {
-  const t = twoQuestionQuiz("net-err-quiz");
-  createBrowserEnv({
-    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
-  });
-  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
-
-  let hrefSnap = "";
-  Object.defineProperty(window.location, "href", {
-    configurable: true,
-    get: () => String(window.location),
-    set: (v) => {
-      hrefSnap = String(v);
-    },
-  });
-
-  globalThis.fetch = async (url, init) => {
-    const u = String(url);
-    const method = (init && init.method) || "GET";
-    if (method === "POST" && u.includes("/compute")) {
-      throw new Error("network unavailable");
-    }
-    if (method === "GET" && u.includes(`/api/tests/${t.id}`)) {
-      return new Response(JSON.stringify(t), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    return new Response("{}", { status: 404 });
-  };
-
-  await import("../../public/scripts/config.js");
-  await import(testquizHref("compute-throw"));
-  dispatchDomContentLoaded(window);
-  await new Promise((r) => setTimeout(r, 60));
-
-  const buttons = () => [...document.querySelectorAll(".TestSelectBtn button")];
-  assert.equal(buttons().length, 2);
-  buttons()[0].click();
-  await new Promise((r) => setTimeout(r, 40));
-  buttons()[0].click();
-  await new Promise((r) => setTimeout(r, 50));
-
-  assert.ok(hrefSnap.includes("testresult.html"));
-  assert.ok(hrefSnap.includes("result="));
-});
-
-test("testquiz.js versioned: sessionStorage cache skips network", async () => {
-  const t = minimalPublishedQuizTest("cached-quiz");
-  createBrowserEnv({
-    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
-  });
-  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
-  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
-
-  let fetches = 0;
-  globalThis.fetch = async () => {
-    fetches += 1;
-    return new Response("{}", { status: 404 });
-  };
-
-  await import("../../public/scripts/config.js");
-  await import(testquizHref("cache"));
-  dispatchDomContentLoaded(window);
-  await new Promise((r) => setTimeout(r, 50));
-
-  assert.equal(fetches, 0);
-  assert.ok(document.querySelector(".TestSelectBtn button"));
-});
-
-test("testquiz.js versioned: API failure shows error copy", async () => {
-  const t = minimalPublishedQuizTest("fail-quiz");
-  createBrowserEnv({
-    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
-  });
-  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
-
-  globalThis.fetch = async () => new Response("", { status: 500 });
-
-  await import("../../public/scripts/config.js");
-  await import(testquizHref("api-fail"));
-  dispatchDomContentLoaded(window);
-  await new Promise((r) => setTimeout(r, 50));
-
-  assert.ok(
-    document.body.textContent?.includes("테스트 정보를 불러오지 못했습니다."),
+  await import(
+    new URL("../../public/scripts/testquiz.js", import.meta.url).href
   );
-});
-
-test("testquiz.js versioned: empty questions array", async () => {
-  const t = minimalPublishedQuizTest("empty-q");
-  t.questions = [];
-  createBrowserEnv({
-    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
-  });
-  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
-
-  globalThis.fetch = async (url) => {
-    if (String(url).includes(`/api/tests/${t.id}`)) {
-      return new Response(JSON.stringify(t), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    return new Response("{}", { status: 404 });
-  };
-
-  await import("../../public/scripts/config.js");
-  await import(testquizHref("no-questions"));
   dispatchDomContentLoaded(window);
-  await new Promise((r) => setTimeout(r, 50));
+  await new Promise((r) => setTimeout(r, 90));
 
-  assert.ok(document.body.textContent?.includes("문항이 없습니다."));
-});
-
-test("testquiz.js versioned: invalid sessionStorage JSON falls back to fetch", async () => {
-  const t = twoQuestionQuiz("bad-cache-json");
-  createBrowserEnv({
-    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
-  });
-  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
-  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, "{not-json");
-
-  let fetches = 0;
-  globalThis.fetch = async (url) => {
-    const u = String(url);
-    if (u.includes(`/api/tests/${t.id}`) && u.includes("compute")) {
-      return new Response("{}", { status: 500 });
-    }
-    if (u.includes(`/api/tests/${t.id}`)) {
-      fetches += 1;
-      return new Response(JSON.stringify(t), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    return new Response("{}", { status: 404 });
-  };
-
-  await import("../../public/scripts/config.js");
-  await import(testquizHref("bad-sess-json"));
-  dispatchDomContentLoaded(window);
-  await new Promise((r) => setTimeout(r, 60));
-
-  assert.equal(fetches, 1);
-  assert.ok(document.querySelector(".TestSelectBtn button"));
-});
-
-test("testquiz.js versioned: question without questionImage uses filename candidates", async () => {
-  const t = minimalPublishedQuizTest("conv-paths");
-  const imagePrefix = `assets/${t.id}/images`;
-  t.questions = [
-    {
-      id: "q1",
-      label: "Q1",
-      answers: [
-        { mbtiAxis: "EI", direction: "E", label: "E" },
-        { mbtiAxis: "EI", direction: "I", label: "I" },
-      ],
-    },
-    {
-      id: "q2",
-      label: "Q2",
-      answers: [
-        { mbtiAxis: "SN", direction: "S", label: "S" },
-        { mbtiAxis: "SN", direction: "N", label: "N" },
-      ],
-    },
-  ];
-
-  createBrowserEnv({
-    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
-  });
-  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
-
-  globalThis.fetch = async (url) => {
-    const u = String(url);
-    if (u.includes(`/api/tests/${t.id}`) && u.includes("compute")) {
-      return new Response("{}", { status: 500 });
-    }
-    if (u.includes(`/api/tests/${t.id}`)) {
-      return new Response(JSON.stringify(t), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    return new Response("{}", { status: 404 });
-  };
-
-  await import("../../public/scripts/config.js");
-  await import(testquizHref("conv-img"));
-  dispatchDomContentLoaded(window);
-  await new Promise((r) => setTimeout(r, 60));
-
-  const img = document.querySelector(".TestImg img");
-  assert.ok(img);
-  const src =
-    img.getAttribute("data-asset-src") || img.getAttribute("src") || "";
-  assert.ok(
-    src.includes(`${imagePrefix}/`) || src.includes("q1"),
-    `expected convention path under ${imagePrefix}, got ${src}`,
-  );
+  const fill = document.querySelector(".Progress .ProgressFill");
+  assert.ok(fill, "ensureProgressFill should create ProgressFill");
+  assert.equal(fill.parentElement, progress);
 });

@@ -33,9 +33,10 @@
     typeof location !== "undefined" &&
     /(?:^|[?&])no_gtag=1(?:&|$)/.test(location.search);
 
-  window.dataLayer = window.dataLayer || [];
-  function gtag() {
-    dataLayer.push(arguments);
+  window.dataLayer = window.dataLayer || globalThis.dataLayer || [];
+  globalThis.dataLayer = window.dataLayer;
+  function gtag(...args) {
+    window.dataLayer.push(args);
   }
   window.gtag = gtag;
 

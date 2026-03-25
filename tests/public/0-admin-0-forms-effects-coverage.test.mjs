@@ -674,6 +674,20 @@ test("admin forms + createAdminEffects branch coverage (single DOM snapshot)", a
   );
   assert.ok(String(dirSelect?.options[0]?.textContent || "").includes("S"));
 
+  axisSelect.innerHTML = "<option value=\"ZZ\">ZZ</option>";
+  axisSelect.value = "ZZ";
+  syncAnswerDirectionOptions();
+  const dirFallback = elements.questionForm?.querySelector(
+    'select[name="answerADirection"]',
+  );
+  const fallbackLabel = String(dirFallback?.options[0]?.textContent || "");
+  assert.ok(fallbackLabel.includes("E") && fallbackLabel.includes("I"));
+
+  axisSelect.innerHTML =
+    '<option value="EI" selected>EI</option><option value="SN">SN</option>';
+  axisSelect.value = "EI";
+  syncAnswerDirectionOptions();
+
   const storeBind = createStore(adminReducer, {
     ...initialAdminState,
     tests: [listMeta],

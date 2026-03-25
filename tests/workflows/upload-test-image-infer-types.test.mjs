@@ -67,6 +67,13 @@ test("uploadTestImageWorkflow: inferImageType misc for q-only and short MBTI-lik
   assert.match(shortMbti.path, /ENF\.png$/);
 });
 
+test("uploadTestImageWorkflow: inferImageType handles undefined baseName (falsy → empty string)", async () => {
+  const r = await runWithBase(undefined);
+  assert.equal(r.ok, true);
+  assert.ok(r.url.startsWith("/assets/"));
+  assert.match(r.path, /\.png$/);
+});
+
 test("uploadTestImageWorkflow: invalidates Cache API only when MBTI_KV absent", async () => {
   const prevCaches = globalThis.caches;
   const waitUntilCalls = [];
@@ -132,6 +139,41 @@ test("uploadTestImageWorkflow: KV invalidation when Cache API absent", async () 
       1,
       "only KV delete when Cache API is unavailable",
     );
+  } finally {
+    globalThis.caches = prevCaches;
+  }
+});
+
+test("uploadTestImageWorkflow: KV delete plus Cache API when both present", async () => {
+  const prevCaches = globalThis.caches;
+  const waitUntilCalls = [];
+  try {
+    globalThis.caches = {
+      default: {
+        async delete() {
+          return true;
+        },
+      },
+    };
+    const kv = { delete: async () => {} };
+    await uploadTestImageWorkflow(
+      createContext({
+        url: "https://example.com/",
+        env: { MBTI_BUCKET: bucket, MBTI_DB: db, MBTI_KV: kv },
+        waitUntil: (p) => {
+          waitUntilCalls.push(p);
+        },
+      }),
+      {
+        testId: "t1",
+        baseName: "kv-and-cache",
+        extension: "png",
+        contentType: "image/png",
+        buffer: new Uint8Array([1]).buffer,
+      },
+    );
+    await Promise.all(waitUntilCalls);
+    assert.equal(waitUntilCalls.length, 3);
   } finally {
     globalThis.caches = prevCaches;
   }

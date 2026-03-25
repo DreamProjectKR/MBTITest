@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { saveTestWorkflow } from "../../worker/application/workflows/saveTest.ts";
+import {
+  SaveTestValidationError,
+  saveTestWorkflow,
+} from "../../worker/application/workflows/saveTest.ts";
 import {
   createContext,
   installDefaultCacheStub,
@@ -77,6 +80,46 @@ test("saveTestWorkflow: throws when MBTI_DB is missing", async () => {
       ),
     /MBTI_DB/,
   );
+});
+
+test("saveTestWorkflow: SaveTestValidationError when payload fails validateTestPayload before R2", async () => {
+  let putCalls = 0;
+  const bucket = {
+    async put() {
+      putCalls += 1;
+    },
+    async get() {
+      return null;
+    },
+    async delete() {},
+  };
+  const db = {
+    prepare() {
+      return {
+        bind() {
+          return this;
+        },
+        async run() {},
+        async all() {
+          return { results: [] };
+        },
+      };
+    },
+  };
+
+  await assert.rejects(
+    () =>
+      saveTestWorkflow(
+        createContext({
+          url: "https://x",
+          env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+        }),
+        "tid",
+        { ...validPayload(), questions: [] },
+      ),
+    (err) => err instanceof SaveTestValidationError,
+  );
+  assert.equal(putCalls, 0);
 });
 
 test("saveTestWorkflow: D1 failure deletes new test body when no previous body", async () => {

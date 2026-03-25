@@ -14,6 +14,13 @@ function testintroImportHref() {
   return u.href;
 }
 
+/** `/api/tests/:id` vs `/api/tests/:id/compute` — test ids may contain the substring "compute". */
+function isTestDetailRequest(url, testId) {
+  const u = String(url);
+  const base = `/api/tests/${encodeURIComponent(testId)}`;
+  return u.includes(base) && !u.includes(`${base}/compute`);
+}
+
 test("testintro.js renders intro from GET /api/tests/:id", async () => {
   const t = minimalPublishedQuizTest("intro1");
   createBrowserEnv({
@@ -282,7 +289,7 @@ test("testintro.js Start navigates to testquiz after warm-up", async () => {
 
   globalThis.fetch = async (url) => {
     const u = String(url);
-    if (u.includes(`/api/tests/${t.id}`) && !u.includes("compute")) {
+    if (isTestDetailRequest(u, t.id)) {
       return new Response(JSON.stringify(t), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -315,4 +322,295 @@ test("testintro.js Start navigates to testquiz after warm-up", async () => {
 
   assert.ok(hrefSnap.includes("testquiz.html"));
   assert.ok(hrefSnap.includes("testId="));
+});
+
+test("testintro.js Start navigates when detail fails, cache JSON is corrupt, warm-up uses stub", async () => {
+  const t = minimalPublishedQuizTest("intro-bad-cache-start");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML;
+
+  window.sessionStorage.setItem(
+    `mbtitest:testdata:${t.id}`,
+    "{not-valid-json",
+  );
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    const pathname = new URL(u, "http://127.0.0.1/").pathname;
+    if (pathname === `/api/tests/${t.id}`) {
+      return new Response("{}", { status: 404 });
+    }
+    if (pathname === "/api/tests") {
+      return new Response(JSON.stringify({ tests: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  let hrefSnap = "";
+  Object.defineProperty(window.location, "href", {
+    configurable: true,
+    get: () =>
+      `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+    set: (v) => {
+      hrefSnap = String(v);
+    },
+  });
+
+  await import("../../public/scripts/config.js");
+  window.getTestIndex = async () => ({ tests: [] });
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+
+  await new Promise((r) => setTimeout(r, 60));
+
+  assert.equal(
+    document.querySelector(".IntroShellTextBox h2")?.textContent,
+    "테스트를 불러올 수 없습니다.",
+  );
+
+  document.querySelector(".TestStart button")?.click();
+  await new Promise((r) => setTimeout(r, 120));
+
+  assert.ok(hrefSnap.includes("testquiz.html"));
+  assert.ok(hrefSnap.includes(encodeURIComponent(t.id)));
+});
+
+test("testintro.js uses fetch for index when getTestIndex is absent", async () => {
+  const t = minimalPublishedQuizTest("intro-no-gti");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML;
+
+  // config.js runs only once (module cache); each test gets a new Window without
+  // TEST_INDEX_URL / assetUrl. Mirror the bits loadIntroData needs for the fetch fallback.
+  window.ASSETS_BASE = "/assets";
+  window.API_TESTS_BASE = "/api/tests";
+  window.TEST_INDEX_URL = "/api/tests";
+  window.assetUrl = function assetUrl(path) {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    let clean = String(path).replace(/^\.?\/+/, "");
+    clean = clean.replace(/^assets\/+/i, "");
+    return `${window.ASSETS_BASE}/${clean}`.replace(/\/{2,}/g, "/");
+  };
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    const pathname = new URL(u, window.location.href).pathname;
+    if (pathname === `/api/tests/${t.id}`) {
+      return new Response("{}", { status: 404 });
+    }
+    if (pathname === "/api/tests") {
+      return new Response(
+        JSON.stringify({
+          tests: [
+            {
+              id: t.id,
+              path: t.path,
+              title: t.title,
+              is_published: true,
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    if (pathname.startsWith("/assets/") && pathname.endsWith(".json")) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response(new Uint8Array([0x89, 0x50]), {
+      status: 200,
+      headers: { "Content-Type": "image/png" },
+    });
+  };
+
+  await import("../../public/scripts/config.js");
+  delete window.getTestIndex;
+  delete globalThis.getTestIndex;
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 90));
+
+  assert.equal(
+    document.querySelector(".IntroShellTextBox h2")?.textContent,
+    t.title,
+  );
+});
+
+test("testintro.js shows error when test.json fetch fails after index match", async () => {
+  const t = minimalPublishedQuizTest("intro-jsonfail");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    const pathname = new URL(u, window.location.href).pathname;
+    if (pathname === `/api/tests/${t.id}`) {
+      return new Response("{}", { status: 404 });
+    }
+    if (pathname === "/api/tests") {
+      return new Response(
+        JSON.stringify({
+          tests: [
+            {
+              id: t.id,
+              path: t.path,
+              title: t.title,
+              is_published: true,
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    if (pathname.startsWith("/assets/") && pathname.endsWith(".json")) {
+      return new Response("{}", { status: 404 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  delete window.getTestIndex;
+  delete globalThis.getTestIndex;
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 90));
+
+  assert.equal(
+    document.querySelector(".IntroShellTextBox h2")?.textContent,
+    "테스트를 불러올 수 없습니다.",
+  );
+});
+
+test("testintro.js schedules runRest with setTimeout when requestIdleCallback absent", async () => {
+  const t = minimalPublishedQuizTest("intro-no-ric");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes(`/api/tests/${t.id}`)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response(new Uint8Array([0x89, 0x50]), {
+      status: 200,
+      headers: { "Content-Type": "image/png" },
+    });
+  };
+
+  const prevRic = globalThis.requestIdleCallback;
+  delete globalThis.requestIdleCallback;
+  let sawRunRest50 = false;
+  const origSt = globalThis.setTimeout;
+  globalThis.setTimeout = function (fn, ms) {
+    if (ms === 50 && typeof fn === "function") sawRunRest50 = true;
+    return origSt.apply(this, arguments);
+  };
+
+  try {
+    await import("../../public/scripts/config.js");
+    await import(testintroImportHref());
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 200));
+  } finally {
+    globalThis.requestIdleCallback = prevRic;
+    globalThis.setTimeout = origSt;
+  }
+
+  assert.equal(sawRunRest50, true);
+});
+
+test("testintro.js renders string description and skips tags when not an array", async () => {
+  const t = minimalPublishedQuizTest("intro-str-desc");
+  t.description = "단일 줄 소개문";
+  t.tags = null;
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes(`/api/tests/${t.id}`)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(
+    document
+      .querySelector(".IntroDescription")
+      ?.textContent?.includes("단일 줄 소개문"),
+  );
+  assert.equal(
+    document.querySelectorAll(".IntroShellImg .NewTestHashTag .HashTag")
+      .length,
+    0,
+  );
+});
+
+test("testintro.js renders when sessionStorage.setItem fails during persist", async () => {
+  const t = minimalPublishedQuizTest("intro-persist-fail");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML;
+
+  const orig = window.sessionStorage.setItem.bind(window.sessionStorage);
+  window.sessionStorage.setItem = function (key, value) {
+    if (String(key).includes("mbtitest:testdata")) {
+      throw new Error("quota");
+    }
+    return orig(key, value);
+  };
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes(`/api/tests/${t.id}`)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  try {
+    await import("../../public/scripts/config.js");
+    await import(testintroImportHref());
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 60));
+
+    assert.equal(
+      document.querySelector(".IntroShellTextBox h2")?.textContent,
+      t.title,
+    );
+  } finally {
+    window.sessionStorage.setItem = orig;
+  }
 });

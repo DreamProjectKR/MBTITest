@@ -1,13 +1,32 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createBrowserEnv } from "./setup-happy-dom.mjs";
+import {
+  createBrowserEnv,
+  dispatchDomContentLoaded,
+} from "./setup-happy-dom.mjs";
 
+/** Unique `?v=` per import so `config.js` IIFE re-runs with each test's `window` (Node ESM cache). */
 function scriptHref(rel) {
   const u = new URL(rel, import.meta.url);
   u.searchParams.set("v", `${Date.now()}-${Math.random()}`);
   return u.href;
 }
+
+test("config: appendVersion falls back when URL() rejects invalid href", async () => {
+  createBrowserEnv({ url: "http://127.0.0.1:8788/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const prev = window.assetUrl;
+  window.assetUrl = () => "http://%%%";
+  document.body.innerHTML =
+    '<img data-asset-src="x" data-asset-version="7" alt="" />';
+  window.applyAssetAttributes(document.body);
+  const src = document.querySelector("img")?.getAttribute("src");
+  assert.ok(src && src.includes("v="), String(src));
+  window.assetUrl = prev;
+});
 
 test("config: production host uses /cdn-cgi/image for assetResizeUrl", async () => {
   createBrowserEnv({ url: "https://example.com/page" });
@@ -85,6 +104,68 @@ test("config: assetResizeUrl on localhost skips cdn-cgi image", async () => {
   assert.ok(out.includes("/assets/"));
 });
 
+test("config: lazy image hydrates without lazy observer when IntersectionObserverEntry missing", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const OrigIo = globalThis.IntersectionObserver;
+  const OrigEntry = globalThis.IntersectionObserverEntry;
+  globalThis.IntersectionObserver = class {};
+  delete globalThis.IntersectionObserverEntry;
+  try {
+    await import(scriptHref("../../public/scripts/config.js"));
+    const img = document.createElement("img");
+    img.setAttribute("data-asset-src", "assets/images/no-lazy-io.png");
+    img.setAttribute("data-asset-lazy", "true");
+    img.setAttribute("loading", "lazy");
+    img.getBoundingClientRect = () => ({
+      top: 50000,
+      bottom: 50100,
+      width: 200,
+    });
+    document.body.appendChild(img);
+    window.applyAssetAttributes(img);
+    assert.ok(String(img.getAttribute("src") || "").includes("/assets/"));
+  } finally {
+    globalThis.IntersectionObserver = OrigIo;
+    if (OrigEntry !== undefined)
+      globalThis.IntersectionObserverEntry = OrigEntry;
+  }
+});
+
+test("config: lazy off-screen img hydrates when IntersectionObserver fires", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  globalThis.IntersectionObserver = class {
+    constructor(cb) {
+      this._cb = cb;
+    }
+    observe(el) {
+      queueMicrotask(() => {
+        this._cb([{ isIntersecting: true, target: el }]);
+      });
+    }
+    unobserve() {}
+    disconnect() {}
+  };
+  await import(scriptHref("../../public/scripts/config.js"));
+  const img = document.createElement("img");
+  img.setAttribute("data-asset-src", "assets/images/lazy.png");
+  img.setAttribute("data-asset-lazy", "true");
+  img.setAttribute("loading", "lazy");
+  img.getBoundingClientRect = () => ({
+    top: 50000,
+    bottom: 50100,
+    width: 200,
+  });
+  document.body.appendChild(img);
+  window.applyAssetAttributes(img);
+  await new Promise((r) => queueMicrotask(r));
+  await new Promise((r) => queueMicrotask(r));
+  assert.ok(String(img.getAttribute("src") || "").length > 0);
+});
+
 test("config: IntersectionObserver constructor failure leaves lazy observer disabled", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
@@ -139,6 +220,30 @@ test("config: getTestIndex memoizes and validates JSON", async () => {
   assert.strictEqual(a, b);
 });
 
+test("config: getTestIndex rejects when fetch throws", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  globalThis.fetch = async () => {
+    throw new Error("getTestIndex fetch boom");
+  };
+  await import(scriptHref("../../public/scripts/config.js"));
+  await assert.rejects(() => window.getTestIndex(), /getTestIndex fetch boom/);
+});
+
+test("config: getTestIndex rejects when JSON body is invalid", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  globalThis.fetch = async () =>
+    new Response("not-json-{", {
+      status: 200,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+    });
+  await import(scriptHref("../../public/scripts/config.js"));
+  await assert.rejects(() => window.getTestIndex(), SyntaxError);
+});
+
 test("config: getTestIndex rejects non-ok response", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
@@ -159,6 +264,22 @@ test("config: getTestIndex rejects non-JSON content-type", async () => {
     });
   await import(scriptHref("../../public/scripts/config.js"));
   await assert.rejects(() => window.getTestIndex(), /JSON/);
+});
+
+test("config: getTestIndex HTML response hint mentions Worker / static page", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  globalThis.fetch = async () =>
+    new Response("<html></html>", {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  await import(scriptHref("../../public/scripts/config.js"));
+  await assert.rejects(
+    () => window.getTestIndex(),
+    /Worker가 아닌 정적 페이지/,
+  );
 });
 
 test("config: getTestIndex non-JSON non-HTML hint includes content-type", async () => {
@@ -209,6 +330,157 @@ test("config: MutationObserver constructor failure uses fallback hydration", asy
     assert.equal(typeof window.applyAssetAttributes, "function");
   } finally {
     globalThis.MutationObserver = Orig;
+  }
+});
+
+test("config: MutationObserver failure + readyState complete hydrates without DCL", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const img = document.createElement("img");
+  img.id = "mo-complete-fallback";
+  img.setAttribute("data-asset-src", "assets/images/mo-complete-fallback.png");
+  document.body.appendChild(img);
+
+  const Orig = globalThis.MutationObserver;
+  globalThis.MutationObserver = class {
+    constructor() {
+      throw new Error("no-mo");
+    }
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+
+  try {
+    await import(scriptHref("../../public/scripts/config.js"));
+    await new Promise((r) => setTimeout(r, 20));
+    const el = document.getElementById("mo-complete-fallback");
+    assert.ok(
+      String(el?.getAttribute("src") || "").includes("/assets/"),
+      String(el?.getAttribute("src")),
+    );
+  } finally {
+    globalThis.MutationObserver = Orig;
+  }
+});
+
+test("config: sets CSS custom properties on documentElement", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const style = document.documentElement.style;
+  assert.ok(style.getPropertyValue("--ASSETS_BASE").length > 0);
+  assert.ok(style.getPropertyValue("--asset-header-bg").includes("url("));
+});
+
+test("config: buildAssetUrl omits v param when version is empty string", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const u = window.buildAssetUrl("assets/nov.png", "width=100", "");
+  assert.ok(!/[?&]v=/.test(u), String(u));
+});
+
+test("config: computeMeasuredWidthPx uses devicePixelRatio when set", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  Object.defineProperty(window, "devicePixelRatio", {
+    configurable: true,
+    value: 2,
+  });
+  await import(scriptHref("../../public/scripts/config.js"));
+  const img = document.createElement("img");
+  img.setAttribute("data-asset-src", "assets/images/dpr.png");
+  img.setAttribute("data-asset-resize", "width=200,minWidth=100,maxWidth=800");
+  img.setAttribute("data-asset-auto-width", "true");
+  img.getBoundingClientRect = () => ({ width: 100 });
+  document.body.appendChild(img);
+  window.applyAssetAttributes(img);
+  const src = String(img.getAttribute("src") || "");
+  assert.ok(src.includes("/cdn-cgi/image/"));
+});
+
+test("config: trims trailing slashes on window.ASSETS_BASE", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  window.ASSETS_BASE = "/my-assets///";
+  await import(scriptHref("../../public/scripts/config.js"));
+  assert.equal(window.ASSETS_BASE, "/my-assets");
+});
+
+test("config: MutationObserver failure + readyState loading hydrates on DOMContentLoaded", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const img = document.createElement("img");
+  img.id = "mo-dcl";
+  img.setAttribute("data-asset-src", "assets/images/mo-dcl.png");
+  document.body.appendChild(img);
+
+  const Orig = globalThis.MutationObserver;
+  globalThis.MutationObserver = class {
+    constructor() {
+      throw new Error("no-mo");
+    }
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "loading",
+  });
+
+  try {
+    await import(scriptHref("../../public/scripts/config.js"));
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 20));
+    const el = document.getElementById("mo-dcl");
+    assert.ok(
+      String(el?.getAttribute("src") || "").includes("/assets/"),
+      String(el?.getAttribute("src")),
+    );
+  } finally {
+    globalThis.MutationObserver = Orig;
+    Object.defineProperty(document, "readyState", {
+      configurable: true,
+      get: () => "complete",
+    });
+  }
+});
+
+test("config: lazy observe throws — falls through to immediate hydration", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const OrigIo = globalThis.IntersectionObserver;
+  globalThis.IntersectionObserver = class {
+    constructor() {}
+    observe() {
+      throw new Error("observe-fail");
+    }
+    unobserve() {}
+    disconnect() {}
+  };
+  try {
+    await import(scriptHref("../../public/scripts/config.js"));
+    const img = document.createElement("img");
+    img.setAttribute("data-asset-src", "assets/images/lazy-obs-fail.png");
+    img.setAttribute("data-asset-lazy", "true");
+    img.setAttribute("loading", "lazy");
+    img.getBoundingClientRect = () => ({
+      top: 50000,
+      bottom: 50100,
+      width: 200,
+    });
+    document.body.appendChild(img);
+    window.applyAssetAttributes(img);
+    assert.ok(String(img.getAttribute("src") || "").includes("/assets/"));
+  } finally {
+    globalThis.IntersectionObserver = OrigIo;
   }
 });
 
@@ -297,6 +569,40 @@ test("config: loadImageAsset empty path resolves false", async () => {
   assert.equal(ok, false);
 });
 
+test("config: loadImageAsset resolves false when Image constructor throws", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const Orig = globalThis.Image;
+  globalThis.Image = class {
+    constructor() {
+      throw new Error("no Image");
+    }
+  };
+  try {
+    await import(scriptHref("../../public/scripts/config.js"));
+    const ok = await window.loadImageAsset("assets/throws.png", null, "1");
+    assert.equal(ok, false);
+  } finally {
+    globalThis.Image = Orig;
+  }
+});
+
+test("config: applyAssetAttributes skips data-asset-bg when backgroundImage already set", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const div = document.createElement("div");
+  div.style.backgroundImage = 'url("https://example.com/keep-this.png")';
+  div.setAttribute("data-asset-bg", "assets/other-bg.png");
+  div.setAttribute("data-asset-resize", "width=800");
+  document.body.appendChild(div);
+  window.applyAssetAttributes(div);
+  assert.ok(String(div.style.backgroundImage || "").includes("keep-this.png"));
+  assert.ok(!String(div.style.backgroundImage || "").includes("other-bg"));
+});
+
 test("config: applyAssetAttributes sets img src and link href on production", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
@@ -332,4 +638,83 @@ test("config: applyAssetAttributes builds srcset when data-asset-srcset is set",
   const srcset = document.getElementById("s").getAttribute("srcset");
   assert.ok(srcset && srcset.includes("400w"));
   assert.ok(srcset.includes("800w"));
+});
+
+test("config: resize load error retries once then falls back to raw /assets", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  document.body.innerHTML = `
+    <img id="errimg"
+      data-asset-src="assets/images/fail.png"
+      data-asset-resize="width=640,quality=80"
+    />
+  `;
+  await import(scriptHref("../../public/scripts/config.js"));
+  const img = document.getElementById("errimg");
+  img.dispatchEvent(new Event("error"));
+  assert.equal(img.getAttribute("data-asset-resize-retried"), "1");
+  img.dispatchEvent(new Event("error"));
+  assert.equal(img.getAttribute("data-asset-resize-fallback-done"), "1");
+  const src = String(img.getAttribute("src") || "");
+  assert.ok(src.includes("/assets/"));
+  assert.ok(!src.includes("/cdn-cgi/image/"));
+});
+
+test("config: prefetchImageAsset swallows errors when assetUrl throws", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const prev = window.assetUrl;
+  window.assetUrl = () => {
+    throw new Error("prefetch-assetUrl-boom");
+  };
+  try {
+    assert.doesNotThrow(() =>
+      window.prefetchImageAsset("assets/x.png", null, "1"),
+    );
+  } finally {
+    window.assetUrl = prev;
+  }
+});
+
+test("config: MutationObserver hydrates dynamically appended data-asset-src", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const img = document.createElement("img");
+  img.setAttribute("data-asset-src", "assets/images/mo-append.png");
+  document.body.appendChild(img);
+  await new Promise((r) => setTimeout(r, 30));
+  const src = String(img.getAttribute("src") || "");
+  assert.ok(src.includes("mo-append.png") && src.includes("/assets/"), src);
+});
+
+test("config: auto-width retries measure when layout width is zero", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const prevRaf = globalThis.requestAnimationFrame;
+  globalThis.requestAnimationFrame = (cb) => {
+    cb();
+    return 0;
+  };
+  try {
+    await import(scriptHref("../../public/scripts/config.js"));
+    const img = document.createElement("img");
+    img.id = "auto";
+    img.setAttribute("data-asset-src", "assets/images/auto.png");
+    img.setAttribute("data-asset-resize", "width=200,fallbackWidth=360");
+    img.setAttribute("data-asset-auto-width", "true");
+    img.getBoundingClientRect = () => ({ width: 0 });
+    document.body.appendChild(img);
+    window.applyAssetAttributes(img);
+  } finally {
+    globalThis.requestAnimationFrame = prevRaf;
+  }
+  const img = document.getElementById("auto");
+  assert.equal(img.getAttribute("data-asset-measure-tries"), "2");
+  assert.ok(String(img.getAttribute("src") || "").includes("/cdn-cgi/image/"));
 });

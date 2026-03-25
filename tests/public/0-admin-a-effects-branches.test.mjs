@@ -56,6 +56,114 @@ test("createAdminEffects loadTest shows toast when fetchTestDetail fails", async
   assert.ok(toasts.some((t) => t.isErr && String(t.msg).includes("detail")));
 });
 
+test("createAdminEffects refreshImageList skips sync when active test id mismatches", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = ADMIN_MINIMAL_HTML;
+  await import("../../public/scripts/config.js");
+
+  const { adminReducer, initialAdminState } = await import(
+    "../../public/scripts/admin/reducer.js"
+  );
+  const { createStore } = await import("../../public/scripts/admin/store.js");
+  const { createAdminEffects } = await import(
+    "../../public/scripts/admin/effects.js"
+  );
+
+  const keepThumb = "assets/t1/keep-thumb.png";
+  const store = createStore(adminReducer, {
+    ...initialAdminState,
+    activeTestId: "t1",
+    loadedTests: {
+      t1: {
+        id: "t1",
+        title: "T1",
+        thumbnail: keepThumb,
+        questions: [],
+        results: {},
+      },
+    },
+  });
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/api/admin/tests/t2/images")) {
+      return new Response(
+        JSON.stringify({
+          items: [{ path: "assets/t2/images/thumbnail.png", baseName: "thumbnail" }],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  const effects = createAdminEffects(store, { showToast: () => {} });
+  await effects.refreshImageList("t2");
+
+  assert.equal(store.getState().imageList.length, 1);
+  assert.equal(store.getState().loadedTests.t1.thumbnail, keepThumb);
+});
+
+test("createAdminEffects refreshImageList keeps existing questionImage when list has Q1 file", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = ADMIN_MINIMAL_HTML;
+  await import("../../public/scripts/config.js");
+
+  const { adminReducer, initialAdminState } = await import(
+    "../../public/scripts/admin/reducer.js"
+  );
+  const { createStore } = await import("../../public/scripts/admin/store.js");
+  const { createAdminEffects } = await import(
+    "../../public/scripts/admin/effects.js"
+  );
+
+  const preserved = "assets/t1/preserved-q1.png";
+  const store = createStore(adminReducer, {
+    ...initialAdminState,
+    activeTestId: "t1",
+    loadedTests: {
+      t1: {
+        id: "t1",
+        title: "T1",
+        thumbnail: "",
+        questions: [
+          {
+            id: "q1",
+            label: "Q",
+            questionImage: preserved,
+            answers: [
+              { mbtiAxis: "EI", direction: "E", label: "a" },
+              { mbtiAxis: "EI", direction: "I", label: "b" },
+            ],
+          },
+        ],
+        results: {},
+      },
+    },
+  });
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/api/admin/tests/t1/images")) {
+      return new Response(
+        JSON.stringify({
+          items: [{ path: "assets/t1/images/q1.png", baseName: "Q1" }],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  const effects = createAdminEffects(store, { showToast: () => {} });
+  await effects.refreshImageList("t1");
+
+  assert.equal(
+    store.getState().loadedTests.t1.questions[0].questionImage,
+    preserved,
+  );
+});
+
 test("createAdminEffects refreshImageList catch clears image list", async () => {
   createBrowserEnv();
   document.body.innerHTML = ADMIN_MINIMAL_HTML;

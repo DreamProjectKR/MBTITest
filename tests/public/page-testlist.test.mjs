@@ -412,6 +412,88 @@ test("testlist.js treats getTestIndex tests as empty when not an array", async (
   assert.equal(document.querySelector(".NewTestList")?.innerHTML.trim(), "");
 });
 
+test("testlist.js first card uses eager loading and later cards use lazy", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = TESTLIST_PAGE_HTML;
+
+  const mk = (suffix) => {
+    const t = minimalPublishedQuizTest(`eager-${suffix}`);
+    return {
+      id: t.id,
+      title: t.title,
+      path: t.path,
+      thumbnail: t.thumbnail,
+      tags: t.tags,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
+      is_published: true,
+    };
+  };
+
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [mk("a"), mk("b"), mk("c")],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+
+  await import("../../public/scripts/config.js");
+  await import(testlistImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  const imgs = [...document.querySelectorAll(".NewTestShell img")];
+  assert.equal(imgs.length, 3);
+  assert.equal(imgs[0].loading, "eager");
+  assert.equal(imgs[1].loading, "lazy");
+  assert.equal(imgs[2].loading, "lazy");
+});
+
+test("testlist.js console.error when getTestIndex rejects", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = TESTLIST_PAGE_HTML;
+
+  const logs = [];
+  const prev = console.error;
+  console.error = (...a) => logs.push(a.join(" "));
+
+  await import("../../public/scripts/config.js");
+  window.getTestIndex = async () => {
+    throw new Error("index boom");
+  };
+  await import(testlistImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  console.error = prev;
+  assert.ok(logs.some((m) => m.includes("테스트 목록 로딩 실패")));
+});
+
+test("testlist.js console.error when index response is not JSON", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = TESTLIST_PAGE_HTML;
+
+  const logs = [];
+  const prev = console.error;
+  console.error = (...a) => logs.push(a.join(" "));
+
+  globalThis.fetch = async () =>
+    new Response("not-json", {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+
+  await import("../../public/scripts/config.js");
+  delete window.getTestIndex;
+  await import(testlistImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  console.error = prev;
+  assert.ok(logs.some((m) => m.includes("테스트 목록 로딩 실패")));
+});
+
 test("testlist.js renders when tags field is not an array", async () => {
   createBrowserEnv();
   document.body.innerHTML = TESTLIST_PAGE_HTML;
@@ -440,4 +522,64 @@ test("testlist.js renders when tags field is not an array", async () => {
   await new Promise((r) => setTimeout(r, 50));
 
   assert.ok(document.body.textContent?.includes(t.title));
+});
+
+test("testlist.js fetchTestIndex uses window.TEST_INDEX_URL when getTestIndex is absent", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = TESTLIST_PAGE_HTML;
+
+  let fetchedUrl = "";
+  globalThis.fetch = async (url) => {
+    fetchedUrl = String(url);
+    return new Response(JSON.stringify({ tests: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
+  await import("../../public/scripts/config.js");
+  delete window.getTestIndex;
+  window.TEST_INDEX_URL = "/custom-testlist-index";
+  await import(testlistImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(fetchedUrl.includes("custom-testlist-index"));
+});
+
+test("testlist.js sorts by createdAt when updatedAt is absent", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = TESTLIST_PAGE_HTML;
+
+  const older = {
+    id: "tl-old",
+    title: "Older",
+    path: "tl-old/test.json",
+    thumbnail: "",
+    tags: [],
+    createdAt: "2018-01-01",
+    is_published: true,
+  };
+  const newer = {
+    id: "tl-new",
+    title: "Newer",
+    path: "tl-new/test.json",
+    thumbnail: "",
+    tags: [],
+    createdAt: "2024-01-01",
+    is_published: true,
+  };
+
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ tests: [older, newer] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+
+  await import("../../public/scripts/config.js");
+  await import(testlistImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.equal(document.querySelector(".NewTestShell h4")?.textContent, "Newer");
 });

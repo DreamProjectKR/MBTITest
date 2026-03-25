@@ -59,3 +59,9 @@ export const ADMIN_MINIMAL_HTML = `
   </section>
 </main>
 `;
+
+/** Same as ADMIN_MINIMAL_HTML but without `[data-test-select]` (optional header wiring). */
+export const ADMIN_NO_TEST_SELECT_HTML = ADMIN_MINIMAL_HTML.replace(
+  /\s*<select data-test-select>[\s\S]*?<\/select>\s*/,
+  "",
+);

@@ -88,6 +88,20 @@ test("assets handler: invalid Range header ignored for full 200", async () => {
   assert.equal(res.status, 200);
 });
 
+test("assets handler: Range bytes= without hyphen treated as invalid", async () => {
+  installInMemoryCacheStub();
+  const { bucket } = createJsonBucket({ "assets/r/nodash.bin": "abc" });
+  const res = await handleAssetsGet(
+    createContext({
+      url: "https://example.com/assets/r/nodash.bin",
+      env: { MBTI_BUCKET: bucket },
+      params: { path: "r/nodash.bin" },
+      headers: { range: "bytes=5" },
+    }),
+  );
+  assert.equal(res.status, 200);
+});
+
 test("assets handler: Range bytes=0-0 on single-byte object returns 206", async () => {
   installInMemoryCacheStub();
   const { bucket } = createJsonBucket({ "assets/r/one.bin": "x" });
@@ -101,6 +115,20 @@ test("assets handler: Range bytes=0-0 on single-byte object returns 206", async 
   );
   assert.equal(res.status, 206);
   assert.equal(res.headers.get("Content-Range"), "bytes 0-0/1");
+});
+
+test("assets handler: guessContentType webp", async () => {
+  installInMemoryCacheStub();
+  const { bucket } = createJsonBucket({ "assets/w/x.webp": "\x00\x00" });
+  const res = await handleAssetsGet(
+    createContext({
+      url: "https://example.com/assets/w/x.webp",
+      env: { MBTI_BUCKET: bucket },
+      params: { path: "w/x.webp" },
+    }),
+  );
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("Content-Type"), "image/webp");
 });
 
 test("assets handler: guessContentType woff2 and default octet-stream", async () => {
@@ -616,6 +644,20 @@ test("assets handler: invalid Range bytes=10-5 yields full 200", async () => {
   assert.equal(res.status, 200);
 });
 
+test("assets handler: invalid Range bytes=abc-5 (non-numeric start) yields full 200", async () => {
+  installInMemoryCacheStub();
+  const { bucket } = createJsonBucket({ "assets/r/badoffset.bin": "abcde" });
+  const res = await handleAssetsGet(
+    createContext({
+      url: "https://example.com/assets/r/badoffset.bin",
+      env: { MBTI_BUCKET: bucket },
+      params: { path: "r/badoffset.bin" },
+      headers: { range: "bytes=abc-5" },
+    }),
+  );
+  assert.equal(res.status, 200);
+});
+
 test("assets handler: localhost tries later lookup keys until fetch succeeds", async () => {
   installInMemoryCacheStub();
   const prevFetch = globalThis.fetch;
@@ -722,6 +764,20 @@ test("assets handler: Cache-Tag includes test id for assets/test-* paths", async
   );
   assert.equal(res.status, 200);
   assert.equal(res.headers.get("Cache-Tag"), "assets,test,test-xyz");
+});
+
+test("assets handler: Cache-Tag is assets only when path is not under assets/test-*/", async () => {
+  installInMemoryCacheStub();
+  const { bucket } = createJsonBucket({ "assets/images/ui/badge.png": "x" });
+  const res = await handleAssetsGet(
+    createContext({
+      url: "https://example.com/assets/images/ui/badge.png",
+      env: { MBTI_BUCKET: bucket },
+      params: { path: "images/ui/badge.png" },
+    }),
+  );
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("Cache-Tag"), "assets");
 });
 
 test("assets handler: Range without hyphen in value is ignored", async () => {

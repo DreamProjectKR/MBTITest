@@ -85,6 +85,44 @@ test("loadTestDetail: KV get invalid JSON -> continues to origin", async () => {
   assert.equal(res.status, 200);
 });
 
+test("loadTestDetail: KV get throws -> continues to D1+R2", async () => {
+  const { bucket } = createJsonBucket({
+    "assets/pub-test/test.json": JSON.stringify({
+      id: "pub-test",
+      title: "From R2 after KV throw",
+      questions: [],
+      results: {},
+    }),
+  });
+  const env = {
+    MBTI_KV: {
+      async get() {
+        throw new Error("kv unavailable");
+      },
+      async put() {},
+      async delete() {},
+    },
+    MBTI_BUCKET: bucket,
+    MBTI_DB: createDetailDb({
+      test_id: "pub-test",
+      title: "T",
+      description_json: "[]",
+      author: "a",
+      author_img_path: "a",
+      thumbnail_path: "t",
+      tags_json: "[]",
+      source_path: "pub-test/test.json",
+      created_at: "2026-01-01",
+      updated_at: "2026-01-01",
+      is_published: 1,
+    }),
+  };
+  const res = await loadTestDetail(ctx({ env }), OPT);
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.equal(j.title, "From R2 after KV throw");
+});
+
 test("loadTestDetail: KV hit returns 304 when If-None-Match matches", async () => {
   const etagVal = '"kv-etag-1"';
   const kvBody = { etag: etagVal, body: { id: "pub-test", questions: [] } };
@@ -128,6 +166,45 @@ test("loadTestDetail: KV hit returns 200 JSON without If-None-Match", async () =
   assert.equal(res.status, 200);
   const j = await res.json();
   assert.equal(j.title, "From KV");
+});
+
+test("loadTestDetail: KV entry with non-object body skips shortcut and uses R2", async () => {
+  const { bucket } = createJsonBucket({
+    "assets/pub-test/test.json": JSON.stringify({
+      id: "pub-test",
+      title: "From R2",
+      questions: [],
+      results: {},
+    }),
+  });
+  const kvBody = { etag: '"e-bad-body"', body: "not-a-record" };
+  const env = {
+    MBTI_KV: {
+      async get() {
+        return JSON.stringify(kvBody);
+      },
+      async put() {},
+      async delete() {},
+    },
+    MBTI_BUCKET: bucket,
+    MBTI_DB: createDetailDb({
+      test_id: "pub-test",
+      title: "T",
+      description_json: "[]",
+      author: "a",
+      author_img_path: "a",
+      thumbnail_path: "t",
+      tags_json: "[]",
+      source_path: "pub-test/test.json",
+      created_at: "2026-01-01",
+      updated_at: "2026-01-01",
+      is_published: 1,
+    }),
+  };
+  const res = await loadTestDetail(ctx({ env }), OPT);
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.equal(j.title, "From R2");
 });
 
 test("loadTestDetail: missing R2 body -> 404", async () => {

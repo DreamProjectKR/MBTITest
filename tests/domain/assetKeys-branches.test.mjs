@@ -41,6 +41,10 @@ test("normalizeR2KeyFromIndexPath empty string returns empty", () => {
   assert.equal(normalizeR2KeyFromIndexPath(""), "");
 });
 
+test("normalizeR2KeyFromIndexPath whitespace-only returns empty", () => {
+  assert.equal(normalizeR2KeyFromIndexPath("   "), "");
+});
+
 test("normalizeR2KeyFromIndexPath strips leading slash before assets check", () => {
   assert.equal(
     normalizeR2KeyFromIndexPath("/assets/pkg/file.json"),
@@ -88,6 +92,10 @@ test("normalizeAssetKey: lone assets token becomes canonical doubled segment", (
 
 test("getImagesPrefix with hyphenated sanitized id", () => {
   assert.match(getImagesPrefix("a-b_1"), /^assets\/a-b_1\/images\/$/);
+});
+
+test("getImagesPrefix when sanitized id is empty uses assets/images prefix", () => {
+  assert.equal(getImagesPrefix("@@@"), "assets/images/");
 });
 
 test("normalizeAssetPath stringifies non-string primitives", () => {

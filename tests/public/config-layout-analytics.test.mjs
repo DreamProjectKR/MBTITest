@@ -7,7 +7,7 @@ import {
   dispatchDomContentLoaded,
 } from "./setup-happy-dom.mjs";
 
-/** Node caches ESM by URL; a unique query re-evaluates the IIFE (matches browser navigations). */
+/** Unique `?v=` per import so `config.js` IIFE re-runs with each test's `window`. */
 function scriptHref(relativeToTestFile) {
   const u = new URL(relativeToTestFile, import.meta.url);
   u.searchParams.set("v", `${Date.now()}-${Math.random()}`);
@@ -22,6 +22,21 @@ test("config.js hydrates globals on localhost", async () => {
   assert.equal(typeof window.assetResizeUrl, "function");
   const local = window.assetResizeUrl("assets/x.png", { width: 100 });
   assert.ok(local.includes("/assets/"));
+});
+
+test("layout.js sets partial innerHTML when applyAssetAttributes is not defined", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = LAYOUT_PARTIAL_HTML;
+  globalThis.fetch = async () =>
+    new Response("<span id='layout-no-hook'>in</span>", {
+      status: 200,
+      headers: { "Content-Type": "text/html" },
+    });
+  delete window.applyAssetAttributes;
+  await import(scriptHref("../../public/scripts/layout.js"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+  assert.equal(document.getElementById("layout-no-hook")?.textContent, "in");
 });
 
 test("layout.js injects fetched partial HTML", async () => {
@@ -54,6 +69,26 @@ test("layout.js logs when partial fetch is not ok", async () => {
   await import(scriptHref("../../public/scripts/layout.js"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
+  console.warn = prev;
+  assert.ok(warns.some((w) => w.includes("layout.js") && w.includes("failed")));
+});
+
+test("layout.js warns when partial fetch rejects", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = LAYOUT_PARTIAL_HTML;
+  globalThis.fetch = async () => {
+    throw new Error("network down");
+  };
+  window.applyAssetAttributes = () => {};
+  const warns = [];
+  const prev = console.warn;
+  console.warn = (...args) => {
+    warns.push(args.map(String).join(" "));
+    prev.apply(console, args);
+  };
+  await import(scriptHref("../../public/scripts/layout.js"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
   console.warn = prev;
   assert.ok(warns.some((w) => w.includes("layout.js") && w.includes("failed")));
 });
@@ -108,6 +143,22 @@ test("analytics.js skips gtag on localhost", async () => {
   assert.equal(window.__gtagLoaded, undefined);
 });
 
+test("analytics.js skips gtag when hostname is localhost", async () => {
+  createBrowserEnv({ url: "http://localhost:8788/index.html" });
+  document.documentElement.innerHTML = "<head></head><body></body>";
+  await import(scriptHref("../../public/scripts/analytics.js"));
+  assert.equal(typeof window.gtag, "function");
+  assert.equal(window.__gtagLoaded, undefined);
+});
+
+test("analytics.js skips gtag on IPv6 loopback [::1]", async () => {
+  createBrowserEnv({ url: "http://[::1]:8788/index.html" });
+  document.documentElement.innerHTML = "<head></head><body></body>";
+  await import(scriptHref("../../public/scripts/analytics.js"));
+  assert.equal(typeof window.gtag, "function");
+  assert.equal(window.__gtagLoaded, undefined);
+});
+
 test("analytics.js gtag pushes arguments to dataLayer (even on localhost)", async () => {
   createBrowserEnv({ url: "http://127.0.0.1:8788/gtag-push.html" });
   document.documentElement.innerHTML = "<head></head><body></body>";
@@ -143,6 +194,26 @@ test("analytics.js defers scheduling until DOMContentLoaded when readyState is l
   assert.equal(window.__gtagLoaded, true);
 });
 
+test("analytics.js does not append a second gtag script when idle callback fires twice", async () => {
+  createBrowserEnv({ url: "https://example.com/idempotent-ga" });
+  document.documentElement.innerHTML = "<head></head><body></body>";
+  globalThis.dataLayer = [];
+  globalThis.requestIdleCallback = (cb) => {
+    cb({ didTimeout: false });
+    cb({ didTimeout: false });
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  await import(scriptHref("../../public/scripts/analytics.js"));
+  await new Promise((r) => setTimeout(r, 30));
+  const scripts = [...document.head.querySelectorAll("script")].filter((s) =>
+    String(s.src).includes("googletagmanager.com/gtag/js"),
+  );
+  assert.equal(scripts.length, 1);
+});
+
 test("analytics.js schedules gtag script on non-localhost", async () => {
   createBrowserEnv({ url: "https://example.com/page" });
   document.documentElement.innerHTML = "<head></head><body></body>";
@@ -162,6 +233,69 @@ test("analytics.js schedules gtag script on non-localhost", async () => {
     String(s.src).includes("googletagmanager.com/gtag/js"),
   );
   assert.equal(scripts.length, 1);
+});
+
+test("analytics.js production path pushes gtag config with allow_google_signals off", async () => {
+  createBrowserEnv({ url: "https://example.com/prod-ga" });
+  document.documentElement.innerHTML = "<head></head><body></body>";
+  globalThis.dataLayer = [];
+  globalThis.requestIdleCallback = (cb) => {
+    cb({ didTimeout: false });
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  await import(scriptHref("../../public/scripts/analytics.js"));
+  await new Promise((r) => setTimeout(r, 20));
+  const hasConfig = globalThis.dataLayer.some((entry) => {
+    if (entry && entry[0] === "config") {
+      const opts = entry[2];
+      return (
+        opts &&
+        opts.allow_google_signals === false &&
+        opts.allow_ad_personalization_signals === false
+      );
+    }
+    return false;
+  });
+  assert.ok(hasConfig, "expected gtag('config', …) with disabled signals");
+});
+
+test("analytics.js requestIdleCallback passes timeout 3000 for loadGtag", async () => {
+  createBrowserEnv({ url: "https://example.com/ric-opts" });
+  document.documentElement.innerHTML = "<head></head><body></body>";
+  globalThis.dataLayer = [];
+  let ricOpts;
+  globalThis.requestIdleCallback = (cb, opts) => {
+    ricOpts = opts;
+    cb({ didTimeout: false });
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  await import(scriptHref("../../public/scripts/analytics.js"));
+  await new Promise((r) => setTimeout(r, 20));
+  assert.equal(ricOpts?.timeout, 3000);
+});
+
+test("analytics.js treats empty hostname as non-local (schedules gtag)", async () => {
+  createBrowserEnv({ url: "https://example.com/empty-host" });
+  document.documentElement.innerHTML = "<head></head><body></body>";
+  Object.defineProperty(window.location, "hostname", {
+    configurable: true,
+    get: () => "",
+  });
+  globalThis.dataLayer = [];
+  globalThis.requestIdleCallback = (cb) => cb({ didTimeout: false });
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  await import(scriptHref("../../public/scripts/analytics.js"));
+  await new Promise((r) => setTimeout(r, 25));
+  assert.equal(window.__gtagLoaded, true);
 });
 
 test("analytics.js uses setTimeout when requestIdleCallback is unavailable", async () => {

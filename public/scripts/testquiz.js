@@ -402,7 +402,10 @@ function injectFirstQuestionPreload() {
       : "";
     if (!url) return;
     const key = `quiz-first:${firstPath}|${version}`;
-    if (document.querySelector(`link[data-preload-key="${key}"]`)) return;
+    const already = [
+      ...document.querySelectorAll("link[data-preload-key]"),
+    ].some((el) => el.getAttribute("data-preload-key") === key);
+    if (already) return;
     const link = document.createElement("link");
     link.rel = "preload";
     link.as = "image";

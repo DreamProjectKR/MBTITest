@@ -177,6 +177,38 @@ test("main.js navigates to testintro when a card is clicked", async () => {
   assert.ok(hrefSnap.includes("click-id"));
 });
 
+test("main.js assetResizeUrl falls back to assetUrl when window.assetResizeUrl missing", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  const sample = {
+    id: "no-resize-global",
+    title: "Resize fallback",
+    thumbnail: "assets/nr/t.png",
+    tags: [],
+    path: "nr/test.json",
+    updatedAt: "2026-02-01",
+  };
+
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("/api/tests")) {
+      return new Response(JSON.stringify({ tests: [sample] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  delete window.assetResizeUrl;
+  await import(mainImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(document.body.textContent?.includes("Resize fallback"));
+});
+
 test("main.js uses local assetUrl when config is not loaded", async () => {
   createBrowserEnv();
   document.body.innerHTML = MAIN_PAGE_HTML;
@@ -251,6 +283,155 @@ test("main.js dedupes same id+path and sorts by updatedAt", async () => {
   assert.ok(!document.body.textContent?.includes("Older"));
 });
 
+test("main.js createTestCard handles empty thumbnail", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  const sample = {
+    id: "no-thumb",
+    title: "No thumb",
+    thumbnail: "",
+    tags: ["z"],
+    path: "no-thumb/test.json",
+    updatedAt: "2026-03-01",
+  };
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/api/tests")) {
+      return new Response(JSON.stringify({ tests: [sample] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(mainImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  assert.ok(document.body.textContent?.includes("No thumb"));
+  const img = document.querySelector(".NewTestShell img");
+  assert.ok(img);
+  assert.equal(img.getAttribute("data-asset-src"), null);
+});
+
+test("main.js newtest and toptest cards use different data-asset-srcset widths", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  const sample = {
+    id: "srcset-a",
+    title: "Srcset",
+    thumbnail: "assets/srcset-a/t.png",
+    tags: ["s"],
+    path: "srcset-a/test.json",
+    updatedAt: "2026-03-01",
+  };
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/api/tests")) {
+      return new Response(JSON.stringify({ tests: [sample] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(mainImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  const lists = document.querySelectorAll(".NewTestList");
+  assert.equal(lists.length, 2);
+  const newImg = lists[0].querySelector(".NewTestShell img");
+  const topImg = lists[1].querySelector(".NewTestShell img");
+  assert.equal(newImg?.getAttribute("data-asset-srcset"), "320,480,640");
+  assert.equal(topImg?.getAttribute("data-asset-srcset"), "320,480,520");
+});
+
+test("main.js keeps absolute https thumbnail on card data-asset-src", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  const sample = {
+    id: "abs-thumb",
+    title: "HTTPS thumb",
+    thumbnail: "https://cdn.example.com/thumb.png",
+    tags: ["h"],
+    path: "abs/test.json",
+    updatedAt: "2026-05-01",
+  };
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/api/tests")) {
+      return new Response(JSON.stringify({ tests: [sample] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(mainImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  const img = document.querySelector(".NewTestShell img");
+  assert.equal(
+    img?.getAttribute("data-asset-src"),
+    "https://cdn.example.com/thumb.png",
+  );
+});
+
+test("main.js skips rendering when fewer than two NewTestList sections", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = `
+<header id="headerScroll"><div id="header" class="Head"></div></header>
+<main id="MainTop">
+  <div class="NewTestList"><div class="NewTestListShell"></div></div>
+</main>
+`;
+
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("/api/tests")) {
+      return new Response(
+        JSON.stringify({
+          tests: [
+            {
+              id: "only-one-section",
+              title: "Hidden",
+              thumbnail: "",
+              tags: [],
+              path: "x.json",
+              updatedAt: "2026-01-01",
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(mainImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  assert.equal(document.querySelectorAll(".NewTestShell").length, 0);
+});
+
 test("main.js uses fetch when getTestIndex is removed", async () => {
   createBrowserEnv();
   document.body.innerHTML = MAIN_PAGE_HTML;
@@ -271,4 +452,145 @@ test("main.js uses fetch when getTestIndex is removed", async () => {
   await new Promise((r) => setTimeout(r, 40));
 
   assert.ok(fetched.includes("/api/tests"));
+});
+
+test("main.js keeps http (non-https) thumbnail on data-asset-src", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  const sample = {
+    id: "http-thumb",
+    title: "HTTP thumb",
+    thumbnail: "http://cdn.example.com/insecure.png",
+    tags: [],
+    path: "http-thumb/test.json",
+    updatedAt: "2026-04-01",
+  };
+
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("/api/tests")) {
+      return new Response(JSON.stringify({ tests: [sample] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(mainImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  assert.equal(
+    document.querySelector(".NewTestShell img")?.getAttribute("data-asset-src"),
+    "http://cdn.example.com/insecure.png",
+  );
+});
+
+test("main.js fetchTestsAjax uses window.TEST_INDEX_URL when getTestIndex is absent", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  let fetched = "";
+  globalThis.fetch = async (url) => {
+    fetched = String(url);
+    return new Response(JSON.stringify({ tests: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
+  await import("../../public/scripts/config.js");
+  delete window.getTestIndex;
+  window.TEST_INDEX_URL = "/custom-tests-index";
+  await import(mainImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  assert.ok(fetched.includes("custom-tests-index"));
+});
+
+test("main.js sorts by createdAt when updatedAt is absent", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  const older = {
+    id: "sort-a",
+    title: "Older created",
+    thumbnail: "",
+    tags: [],
+    path: "sort-a/test.json",
+    createdAt: "2019-06-01",
+  };
+  const newer = {
+    id: "sort-b",
+    title: "Newer created",
+    thumbnail: "",
+    tags: [],
+    path: "sort-b/test.json",
+    createdAt: "2025-06-01",
+  };
+
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("/api/tests")) {
+      return new Response(JSON.stringify({ tests: [older, newer] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(mainImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  assert.equal(
+    document.querySelector(".NewTestListShell .NewTestShell h4")?.textContent,
+    "Newer created",
+  );
+});
+
+test("main.js card click navigates with empty testId when id is missing", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  const sample = {
+    title: "No id",
+    thumbnail: "",
+    tags: [],
+    path: "noid/test.json",
+    updatedAt: "2026-01-01",
+  };
+
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("/api/tests")) {
+      return new Response(JSON.stringify({ tests: [sample] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(mainImportHref());
+
+  let hrefSnap = "";
+  Object.defineProperty(window.location, "href", {
+    configurable: true,
+    get: () => String(window.location),
+    set: (v) => {
+      hrefSnap = String(v);
+    },
+  });
+
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  document.querySelector(".NewTestShell")?.click();
+  assert.ok(hrefSnap.includes("testintro.html"));
+  assert.ok(hrefSnap.includes("testId="));
 });

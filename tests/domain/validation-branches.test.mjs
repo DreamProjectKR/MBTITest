@@ -19,6 +19,27 @@ function twelveQuestions() {
   }));
 }
 
+/** Rotates EI / SN / TF / JP so AXIS_MAP branches for each axis are exercised. */
+function twelveQuestionsMixedAxes() {
+  const cycles = [
+    ["EI", "E", "I"],
+    ["SN", "S", "N"],
+    ["TF", "T", "F"],
+    ["JP", "J", "P"],
+  ];
+  return Array.from({ length: 12 }, (_, i) => {
+    const [axis, a, b] = cycles[i % 4];
+    return {
+      label: `L${i + 1}`,
+      questionImage: `assets/t/q${i + 1}.png`,
+      answers: [
+        { label: "A", mbtiAxis: axis, direction: a },
+        { label: "B", mbtiAxis: axis, direction: b },
+      ],
+    };
+  });
+}
+
 function sixteenResults() {
   return Object.fromEntries(
     MBTI_ORDER.map((code) => [
@@ -97,6 +118,15 @@ test("validateTestPayload: external URLs on thumbnail, author, question image", 
   assert.match(
     validateTestPayload(basePayload({ questions: qs })),
     /Question 1 image/,
+  );
+});
+
+test("validateTestPayload accepts 12 questions with mixed MBTI axes", () => {
+  assert.equal(
+    validateTestPayload(
+      basePayload({ questions: twelveQuestionsMixedAxes() }),
+    ),
+    null,
   );
 });
 
@@ -239,6 +269,19 @@ test("validateTestPayload: answer-level validation", () => {
     validateTestPayload(basePayload({ questions: qs4 })),
     /Question 4 answer 1 needs a direction/,
   );
+
+  const qs5 = twelveQuestions();
+  qs5[4] = {
+    ...qs5[4],
+    answers: [
+      { label: "A", mbtiAxis: "EI", direction: "   " },
+      { label: "B", mbtiAxis: "EI", direction: "I" },
+    ],
+  };
+  assert.match(
+    validateTestPayload(basePayload({ questions: qs5 })),
+    /Question 5 answer 1 needs a direction/,
+  );
 });
 
 test("validateTestPayload: answers must share axis and cover both poles", () => {
@@ -282,6 +325,15 @@ test("validateTestPayload: results block", () => {
   const r = sixteenResults();
   delete r.ENFP;
   assert.match(validateTestPayload(basePayload({ results: r })), /exactly 16/);
+
+  const rTooMany = {
+    ...sixteenResults(),
+    EXTRA: { image: "assets/t/x.png", summary: "x" },
+  };
+  assert.match(
+    validateTestPayload(basePayload({ results: rTooMany })),
+    /exactly 16 MBTI entries/,
+  );
 
   const r2 = { ...sixteenResults() };
   delete r2.INTJ;

@@ -35,3 +35,22 @@ test("computeMbtiFromAnswers handles empty answers with default percentages", ()
   assert.equal(r.mbti.length, 4);
   assert.equal(r.percentages.E + r.percentages.I, 100);
 });
+
+test("computeMbtiFromAnswers tie on axis picks first pole letter", () => {
+  const tieEi = [];
+  for (let i = 0; i < 3; i += 1) {
+    tieEi.push({ mbtiAxis: "EI", direction: "E" });
+    tieEi.push({ mbtiAxis: "EI", direction: "I" });
+  }
+  tieEi.push(
+    { mbtiAxis: "SN", direction: "S" },
+    { mbtiAxis: "SN", direction: "N" },
+    { mbtiAxis: "TF", direction: "T" },
+    { mbtiAxis: "TF", direction: "F" },
+    { mbtiAxis: "JP", direction: "J" },
+    { mbtiAxis: "JP", direction: "P" },
+  );
+  const r = computeMbtiFromAnswers(tieEi);
+  assert.equal(r.mbti[0], "E");
+  assert.equal(r.mbti, "ESTJ");
+});

@@ -65,6 +65,48 @@ test("uses first IP from x-forwarded-for when cf-connecting-ip absent", async ()
   assert.equal(blocked?.status, 429);
 });
 
+test("rateLimitOr429: whitespace-only CF-Connecting-IP maps to unknown client bucket", async () => {
+  const kv = createMemoryKV();
+  const url = "https://example.com/ws-cf";
+  const headers = { "cf-connecting-ip": "   \t" };
+
+  for (let i = 0; i < 3; i++) {
+    const res = await rateLimitOr429(
+      kv,
+      new Request(url, { method: "POST", headers }),
+      opts("ws-cf"),
+    );
+    assert.equal(res, null);
+  }
+  const blocked = await rateLimitOr429(
+    kv,
+    new Request(url, { method: "POST", headers }),
+    opts("ws-cf"),
+  );
+  assert.equal(blocked?.status, 429);
+});
+
+test("rateLimitOr429: x-forwarded-for with empty first hop maps to unknown", async () => {
+  const kv = createMemoryKV();
+  const url = "https://example.com/xff-empty-first";
+  const headers = { "x-forwarded-for": ", 198.51.100.9" };
+
+  for (let i = 0; i < 3; i++) {
+    const res = await rateLimitOr429(
+      kv,
+      new Request(url, { method: "POST", headers }),
+      opts("xff-empty"),
+    );
+    assert.equal(res, null);
+  }
+  const blocked = await rateLimitOr429(
+    kv,
+    new Request(url, { method: "POST", headers }),
+    opts("xff-empty"),
+  );
+  assert.equal(blocked?.status, 429);
+});
+
 test("non-numeric count in KV is treated as 0", async () => {
   const kv = createMemoryKV();
   const windowSec = 60;

@@ -111,6 +111,137 @@ test("testresult.js static import: invalid sessionStorage JSON falls back to fet
   );
 });
 
+test("testresult.js static import: fetch 200 with non-JSON body shows error", async () => {
+  const t = minimalPublishedQuizTest("fetch-nonjson");
+  const mbti = "ESTJ";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+
+  globalThis.fetch = async () =>
+    new Response("not-json", {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+
+  await import("../../public/scripts/config.js");
+  await import(testresultHref("fetch-nonjson"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  assert.equal(
+    document.querySelector(".ResultShellTextBox h2")?.textContent,
+    "결과를 불러올 수 없습니다.",
+  );
+});
+
+test("testresult.js static import: cached test without results entry still renders title", async () => {
+  const t = minimalPublishedQuizTest("res-miss");
+  delete t.results.ENFP;
+  const mbti = "ENFP";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+  globalThis.fetch = async () => new Response("{}", { status: 404 });
+
+  await import("../../public/scripts/config.js");
+  await import(testresultHref("res-miss"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  const title = document.querySelector(".ResultShellTextBox h2");
+  assert.ok(String(title?.textContent || "").includes(mbti));
+  assert.equal(
+    document.querySelector(".ResultShellImg img")?.getAttribute("data-asset-src"),
+    null,
+  );
+});
+
+test("testresult.js static import: invalid pS skips axis breakdown (not all four percents)", async () => {
+  const t = minimalPublishedQuizTest("partial-p");
+  const mbti = "ENFP";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}&pE=50&pS=bad`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+
+  await import("../../public/scripts/config.js");
+  await import(testresultHref("partial-p"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.equal(document.querySelector(".ResultAxisStats"), null);
+});
+
+test("testresult.js static import: axis stats append when ResultBtnShell not direct child", async () => {
+  const t = minimalPublishedQuizTest("nested-btn");
+  const mbti = "ESTJ";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}&pE=50&pS=50&pT=50&pJ=50`,
+  });
+  document.body.innerHTML = `
+<header class="Sticky"><div class="Head"></div></header>
+<main class="ResultShell">
+  <div class="ResultShellImg"><img alt="" /></div>
+  <div class="ResultShellTextBox">
+    <h2>결과</h2>
+    <div class="ResultBtnOuter">
+      <div class="ResultBtnShell">
+        <div class="Restart"><button type="button">다시</button></div>
+        <div class="TestShare"><button type="button">공유</button></div>
+      </div>
+    </div>
+  </div>
+</main>
+`;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+
+  await import("../../public/scripts/config.js");
+  await import(testresultHref("nested-axis"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  const stats = document.querySelector(".ResultAxisStats");
+  assert.ok(stats);
+  assert.equal(stats.parentElement?.className, "ResultShellTextBox");
+});
+
+test("testresult.js static import: preload uses raw path when assetUrl and assetResizeUrl missing", async () => {
+  const t = minimalPublishedQuizTest("preload-raw");
+  const mbti = "ENFP";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+
+  await import("../../public/scripts/config.js");
+  const origApply = window.applyAssetAttributes;
+  const origResize = window.assetResizeUrl;
+  const origAssetUrl = window.assetUrl;
+  window.applyAssetAttributes = () => {};
+  delete window.assetResizeUrl;
+  delete window.assetUrl;
+
+  await import(testresultHref("preload-raw"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  window.applyAssetAttributes = origApply;
+  window.assetResizeUrl = origResize;
+  window.assetUrl = origAssetUrl;
+
+  const link = document.querySelector('link[rel="preload"][as="image"]');
+  assert.ok(link);
+  const href = String(link.getAttribute("href") || "");
+  assert.ok(href.includes("assets/"));
+  assert.ok(!href.includes("/cdn-cgi/image/"));
+});
+
 test("testresult.js versioned: share uses navigator.share when available", async () => {
   const t = minimalPublishedQuizTest("res-share-nav");
   const mbti = "ISTP";

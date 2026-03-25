@@ -18,7 +18,13 @@ test("parseJsonArray covers non-string, invalid JSON, non-array", () => {
   assert.equal(parseJsonArray("{"), null);
   assert.equal(parseJsonArray(JSON.stringify({ a: 1 })), null);
   assert.equal(parseJsonArray("5"), null);
+  assert.equal(parseJsonArray("true"), null);
   assert.equal(parseJsonArray("null"), null);
+});
+
+test("parseJsonArray returns array for valid JSON array strings", () => {
+  assert.deepEqual(parseJsonArray(JSON.stringify(["a", "b"])), ["a", "b"]);
+  assert.deepEqual(parseJsonArray("[]"), []);
 });
 
 test("mergeTestDetailPayload uses empty description when JSON not array", () => {
@@ -37,6 +43,20 @@ test("mergeTestDetailPayload uses empty description when JSON not array", () => 
 test("mergeTestDetailPayload spreads body when object", () => {
   const p = mergeTestDetailPayload({ test_id: "t", title: "T" }, { extra: 1 });
   assert.equal(p.extra, 1);
+});
+
+test("mergeTestDetailPayload body object overrides D1 id and title", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "from-row",
+      title: "Row title",
+      tags_json: "[]",
+    },
+    { id: "from-body", title: "Body title", tags: ["a"] },
+  );
+  assert.equal(p.id, "from-body");
+  assert.equal(p.title, "Body title");
+  assert.deepEqual(p.tags, ["a"]);
 });
 
 test("mergeTestDetailPayload ignores non-object bodyJson", () => {
@@ -177,6 +197,21 @@ test("mergeTestDetailPayload: truthy non-object bodyJson does not spread", () =>
 test("mergeTestDetailPayload: falsy bodyJson 0 skips spread", () => {
   const p = mergeTestDetailPayload({ test_id: "t", title: "T" }, 0);
   assert.equal(p.extra, undefined);
+});
+
+test("mergeTestDetailPayload spreads null-prototype body object", () => {
+  const body = Object.create(null);
+  body.mergedKey = "from-null-proto";
+  const p = mergeTestDetailPayload({ test_id: "t", title: "Row" }, body);
+  assert.equal(p.mergedKey, "from-null-proto");
+  assert.equal(p.title, "Row");
+});
+
+test("mergeTestDetailPayload spreads boxed String body as object-typed value", () => {
+  const body = Object("extra");
+  const p = mergeTestDetailPayload({ test_id: "t", title: "Row" }, body);
+  assert.equal(p[0], "e");
+  assert.equal(p.title, "Row");
 });
 
 test("safeJsonArray returns [] on invalid JSON string", () => {

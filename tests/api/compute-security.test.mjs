@@ -122,6 +122,22 @@ test("POST compute: empty answers array -> 400", async () => {
   assert.match(body.error, /answers array is required/i);
 });
 
+test("POST compute: answers not an array -> 400", async () => {
+  const res = await onRequestPost(
+    createContext({
+      url: COMPUTE_URL,
+      method: "POST",
+      env: baseEnv(),
+      params: { id: "t1" },
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ answers: { "0": { mbtiAxis: "EI", direction: "E" } } }),
+    }),
+  );
+  assert.equal(res.status, 400);
+  const body = await res.json();
+  assert.match(body.error, /answers array is required/i);
+});
+
 test("POST compute: no DB row -> 404", async () => {
   const res = await onRequestPost(
     createContext({
