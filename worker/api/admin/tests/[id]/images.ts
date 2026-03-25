@@ -51,18 +51,6 @@ function canonicalBaseName(baseName: string): string {
   return base;
 }
 
-/** Pure: infer image type from base name. */
-function inferImageType(baseName: string): string {
-  const base = String(baseName || "")
-    .trim()
-    .toLowerCase();
-  if (base === "thumbnail") return "thumbnail";
-  if (base === "author") return "author";
-  if (/^q\d{1,2}$/i.test(baseName)) return "question";
-  if (/^[ei][ns][tf][jp]$/i.test(baseName)) return "result";
-  return "misc";
-}
-
 /** Pure: map DB row to API item shape. */
 function rowToImageItem(row: TestImageMetaRow): {
   id: number | null;

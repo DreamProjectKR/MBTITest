@@ -1,0 +1,65 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { cacheKeyForGet } from "../../worker/api/_utils/http.ts";
+import { listTests } from "../../worker/api/tests/index.ts";
+import {
+  createContext,
+  createIndexDb,
+  installDefaultCacheStub,
+} from "../shared/worker-harness.mjs";
+
+const cacheMemory = new Map();
+installDefaultCacheStub({
+  async match(req) {
+    const key = new URL(req.url).origin + new URL(req.url).pathname;
+    return cacheMemory.get(key) ?? null;
+  },
+  async put(req, res) {
+    const key = new URL(req.url).origin + new URL(req.url).pathname;
+    cacheMemory.set(key, res.clone());
+  },
+});
+
+const ROW = {
+  test_id: "t1",
+  title: "One",
+  thumbnail_path: "assets/t1/images/thumbnail.png",
+  tags_json: "[]",
+  source_path: "t1/test.json",
+  created_at: "2026-01-01",
+  updated_at: "2026-01-01",
+  is_published: 1,
+};
+
+test("listTests: Cache API HIT on second request", async () => {
+  const url = new URL("https://example.com/api/tests?cachebranch=1");
+  const env = { MBTI_DB: createIndexDb([ROW]) };
+  const first = await listTests(createContext({ url: url.href, env }), {
+    publishedOnly: true,
+    useCache: true,
+  });
+  assert.equal(first.status, 200);
+  await caches.default.put(cacheKeyForGet(url), first.clone());
+  const second = await listTests(createContext({ url: url.href, env }), {
+    publishedOnly: true,
+    useCache: true,
+  });
+  assert.equal(second.status, 200);
+  assert.equal(second.headers.get("X-MBTI-Edge-Cache"), "HIT");
+});
+
+test("listTests: responseHeaders merged into response", async () => {
+  const res = await listTests(
+    createContext({
+      url: "https://example.com/api/tests",
+      env: { MBTI_DB: createIndexDb([ROW]) },
+    }),
+    {
+      publishedOnly: true,
+      useCache: false,
+      responseHeaders: { "X-Test-Extra": "1" },
+    },
+  );
+  assert.equal(res.headers.get("X-Test-Extra"), "1");
+});

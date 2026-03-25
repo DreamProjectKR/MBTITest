@@ -1,3 +1,33 @@
+/** Cache stub that persists `put` entries so `match` can return them (same key as `cacheKeyForGet`). */
+export function installInMemoryCacheStub() {
+  const store = new Map();
+  function cacheKeyString(request) {
+    const u = new URL(request.url);
+    return u.origin + u.pathname;
+  }
+  const calls = { match: [], put: [], delete: [] };
+  globalThis.caches = {
+    default: {
+      async match(request) {
+        calls.match.push(request);
+        const key = cacheKeyString(request);
+        const res = store.get(key);
+        return res ? res.clone() : null;
+      },
+      async put(request, response) {
+        calls.put.push({ request, response });
+        store.set(cacheKeyString(request), response.clone());
+      },
+      async delete(request) {
+        calls.delete.push(request);
+        store.delete(cacheKeyString(request));
+        return true;
+      },
+    },
+  };
+  return calls;
+}
+
 export function installDefaultCacheStub(overrides = {}) {
   const calls = {
     match: [],

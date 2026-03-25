@@ -185,3 +185,21 @@ Cloudflare Pages (정적만) + Worker (API + 에셋), D1 (SQLite), R2 (object st
 | D1/R2 helpers            | `worker/api/admin/utils/store.ts`      |
 | Shared types             | `worker/_types.ts`                     |
 | Caching strategy         | `docs/CLOUDFLARE_PERFORMANCE.md`       |
+
+---
+
+## Learned User Preferences
+
+- For large or high-coverage test work, run a follow-up review pass (for example a reviewer subagent) so assertions stay tied to real business rules rather than accidental mock behavior.
+- When a test fails, fix Worker or `public/` code first; change the test only if the production behavior is already the intended contract.
+- Security-hardening work in this repo has treated crawl/search suppression plus Cloudflare Access documentation as the primary admin exposure story, without adding in-Worker Bearer verification, unless a later task explicitly requires it.
+
+---
+
+## Learned Workspace Facts
+
+- KV-backed rate limits need `MBTI_KV`; without it, rate limiting may be skipped (fail-open) in local or minimal setups.
+- In Node tests, `cache.put()` may still run even when `waitUntil` is a no-op; tests that must hit the origin `If-None-Match` path for `loadTestDetail` can clear the Cache API entry with `caches.default.delete(cacheKeyForGet(url))` before a second request.
+- Question images: preloading on the intro flow should use the same full URLs as the quiz (including `/cdn-cgi/image` width variants such as 360, 480, 720); raw asset URLs and resized URLs are different HTTP cache keys.
+- Cloudflare dashboard cache metrics (for example Cache Reserve or Caching Overview) may omit Worker subrequests or show zero storage while edge caching still works; confirm with response headers such as `cf-cache-status` or app-specific edge cache headers.
+- Worker dispatch should await async handlers so handler rejections surface as JSON error responses instead of unhandled promise failures.
