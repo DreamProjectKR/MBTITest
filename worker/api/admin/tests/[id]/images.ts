@@ -1,14 +1,18 @@
 import type { MbtiEnv, PagesContext } from "../../../../_types.ts";
 
 import { uploadTestImageWorkflow } from "../../../../application/workflows/uploadTestImage.ts";
+import {
+  MAX_IMAGE_UPLOAD_BYTES,
+  getContentLength,
+  payloadTooLargeResponse,
+} from "../../../_utils/bodyLimits.ts";
 import { noStoreJsonResponse } from "../../../_utils/http.ts";
 import {
-  type TestImageMetaRow,
-  getImagesPrefix,
-  listTestImageMeta,
-  normalizeAssetKey,
-  upsertTestImageMeta,
-} from "../../utils/store.ts";
+  RATE_IMAGE_PUT_PER_WINDOW,
+  RATE_IMAGE_PUT_WINDOW_SEC,
+  rateLimitOr429,
+} from "../../../_utils/rateLimit.ts";
+import { type TestImageMetaRow, listTestImageMeta } from "../../utils/store.ts";
 
 type Params = { id?: string };
 
@@ -20,13 +24,12 @@ function badRequest(message: string): Response {
   return noStoreJsonResponse({ error: message }, 400);
 }
 
-/** Pure: map MIME type to file extension. */
+/** Pure: map MIME type to file extension (SVG not accepted; see handler). */
 function extensionFromMime(mimeType = ""): string {
   const type = String(mimeType || "").toLowerCase();
   if (type === "image/jpeg" || type === "image/jpg") return "jpg";
   if (type === "image/webp") return "webp";
   if (type === "image/gif") return "gif";
-  if (type === "image/svg+xml") return "svg";
   return "png";
 }
 
@@ -161,6 +164,24 @@ export async function onRequestPut(
   const testId = context.params?.id ? String(context.params.id).trim() : "";
   if (!testId) return badRequest("Missing test id.");
 
+  const tooMany = await rateLimitOr429(context.env.MBTI_KV, context.request, {
+    routeKey: "admin-image-put",
+    limit: RATE_IMAGE_PUT_PER_WINDOW,
+    windowSec: RATE_IMAGE_PUT_WINDOW_SEC,
+  });
+  if (tooMany) return tooMany;
+
+  const reqContentType = context.request.headers.get("content-type") || "";
+  const isMultipart = reqContentType
+    .toLowerCase()
+    .startsWith("multipart/form-data");
+  if (!isMultipart) {
+    const len = getContentLength(context.request);
+    if (len !== null && len > MAX_IMAGE_UPLOAD_BYTES) {
+      return payloadTooLargeResponse();
+    }
+  }
+
   let upload: {
     buffer: ArrayBuffer;
     contentType: string;
@@ -172,6 +193,15 @@ export async function onRequestPut(
     return badRequest("Unable to parse uploaded file.");
   }
   if (!upload) return badRequest("File upload required.");
+
+  if (upload.buffer.byteLength > MAX_IMAGE_UPLOAD_BYTES) {
+    return payloadTooLargeResponse();
+  }
+
+  const mimeLower = String(upload.contentType || "").toLowerCase();
+  if (mimeLower.includes("svg")) {
+    return noStoreJsonResponse({ error: "SVG uploads are not allowed." }, 415);
+  }
 
   const ext = extensionFromMime(upload.contentType);
   const baseRaw =

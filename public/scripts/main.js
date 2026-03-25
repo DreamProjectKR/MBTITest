@@ -110,10 +110,14 @@ function createTestCard(test, variantClass, opts = {}) {
   const tagBox = document.createElement("div");
   tagBox.className = "NewTestHashTag";
   const tags = Array.isArray(test.tags) ? test.tags : [];
-  tagBox.innerHTML = tags
-    .slice(0, 3)
-    .map((tag) => `<span class="HashTag">#${tag}</span>`)
-    .join("");
+  const frag = document.createDocumentFragment();
+  tags.slice(0, 3).forEach((tag) => {
+    const span = document.createElement("span");
+    span.className = "HashTag";
+    span.textContent = `#${tag}`;
+    frag.appendChild(span);
+  });
+  tagBox.appendChild(frag);
 
   card.appendChild(img);
   card.appendChild(title);

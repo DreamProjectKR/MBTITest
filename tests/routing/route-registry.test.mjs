@@ -75,7 +75,7 @@ test("worker fetch dispatches compute POST route", async () => {
               return this;
             },
             async first() {
-              return { test_id: "test-a" };
+              return { test_id: "test-a", is_published: 1 };
             },
             async all() {
               return { results: [] };

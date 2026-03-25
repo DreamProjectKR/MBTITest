@@ -1,0 +1,5 @@
+# MBTI ZOO — allow public pages; discourage indexing of admin UI.
+User-agent: *
+Allow: /
+
+Disallow: /admin.html

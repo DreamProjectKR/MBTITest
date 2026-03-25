@@ -90,8 +90,8 @@ export async function dispatchWorkerRequest(
     if (request.headers.get(ORIGIN_REQUEST_HEADER) === "1") {
       const context = createContext(request, env, ctx, params);
       const handler = resolveHandler(route, request.method);
-      if (handler) return handler(context);
-      if (env.ASSETS) return env.ASSETS.fetch(request);
+      if (handler) return await handler(context);
+      if (env.ASSETS) return await env.ASSETS.fetch(request);
       return notFoundResponse();
     }
 
@@ -100,8 +100,8 @@ export async function dispatchWorkerRequest(
 
     const context = createContext(request, env, ctx, params);
     const handler = resolveHandler(route, request.method);
-    if (handler) return handler(context);
-    if (env.ASSETS) return env.ASSETS.fetch(request);
+    if (handler) return await handler(context);
+    if (env.ASSETS) return await env.ASSETS.fetch(request);
     return notFoundResponse();
   } catch (err) {
     const message =

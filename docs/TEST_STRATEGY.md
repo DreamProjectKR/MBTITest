@@ -65,6 +65,20 @@
 
 - admin state transition과 주요 UI workflow가 회귀하지 않도록 보장합니다.
 
+### 6. Security / HTTP Utils Tests
+
+대상:
+
+- `worker/api/_utils/bodyLimits.ts`, `rateLimit.ts`
+- `POST /api/tests/:id/compute` (공개 여부, 본문 크기, KV 속도 제한)
+- `GET/PUT .../images` (SVG 거부, 업로드 크기, 속도 제한)
+- `loadTestDetail`, `listTests` 분기 (KV/캐시/404/500)
+- `dispatchWorkerRequest` (예외 처리, Tiered Cache `SELF`, origin 서브요청)
+
+목표:
+
+- 보안 관련 상수·분기와 `dispatch`의 `await handler` 비동기 예외 포착을 회귀 테스트로 고정합니다.
+
 ## 권장 폴더 구조
 
 ```text
@@ -72,7 +86,19 @@ tests/
 ├── shared/
 │   ├── fixtures/
 │   ├── factories/
+│   ├── kv-harness.mjs
 │   └── worker-harness.mjs
+├── api/
+│   ├── admin-images-security.test.mjs
+│   ├── compute-security.test.mjs
+│   ├── list-tests.test.mjs
+│   └── load-test-detail.test.mjs
+├── utils/
+│   ├── body-limits.test.mjs
+│   └── rate-limit.test.mjs
+├── http/
+│   ├── dispatch-tiered-cache.test.mjs
+│   └── dispatch-worker.test.mjs
 ├── domain/
 ├── public-browse/
 ├── admin-authoring/
@@ -105,6 +131,7 @@ tests/
 ## 실행 규칙
 
 - 기본 전체 실행: `npm test`
+- Worker TypeScript 라인 커버리지(대략적): `npm run test:coverage` — `worker/**/*.ts` 포함, V8 리포트는 터미널에 출력됩니다. **전체 저장소 100%는 목표로 하지 않으며**, `public/` 정적 스크립트·일부 분기는 별도 E2E/수동 검증과 병행합니다.
 - 리팩터링 중에는 변경 범위에 맞는 하위 테스트 묶음을 빠르게 실행할 수 있어야 합니다.
 - 최종 완료 전에는 전체 테스트 명령을 다시 실행합니다.
 

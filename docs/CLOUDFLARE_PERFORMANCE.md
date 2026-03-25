@@ -29,6 +29,8 @@
 - **쓰기**: 어드민 저장 시 KV 키 삭제
 - **바인딩**: `MBTI_KV` (worker/wrangler.toml)
 
+**속도 제한 (구현됨)**: 동일 KV 네임스페이스에 `POST /api/tests/:id/compute` 및 `PUT /api/admin/tests/:id/images`용 카운터를 둡니다. IP는 `CF-Connecting-IP` 우선. 상수·동작은 [docs/API.md](API.md) 및 `worker/api/_utils/rateLimit.ts` 참고.
+
 ### Tiered Cache (Worker) — fetch+cf 적용됨
 
 Worker가 캐시 가능한 GET 요청(`/api/tests`, `/api/tests/:id`, `/assets/*`)에 대해 **fetch(self, cf)** 패턴을 사용해 Tiered Cache를 채웁니다. 내부 헤더 `X-Mbti-Origin-Request`로 subrequest를 구분하고, 오리진 처리 시 D1/R2/KV 응답이 `cf: { cacheTtl, cacheEverything, cacheTags }`에 의해 Tiered Cache에 적재됩니다.

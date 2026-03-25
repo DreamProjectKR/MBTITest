@@ -12,6 +12,8 @@
    D1/R2 데이터 소유권과 저장 구조
 5. `TEST_STRATEGY.md`
    자동 테스트 계층과 최소 커버리지 기준
+6. `ADMIN_ACCESS.md`
+   Admin UI/API를 앱 회원가입 없이 보호하는 방법 (Cloudflare Access 등)
 
 아래 내용은 시스템 개요와 배경 설명입니다.
 
