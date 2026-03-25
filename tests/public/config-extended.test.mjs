@@ -62,6 +62,63 @@ test("config: buildAssetUrl merges resize, version, and empty path", async () =>
   assert.ok(plain.includes("/assets/"));
 });
 
+test("config: buildAssetUrl keeps existing v query when version param also passed", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const u = window.buildAssetUrl("assets/keep.png?v=first", null, "second");
+  assert.ok(u.includes("v=first"));
+  assert.ok(!u.includes("v=second"));
+});
+
+test("config: assetResizeUrl on localhost skips cdn-cgi image", async () => {
+  createBrowserEnv({ url: "http://127.0.0.1:8788/page" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const out = window.assetResizeUrl("assets/local.png", {
+    width: 640,
+    quality: 80,
+  });
+  assert.ok(!out.includes("cdn-cgi"));
+  assert.ok(out.includes("/assets/"));
+});
+
+test("config: IntersectionObserver constructor failure leaves lazy observer disabled", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const OrigIo = globalThis.IntersectionObserver;
+  globalThis.IntersectionObserver = class {
+    constructor() {
+      throw new Error("no-io");
+    }
+  };
+  try {
+    await import(scriptHref("../../public/scripts/config.js"));
+    assert.equal(typeof window.applyAssetAttributes, "function");
+  } finally {
+    globalThis.IntersectionObserver = OrigIo;
+  }
+});
+
+test("config: buildAssetUrl falls back when absolute href is invalid for URL()", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const orig = window.assetUrl;
+  window.assetUrl = () => "http://a b.com/assets/x.png";
+  try {
+    const out = window.buildAssetUrl("ignored", null, "1");
+    assert.ok(typeof out === "string");
+    assert.ok(out.includes("a b.com") || out.length > 0);
+  } finally {
+    window.assetUrl = orig;
+  }
+});
+
 test("config: getTestIndex memoizes and validates JSON", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =

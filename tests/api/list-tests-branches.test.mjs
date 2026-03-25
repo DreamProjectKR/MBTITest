@@ -53,6 +53,29 @@ test("listTests: Cache API HIT on second request", async () => {
   assert.equal(second.headers.get("X-MBTI-Edge-Cache"), "HIT");
 });
 
+test("listTests: Cache HIT returns 304 when If-None-Match matches cached ETag", async () => {
+  const url = new URL("https://example.com/api/tests?cache304=1");
+  const env = { MBTI_DB: createIndexDb([ROW]) };
+  const first = await listTests(createContext({ url: url.href, env }), {
+    publishedOnly: true,
+    useCache: true,
+  });
+  assert.equal(first.status, 200);
+  const etag = first.headers.get("ETag");
+  assert.ok(etag);
+  await caches.default.put(cacheKeyForGet(url), first.clone());
+  const notModified = await listTests(
+    createContext({
+      url: url.href,
+      env,
+      headers: { "if-none-match": etag },
+    }),
+    { publishedOnly: true, useCache: true },
+  );
+  assert.equal(notModified.status, 304);
+  assert.equal(notModified.headers.get("X-MBTI-Edge-Cache"), "HIT");
+});
+
 test("listTests: responseHeaders merged into response", async () => {
   const res = await listTests(
     createContext({

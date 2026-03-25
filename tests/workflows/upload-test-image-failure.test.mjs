@@ -9,6 +9,54 @@ import {
 
 installDefaultCacheStub();
 
+test("uploadTestImageWorkflow: throws when MBTI_BUCKET is missing", async () => {
+  await assert.rejects(
+    () =>
+      uploadTestImageWorkflow(
+        createContext({
+          url: "https://x",
+          env: {
+            MBTI_DB: {
+              prepare() {
+                return { bind() {}, async all() {} };
+              },
+            },
+          },
+        }),
+        {
+          testId: "tid",
+          baseName: "thumbnail",
+          extension: "png",
+          contentType: "image/png",
+          buffer: new Uint8Array([1]).buffer,
+        },
+      ),
+    /MBTI_BUCKET/,
+  );
+});
+
+test("uploadTestImageWorkflow: throws when MBTI_DB is missing", async () => {
+  await assert.rejects(
+    () =>
+      uploadTestImageWorkflow(
+        createContext({
+          url: "https://x",
+          env: {
+            MBTI_BUCKET: { async put() {} },
+          },
+        }),
+        {
+          testId: "tid",
+          baseName: "thumbnail",
+          extension: "png",
+          contentType: "image/png",
+          buffer: new Uint8Array([1]).buffer,
+        },
+      ),
+    /MBTI_DB/,
+  );
+});
+
 test("uploadTestImageWorkflow: metadata failure triggers delete cleanup", async () => {
   const deleted = [];
   const bucket = {

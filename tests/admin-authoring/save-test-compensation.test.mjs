@@ -55,6 +55,30 @@ function validPayload() {
   };
 }
 
+test("saveTestWorkflow: throws when MBTI_BUCKET is missing", async () => {
+  await assert.rejects(
+    () =>
+      saveTestWorkflow(
+        createContext({ url: "https://x", env: { MBTI_DB: {} } }),
+        "tid",
+        validPayload(),
+      ),
+    /MBTI_BUCKET/,
+  );
+});
+
+test("saveTestWorkflow: throws when MBTI_DB is missing", async () => {
+  await assert.rejects(
+    () =>
+      saveTestWorkflow(
+        createContext({ url: "https://x", env: { MBTI_BUCKET: {} } }),
+        "tid",
+        validPayload(),
+      ),
+    /MBTI_DB/,
+  );
+});
+
 test("saveTestWorkflow: D1 failure deletes new test body when no previous body", async () => {
   const store = new Map();
   const bucket = {

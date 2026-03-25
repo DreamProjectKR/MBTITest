@@ -90,6 +90,53 @@ test("testquiz.js static import: two questions then result with local MBTI", asy
   assert.ok(hrefSnap.includes("result="));
 });
 
+test("testquiz.js versioned: compute fetch throws; local MBTI fallback still navigates", async () => {
+  const t = twoQuestionQuiz("net-err-quiz");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  let hrefSnap = "";
+  Object.defineProperty(window.location, "href", {
+    configurable: true,
+    get: () => String(window.location),
+    set: (v) => {
+      hrefSnap = String(v);
+    },
+  });
+
+  globalThis.fetch = async (url, init) => {
+    const u = String(url);
+    const method = (init && init.method) || "GET";
+    if (method === "POST" && u.includes("/compute")) {
+      throw new Error("network unavailable");
+    }
+    if (method === "GET" && u.includes(`/api/tests/${t.id}`)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizHref("compute-throw"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  const buttons = () => [...document.querySelectorAll(".TestSelectBtn button")];
+  assert.equal(buttons().length, 2);
+  buttons()[0].click();
+  await new Promise((r) => setTimeout(r, 40));
+  buttons()[0].click();
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(hrefSnap.includes("testresult.html"));
+  assert.ok(hrefSnap.includes("result="));
+});
+
 test("testquiz.js versioned: sessionStorage cache skips network", async () => {
   const t = minimalPublishedQuizTest("cached-quiz");
   createBrowserEnv({
@@ -156,4 +203,93 @@ test("testquiz.js versioned: empty questions array", async () => {
   await new Promise((r) => setTimeout(r, 50));
 
   assert.ok(document.body.textContent?.includes("문항이 없습니다."));
+});
+
+test("testquiz.js versioned: invalid sessionStorage JSON falls back to fetch", async () => {
+  const t = twoQuestionQuiz("bad-cache-json");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, "{not-json");
+
+  let fetches = 0;
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes(`/api/tests/${t.id}`) && u.includes("compute")) {
+      return new Response("{}", { status: 500 });
+    }
+    if (u.includes(`/api/tests/${t.id}`)) {
+      fetches += 1;
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizHref("bad-sess-json"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  assert.equal(fetches, 1);
+  assert.ok(document.querySelector(".TestSelectBtn button"));
+});
+
+test("testquiz.js versioned: question without questionImage uses filename candidates", async () => {
+  const t = minimalPublishedQuizTest("conv-paths");
+  const imagePrefix = `assets/${t.id}/images`;
+  t.questions = [
+    {
+      id: "q1",
+      label: "Q1",
+      answers: [
+        { mbtiAxis: "EI", direction: "E", label: "E" },
+        { mbtiAxis: "EI", direction: "I", label: "I" },
+      ],
+    },
+    {
+      id: "q2",
+      label: "Q2",
+      answers: [
+        { mbtiAxis: "SN", direction: "S", label: "S" },
+        { mbtiAxis: "SN", direction: "N", label: "N" },
+      ],
+    },
+  ];
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes(`/api/tests/${t.id}`) && u.includes("compute")) {
+      return new Response("{}", { status: 500 });
+    }
+    if (u.includes(`/api/tests/${t.id}`)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizHref("conv-img"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  const img = document.querySelector(".TestImg img");
+  assert.ok(img);
+  const src =
+    img.getAttribute("data-asset-src") || img.getAttribute("src") || "";
+  assert.ok(
+    src.includes(`${imagePrefix}/`) || src.includes("q1"),
+    `expected convention path under ${imagePrefix}, got ${src}`,
+  );
 });

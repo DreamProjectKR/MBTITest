@@ -72,18 +72,19 @@ test("matchRoute empty path uses empty split segments", () => {
   assert.equal(matchRoute("/").route, "unknown");
 });
 
+test("matchRoute slashes-only path is unknown", () => {
+  assert.equal(matchRoute("///").route, "unknown");
+});
+
 test("matchRoute resolves compute and admin result image routes", () => {
   assert.deepEqual(matchRoute("/api/tests/t1/compute"), {
     route: "api/tests/:id/compute",
     params: { id: "t1" },
   });
-  assert.deepEqual(
-    matchRoute("/api/admin/tests/my-id/results/ENFP/image"),
-    {
-      route: "api/admin/tests/:id/results/:mbti/image",
-      params: { id: "my-id", mbti: "ENFP" },
-    },
-  );
+  assert.deepEqual(matchRoute("/api/admin/tests/my-id/results/ENFP/image"), {
+    route: "api/admin/tests/:id/results/:mbti/image",
+    params: { id: "my-id", mbti: "ENFP" },
+  });
 });
 
 test("assets route tieredCache tags with and without first path segment", () => {
@@ -92,4 +93,23 @@ test("assets route tieredCache tags with and without first path segment", () => 
   assert.deepEqual(assets.tieredCache({ path: "" }).cacheTags, ["assets"]);
   const withSeg = assets.tieredCache({ path: "test-z/foo.png" });
   assert.ok(withSeg.cacheTags.includes("test-test-z"));
+});
+
+test("routeDescriptors tieredCache runs for every route with sample params", () => {
+  const paramsByRoute = {
+    "api/tests": {},
+    "api/tests/:id": { id: "tid" },
+    "api/tests/:id/compute": { id: "tid" },
+    "api/admin/tests": {},
+    "api/admin/tests/:id": { id: "aid" },
+    "api/admin/tests/:id/images": { id: "aid" },
+    "api/admin/tests/:id/results/:mbti/image": { id: "aid", mbti: "ENFP" },
+    assets: { path: "pub/img.png" },
+  };
+  for (const d of routeDescriptors) {
+    const p = paramsByRoute[d.route];
+    assert.ok(p, `missing sample params for ${d.route}`);
+    const out = d.tieredCache(p);
+    assert.ok(out === null || typeof out.cacheTtl === "number");
+  }
 });

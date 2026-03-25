@@ -17,6 +17,8 @@ test("parseJsonArray covers non-string, invalid JSON, non-array", () => {
   assert.equal(parseJsonArray(null), null);
   assert.equal(parseJsonArray("{"), null);
   assert.equal(parseJsonArray(JSON.stringify({ a: 1 })), null);
+  assert.equal(parseJsonArray("5"), null);
+  assert.equal(parseJsonArray("null"), null);
 });
 
 test("mergeTestDetailPayload uses empty description when JSON not array", () => {
@@ -37,12 +39,144 @@ test("mergeTestDetailPayload spreads body when object", () => {
   assert.equal(p.extra, 1);
 });
 
+test("mergeTestDetailPayload ignores non-object bodyJson", () => {
+  const p = mergeTestDetailPayload(
+    { test_id: "t", title: "T" },
+    "not-an-object",
+  );
+  assert.equal(p.extra, undefined);
+});
+
+test("mergeTestDetailPayload spreads array bodyJson index keys", () => {
+  const p = mergeTestDetailPayload({ test_id: "t", title: "T" }, ["x", "y"]);
+  assert.equal(p[0], "x");
+  assert.equal(p[1], "y");
+});
+
+test("mergeTestDetailPayload filters falsy description entries", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "t",
+      description_json: JSON.stringify(["a", null, "", "b"]),
+    },
+    null,
+  );
+  assert.deepEqual(p.description, ["a", "b"]);
+});
+
+test("mergeTestDetailPayload: empty description array stays empty array", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "t",
+      description_json: "[]",
+    },
+    null,
+  );
+  assert.deepEqual(p.description, []);
+});
+
+test("mergeTestDetailPayload: all-null description array becomes empty after filter", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "t",
+      description_json: "[null,null]",
+    },
+    null,
+  );
+  assert.deepEqual(p.description, []);
+});
+
+test("mergeTestDetailPayload filters non-string tags from JSON array", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "t",
+      description_json: "[]",
+      tags_json: JSON.stringify(["a", 1, null, "b"]),
+    },
+    null,
+  );
+  assert.deepEqual(p.tags, ["a", "b"]);
+});
+
+test("mergeTestDetailPayload uses empty strings for falsy row string fields", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "tid",
+      title: null,
+      author: null,
+      author_img_path: null,
+      thumbnail_path: null,
+      source_path: null,
+      created_at: null,
+      updated_at: null,
+      description_json: null,
+      tags_json: null,
+    },
+    null,
+  );
+  assert.equal(p.title, "");
+  assert.equal(p.author, "");
+  assert.equal(p.authorImg, "");
+  assert.equal(p.thumbnail, "");
+  assert.equal(p.path, "");
+  assert.equal(p.createdAt, "");
+  assert.equal(p.updatedAt, "");
+});
+
 test("buildTestDetailEtag handles null row and null etag", () => {
   assert.equal(buildTestDetailEtag(null, null), '"|"');
 });
 
+test("buildTestDetailEtag joins row updated_at and R2 etag", () => {
+  assert.equal(
+    buildTestDetailEtag({ updated_at: "2026-01-02" }, "etag-r2"),
+    '"etag-r2|2026-01-02"',
+  );
+});
+
+test("buildTestDetailEtag with null row keeps D1 part empty", () => {
+  assert.equal(buildTestDetailEtag(null, "only-r2"), '"only-r2|"');
+});
+
+test("buildTestDetailEtag treats empty updated_at like missing", () => {
+  assert.equal(buildTestDetailEtag({ updated_at: "" }, "e"), '"e|"');
+});
+
 test("isPublishedRow is false for null row", () => {
   assert.equal(isPublishedRow(null), false);
+});
+
+test("isPublishedRow is true when is_published is truthy", () => {
+  assert.equal(isPublishedRow({ is_published: 1 }), true);
+});
+
+test("isPublishedRow is false when is_published is 0", () => {
+  assert.equal(isPublishedRow({ is_published: 0 }), false);
+});
+
+test("buildTestDetailEtag uses empty R2 segment when resolved etag is empty string", () => {
+  assert.equal(
+    buildTestDetailEtag({ updated_at: "2026-03-01" }, ""),
+    '"|2026-03-01"',
+  );
+});
+
+test("mergeTestDetailPayload with null bodyJson skips spread", () => {
+  const p = mergeTestDetailPayload({ test_id: "x", title: "T" }, null);
+  assert.equal(p.id, "x");
+  assert.equal(Object.keys(p).includes("extra"), false);
+});
+
+test("mergeTestDetailPayload: truthy non-object bodyJson does not spread", () => {
+  const row = { test_id: "t", title: "T" };
+  assert.equal(mergeTestDetailPayload(row, true).extra, undefined);
+  assert.equal(mergeTestDetailPayload(row, 1).extra, undefined);
+  assert.equal(mergeTestDetailPayload(row, Symbol("x")).extra, undefined);
+});
+
+test("mergeTestDetailPayload: falsy bodyJson 0 skips spread", () => {
+  const p = mergeTestDetailPayload({ test_id: "t", title: "T" }, 0);
+  assert.equal(p.extra, undefined);
 });
 
 test("safeJsonArray returns [] on invalid JSON string", () => {

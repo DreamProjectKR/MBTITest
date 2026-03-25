@@ -29,3 +29,9 @@ test("computeMbtiFromAnswers skips direction when it does not match axis poles",
   ]);
   assert.ok(r.mbti.includes("E") || r.mbti.includes("I"));
 });
+
+test("computeMbtiFromAnswers handles empty answers with default percentages", () => {
+  const r = computeMbtiFromAnswers([]);
+  assert.equal(r.mbti.length, 4);
+  assert.equal(r.percentages.E + r.percentages.I, 100);
+});

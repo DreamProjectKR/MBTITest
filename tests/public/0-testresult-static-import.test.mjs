@@ -35,6 +35,23 @@ test("testresult.js static import: missing testId or result shows early error", 
   );
 });
 
+test("testresult.js static import: result param without testId shows early error", async () => {
+  createBrowserEnv({
+    url: "http://127.0.0.1:8788/testresult.html?result=ESTJ",
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+
+  await import("../../public/scripts/config.js");
+  await import(testresultHref("result-only"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  assert.equal(
+    document.querySelector(".ResultShellTextBox h2")?.textContent,
+    "결과를 불러올 수 없습니다.",
+  );
+});
+
 test("testresult.js static import: fetch JSON when cache empty", async () => {
   const t = minimalPublishedQuizTest("res-fetch-static");
   const mbti = "ESTJ";

@@ -11,6 +11,39 @@ import {
 
 installDefaultCacheStub();
 
+test("dispatchWorkerRequest: tiered cache returns null when SELF omits content-type on GET /api/tests", async () => {
+  const env = {
+    SELF: {
+      async fetch() {
+        return new Response(JSON.stringify({ tests: [] }), {
+          status: 200,
+          headers: {},
+        });
+      },
+    },
+    MBTI_DB: createIndexDb([
+      {
+        test_id: "only",
+        title: "Only",
+        thumbnail_path: "assets/only/images/thumbnail.png",
+        tags_json: "[]",
+        source_path: "only/test.json",
+        created_at: "2026-01-01",
+        updated_at: "2026-01-01",
+        is_published: 1,
+      },
+    ]),
+  };
+  const res = await dispatchWorkerRequest(
+    new Request("https://example.com/api/tests"),
+    env,
+    { waitUntil() {} },
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.equal(j.tests.length, 1);
+});
+
 test("dispatchWorkerRequest: tiered cache uses SELF.fetch for GET /api/tests", async () => {
   let originSeen = false;
   const env = {
@@ -111,4 +144,28 @@ test("dispatchWorkerRequest: tiered cache returns null for non-JSON from SELF on
   assert.equal(res.status, 200);
   const j = await res.json();
   assert.equal(j.id, "pub-test");
+});
+
+test("dispatchWorkerRequest: tiered cache wraps SELF response for assets route (non-API)", async () => {
+  let selfCalled = false;
+  const env = {
+    SELF: {
+      async fetch() {
+        selfCalled = true;
+        return new Response("binary-bytes", {
+          status: 200,
+          headers: { "content-type": "application/octet-stream" },
+        });
+      },
+    },
+    MBTI_BUCKET: createJsonBucket().bucket,
+  };
+  const res = await dispatchWorkerRequest(
+    new Request("https://example.com/assets/t1/hero.png"),
+    env,
+    { waitUntil() {} },
+  );
+  assert.ok(selfCalled);
+  assert.equal(res.status, 200);
+  assert.equal(await res.text(), "binary-bytes");
 });

@@ -26,3 +26,15 @@ test("mergeTestDetailPayload: tags_json parses string array", () => {
   );
   assert.deepEqual(p.tags, ["a", "b"]);
 });
+
+test("mergeTestDetailPayload: tags_json drops non-string entries", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "x",
+      title: "T",
+      tags_json: '["a",1,null,"b"]',
+    },
+    {},
+  );
+  assert.deepEqual(p.tags, ["a", "b"]);
+});

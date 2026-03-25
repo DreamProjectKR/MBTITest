@@ -46,6 +46,10 @@ test("normalizeQuestions maps non-object entries to empty spread", () => {
   assert.ok(String(q[1].questionImage).includes("assets/"));
 });
 
+test("normalizeQuestions treats non-array input as empty list", () => {
+  assert.deepEqual(normalizeQuestions(null), []);
+});
+
 test("normalizeResults wraps non-object entries", () => {
   const r = normalizeResults({
     INTJ: null,
@@ -53,6 +57,12 @@ test("normalizeResults wraps non-object entries", () => {
   });
   assert.ok(r.INTJ);
   assert.equal(typeof r.INTJ.image, "string");
+});
+
+test("normalizeResults: non-object input becomes empty object", () => {
+  assert.deepEqual(normalizeResults(null), {});
+  assert.deepEqual(normalizeResults(undefined), {});
+  assert.deepEqual(normalizeResults(42), {});
 });
 
 test("validateTestPayload: missing id", () => {
@@ -97,9 +107,26 @@ test("validateTestPayload: question count", () => {
     ),
     /exactly 12/,
   );
+  assert.match(
+    validateTestPayload(basePayload({ questions: null })),
+    /exactly 12/,
+  );
+
+  const thirteen = [...twelveQuestions(), twelveQuestions()[0]];
+  assert.match(
+    validateTestPayload(basePayload({ questions: thirteen })),
+    /exactly 12/,
+  );
 });
 
 test("validateTestPayload: question shape and answers count", () => {
+  const qsBadType = twelveQuestions();
+  qsBadType[0] = "not-an-object";
+  assert.match(
+    validateTestPayload(basePayload({ questions: qsBadType })),
+    /Question 1 is invalid/,
+  );
+
   const qs = twelveQuestions();
   qs[2] = null;
   assert.match(
@@ -145,6 +172,20 @@ test("validateTestPayload: invalid axis on first answer", () => {
   assert.match(
     validateTestPayload(basePayload({ questions: qs })),
     /invalid mbtiAxis/,
+  );
+
+  const qsNumAxis = twelveQuestions();
+  qsNumAxis[1] = {
+    label: "Q",
+    questionImage: "assets/t/q.png",
+    answers: [
+      { label: "A", mbtiAxis: 99, direction: "E" },
+      { label: "B", mbtiAxis: "EI", direction: "I" },
+    ],
+  };
+  assert.match(
+    validateTestPayload(basePayload({ questions: qsNumAxis })),
+    /Question 2 has invalid mbtiAxis/,
   );
 });
 
@@ -229,6 +270,14 @@ test("validateTestPayload: answers must share axis and cover both poles", () => 
   );
 });
 
+test("validateTestPayload: result entry that is not an object", () => {
+  const r = { ...sixteenResults(), ENFP: "not-an-object" };
+  assert.match(
+    validateTestPayload(basePayload({ results: r })),
+    /ENFP must be an object/,
+  );
+});
+
 test("validateTestPayload: results block", () => {
   const r = sixteenResults();
   delete r.ENFP;
@@ -269,6 +318,15 @@ test("validateTestPayload: results block", () => {
   };
   assert.match(
     validateTestPayload(basePayload({ results: r6 })),
+    /needs a summary/,
+  );
+
+  const r7 = {
+    ...sixteenResults(),
+    ENFP: { image: "assets/t/x.png", summary: "   " },
+  };
+  assert.match(
+    validateTestPayload(basePayload({ results: r7 })),
     /needs a summary/,
   );
 });

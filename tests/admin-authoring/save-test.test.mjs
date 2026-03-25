@@ -78,6 +78,28 @@ function buildValidPayload(overrides = {}) {
   };
 }
 
+test("PUT /api/admin/tests/:id stores tags as [] when tags is not an array", async () => {
+  installDefaultCacheStub();
+  const { bucket } = createJsonBucket();
+  const { db, calls } = createSaveDb();
+  const response = await saveTestPut(
+    createContext({
+      url: "https://example.com/api/admin/tests/test-valid",
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "test-valid" },
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(buildValidPayload({ tags: "not-an-array" })),
+    }),
+  );
+  assert.equal(response.status, 200);
+  const upsertBind = calls.find(
+    (c) => c.type === "bind" && String(c.query).includes("INSERT INTO tests"),
+  );
+  assert.ok(upsertBind);
+  assert.equal(upsertBind.args[7], "[]");
+});
+
 test("PUT /api/admin/tests/:id returns 400 for invalid payload", async () => {
   installDefaultCacheStub();
   const { bucket } = createJsonBucket();

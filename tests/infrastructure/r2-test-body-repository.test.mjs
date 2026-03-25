@@ -100,6 +100,40 @@ test("readTestBodyBySourcePath reads from bucket when present", async () => {
   assert.equal(r.etag, "et");
 });
 
+test("readTestBodyBySourcePath object without etag returns null etag", async () => {
+  const bucket = {
+    async get() {
+      return {
+        async text() {
+          return "{}";
+        },
+      };
+    },
+  };
+  const r = await readTestBodyBySourcePath(
+    bucket,
+    "t1/test.json",
+    "https://example.com/",
+  );
+  assert.equal(r.bodyText, "{}");
+  assert.equal(r.etag, null);
+});
+
+test("readTestBodyBySourcePath localhost without publicBaseUrl skips remote fetch", async () => {
+  const bucket = {
+    async get() {
+      return null;
+    },
+  };
+  const r = await readTestBodyBySourcePath(
+    bucket,
+    "t1/test.json",
+    "http://127.0.0.1:8787/x",
+    undefined,
+  );
+  assert.equal(r.bodyText, null);
+});
+
 test("readTestBodyBySourcePath localhost fetch ok", async () => {
   const orig = globalThis.fetch;
   globalThis.fetch = async () =>

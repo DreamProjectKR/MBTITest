@@ -66,6 +66,87 @@ test("admin images PUT: multipart formData throws -> Unable to parse", async () 
   assert.match(j.error, /Unable to parse uploaded file/);
 });
 
+test("admin images PUT: multipart name canonicalizes enfp and q3", async () => {
+  const keys = [];
+  const bucket = {
+    async put(key) {
+      keys.push(key);
+    },
+  };
+  const db = {
+    prepare() {
+      return {
+        bind() {
+          return this;
+        },
+        async all() {
+          return { results: [] };
+        },
+      };
+    },
+  };
+  const fd1 = new FormData();
+  fd1.set("name", "enfp");
+  fd1.set(
+    "file",
+    new File([new Uint8Array([1])], "x.png", { type: "image/png" }),
+  );
+  const res1 = await adminImagesPut(
+    createContext({
+      url: "https://example.com/api/admin/tests/t1/images",
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1" },
+      headers: {},
+      body: fd1,
+    }),
+  );
+  assert.equal(res1.status, 200);
+  assert.match(String(keys[0]), /ENFP\.png$/i);
+  const fd2 = new FormData();
+  fd2.set("name", "q3");
+  fd2.set(
+    "file",
+    new File([new Uint8Array([1])], "y.png", { type: "image/png" }),
+  );
+  const res2 = await adminImagesPut(
+    createContext({
+      url: "https://example.com/api/admin/tests/t1/images",
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1" },
+      headers: {},
+      body: fd2,
+    }),
+  );
+  assert.equal(res2.status, 200);
+  assert.match(String(keys[1]), /Q3\.png$/i);
+});
+
+test("admin images PUT: multipart without file returns 400", async () => {
+  const { bucket } = createJsonBucket({});
+  const db = {
+    prepare() {
+      return { bind() {}, async all() {} };
+    },
+  };
+  const fd = new FormData();
+  fd.set("name", "thumbnail");
+  const res = await adminImagesPut(
+    createContext({
+      url: "https://example.com/api/admin/tests/t1/images",
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1" },
+      headers: {},
+      body: fd,
+    }),
+  );
+  assert.equal(res.status, 400);
+  const j = await res.json();
+  assert.match(j.error, /File upload required/);
+});
+
 test("admin images PUT: multipart file over max bytes -> 413", async () => {
   const { bucket } = createJsonBucket({});
   const db = {

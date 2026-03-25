@@ -70,6 +70,107 @@ test("result image PUT: invalid MBTI code -> 400", async () => {
   assert.equal(res.status, 400);
 });
 
+test("result image PUT: empty raw body -> 400", async () => {
+  installDefaultCacheStub();
+  const { bucket } = createJsonBucket({
+    "assets/t1/test.json": JSON.stringify({
+      questions: [],
+      results: { ENFP: { image: "x", summary: "y" } },
+    }),
+  });
+  const db = {
+    prepare() {
+      return { bind() {}, async all() {} };
+    },
+    async batch() {
+      return [];
+    },
+  };
+  const res = await onRequestPut(
+    createContext({
+      url,
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1", mbti: "ENFP" },
+      headers: { "content-type": "image/png" },
+      body: new ArrayBuffer(0),
+    }),
+  );
+  assert.equal(res.status, 400);
+  const j = await res.json();
+  assert.match(j.error, /File upload required/);
+});
+
+test("result image PUT: raw image/webp uses webp extension on success", async () => {
+  installDefaultCacheStub();
+  const testJson = JSON.stringify({
+    questions: [],
+    results: { ENFP: { image: "old", summary: "s" } },
+  });
+  const { bucket } = createJsonBucket({
+    "assets/t1/test.json": testJson,
+  });
+  const db = {
+    prepare() {
+      return { bind() {}, async all() {} };
+    },
+    async batch() {
+      return [];
+    },
+  };
+  const res = await onRequestPut(
+    createContext({
+      url,
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1", mbti: "ENFP" },
+      headers: {
+        "content-type": "image/webp",
+        "content-length": "2",
+      },
+      body: new Uint8Array([1, 2]),
+    }),
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.match(String(j.path), /\.webp$/i);
+});
+
+test("result image PUT: raw image/gif uses gif extension on success", async () => {
+  installDefaultCacheStub();
+  const testJson = JSON.stringify({
+    questions: [],
+    results: { ENFP: { image: "old", summary: "s" } },
+  });
+  const { bucket } = createJsonBucket({
+    "assets/t1/test.json": testJson,
+  });
+  const db = {
+    prepare() {
+      return { bind() {}, async all() {} };
+    },
+    async batch() {
+      return [];
+    },
+  };
+  const res = await onRequestPut(
+    createContext({
+      url,
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1", mbti: "ENFP" },
+      headers: {
+        "content-type": "image/gif",
+        "content-length": "3",
+      },
+      body: new Uint8Array([0x47, 0x49, 0x46]),
+    }),
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.match(String(j.path), /\.gif$/i);
+});
+
 test("result image PUT: no test.json in R2 -> 404", async () => {
   installDefaultCacheStub();
   const { bucket } = createJsonBucket({});

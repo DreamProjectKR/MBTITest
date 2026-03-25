@@ -108,6 +108,16 @@ test("analytics.js skips gtag on localhost", async () => {
   assert.equal(window.__gtagLoaded, undefined);
 });
 
+test("analytics.js gtag pushes arguments to dataLayer (even on localhost)", async () => {
+  createBrowserEnv({ url: "http://127.0.0.1:8788/gtag-push.html" });
+  document.documentElement.innerHTML = "<head></head><body></body>";
+  globalThis.dataLayer = [];
+  await import(scriptHref("../../public/scripts/analytics.js"));
+  const n = globalThis.dataLayer.length;
+  window.gtag("event", "unit_test", { send_to: "test" });
+  assert.ok(globalThis.dataLayer.length > n);
+});
+
 test("analytics.js skips gtag when no_gtag=1 is in the query string", async () => {
   createBrowserEnv({ url: "https://example.com/app?no_gtag=1" });
   document.documentElement.innerHTML = "<head></head><body></body>";
@@ -144,7 +154,9 @@ test("analytics.js schedules gtag script on non-localhost", async () => {
   await import(scriptHref("../../public/scripts/analytics.js"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 25));
-  assert.ok(Array.isArray(globalThis.dataLayer) && globalThis.dataLayer.length >= 1);
+  assert.ok(
+    Array.isArray(globalThis.dataLayer) && globalThis.dataLayer.length >= 1,
+  );
   assert.equal(window.__gtagLoaded, true);
   const scripts = [...document.head.querySelectorAll("script")].filter((s) =>
     String(s.src).includes("googletagmanager.com/gtag/js"),

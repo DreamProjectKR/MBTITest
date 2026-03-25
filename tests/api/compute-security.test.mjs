@@ -106,6 +106,57 @@ test("POST compute: invalid JSON -> 400", async () => {
   assert.match(body.error, /JSON/i);
 });
 
+test("POST compute: empty answers array -> 400", async () => {
+  const res = await onRequestPost(
+    createContext({
+      url: COMPUTE_URL,
+      method: "POST",
+      env: baseEnv(),
+      params: { id: "t1" },
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ answers: [] }),
+    }),
+  );
+  assert.equal(res.status, 400);
+  const body = await res.json();
+  assert.match(body.error, /answers array is required/i);
+});
+
+test("POST compute: no DB row -> 404", async () => {
+  const res = await onRequestPost(
+    createContext({
+      url: COMPUTE_URL,
+      method: "POST",
+      env: {
+        MBTI_DB: createDetailDb(null),
+      },
+      params: { id: "t1" },
+      headers: { "content-type": "application/json" },
+      body: MINIMAL_BODY,
+    }),
+  );
+  assert.equal(res.status, 404);
+});
+
+test("POST compute: row with empty test_id -> 404", async () => {
+  const res = await onRequestPost(
+    createContext({
+      url: COMPUTE_URL,
+      method: "POST",
+      env: {
+        MBTI_DB: createDetailDb({
+          test_id: "",
+          is_published: 1,
+        }),
+      },
+      params: { id: "t1" },
+      headers: { "content-type": "application/json" },
+      body: MINIMAL_BODY,
+    }),
+  );
+  assert.equal(res.status, 404);
+});
+
 test("POST compute: draft (is_published 0) -> 404", async () => {
   const res = await onRequestPost(
     createContext({

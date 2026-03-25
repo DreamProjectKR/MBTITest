@@ -3,6 +3,10 @@ import test from "node:test";
 
 import { listTests } from "../../worker/api/tests/index.ts";
 import {
+  computeTestsIndexEtag,
+  mapRowToTestMeta,
+} from "../../worker/domain/tests/listPayload.ts";
+import {
   createContext,
   createIndexDb,
   installDefaultCacheStub,
@@ -27,6 +31,21 @@ test("listTests: no D1 -> 500", async () => {
     { publishedOnly: true, useCache: true },
   );
   assert.equal(res.status, 500);
+});
+
+test("listTests: useCache false If-None-Match matches D1 etag -> 304 BYPASS", async () => {
+  const url = "https://example.com/api/tests?bypass304=1";
+  const etag = computeTestsIndexEtag([mapRowToTestMeta(ROW)]);
+  const res = await listTests(
+    createContext({
+      url,
+      env: { MBTI_DB: createIndexDb([ROW]) },
+      headers: { "if-none-match": etag },
+    }),
+    { publishedOnly: true, useCache: false },
+  );
+  assert.equal(res.status, 304);
+  assert.equal(res.headers.get("X-MBTI-Edge-Cache"), "BYPASS");
 });
 
 test("listTests: If-None-Match matches etag -> 304", async () => {
