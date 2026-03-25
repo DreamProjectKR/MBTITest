@@ -1,7 +1,6 @@
 import { elements, isMetaHydrating } from "./dom.js";
 import { getActiveTest } from "./selectors.js";
-import { AXIS_MAP, REQUIRED_QUESTION_COUNT } from "./state.js";
-import { parseDescriptionInput } from "./validation.js";
+import { AXIS_MAP } from "./state.js";
 
 /** Form bindings and DOM for question/result/meta forms. */
 
@@ -23,23 +22,6 @@ export function syncAnswerDirectionOptions() {
   optNeg.textContent = `A=${neg} / B=${pos}`;
   select.append(optPos, optNeg);
   select.value = current === "negative" ? "negative" : "positive";
-}
-
-/** Pure: next available question number 1..REQUIRED_QUESTION_COUNT. */
-function getNextQuestionNo(questions) {
-  const used = new Set(
-    (Array.isArray(questions) ? questions : [])
-      .map((q) => String(q?.id || ""))
-      .map((id) => {
-        const m = /^q(\d{1,2})$/i.exec(id);
-        return m ? Number(m[1]) : null;
-      })
-      .filter((n) => Number.isFinite(n)),
-  );
-  for (let i = 1; i <= REQUIRED_QUESTION_COUNT; i += 1) {
-    if (!used.has(i)) return i;
-  }
-  return 0;
 }
 
 export function bindForms({ store, effects }) {

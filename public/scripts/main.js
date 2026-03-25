@@ -104,6 +104,9 @@ function createTestCard(test, variantClass, opts = {}) {
     if (opts.isFirst) img.fetchPriority = "high";
   } catch (e) {}
 
+  void resolveThumbnailPath(test.thumbnail);
+  void assetResizeUrl(String(test.thumbnail || ""), size);
+
   const title = document.createElement("h4");
   title.textContent = test.title || "테스트 이름";
 

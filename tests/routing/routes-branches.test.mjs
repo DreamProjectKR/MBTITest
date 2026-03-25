@@ -67,6 +67,25 @@ test("matchRoute falls through to unknown", () => {
   assert.equal(matchRoute("/nope/here").route, "unknown");
 });
 
+test("matchRoute empty path uses empty split segments", () => {
+  assert.equal(matchRoute("").route, "unknown");
+  assert.equal(matchRoute("/").route, "unknown");
+});
+
+test("matchRoute resolves compute and admin result image routes", () => {
+  assert.deepEqual(matchRoute("/api/tests/t1/compute"), {
+    route: "api/tests/:id/compute",
+    params: { id: "t1" },
+  });
+  assert.deepEqual(
+    matchRoute("/api/admin/tests/my-id/results/ENFP/image"),
+    {
+      route: "api/admin/tests/:id/results/:mbti/image",
+      params: { id: "my-id", mbti: "ENFP" },
+    },
+  );
+});
+
 test("assets route tieredCache tags with and without first path segment", () => {
   const assets = routeDescriptors.find((d) => d.route === "assets");
   assert.ok(assets);

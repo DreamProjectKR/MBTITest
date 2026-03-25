@@ -49,6 +49,23 @@ export function findByBaseName(items, baseName) {
   );
 }
 
+/** Next free question slot `q{n}` for 1..REQUIRED_QUESTION_COUNT, or 0 if all slots are taken. */
+export function getNextQuestionNo(questions) {
+  const used = new Set(
+    (Array.isArray(questions) ? questions : [])
+      .map((question) => String(question?.id || ""))
+      .map((id) => {
+        const match = /^q(\d{1,2})$/i.exec(id);
+        return match ? Number(match[1]) : null;
+      })
+      .filter((value) => Number.isFinite(value)),
+  );
+  for (let i = 1; i <= REQUIRED_QUESTION_COUNT; i += 1) {
+    if (!used.has(i)) return i;
+  }
+  return 0;
+}
+
 export function validateTestForSave(test) {
   if (!test?.title || !String(test.title).trim())
     return "테스트 제목이 필요합니다.";

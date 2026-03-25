@@ -40,14 +40,13 @@ function splitPath(pathname: string): string[] {
 
 function staticMatch(
   expected: string[],
-  paramsFactory?: (segments: string[]) => RouteParams,
 ): (segments: string[]) => RouteParams | null {
   return (segments) => {
     if (segments.length !== expected.length) return null;
     for (let i = 0; i < expected.length; i += 1) {
       if (segments[i] !== expected[i]) return null;
     }
-    return paramsFactory ? paramsFactory(segments) : {};
+    return {};
   };
 }
 

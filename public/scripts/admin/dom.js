@@ -1,14 +1,35 @@
+/** Re-query on access so admin boot works after DOM swap (tests, late HTML). */
 export const elements = {
-  metaForm: document.querySelector("[data-test-meta-form]"),
-  questionForm: document.querySelector("[data-question-form]"),
-  questionList: document.querySelector("[data-question-list]"),
-  resultForm: document.querySelector("[data-result-form]"),
-  resultList: document.querySelector("[data-result-list]"),
-  testSelect: document.querySelector("[data-test-select]"),
-  createTestButton: document.querySelector("[data-create-test]"),
-  saveButton: document.querySelector("[data-save-test]"),
-  saveStatus: document.querySelector("[data-save-status]"),
-  bulkUploadButton: document.querySelector("[data-bulk-result-upload]"),
+  get metaForm() {
+    return document.querySelector("[data-test-meta-form]");
+  },
+  get questionForm() {
+    return document.querySelector("[data-question-form]");
+  },
+  get questionList() {
+    return document.querySelector("[data-question-list]");
+  },
+  get resultForm() {
+    return document.querySelector("[data-result-form]");
+  },
+  get resultList() {
+    return document.querySelector("[data-result-list]");
+  },
+  get testSelect() {
+    return document.querySelector("[data-test-select]");
+  },
+  get createTestButton() {
+    return document.querySelector("[data-create-test]");
+  },
+  get saveButton() {
+    return document.querySelector("[data-save-test]");
+  },
+  get saveStatus() {
+    return document.querySelector("[data-save-status]");
+  },
+  get bulkUploadButton() {
+    return document.querySelector("[data-bulk-result-upload]");
+  },
 };
 
 const panelSelectors = {
