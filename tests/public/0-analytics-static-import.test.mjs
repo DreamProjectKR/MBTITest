@@ -47,6 +47,10 @@ test("analytics.js stable URL: production schedules gtag script", async () => {
     return false;
   });
   assert.ok(hasConfig, "expected gtag config with signals disabled");
+  const hasJs = globalThis.dataLayer.some(
+    (entry) => entry && entry[0] === "js" && entry[1] instanceof Date,
+  );
+  assert.ok(hasJs, "expected gtag js + Date push before config");
 });
 
 test("analytics.js stable URL: loading defers run until DOMContentLoaded", async () => {

@@ -855,6 +855,28 @@ test("main.js: getTestIndex non-array tests yields no cards", async () => {
   assert.equal(document.querySelectorAll(".NewTestShell").length, 0);
 });
 
+test("main.js: getTestIndex rejection logs load failure when config defined getTestIndex", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  await import("../../public/scripts/config.js");
+  window.getTestIndex = async () => {
+    throw new Error("index boom");
+  };
+  const errs = [];
+  const prevErr = console.error;
+  console.error = (...args) => {
+    errs.push(args.map(String).join(" "));
+    prevErr.apply(console, args);
+  };
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-idx-reject`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+  console.error = prevErr;
+  assert.ok(errs.some((e) => e.includes("테스트 목록 로딩 실패")));
+});
+
 test("main.js: window.assetResizeUrl and window.assetUrl both used for relative thumb", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.body.innerHTML = MAIN_PAGE_HTML;

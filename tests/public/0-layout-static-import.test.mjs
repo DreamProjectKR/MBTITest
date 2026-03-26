@@ -204,6 +204,31 @@ test("layout.js does not call applyAssetAttributes when it is not a function", a
   assert.equal(document.getElementById("layoutNonFn")?.textContent, "x");
 });
 
+test("layout.js warns when res.ok but res.text() rejects", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = LAYOUT_PARTIAL_HTML;
+  globalThis.fetch = async () => ({
+    ok: true,
+    status: 200,
+    text: () => Promise.reject(new Error("text boom")),
+  });
+  window.applyAssetAttributes = () => {};
+  const warns = [];
+  const prev = console.warn;
+  console.warn = (...args) => {
+    warns.push(args.map(String).join(" "));
+    prev.apply(console, args);
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  await import(layoutHref("text-reject"));
+  await new Promise((r) => setTimeout(r, 40));
+  console.warn = prev;
+  assert.ok(warns.some((w) => w.includes("layout.js") && w.includes("failed")));
+});
+
 test("layout.js uses window.location when document.baseURI is empty", async () => {
   createBrowserEnv({ url: "https://example.com/page/baseuri" });
   document.body.innerHTML =
