@@ -584,3 +584,130 @@ test("main.js: img.loading setter errors are swallowed", async () => {
     else delete proto.loading;
   }
 });
+
+test("main.js: img.fetchPriority setter errors swallowed on first card", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  const proto = window.HTMLImageElement.prototype;
+  const desc = Object.getOwnPropertyDescriptor(proto, "fetchPriority");
+  Object.defineProperty(proto, "fetchPriority", {
+    configurable: true,
+    enumerable: true,
+    get() {
+      return "auto";
+    },
+    set() {
+      throw new Error("fetchPriority blocked");
+    },
+  });
+  try {
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          tests: [
+            {
+              id: "fprio",
+              title: "FPrio",
+              thumbnail: "http://x/p.png",
+              tags: [],
+              path: "fprio/p.json",
+              updatedAt: "2026-01-01",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    const u = new URL("../../public/scripts/main.js", import.meta.url);
+    u.searchParams.set("v", `${stableImportV(import.meta.url)}-fetch-priority-catch`);
+    await import(u.href);
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 50));
+    assert.ok(document.body.textContent?.includes("FPrio"));
+  } finally {
+    if (desc) Object.defineProperty(proto, "fetchPriority", desc);
+    else delete proto.fetchPriority;
+  }
+});
+
+test("main.js: getTestIndex without tests property yields no cards", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  window.getTestIndex = async () => ({});
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-idx-missing-tests`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+  assert.equal(document.querySelectorAll(".NewTestShell").length, 0);
+});
+
+test("main.js: card click encodes test id in location href", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [
+          {
+            id: "id/with?x=1",
+            title: "ClickEnc",
+            thumbnail: "http://x/i.png",
+            tags: [],
+            path: "ce/p.json",
+            updatedAt: "2026-01-01",
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  let hrefSnap = "";
+  Object.defineProperty(window.location, "href", {
+    configurable: true,
+    get: () => "https://example.com/",
+    set: (v) => {
+      hrefSnap = String(v);
+    },
+  });
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-card-click-encode`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+  document.querySelector(".NewTestShell")?.click();
+  assert.ok(hrefSnap.includes("testintro.html"));
+  assert.ok(hrefSnap.includes("testId="));
+  assert.ok(hrefSnap.includes(encodeURIComponent("id/with?x=1")));
+});
+
+test("main.js: protocol-relative thumbnail flows through assetUrl", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [
+          {
+            id: "prel",
+            title: "ProtoRel",
+            thumbnail: "//cdn.example.com/t.png",
+            tags: ["h"],
+            path: "prel/p.json",
+            updatedAt: "2026-01-01",
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-proto-rel-thumb`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+  assert.ok(document.body.textContent?.includes("ProtoRel"));
+  assert.ok(document.body.textContent?.includes("#h"));
+  const img = document.querySelector(".NewTest img");
+  assert.equal(
+    img?.getAttribute("data-asset-src"),
+    "//cdn.example.com/t.png",
+  );
+});
