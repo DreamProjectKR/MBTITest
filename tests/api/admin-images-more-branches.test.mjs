@@ -515,6 +515,45 @@ test("admin images PUT: raw body over max without Content-Length -> 413", async 
   assert.match(j.error, /Payload too large/i);
 });
 
+test("admin images PUT: multipart name Author! canonicalizes to author basename", async () => {
+  installDefaultCacheStub();
+  let lastKey = "";
+  const bucket = {
+    async put(key) {
+      lastKey = key;
+    },
+  };
+  const db = {
+    prepare() {
+      return {
+        bind() {
+          return this;
+        },
+        async all() {
+          return { results: [] };
+        },
+      };
+    },
+  };
+  const fd = new FormData();
+  fd.set("name", "Author!");
+  fd.set(
+    "file",
+    new File([new Uint8Array([1])], "x.png", { type: "image/png" }),
+  );
+  const res = await onRequestPut(
+    createContext({
+      url: "https://example.com/api/admin/tests/t1/images",
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1" },
+      body: fd,
+    }),
+  );
+  assert.equal(res.status, 200);
+  assert.match(String(lastKey), /\/author\.png$/i);
+});
+
 test("admin images PUT: multipart File with empty type uses header fallback", async () => {
   installDefaultCacheStub();
   let lastKey = "";

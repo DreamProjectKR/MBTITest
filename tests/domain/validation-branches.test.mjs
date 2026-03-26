@@ -195,12 +195,26 @@ test("validateTestPayload: invalid axis on first answer", () => {
     label: "Q",
     questionImage: "assets/t/q.png",
     answers: [
+      { label: "A", mbtiAxis: " EI ", direction: "E" },
+      { label: "B", mbtiAxis: " EI ", direction: "I" },
+    ],
+  };
+  assert.match(
+    validateTestPayload(basePayload({ questions: qs })),
+    /Question 1 has invalid mbtiAxis/,
+  );
+
+  const qsBad = twelveQuestions();
+  qsBad[0] = {
+    label: "Q",
+    questionImage: "assets/t/q.png",
+    answers: [
       { label: "A", mbtiAxis: "XX", direction: "E" },
       { label: "B", mbtiAxis: "XX", direction: "I" },
     ],
   };
   assert.match(
-    validateTestPayload(basePayload({ questions: qs })),
+    validateTestPayload(basePayload({ questions: qsBad })),
     /invalid mbtiAxis/,
   );
 

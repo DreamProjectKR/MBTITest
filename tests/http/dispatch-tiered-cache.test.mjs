@@ -184,6 +184,39 @@ test("dispatchWorkerRequest: tiered cache accepts SELF JSON when content-type us
   assert.ok(Array.isArray(j.tests));
 });
 
+test("dispatchWorkerRequest: tiered cache returns null when SELF returns text/plain on GET /api/tests", async () => {
+  const env = {
+    SELF: {
+      async fetch() {
+        return new Response("not json", {
+          status: 200,
+          headers: { "content-type": "text/plain; charset=utf-8" },
+        });
+      },
+    },
+    MBTI_DB: createIndexDb([
+      {
+        test_id: "only",
+        title: "Only",
+        thumbnail_path: "assets/only/images/thumbnail.png",
+        tags_json: "[]",
+        source_path: "only/test.json",
+        created_at: "2026-01-01",
+        updated_at: "2026-01-01",
+        is_published: 1,
+      },
+    ]),
+  };
+  const res = await dispatchWorkerRequest(
+    new Request("https://example.com/api/tests"),
+    env,
+    { waitUntil() {} },
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.equal(j.tests.length, 1);
+});
+
 test("dispatchWorkerRequest: tiered cache returns null when SELF returns application/hal+json on GET /api/tests", async () => {
   const env = {
     SELF: {

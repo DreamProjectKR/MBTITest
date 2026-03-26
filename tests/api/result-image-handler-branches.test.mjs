@@ -70,6 +70,51 @@ test("result image PUT: invalid MBTI code -> 400", async () => {
   assert.equal(res.status, 400);
 });
 
+test("result image PUT: missing mbti param -> 400 Invalid MBTI", async () => {
+  installDefaultCacheStub();
+  const { bucket } = createJsonBucket({});
+  const res = await onRequestPut(
+    createContext({
+      url: "https://example.com/api/admin/tests/t1/results/ENFP/image",
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: {} },
+      params: { id: "t1" },
+      headers: { "content-type": "application/octet-stream" },
+      body: new Uint8Array([1]),
+    }),
+  );
+  assert.equal(res.status, 400);
+  const j = await res.json();
+  assert.match(j.error, /Invalid MBTI/i);
+});
+
+test("result image PUT: multipart file field is not a File -> 400", async () => {
+  installDefaultCacheStub();
+  const { bucket } = createJsonBucket({});
+  const db = {
+    prepare() {
+      return { bind() {}, async all() {} };
+    },
+    async batch() {
+      return [];
+    },
+  };
+  const fd = new FormData();
+  fd.set("file", "not-a-file");
+  const res = await onRequestPut(
+    createContext({
+      url,
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1", mbti: "ENFP" },
+      body: fd,
+    }),
+  );
+  assert.equal(res.status, 400);
+  const j = await res.json();
+  assert.match(j.error, /File upload required/i);
+});
+
 test("result image PUT: empty raw body -> 400", async () => {
   installDefaultCacheStub();
   const { bucket } = createJsonBucket({

@@ -65,6 +65,29 @@ test("layout.js static import: defers when readyState is loading", async () => {
   assert.equal(document.getElementById("layoutDefer")?.textContent, "ok");
 });
 
+test("layout.js calls applyAssetAttributes on partial root after successful fetch", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = LAYOUT_PARTIAL_HTML;
+  const applied = [];
+  globalThis.fetch = async () =>
+    new Response("<span id='layoutApply'>ok</span>", {
+      status: 200,
+      headers: { "Content-Type": "text/html" },
+    });
+  window.applyAssetAttributes = (el) => {
+    applied.push(el);
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  await import(layoutHref("apply-attr-after-fetch"));
+  await new Promise((r) => setTimeout(r, 50));
+  assert.equal(applied.length, 1);
+  assert.equal(applied[0].getAttribute("data-include"), "x");
+  assert.equal(document.getElementById("layoutApply")?.textContent, "ok");
+});
+
 test("layout.js static import: runs immediately when already complete", async () => {
   createBrowserEnv();
   document.body.innerHTML = LAYOUT_PARTIAL_HTML;

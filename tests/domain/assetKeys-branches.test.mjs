@@ -86,6 +86,11 @@ test("normalizeR2KeyFromIndexPath: bare assets token gets prefixed", () => {
   assert.equal(normalizeR2KeyFromIndexPath("assets"), "assets/assets");
 });
 
+test("normalizeR2KeyFromIndexPath: assets/ only keeps trailing slash path", () => {
+  assert.equal(normalizeR2KeyFromIndexPath("assets/"), "assets/");
+  assert.equal(normalizeR2KeyFromIndexPath(" /assets/ "), "assets/");
+});
+
 test("normalizeAssetKey: lone assets token becomes canonical doubled segment", () => {
   assert.equal(normalizeAssetKey("assets"), "assets/assets");
 });

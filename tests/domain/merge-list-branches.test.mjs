@@ -40,6 +40,19 @@ test("mergeTestDetailPayload uses empty description when JSON not array", () => 
   assert.deepEqual(p.tags, []);
 });
 
+test("mergeTestDetailPayload: non-string description_json yields null description", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "t",
+      title: "T",
+      description_json: 123,
+      tags_json: "[]",
+    },
+    null,
+  );
+  assert.equal(p.description, null);
+});
+
 test("mergeTestDetailPayload spreads body when object", () => {
   const p = mergeTestDetailPayload({ test_id: "t", title: "T" }, { extra: 1 });
   assert.equal(p.extra, 1);

@@ -74,6 +74,50 @@ test("analytics.js stable URL: loading defers run until DOMContentLoaded", async
   assert.equal(window.__gtagLoaded, true);
 });
 
+test("analytics.js skips gtag load on localhost hostname", async () => {
+  createBrowserEnv({ url: "http://localhost:3000/analytics-local" });
+  document.documentElement.innerHTML = "<head></head><body></body>";
+  globalThis.dataLayer = [];
+  globalThis.requestIdleCallback = (cb) => {
+    cb({ didTimeout: false });
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  const u = new URL("../../public/scripts/analytics.js", import.meta.url);
+  u.searchParams.set("v", `${analyticsV}-localhost-skip`);
+  await import(u.href);
+  await new Promise((r) => setTimeout(r, 25));
+  assert.notEqual(window.__gtagLoaded, true);
+  const scripts = [...document.head.querySelectorAll("script")].filter((s) =>
+    String(s.src).includes("googletagmanager.com/gtag/js"),
+  );
+  assert.equal(scripts.length, 0);
+});
+
+test("analytics.js skips gtag when no_gtag=1 is in query string", async () => {
+  createBrowserEnv({ url: "https://example.com/page?no_gtag=1&x=1" });
+  document.documentElement.innerHTML = "<head></head><body></body>";
+  globalThis.dataLayer = [];
+  globalThis.requestIdleCallback = (cb) => {
+    cb({ didTimeout: false });
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  const u = new URL("../../public/scripts/analytics.js", import.meta.url);
+  u.searchParams.set("v", `${analyticsV}-no-gtag-query`);
+  await import(u.href);
+  await new Promise((r) => setTimeout(r, 25));
+  assert.notEqual(window.__gtagLoaded, true);
+  const scripts = [...document.head.querySelectorAll("script")].filter((s) =>
+    String(s.src).includes("googletagmanager.com/gtag/js"),
+  );
+  assert.equal(scripts.length, 0);
+});
+
 test("analytics.js uses setTimeout when requestIdleCallback is missing", async () => {
   createBrowserEnv({ url: "https://example.com/analytics-no-ric" });
   document.documentElement.innerHTML = "<head></head><body></body>";
