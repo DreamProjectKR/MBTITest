@@ -594,3 +594,19 @@ test("main.js card click navigates with empty testId when id is missing", async 
   assert.ok(hrefSnap.includes("testintro.html"));
   assert.ok(hrefSnap.includes("testId="));
 });
+
+test("main.js treats getTestIndex tests as empty when not an array", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  globalThis.fetch = async () => new Response("{}", { status: 404 });
+
+  await import("../../public/scripts/config.js");
+  window.getTestIndex = async () => ({ tests: "not-array" });
+
+  await import(mainImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  assert.equal(document.querySelectorAll(".NewTestShell").length, 0);
+});

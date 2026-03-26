@@ -1184,3 +1184,134 @@ test("testquiz.js skips hydrate when applyAssetAttributes is absent", async () =
 
   assert.ok(document.querySelector(".TestSelectBtn button"));
 });
+
+test("testquiz.js clears question img when there is no id and no image fields", async () => {
+  const t = minimalPublishedQuizTest("quiz-no-qid-img");
+  t.questions = [
+    {
+      label: "Anonymous Q",
+      answers: [
+        { mbtiAxis: "EI", direction: "E", label: "E" },
+        { mbtiAxis: "EI", direction: "I", label: "I" },
+      ],
+    },
+  ];
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  const img = document.querySelector(".TestImg img");
+  assert.ok(img);
+  assert.equal(img.getAttribute("data-asset-src"), null);
+  assert.equal(img.getAttribute("src"), null);
+});
+
+test("testquiz.js fetches detail when sessionStorage.getItem throws", async () => {
+  const t = minimalPublishedQuizTest("quiz-getitem-throw");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  const storage = window.sessionStorage;
+  const origGet = storage.getItem.bind(storage);
+  storage.getItem = () => {
+    throw new Error("storage getItem");
+  };
+
+  let detailFetches = 0;
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      detailFetches += 1;
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  try {
+    await import("../../public/scripts/config.js");
+    await import(testquizImportHref());
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 60));
+
+    assert.equal(detailFetches, 1);
+    assert.ok(document.querySelector(".TestSelectBtn button"));
+  } finally {
+    storage.getItem = origGet;
+  }
+});
+
+test("testquiz.js still loads when first-question preload appendChild throws", async () => {
+  const t = minimalPublishedQuizTest("quiz-preload-append-throw");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  const head = document.head;
+  const origAppend = head.appendChild.bind(head);
+  head.appendChild = (node) => {
+    if (
+      node &&
+      node.nodeType === 1 &&
+      String(node.tagName).toLowerCase() === "link" &&
+      node.getAttribute("rel") === "preload"
+    ) {
+      throw new Error("append preload blocked");
+    }
+    return origAppend(node);
+  };
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  try {
+    await import("../../public/scripts/config.js");
+    await import(testquizImportHref());
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 50));
+
+    assert.ok(document.querySelector(".TestSelectBtn button"));
+  } finally {
+    head.appendChild = origAppend;
+  }
+});
