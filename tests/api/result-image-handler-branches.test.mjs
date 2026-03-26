@@ -101,6 +101,74 @@ test("result image PUT: empty raw body -> 400", async () => {
   assert.match(j.error, /File upload required/);
 });
 
+test("result image PUT: multipart file succeeds and uses file type for extension", async () => {
+  installDefaultCacheStub();
+  const testJson = JSON.stringify({
+    questions: [],
+    results: { ENFP: { image: "old", summary: "s" } },
+  });
+  const { bucket } = createJsonBucket({
+    "assets/t1/test.json": testJson,
+  });
+  const db = {
+    prepare() {
+      return { bind() {}, async all() {} };
+    },
+    async batch() {
+      return [];
+    },
+  };
+  const fd = new FormData();
+  fd.set(
+    "file",
+    new File([new Uint8Array([1, 2])], "out.webp", { type: "image/webp" }),
+  );
+  const res = await onRequestPut(
+    createContext({
+      url,
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1", mbti: "ENFP" },
+      body: fd,
+    }),
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.match(String(j.path), /\.webp$/i);
+});
+
+test("result image PUT: multipart without file field -> 400", async () => {
+  installDefaultCacheStub();
+  const { bucket } = createJsonBucket({
+    "assets/t1/test.json": JSON.stringify({
+      questions: [],
+      results: { ENFP: { image: "old", summary: "s" } },
+    }),
+  });
+  const db = {
+    prepare() {
+      return { bind() {}, async all() {} };
+    },
+    async batch() {
+      return [];
+    },
+  };
+  const fd = new FormData();
+  fd.set("note", "no-file");
+  const res = await onRequestPut(
+    createContext({
+      url,
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1", mbti: "ENFP" },
+      body: fd,
+    }),
+  );
+  assert.equal(res.status, 400);
+  const j = await res.json();
+  assert.match(j.error, /File upload required/);
+});
+
 test("result image PUT: raw image/webp uses webp extension on success", async () => {
   installDefaultCacheStub();
   const testJson = JSON.stringify({
