@@ -250,6 +250,51 @@ test("dispatchWorkerRequest: tiered cache returns null when SELF returns applica
   assert.equal(j.tests.length, 1);
 });
 
+test("dispatchWorkerRequest: tiered cache returns null when SELF returns application/xml on GET /api/tests/:id", async () => {
+  const { bucket } = createJsonBucket({
+    "assets/pub-test/test.json": JSON.stringify({
+      id: "pub-test",
+      title: "Detail",
+      questions: [],
+      results: {
+        ESTJ: { image: "assets/pub-test/images/r.png", summary: "s" },
+      },
+    }),
+  });
+  const env = {
+    SELF: {
+      async fetch() {
+        return new Response("<xml/>", {
+          status: 200,
+          headers: { "content-type": "application/xml; charset=utf-8" },
+        });
+      },
+    },
+    MBTI_BUCKET: bucket,
+    MBTI_DB: createDetailDb({
+      test_id: "pub-test",
+      title: "Detail",
+      description_json: "[]",
+      author: "a",
+      author_img_path: "a",
+      thumbnail_path: "t",
+      tags_json: "[]",
+      source_path: "pub-test/test.json",
+      created_at: "2026-01-01",
+      updated_at: "2026-01-01",
+      is_published: 1,
+    }),
+  };
+  const res = await dispatchWorkerRequest(
+    new Request("https://example.com/api/tests/pub-test"),
+    env,
+    { waitUntil() {} },
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.equal(j.id, "pub-test");
+});
+
 test("dispatchWorkerRequest: tiered cache returns null for non-JSON from SELF on GET /api/tests/:id", async () => {
   const { bucket } = createJsonBucket({
     "assets/pub-test/test.json": JSON.stringify({

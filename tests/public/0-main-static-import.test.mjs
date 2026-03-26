@@ -347,3 +347,240 @@ test("main.js: missing title uses default card label", async () => {
   assert.equal(img?.getAttribute("data-asset-src"), null);
   assert.equal(img?.alt, "테스트 이미지");
 });
+
+test("main.js: header scroll threshold uses offsetTop captured at import", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  const hdr = document.getElementById("header");
+  assert.ok(hdr);
+  Object.defineProperty(hdr, "offsetTop", {
+    configurable: true,
+    enumerable: true,
+    get: () => 40,
+  });
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ tests: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-hdr-offset`);
+  await import(u.href);
+  const header = document.getElementById("header");
+  assert.ok(header);
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    get: () => 50,
+  });
+  window.dispatchEvent(new Event("scroll"));
+  assert.ok(header.classList.contains("fixed-header"));
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    get: () => 0,
+  });
+  window.dispatchEvent(new Event("scroll"));
+  assert.ok(!header.classList.contains("fixed-header"));
+});
+
+test("main.js: window.assetUrl resolves relative thumbnails", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  window.assetUrl = (p) => `https://cdn.example/${String(p).replace(/^assets\//, "")}`;
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [
+          {
+            id: "wau",
+            title: "WAU",
+            thumbnail: "assets/wau/th.png",
+            tags: ["t"],
+            path: "wau/p.json",
+            updatedAt: "2026-02-02",
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-win-asset-url`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+  assert.ok(document.body.textContent?.includes("WAU"));
+});
+
+test("main.js: window.assetResizeUrl is invoked for cards when defined", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  let resizeCalls = 0;
+  window.assetResizeUrl = (path, opts) => {
+    resizeCalls += 1;
+    return `R:${path}:${opts.width}`;
+  };
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [
+          {
+            id: "wrz",
+            title: "WRZ",
+            thumbnail: "assets/wrz/t.png",
+            tags: [],
+            path: "wrz/p.json",
+            updatedAt: "2026-03-03",
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-win-resize`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+  assert.ok(resizeCalls >= 1);
+});
+
+test("main.js: newtest vs toptest use different data-asset-srcset widths", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [
+          {
+            id: "srcset",
+            title: "Srcset",
+            thumbnail: "https://example.com/s.png",
+            tags: [],
+            path: "srcset/p.json",
+            updatedAt: "2026-01-01",
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-variant-srcset`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+  const topImg = document.querySelector(".NewTestShell.toptest img");
+  const newImg = document.querySelector(".NewTestShell.newtest img");
+  assert.ok(topImg);
+  assert.ok(newImg);
+  assert.equal(topImg.getAttribute("data-asset-srcset"), "320,480,520");
+  assert.equal(newImg.getAttribute("data-asset-srcset"), "320,480,640");
+});
+
+test("main.js: getTestIndex array path skips fetch and renders hashtags", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  let fetchCalled = false;
+  globalThis.fetch = async () => {
+    fetchCalled = true;
+    return new Response("{}", { status: 404 });
+  };
+  window.getTestIndex = async () => ({
+    tests: [
+      {
+        id: "gidx",
+        title: "Gidx",
+        thumbnail: "http://x/i.png",
+        tags: ["solo"],
+        path: "gidx/p.json",
+        updatedAt: "2026-01-01",
+      },
+    ],
+  });
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-get-idx-array`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+  assert.equal(fetchCalled, false);
+  assert.ok(document.body.textContent?.includes("Gidx"));
+  assert.ok(document.body.textContent?.includes("#solo"));
+});
+
+test("main.js: normalizeTests prefers updatedAt over createdAt", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [
+          {
+            id: "stale-upd",
+            title: "StaleUpd",
+            thumbnail: "http://x/a.png",
+            tags: [],
+            path: "a/p.json",
+            updatedAt: "2010-01-01",
+            createdAt: "2030-01-01",
+          },
+          {
+            id: "mid",
+            title: "MidWins",
+            thumbnail: "http://x/b.png",
+            tags: [],
+            path: "b/p.json",
+            createdAt: "2015-01-01",
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-sort-updated-at`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+  const firstH4 = document.querySelector(".NewTestList .NewTest h4");
+  assert.equal(firstH4?.textContent, "MidWins");
+});
+
+test("main.js: img.loading setter errors are swallowed", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  const proto = window.HTMLImageElement.prototype;
+  const desc = Object.getOwnPropertyDescriptor(proto, "loading");
+  Object.defineProperty(proto, "loading", {
+    configurable: true,
+    enumerable: true,
+    get() {
+      return "lazy";
+    },
+    set() {
+      throw new Error("loading blocked");
+    },
+  });
+  try {
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          tests: [
+            {
+              id: "imgld",
+              title: "ImgLd",
+              thumbnail: "http://x/p.png",
+              tags: [],
+              path: "imgld/p.json",
+              updatedAt: "2026-01-01",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    const u = new URL("../../public/scripts/main.js", import.meta.url);
+    u.searchParams.set("v", `${stableImportV(import.meta.url)}-img-loading-catch`);
+    await import(u.href);
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 50));
+    assert.ok(document.body.textContent?.includes("ImgLd"));
+  } finally {
+    if (desc) Object.defineProperty(proto, "loading", desc);
+    else delete proto.loading;
+  }
+});
