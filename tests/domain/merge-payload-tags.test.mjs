@@ -50,3 +50,16 @@ test("mergeTestDetailPayload: tags_json empty JSON array yields empty tags", () 
   );
   assert.deepEqual(p.tags, []);
 });
+
+test("mergeTestDetailPayload: non-object bodyJson does not spread into payload", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "x",
+      title: "T",
+    },
+    42,
+  );
+  assert.equal(p.id, "x");
+  assert.equal(p.title, "T");
+  assert.equal("42" in p, false);
+});

@@ -204,6 +204,34 @@ test("validateTestPayload: invalid axis on first answer", () => {
     /invalid mbtiAxis/,
   );
 
+  const qsEmptyAxis = twelveQuestions();
+  qsEmptyAxis[5] = {
+    label: "Q",
+    questionImage: "assets/t/q.png",
+    answers: [
+      { label: "A", mbtiAxis: "", direction: "E" },
+      { label: "B", mbtiAxis: "EI", direction: "I" },
+    ],
+  };
+  assert.match(
+    validateTestPayload(basePayload({ questions: qsEmptyAxis })),
+    /Question 6 has invalid mbtiAxis/,
+  );
+
+  const qsMissingAxis = twelveQuestions();
+  qsMissingAxis[6] = {
+    label: "Q",
+    questionImage: "assets/t/q.png",
+    answers: [
+      { label: "A", direction: "E" },
+      { label: "B", mbtiAxis: "EI", direction: "I" },
+    ],
+  };
+  assert.match(
+    validateTestPayload(basePayload({ questions: qsMissingAxis })),
+    /Question 7 has invalid mbtiAxis/,
+  );
+
   const qsNumAxis = twelveQuestions();
   qsNumAxis[1] = {
     label: "Q",
