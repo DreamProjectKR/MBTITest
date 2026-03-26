@@ -84,6 +84,17 @@ test("mergeTestDetailPayload filters falsy description entries", () => {
   assert.deepEqual(p.description, ["a", "b"]);
 });
 
+test("mergeTestDetailPayload: description array only non-string or falsy becomes empty", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "t",
+      description_json: JSON.stringify(["", false, 0, null]),
+    },
+    null,
+  );
+  assert.deepEqual(p.description, []);
+});
+
 test("mergeTestDetailPayload: empty description array stays empty array", () => {
   const p = mergeTestDetailPayload(
     {
