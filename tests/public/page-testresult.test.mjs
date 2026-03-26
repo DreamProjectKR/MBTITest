@@ -379,6 +379,100 @@ test("testresult.js share title uses MBTI 결과 when test title is empty", asyn
   assert.ok(String(shared.title || "").includes(mbti));
 });
 
+test("testresult.js preloadCriticalImage uses raw href when assetUrl and resize helpers are gone", async () => {
+  const t = minimalPublishedQuizTest("res-preload-raw");
+  const mbti = "ENFP";
+  const absImg = "https://example.com/absolute-result.png";
+  t.results[mbti] = { ...t.results[mbti], image: absImg };
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+  globalThis.fetch = async () => new Response("{}", { status: 404 });
+
+  await import("../../public/scripts/config.js");
+  delete window.assetUrl;
+  delete window.assetResizeUrl;
+  delete window.parseResizeOptions;
+  await import(testresultImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 55));
+
+  const link = document.head.querySelector("link[data-preload-key]");
+  assert.ok(link);
+  assert.ok(String(link.getAttribute("href") || link.href).includes("absolute-result"));
+});
+
+test("testresult.js preloadCriticalImage swallows head.appendChild errors", async () => {
+  const t = minimalPublishedQuizTest("res-preload-append-fail");
+  const mbti = "ESTJ";
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+  globalThis.fetch = async () => new Response("{}", { status: 404 });
+
+  await import("../../public/scripts/config.js");
+  const origAppend = document.head.appendChild.bind(document.head);
+  document.head.appendChild = function (node) {
+    if (node && node.getAttribute && node.getAttribute("data-preload-key")) {
+      throw new Error("append-blocked");
+    }
+    return origAppend(node);
+  };
+
+  try {
+    await import(testresultImportHref());
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 55));
+  } finally {
+    document.head.appendChild = origAppend;
+  }
+
+  assert.equal(document.head.querySelector("link[data-preload-key]"), null);
+  assert.ok(
+    String(
+      document.querySelector(".ResultShellTextBox h2")?.textContent || "",
+    ).includes(mbti),
+  );
+});
+
+test("testresult.js renderError skips missing thumbnail img element", async () => {
+  const t = minimalPublishedQuizTest("res-no-img-el");
+  const mbti = "ESTJ";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = `
+<header class="Sticky"><div class="Head"></div></header>
+<main class="ResultShell">
+  <div class="ResultShellImg"></div>
+  <div class="ResultShellTextBox">
+    <h2>결과</h2>
+    <div class="ResultBtnShell">
+      <div class="Restart"><button type="button">다시</button></div>
+      <div class="TestShare"><button type="button">공유</button></div>
+    </div>
+  </div>
+</main>`;
+
+  globalThis.fetch = async () => new Response("", { status: 500 });
+
+  await import("../../public/scripts/config.js");
+  await import(testresultImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.equal(
+    document.querySelector(".ResultShellTextBox h2")?.textContent,
+    "결과를 불러올 수 없습니다.",
+  );
+});
+
 test("testresult.js preloadCriticalImage uses assetUrl when parseResizeOptions is missing", async () => {
   const t = minimalPublishedQuizTest("res-preload-asseturl");
   const mbti = "ENFP";

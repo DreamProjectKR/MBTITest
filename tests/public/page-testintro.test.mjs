@@ -614,3 +614,129 @@ test("testintro.js renders when sessionStorage.setItem fails during persist", as
     window.sessionStorage.setItem = orig;
   }
 });
+
+test("testintro.js loads when IntroBtnShell has no TestShare block", async () => {
+  const t = minimalPublishedQuizTest("intro-no-share");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = `
+<header class="Sticky"><div class="Head"></div></header>
+<main class="TestIntroShell">
+  <div class="IntroShellImg">
+    <img alt="" />
+    <div class="NewTestHashTag"></div>
+  </div>
+  <div class="IntroShellTextBox">
+    <h2>제목</h2>
+    <div class="Creator"><img alt="" /><p class="CreatorName"></p></div>
+    <div class="IntroDescription"></div>
+    <div class="IntroBtnShell">
+      <div class="TestStart"><button type="button">시작</button></div>
+    </div>
+  </div>
+</main>`;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  assert.equal(document.querySelector(".IntroShellTextBox h2")?.textContent, t.title);
+  assert.equal(document.querySelector(".TestShare button"), null);
+});
+
+test("testintro.js loads when IntroBtnShell has no TestStart button", async () => {
+  const t = minimalPublishedQuizTest("intro-no-start");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = `
+<header class="Sticky"><div class="Head"></div></header>
+<main class="TestIntroShell">
+  <div class="IntroShellImg">
+    <img alt="" />
+    <div class="NewTestHashTag"></div>
+  </div>
+  <div class="IntroShellTextBox">
+    <h2>제목</h2>
+    <div class="Creator"><img alt="" /><p class="CreatorName"></p></div>
+    <div class="IntroDescription"></div>
+    <div class="IntroBtnShell">
+      <div class="TestShare"><button type="button">공유</button></div>
+    </div>
+  </div>
+</main>`;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  assert.equal(document.querySelector(".IntroShellTextBox h2")?.textContent, t.title);
+  assert.equal(document.querySelector(".TestStart button"), null);
+});
+
+test("testintro.js Start second click returns early while first warm-up is pending", async () => {
+  const t = minimalPublishedQuizTest("intro-double-start");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response(new Uint8Array([0xd7]), { status: 200 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 80));
+
+  let hrefSets = 0;
+  Object.defineProperty(window.location, "href", {
+    configurable: true,
+    get: () => String(window.location),
+    set: () => {
+      hrefSets += 1;
+    },
+  });
+
+  const startBtn = document.querySelector(".TestStart button");
+  assert.ok(startBtn);
+  startBtn.click();
+  startBtn.click();
+  assert.equal(startBtn.getAttribute("data-loading"), "1");
+  assert.equal(hrefSets, 0);
+  await new Promise((r) => setTimeout(r, 120));
+  assert.equal(hrefSets, 1);
+});
