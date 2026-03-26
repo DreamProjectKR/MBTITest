@@ -445,3 +445,43 @@ test("result image PUT: generic workflow error -> 500", async () => {
   );
   assert.equal(res.status, 500);
 });
+
+test("result image PUT: workflow throws non-Error -> 500 generic message", async () => {
+  installDefaultCacheStub();
+  const bucket = {
+    async get() {
+      return {
+        async text() {
+          return JSON.stringify({
+            questions: [],
+            results: { ENFP: { image: "x", summary: "y" } },
+          });
+        },
+      };
+    },
+    async put() {
+      throw "not-an-error-object";
+    },
+  };
+  const db = {
+    prepare() {
+      return { bind() {}, async all() {} };
+    },
+    async batch() {
+      return [];
+    },
+  };
+  const res = await onRequestPut(
+    createContext({
+      url,
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1", mbti: "ENFP" },
+      headers: { "content-type": "application/octet-stream" },
+      body: new Uint8Array([1, 2]),
+    }),
+  );
+  assert.equal(res.status, 500);
+  const j = await res.json();
+  assert.equal(j.error, "Failed to upload image.");
+});

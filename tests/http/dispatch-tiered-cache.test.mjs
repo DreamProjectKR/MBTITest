@@ -62,6 +62,38 @@ test("dispatchWorkerRequest: tiered cache SELF.fetch rejection returns 500", asy
   assert.equal(j.error, "An unexpected error occurred.");
 });
 
+test("dispatchWorkerRequest: Error without stack logs message only", async () => {
+  const calls = [];
+  const orig = console.error;
+  console.error = (...args) => {
+    calls.push(args);
+  };
+  try {
+    const env = {
+      SELF: {
+        fetch() {
+          const err = new Error("tiered-no-stack");
+          delete err.stack;
+          return Promise.reject(err);
+        },
+      },
+    };
+    const res = await dispatchWorkerRequest(
+      new Request("https://example.com/api/tests"),
+      env,
+      { waitUntil() {} },
+    );
+    assert.equal(res.status, 500);
+    const hit = calls.some(
+      (c) =>
+        c.length === 2 && c[0] === "[worker]" && c[1] === "tiered-no-stack",
+    );
+    assert.ok(hit, `expected two-arg console.error, got ${JSON.stringify(calls)}`);
+  } finally {
+    console.error = orig;
+  }
+});
+
 test("dispatchWorkerRequest: tiered cache uses SELF.fetch for GET /api/tests", async () => {
   let originSeen = false;
   const env = {
