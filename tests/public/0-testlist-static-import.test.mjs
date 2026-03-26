@@ -92,6 +92,56 @@ test("testlist.js static import: list fetch, mobile scroll margin, and test1 lin
   assert.equal(hrefSnap, "testintro.html");
 });
 
+test("testlist.js static import: dynamic card click navigates with testId", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = TESTLIST_PAGE_HTML;
+
+  const pub = minimalPublishedQuizTest("list-stable-card");
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/api/tests") || u.includes("/assets/index.json")) {
+      return new Response(
+        JSON.stringify({
+          tests: [
+            {
+              id: pub.id,
+              title: pub.title,
+              path: pub.path,
+              thumbnail: pub.thumbnail,
+              tags: pub.tags,
+              createdAt: pub.createdAt,
+              updatedAt: pub.updatedAt,
+              is_published: true,
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  const listUrl = new URL("../../public/scripts/testlist.js", import.meta.url);
+  listUrl.searchParams.set("v", `${stableImportV(import.meta.url)}-card-nav`);
+  await import(listUrl.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  let hrefSnap = "";
+  Object.defineProperty(window.location, "href", {
+    configurable: true,
+    get: () => String(window.location),
+    set: (v) => {
+      hrefSnap = String(v);
+    },
+  });
+
+  document.querySelector(".NewTestList .NewTestShell")?.click();
+  assert.ok(hrefSnap.includes("testintro.html"));
+  assert.ok(hrefSnap.includes(encodeURIComponent(pub.id)));
+});
+
 test("testlist.js fetch path without config and lazy loading on second card", async () => {
   createBrowserEnv();
   document.body.innerHTML = TESTLIST_PAGE_HTML;

@@ -89,6 +89,54 @@ test("main.js static import: renders cards and toggles header on scroll", async 
   assert.ok(!header.classList.contains("fixed-header"));
 });
 
+test("main.js static import: toptest section uses 520 srcset list (not 640)", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = MAIN_PAGE_HTML;
+
+  const newer = {
+    id: "main-top-new",
+    title: "NewerFirst",
+    thumbnail: "assets/mtn/a.png",
+    tags: ["a"],
+    path: "mtn/a.json",
+    updatedAt: "2026-06-01",
+  };
+  const older = {
+    id: "main-top-old",
+    title: "OlderSecond",
+    thumbnail: "assets/mto/b.png",
+    tags: ["b"],
+    path: "mto/b.json",
+    updatedAt: "2026-01-01",
+  };
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/api/tests")) {
+      return new Response(JSON.stringify({ tests: [newer, older] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  const mainUrl = new URL("../../public/scripts/main.js", import.meta.url);
+  mainUrl.searchParams.set("v", `${stableImportV(import.meta.url)}-toptest-srcset`);
+  await import(mainUrl.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 55));
+
+  const lists = document.querySelectorAll(".NewTestList");
+  assert.equal(lists.length, 2);
+  const topImg = lists[1].querySelector(".NewTestShell img");
+  assert.ok(topImg);
+  assert.equal(topImg.getAttribute("data-asset-srcset"), "320,480,520");
+  const newImg = lists[0].querySelector(".NewTestShell img");
+  assert.equal(newImg?.getAttribute("data-asset-srcset"), "320,480,640");
+});
+
 test("main.js uses fetch path when getTestIndex is absent (no config)", async () => {
   createBrowserEnv({ url: "http://127.0.0.1:8788/" });
   document.body.innerHTML = MAIN_PAGE_HTML;
