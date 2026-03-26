@@ -254,3 +254,85 @@ test("loadTestDetail: invalid JSON in R2 -> 500", async () => {
   const res = await loadTestDetail(ctx({ env }), OPT);
   assert.equal(res.status, 500);
 });
+
+test("loadTestDetail: KV entry with etag but no body falls through to D1+R2", async () => {
+  const { bucket } = createJsonBucket({
+    "assets/pub-test/test.json": JSON.stringify({
+      id: "pub-test",
+      title: "From R2 after KV body miss",
+      questions: [],
+      results: {},
+    }),
+  });
+  const env = {
+    MBTI_KV: {
+      async get() {
+        return JSON.stringify({ etag: '"etag-only"' });
+      },
+      async put() {},
+      async delete() {},
+    },
+    MBTI_BUCKET: bucket,
+    MBTI_DB: createDetailDb({
+      test_id: "pub-test",
+      title: "T",
+      description_json: "[]",
+      author: "a",
+      author_img_path: "a",
+      thumbnail_path: "t",
+      tags_json: "[]",
+      source_path: "pub-test/test.json",
+      created_at: "2026-01-01",
+      updated_at: "2026-01-01",
+      is_published: 1,
+    }),
+  };
+  const res = await loadTestDetail(ctx({ env }), OPT);
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.equal(j.title, "From R2 after KV body miss");
+});
+
+test("loadTestDetail: admin useCache false returns 304 when If-None-Match matches", async () => {
+  const { bucket } = createJsonBucket({
+    "assets/pub-test/test.json": JSON.stringify({ questions: [], results: {} }),
+  });
+  const env = {
+    MBTI_BUCKET: bucket,
+    MBTI_DB: createDetailDb({
+      test_id: "pub-test",
+      title: "T",
+      description_json: "[]",
+      author: "a",
+      author_img_path: "a",
+      thumbnail_path: "t",
+      tags_json: "[]",
+      source_path: "pub-test/test.json",
+      created_at: "2026-01-01",
+      updated_at: "2026-01-01",
+      is_published: 1,
+    }),
+  };
+  const pubUrl = new URL("https://example.com/api/tests/pub-test");
+  const pubFirst = await loadTestDetail(
+    createContext({ url: pubUrl.href, env, params: { id: "pub-test" } }),
+    { enforcePublished: true, useCache: true },
+  );
+  assert.equal(pubFirst.status, 200);
+  const etag = pubFirst.headers.get("ETag");
+  assert.ok(etag);
+
+  const adminOpt = { enforcePublished: false, useCache: false };
+  const adminUrl = "https://example.com/api/admin/tests/pub-test";
+  const second = await loadTestDetail(
+    createContext({
+      url: adminUrl,
+      env,
+      params: { id: "pub-test" },
+      headers: { "if-none-match": etag },
+    }),
+    adminOpt,
+  );
+  assert.equal(second.status, 304);
+  assert.equal(second.headers.get("X-MBTI-Edge-Cache"), "BYPASS");
+});
