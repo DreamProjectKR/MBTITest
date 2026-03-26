@@ -85,3 +85,60 @@ test("images PUT: workflow throws -> 500 with message", async () => {
   const j = await res.json();
   assert.match(j.error, /r2 boom/);
 });
+
+test("images PUT: raw body uses img-<timestamp> when crypto.randomUUID is absent", async () => {
+  installDefaultCacheStub();
+  const prevCryptoDesc = Object.getOwnPropertyDescriptor(globalThis, "crypto");
+  const origNow = Date.now;
+  const fixedTs = 1700000000123;
+  try {
+    Object.defineProperty(globalThis, "crypto", {
+      value: {
+        getRandomValues(arr) {
+          return arr;
+        },
+      },
+      configurable: true,
+      writable: true,
+      enumerable: true,
+    });
+    Date.now = () => fixedTs;
+    const bucket = {
+      async put() {},
+    };
+    const db = {
+      prepare() {
+        return {
+          bind() {
+            return this;
+          },
+          async all() {
+            return { results: [] };
+          },
+        };
+      },
+    };
+    const buf = new Uint8Array([1]).buffer;
+    const res = await onRequestPut(
+      createContext({
+        url: "https://example.com/api/admin/tests/nouuid/images",
+        method: "PUT",
+        env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+        params: { id: "nouuid" },
+        headers: {
+          "content-type": "image/png",
+          "content-length": String(buf.byteLength),
+        },
+        body: buf,
+      }),
+    );
+    assert.equal(res.status, 200);
+    const j = await res.json();
+    assert.match(String(j.path), new RegExp(`img-${fixedTs}\\.png$`));
+  } finally {
+    if (prevCryptoDesc) {
+      Object.defineProperty(globalThis, "crypto", prevCryptoDesc);
+    }
+    Date.now = origNow;
+  }
+});

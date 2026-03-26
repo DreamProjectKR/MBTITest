@@ -199,6 +199,22 @@ test("assets handler: UI image path uses long immutable cache-control", async ()
   assert.match(res.headers.get("Cache-Control") || "", /immutable/);
 });
 
+test("assets handler: assets/data/images path uses UI immutable cache-control", async () => {
+  installInMemoryCacheStub();
+  const { bucket } = createJsonBucket({
+    "assets/data/images/legacy-ui.png": "x",
+  });
+  const res = await handleAssetsGet(
+    createContext({
+      url: "https://example.com/assets/data/images/legacy-ui.png",
+      env: { MBTI_BUCKET: bucket },
+      params: { path: "data/images/legacy-ui.png" },
+    }),
+  );
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("Cache-Control") || "", /immutable/);
+});
+
 test("assets handler: invalid Range bytes=bad-1 ignored for full 200", async () => {
   installInMemoryCacheStub();
   const { bucket } = createJsonBucket({ "assets/r/badstart.bin": "abc" });
