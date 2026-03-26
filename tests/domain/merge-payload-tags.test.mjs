@@ -63,3 +63,16 @@ test("mergeTestDetailPayload: non-object bodyJson does not spread into payload",
   assert.equal(p.title, "T");
   assert.equal("42" in p, false);
 });
+
+test("mergeTestDetailPayload: truthy string bodyJson does not spread (typeof !== object)", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "x",
+      title: "T",
+    },
+    "not-an-object",
+  );
+  assert.equal(p.id, "x");
+  assert.equal(p.title, "T");
+  assert.equal("0" in p, false);
+});

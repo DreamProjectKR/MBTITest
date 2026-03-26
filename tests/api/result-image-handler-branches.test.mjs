@@ -101,6 +101,38 @@ test("result image PUT: empty raw body -> 400", async () => {
   assert.match(j.error, /File upload required/);
 });
 
+test("result image PUT: raw body without content-type defaults to image/png", async () => {
+  installDefaultCacheStub();
+  const testJson = JSON.stringify({
+    questions: [],
+    results: { ENFP: { image: "old", summary: "s" } },
+  });
+  const { bucket } = createJsonBucket({
+    "assets/t1/test.json": testJson,
+  });
+  const db = {
+    prepare() {
+      return { bind() {}, async all() {} };
+    },
+    async batch() {
+      return [];
+    },
+  };
+  const res = await onRequestPut(
+    createContext({
+      url,
+      method: "PUT",
+      env: { MBTI_BUCKET: bucket, MBTI_DB: db },
+      params: { id: "t1", mbti: "ENFP" },
+      headers: {},
+      body: new Uint8Array([7, 8, 9]),
+    }),
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.match(String(j.path), /\.png$/i);
+});
+
 test("result image PUT: multipart file succeeds and uses file type for extension", async () => {
   installDefaultCacheStub();
   const testJson = JSON.stringify({
