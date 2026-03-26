@@ -729,3 +729,245 @@ test("testquiz.js resolves question image from image alias field", async () => {
   assert.ok(img);
   assert.equal(img.getAttribute("data-asset-src"), `${ip}/from-image-field.png`);
 });
+
+test("testquiz.js shows error when detail fetch returns non-OK", async () => {
+  const t = minimalPublishedQuizTest("quiz-detail-not-ok");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response("gone", { status: 404 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(
+    document.body.textContent?.includes("테스트 정보를 불러오지 못했습니다."),
+  );
+});
+
+test("testquiz.js shows error when payload has no questions", async () => {
+  const t = minimalPublishedQuizTest("quiz-no-questions");
+  t.questions = [];
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(document.body.textContent?.includes("문항이 없습니다."));
+});
+
+test("testquiz.js shows error when questions field is not an array", async () => {
+  const t = minimalPublishedQuizTest("quiz-bad-questions-type");
+  t.questions = null;
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(document.body.textContent?.includes("문항이 없습니다."));
+});
+
+test("testquiz.js skips first-question preload when buildAssetUrl is missing", async () => {
+  const t = minimalPublishedQuizTest("quiz-no-build-asset-url");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  const prev = window.buildAssetUrl;
+  try {
+    delete window.buildAssetUrl;
+    await import(testquizImportHref());
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 50));
+  } finally {
+    window.buildAssetUrl = prev;
+  }
+
+  assert.equal(
+    document.querySelector("link[data-preload-key^='quiz-first:']"),
+    null,
+  );
+  assert.ok(document.querySelector(".TestSelectBtn button"));
+});
+
+test("testquiz.js resolves question image from questionImg alias field", async () => {
+  const t = minimalPublishedQuizTest("quiz-questionimg-alias");
+  const ip = `assets/${t.id}/images`;
+  t.questions = [
+    {
+      id: "q1",
+      label: "Q1",
+      questionImg: `${ip}/from-questionImg.png`,
+      answers: [
+        { mbtiAxis: "EI", direction: "E", label: "E" },
+        { mbtiAxis: "EI", direction: "I", label: "I" },
+      ],
+    },
+  ];
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  const img = document.querySelector(".TestImg img");
+  assert.ok(img);
+  assert.equal(
+    img.getAttribute("data-asset-src"),
+    `${ip}/from-questionImg.png`,
+  );
+});
+
+test("testquiz.js resolves question image from question_image alias field", async () => {
+  const t = minimalPublishedQuizTest("quiz-question-image-snake");
+  const ip = `assets/${t.id}/images`;
+  t.questions = [
+    {
+      id: "q1",
+      label: "Q1",
+      question_image: `${ip}/from-snake.png`,
+      answers: [
+        { mbtiAxis: "EI", direction: "E", label: "E" },
+        { mbtiAxis: "EI", direction: "I", label: "I" },
+      ],
+    },
+  ];
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  const img = document.querySelector(".TestImg img");
+  assert.ok(img);
+  assert.equal(img.getAttribute("data-asset-src"), `${ip}/from-snake.png`);
+});
+
+test("testquiz.js hides QuizFooter while question is shown", async () => {
+  const t = minimalPublishedQuizTest("quiz-footer-hide");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = `${TESTQUIZ_PAGE_HTML}<footer class="QuizFooter">x</footer>`;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  const footer = document.querySelector(".QuizFooter");
+  assert.ok(footer);
+  assert.equal(footer.style.display, "none");
+});

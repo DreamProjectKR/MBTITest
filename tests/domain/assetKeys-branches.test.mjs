@@ -82,6 +82,10 @@ test("getTestKey with only unsafe id still yields assets test.json key", () => {
   assert.equal(getTestKey("@@@"), "assets/test.json");
 });
 
+test("getTestKey with whitespace-only id normalizes to default test.json key", () => {
+  assert.equal(getTestKey("   \t  "), "assets/test.json");
+});
+
 test("normalizeR2KeyFromIndexPath: bare assets token gets prefixed", () => {
   assert.equal(normalizeR2KeyFromIndexPath("assets"), "assets/assets");
 });
