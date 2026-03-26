@@ -170,3 +170,59 @@ test("layout.js warns when partial fetch throws", async () => {
   console.warn = prev;
   assert.ok(warns.some((w) => w.includes("layout.js") && w.includes("failed")));
 });
+
+test("layout.js skips fetch when data-include-src is empty", async () => {
+  createBrowserEnv();
+  document.body.innerHTML =
+    '<div data-include="x" data-include-src=""></div>';
+  let fetchCount = 0;
+  globalThis.fetch = async () => {
+    fetchCount += 1;
+    return new Response("x", { status: 200 });
+  };
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  await import(layoutHref("empty-src-skip"));
+  await new Promise((r) => setTimeout(r, 30));
+  assert.equal(fetchCount, 0);
+});
+
+test("layout.js does not call applyAssetAttributes when it is not a function", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = LAYOUT_PARTIAL_HTML;
+  globalThis.fetch = async () =>
+    new Response("<span id='layoutNonFn'>x</span>", { status: 200 });
+  window.applyAssetAttributes = {};
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  await import(layoutHref("apply-attr-non-function"));
+  await new Promise((r) => setTimeout(r, 40));
+  assert.equal(document.getElementById("layoutNonFn")?.textContent, "x");
+});
+
+test("layout.js uses window.location when document.baseURI is empty", async () => {
+  createBrowserEnv({ url: "https://example.com/page/baseuri" });
+  document.body.innerHTML =
+    '<div data-include="x" data-include-src="/frag.html"></div>';
+  let requestedUrl = "";
+  globalThis.fetch = async (input) => {
+    requestedUrl = String(input instanceof Request ? input.url : input);
+    return new Response("<i id='fragFromLoc'></i>", { status: 200 });
+  };
+  Object.defineProperty(document, "baseURI", {
+    configurable: true,
+    get: () => "",
+  });
+  Object.defineProperty(document, "readyState", {
+    configurable: true,
+    get: () => "complete",
+  });
+  await import(layoutHref("empty-base-uri"));
+  await new Promise((r) => setTimeout(r, 40));
+  assert.match(requestedUrl, /frag\.html$/);
+  assert.ok(document.getElementById("fragFromLoc"));
+});
