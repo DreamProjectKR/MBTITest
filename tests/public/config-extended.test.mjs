@@ -821,3 +821,75 @@ test("config: auto-width retries measure when layout width is zero", async () =>
   assert.equal(img.getAttribute("data-asset-measure-tries"), "2");
   assert.ok(String(img.getAttribute("src") || "").includes("/cdn-cgi/image/"));
 });
+
+test("config: parseResizeOptions ignores unknown keys in pairs", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  assert.deepEqual(window.parseResizeOptions("width=10,unknownKey=x"), {
+    width: 10,
+  });
+  assert.deepEqual(window.parseResizeOptions("onlyUnknown=1"), {});
+});
+
+test("config: buildAssetUrl returns empty when path is whitespace only", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  assert.equal(window.buildAssetUrl("  \t\n", null, "v"), "");
+});
+
+test("config: prefetchImageAsset returns early for falsy path", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  let images = 0;
+  globalThis.Image = class {
+    set src(_v) {
+      images += 1;
+    }
+  };
+  globalThis.requestIdleCallback = (cb) => {
+    cb({ didTimeout: false });
+  };
+  await import(scriptHref("../../public/scripts/config.js"));
+  window.prefetchImageAsset("", null, null);
+  window.prefetchImageAsset(undefined, null, null);
+  await new Promise((r) => setTimeout(r, 5));
+  assert.equal(images, 0);
+});
+
+test("config: applyAssetAttributes sets sizes from data-asset-sizes on production", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const img = document.createElement("img");
+  img.setAttribute("data-asset-src", "assets/images/sizes-attr.png");
+  img.setAttribute("data-asset-srcset", "320,640");
+  img.setAttribute("data-asset-sizes", "(max-width: 600px) 90vw, 400px");
+  img.setAttribute("data-asset-resize", "width=400,fit=cover,format=webp");
+  document.body.appendChild(img);
+  window.applyAssetAttributes(img);
+  const sizes = img.getAttribute("sizes");
+  assert.ok(sizes && sizes.includes("90vw"), String(sizes));
+  assert.ok(String(img.getAttribute("srcset") || "").length > 0);
+});
+
+test("config: assetResizeUrl builds cdn-cgi path for absolute https asset URL", async () => {
+  createBrowserEnv({ url: "https://example.com/page" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const out = window.assetResizeUrl("https://cdn.example.net/remote.png", {
+    width: 200,
+    quality: 80,
+  });
+  assert.ok(out.startsWith("/cdn-cgi/image/"));
+  assert.ok(
+    out.includes("cdn.example.net") || out.includes("remote.png"),
+    String(out),
+  );
+});

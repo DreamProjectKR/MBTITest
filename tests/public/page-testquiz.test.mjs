@@ -182,6 +182,95 @@ test("testquiz.js uses edge compute MBTI and percent query params when API succe
   assert.ok(hrefSnap.includes("pE=") && hrefSnap.includes("72"));
 });
 
+test("testquiz.js goToResultPage only adds finite percent query keys from edge payload", async () => {
+  const t = minimalPublishedQuizTest("quiz-partial-pct");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  let hrefSnap = "";
+  Object.defineProperty(window.location, "href", {
+    configurable: true,
+    get: () => String(window.location),
+    set: (v) => {
+      hrefSnap = String(v);
+    },
+  });
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response(
+        JSON.stringify({
+          mbti: "ENTP",
+          percentages: { E: 61, S: 58, T: "nope" },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  document.querySelector(".TestSelectBtn button")?.click();
+  await new Promise((r) => setTimeout(r, 45));
+
+  const u = new URL(hrefSnap);
+  assert.equal(u.searchParams.get("result"), "ENTP");
+  assert.equal(u.searchParams.get("pE"), "61");
+  assert.equal(u.searchParams.get("pS"), "58");
+  assert.equal(u.searchParams.has("pT"), false);
+  assert.equal(u.searchParams.has("pJ"), false);
+});
+
+test("testquiz.js renderQuestion skips options when TestSelectBtn is absent", async () => {
+  const t = minimalPublishedQuizTest("quiz-no-options");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = `
+<div class="PageShell">
+  <header class="Sticky"><div class="Head"></div></header>
+  <main>
+    <div class="ProgressBar"><div class="Progress"></div></div>
+    <div class="TestImg"><img alt="" /></div>
+  </main>
+</div>`;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 55));
+
+  assert.equal(document.querySelector(".TestSelectBtn"), null);
+  assert.ok(document.querySelector(".TestImg img")?.getAttribute("data-asset-src"));
+});
+
 test("testquiz.js shows error when testId is missing", async () => {
   createBrowserEnv({ url: "http://127.0.0.1:8788/testquiz.html" });
   document.body.innerHTML = TESTQUIZ_PAGE_HTML;
@@ -970,4 +1059,128 @@ test("testquiz.js hides QuizFooter while question is shown", async () => {
   const footer = document.querySelector(".QuizFooter");
   assert.ok(footer);
   assert.equal(footer.style.display, "none");
+});
+
+test("testquiz.js falls back to local MBTI when compute body is invalid JSON", async () => {
+  const t = minimalPublishedQuizTest("quiz-compute-bad-json");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  let hrefSnap = "";
+  Object.defineProperty(window.location, "href", {
+    configurable: true,
+    get: () => String(window.location),
+    set: (v) => {
+      hrefSnap = String(v);
+    },
+  });
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{not-json", {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  const btn = document.querySelector(".TestSelectBtn button");
+  assert.ok(btn);
+  btn.click();
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(hrefSnap.includes("testresult.html"));
+  assert.ok(hrefSnap.includes("result="));
+});
+
+test("testquiz.js loads detail when sessionStorage is null", async () => {
+  const t = minimalPublishedQuizTest("quiz-null-session");
+  const win = createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  Object.defineProperty(win, "sessionStorage", {
+    configurable: true,
+    enumerable: true,
+    value: null,
+  });
+  try {
+    Object.defineProperty(globalThis, "sessionStorage", {
+      configurable: true,
+      writable: true,
+      value: null,
+    });
+  } catch {
+    /* ignore */
+  }
+
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  let detailFetches = 0;
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      detailFetches += 1;
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  assert.equal(detailFetches, 1);
+  assert.ok(document.querySelector(".TestSelectBtn button"));
+});
+
+test("testquiz.js skips hydrate when applyAssetAttributes is absent", async () => {
+  const t = minimalPublishedQuizTest("quiz-no-hydrate-fn");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  delete window.applyAssetAttributes;
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(document.querySelector(".TestSelectBtn button"));
 });
