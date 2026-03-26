@@ -151,12 +151,16 @@
         }
       })();
     </script>
-    <script
-      type="module"
-      src="./scripts/config.js"
-      defer
-      data-cfasync="false"
-    ></script>
+    <!-- Load config as a module via DOM so a broken deploy cannot strip `type="module"` from markup. -->
+    <script data-cfasync="false">
+      (function () {
+        var s = document.createElement("script");
+        s.type = "module";
+        s.src = new URL("./scripts/config.js", document.baseURI).href;
+        s.dataset.cfasync = "false";
+        document.head.appendChild(s);
+      })();
+    </script>
     <script
       src="./scripts/layout.js"
       defer
@@ -253,12 +257,11 @@
         ></div>
       </footer>
     </div>
+    <script
+      type="module"
+      src="./scripts/main.js"
+      data-cfasync="false"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>
-
-<script
-  type="module"
-  src="./scripts/main.js"
-  data-cfasync="false"
-  crossorigin="anonymous"
-></script>
