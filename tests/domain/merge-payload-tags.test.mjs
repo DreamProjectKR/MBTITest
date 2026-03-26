@@ -90,3 +90,17 @@ test("mergeTestDetailPayload: null bodyJson does not spread", () => {
   assert.equal(p.title, "T");
   assert.deepEqual(p.tags, []);
 });
+
+test("mergeTestDetailPayload: object bodyJson spreads over row fields", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "x",
+      title: "RowTitle",
+      tags_json: "[]",
+    },
+    { title: "OverlayTitle", extraKey: 1 },
+  );
+  assert.equal(p.id, "x");
+  assert.equal(p.title, "OverlayTitle");
+  assert.equal(p.extraKey, 1);
+});

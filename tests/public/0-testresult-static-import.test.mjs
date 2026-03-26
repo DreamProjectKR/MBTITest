@@ -242,6 +242,92 @@ test("testresult.js static import: preload uses raw path when assetUrl and asset
   assert.ok(!href.includes("/cdn-cgi/image/"));
 });
 
+test("testresult.js static import: hydrateAssetElement calls applyAssetAttributes", async () => {
+  const t = minimalPublishedQuizTest("hydrate-apply");
+  const mbti = "ENFP";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+
+  let applyCalls = 0;
+  window.applyAssetAttributes = (el) => {
+    applyCalls += 1;
+    assert.equal(String(el?.tagName || "").toLowerCase(), "img");
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testresultHref("hydrate-apply"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(applyCalls >= 1);
+});
+
+test("testresult.js static import: hydrateAssetElement skips when applyAssetAttributes missing", async () => {
+  const t = minimalPublishedQuizTest("hydrate-no-fn");
+  const mbti = "ENFP";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+
+  await import("../../public/scripts/config.js");
+  delete window.applyAssetAttributes;
+
+  await import(testresultHref("hydrate-no-fn"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(
+    document
+      .querySelector(".ResultShellImg img")
+      ?.getAttribute("data-asset-src"),
+  );
+});
+
+test("testresult.js static import: persistTestJson ignores sessionStorage setItem errors", async () => {
+  const t = minimalPublishedQuizTest("persist-throw");
+  const mbti = "ESTJ";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+
+  const st = window.sessionStorage;
+  const origSetItem = st.setItem;
+  st.setItem = function () {
+    throw new Error("quota");
+  };
+
+  try {
+    globalThis.fetch = async (url) => {
+      if (String(url).includes(`/api/tests/${t.id}`)) {
+        return new Response(JSON.stringify(t), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response("{}", { status: 404 });
+    };
+
+    await import("../../public/scripts/config.js");
+    await import(testresultHref("persist-throw"));
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 60));
+
+    assert.ok(
+      String(
+        document.querySelector(".ResultShellTextBox h2")?.textContent || "",
+      ).includes(mbti),
+    );
+  } finally {
+    st.setItem = origSetItem;
+  }
+});
+
 test("testresult.js versioned: share uses navigator.share when available", async () => {
   const t = minimalPublishedQuizTest("res-share-nav");
   const mbti = "ISTP";
