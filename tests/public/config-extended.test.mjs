@@ -58,6 +58,7 @@ test("config: parseResizeOptions handles pairs and numeric keys", async () => {
     420,
   );
   assert.equal(window.parseResizeOptions("quality=85").quality, 85);
+  assert.equal(window.parseResizeOptions("quality=0").quality, "0");
   assert.equal(window.parseResizeOptions("fit=contain").fit, "contain");
   assert.equal(window.parseResizeOptions("format=webp").format, "webp");
   assert.deepEqual(window.parseResizeOptions("badpair"), {});
@@ -638,6 +639,108 @@ test("config: applyAssetAttributes builds srcset when data-asset-srcset is set",
   const srcset = document.getElementById("s").getAttribute("srcset");
   assert.ok(srcset && srcset.includes("400w"));
   assert.ok(srcset.includes("800w"));
+});
+
+test("config: invalid data-asset-srcset widths skip srcset but still set src", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const img = document.createElement("img");
+  img.setAttribute("data-asset-src", "assets/images/no-srcset.png");
+  img.setAttribute("data-asset-srcset", "foo,bar,12zz");
+  img.setAttribute("data-asset-resize", "width=100");
+  document.body.appendChild(img);
+  window.applyAssetAttributes(img);
+  assert.equal(img.getAttribute("srcset"), null);
+  assert.ok(String(img.getAttribute("src") || "").includes("/cdn-cgi/image/"));
+});
+
+test("config: lazy off-screen hydrates when IntersectionObserver.observe throws", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const OrigIo = globalThis.IntersectionObserver;
+  globalThis.IntersectionObserver = class {
+    observe() {
+      throw new Error("observe-fail");
+    }
+    unobserve() {}
+    disconnect() {}
+  };
+  try {
+    await import(scriptHref("../../public/scripts/config.js"));
+    const img = document.createElement("img");
+    img.setAttribute("data-asset-src", "assets/images/observe-throw.png");
+    img.setAttribute("data-asset-lazy", "true");
+    img.setAttribute("loading", "lazy");
+    img.getBoundingClientRect = () => ({
+      top: 50000,
+      bottom: 50100,
+      width: 200,
+    });
+    document.body.appendChild(img);
+    window.applyAssetAttributes(img);
+    assert.ok(String(img.getAttribute("src") || "").includes("/assets/"));
+  } finally {
+    globalThis.IntersectionObserver = OrigIo;
+  }
+});
+
+test("config: lazy IO callback swallows unobserve errors", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const OrigIo = globalThis.IntersectionObserver;
+  globalThis.IntersectionObserver = class {
+    constructor(cb) {
+      this._cb = cb;
+    }
+    observe(el) {
+      queueMicrotask(() => {
+        this._cb([{ isIntersecting: true, target: el }]);
+      });
+    }
+    unobserve() {
+      throw new Error("unobserve-fail");
+    }
+    disconnect() {}
+  };
+  try {
+    await import(scriptHref("../../public/scripts/config.js"));
+    const img = document.createElement("img");
+    img.setAttribute("data-asset-src", "assets/images/unobserve-throw.png");
+    img.setAttribute("data-asset-lazy", "true");
+    img.setAttribute("loading", "lazy");
+    img.getBoundingClientRect = () => ({
+      top: 50000,
+      bottom: 50100,
+      width: 200,
+    });
+    document.body.appendChild(img);
+    window.applyAssetAttributes(img);
+    await new Promise((r) => queueMicrotask(r));
+    await new Promise((r) => queueMicrotask(r));
+    assert.ok(String(img.getAttribute("src") || "").includes("/assets/"));
+  } finally {
+    globalThis.IntersectionObserver = OrigIo;
+  }
+});
+
+test("config: applyAssetAttributes swallows addEventListener throw on resize fallback wiring", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  await import(scriptHref("../../public/scripts/config.js"));
+  const img = document.createElement("img");
+  img.setAttribute("data-asset-src", "assets/images/addevent-fail.png");
+  img.setAttribute("data-asset-resize", "width=640");
+  img.addEventListener = () => {
+    throw new Error("no-listeners");
+  };
+  document.body.appendChild(img);
+  assert.doesNotThrow(() => window.applyAssetAttributes(img));
+  assert.ok(String(img.getAttribute("src") || "").includes("/cdn-cgi/image/"));
 });
 
 test("config: resize load error retries once then falls back to raw /assets", async () => {
