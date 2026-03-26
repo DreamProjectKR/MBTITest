@@ -168,6 +168,63 @@ test("loadTestDetail: KV hit returns 200 JSON without If-None-Match", async () =
   assert.equal(j.title, "From KV");
 });
 
+test("loadTestDetail: KV hit returns 200 when If-None-Match does not match cached etag", async () => {
+  const kvBody = {
+    etag: '"kv-current"',
+    body: { id: "pub-test", title: "Stale INM" },
+  };
+  const env = {
+    MBTI_KV: {
+      async get() {
+        return JSON.stringify(kvBody);
+      },
+      async put() {},
+      async delete() {},
+    },
+    MBTI_BUCKET: {},
+    MBTI_DB: {},
+  };
+  const res = await loadTestDetail(
+    createContext({
+      url: BASE_URL,
+      env,
+      params: { id: "pub-test" },
+      headers: { "if-none-match": '"other"' },
+    }),
+    OPT,
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.equal(j.title, "Stale INM");
+});
+
+test("loadTestDetail: KV hit with object body but no etag skips 304 and returns 200", async () => {
+  const kvBody = { body: { id: "pub-test", title: "KV no etag" } };
+  const env = {
+    MBTI_KV: {
+      async get() {
+        return JSON.stringify(kvBody);
+      },
+      async put() {},
+      async delete() {},
+    },
+    MBTI_BUCKET: {},
+    MBTI_DB: {},
+  };
+  const res = await loadTestDetail(
+    createContext({
+      url: BASE_URL,
+      env,
+      params: { id: "pub-test" },
+      headers: { "if-none-match": '"any"' },
+    }),
+    OPT,
+  );
+  assert.equal(res.status, 200);
+  const j = await res.json();
+  assert.equal(j.title, "KV no etag");
+});
+
 test("loadTestDetail: KV entry with non-object body skips shortcut and uses R2", async () => {
   const { bucket } = createJsonBucket({
     "assets/pub-test/test.json": JSON.stringify({

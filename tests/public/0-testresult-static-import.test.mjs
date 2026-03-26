@@ -11,6 +11,7 @@ import {
   createBrowserEnv,
   dispatchDomContentLoaded,
 } from "./setup-happy-dom.mjs";
+import { stableImportV } from "./stable-import.mjs";
 
 function testresultHref(v) {
   const u = new URL("../../public/scripts/testresult.js", import.meta.url);
@@ -208,6 +209,43 @@ test("testresult.js static import: axis stats append when ResultBtnShell not dir
   const stats = document.querySelector(".ResultAxisStats");
   assert.ok(stats);
   assert.equal(stats.parentElement?.className, "ResultShellTextBox");
+});
+
+test("testresult.js static import: preload uses assetResizeUrl when config provides parseResizeOptions", async () => {
+  const t = minimalPublishedQuizTest("preload-resize-branch");
+  t.updatedAt = "2026-01-10";
+  const mbti = "ENFP";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+
+  const configUrl = new URL("../../public/scripts/config.js", import.meta.url);
+  configUrl.searchParams.set(
+    "v",
+    `${stableImportV(import.meta.url)}-preload-resize`,
+  );
+  await import(configUrl.href);
+  assert.equal(typeof window.parseResizeOptions, "function");
+  assert.equal(typeof window.assetResizeUrl, "function");
+
+  let resizeCalls = 0;
+  const origResize = window.assetResizeUrl;
+  window.assetResizeUrl = function (path, opts) {
+    resizeCalls += 1;
+    return origResize(path, opts);
+  };
+
+  await import(testresultHref("preload-resize-branch"));
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 45));
+
+  window.assetResizeUrl = origResize;
+
+  assert.ok(resizeCalls >= 1);
+  const link = document.querySelector('link[rel="preload"][as="image"]');
+  assert.ok(link?.getAttribute("href"));
 });
 
 test("testresult.js static import: preload uses raw path when assetUrl and assetResizeUrl missing", async () => {
