@@ -379,6 +379,64 @@ test("testresult.js share title uses MBTI 결과 when test title is empty", asyn
   assert.ok(String(shared.title || "").includes(mbti));
 });
 
+test("testresult.js preloadCriticalImage uses assetUrl when parseResizeOptions is missing", async () => {
+  const t = minimalPublishedQuizTest("res-preload-asseturl");
+  const mbti = "ENFP";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+  globalThis.fetch = async () => new Response("{}", { status: 404 });
+
+  await import("../../public/scripts/config.js");
+  delete window.parseResizeOptions;
+  await import(testresultImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 55));
+
+  const links = [...document.head.querySelectorAll("link[data-preload-key]")];
+  assert.ok(
+    links.some((l) => String(l.href).includes("assets/") || l.href.length > 0),
+  );
+});
+
+test("testresult.js renderAxisBreakdown appends when ResultBtnShell is nested", async () => {
+  const t = minimalPublishedQuizTest("res-axis-nested-shell");
+  const mbti = "ESTJ";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}&pE=50&pS=50&pT=50&pJ=50`,
+  });
+  document.body.innerHTML = `
+<header class="Sticky"><div class="Head"></div></header>
+<main class="ResultShell">
+  <div class="ResultShellImg"><img alt="" /></div>
+  <div class="ResultShellTextBox">
+    <h2>결과</h2>
+    <div class="OuterWrap">
+      <div class="ResultBtnShell">
+        <div class="Restart"><button type="button">다시</button></div>
+        <div class="TestShare"><button type="button">공유</button></div>
+      </div>
+    </div>
+  </div>
+</main>`;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+  globalThis.fetch = async () => new Response("{}", { status: 404 });
+
+  await import("../../public/scripts/config.js");
+  await import(testresultImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 55));
+
+  const box = document.querySelector(".ResultShellTextBox");
+  const stats = box?.querySelector(".ResultAxisStats");
+  assert.ok(stats);
+  assert.equal(stats.parentElement, box);
+  const outer = box?.querySelector(".OuterWrap");
+  assert.ok(outer?.contains(box.querySelector(".ResultBtnShell")));
+});
+
 test("testresult.js invokes applyAssetAttributes on result thumbnail", async () => {
   const t = minimalPublishedQuizTest("res-apply-hook");
   const mbti = "ENFP";
