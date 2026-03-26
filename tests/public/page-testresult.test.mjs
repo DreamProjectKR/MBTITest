@@ -349,3 +349,55 @@ test("testresult.js Restart navigates to testquiz with testId", async () => {
   assert.ok(hrefSnap.includes("testId="));
   assert.ok(hrefSnap.includes(encodeURIComponent(t.id)));
 });
+
+test("testresult.js share title uses MBTI 결과 when test title is empty", async () => {
+  const t = minimalPublishedQuizTest("res-share-empty-title");
+  t.title = "";
+  const mbti = "INTJ";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+  globalThis.fetch = async () => new Response("{}", { status: 404 });
+
+  let shared = null;
+  window.navigator.share = async (data) => {
+    shared = data;
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testresultImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  document.querySelector(".TestShare button")?.click();
+  await new Promise((r) => setTimeout(r, 25));
+
+  assert.ok(shared);
+  assert.match(String(shared.title || ""), /MBTI 결과/);
+  assert.ok(String(shared.title || "").includes(mbti));
+});
+
+test("testresult.js invokes applyAssetAttributes on result thumbnail", async () => {
+  const t = minimalPublishedQuizTest("res-apply-hook");
+  const mbti = "ENFP";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testresult.html?testId=${encodeURIComponent(t.id)}&result=${mbti}`,
+  });
+  document.body.innerHTML = TESTRESULT_PAGE_HTML;
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
+  globalThis.fetch = async () => new Response("{}", { status: 404 });
+
+  let applyCalls = 0;
+  window.applyAssetAttributes = (el) => {
+    if (el?.getAttribute?.("data-asset-src")) applyCalls += 1;
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testresultImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 45));
+
+  assert.ok(applyCalls >= 1);
+});
