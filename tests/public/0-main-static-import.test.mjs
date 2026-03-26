@@ -69,9 +69,7 @@ test("main.js static import: renders cards and toggles header on scroll", async 
 
   const firstShell = document.querySelector(".NewTestShell");
   assert.ok(firstShell);
-  firstShell.dispatchEvent(
-    new window.MouseEvent("click", { bubbles: true, cancelable: true }),
-  );
+  firstShell.click();
   assert.ok(hrefSnap.includes("testintro.html"));
   assert.match(hrefSnap, /testId=static-rel/);
 
@@ -125,4 +123,51 @@ test("main.js uses fetch path when getTestIndex is absent (no config)", async ()
   await new Promise((r) => setTimeout(r, 50));
 
   assert.ok(document.body.textContent?.includes("Fetch only title"));
+});
+
+test("main.js import: without config uses ASSETS_BASE for relative thumbnails", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  window.ASSETS_BASE = "https://cdn.example/pub/assets//";
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [
+          {
+            id: "noconf-assets",
+            title: "NoConfAssets",
+            thumbnail: "assets/noconf/x.png",
+            tags: "not-an-array",
+            path: "noconf/test.json",
+            createdAt: "2025-06-01",
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-noconf-assets`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 60));
+
+  assert.ok(document.body.textContent?.includes("NoConfAssets"));
+  const img = document.querySelector('img[data-asset-src="assets/noconf/x.png"]');
+  assert.ok(img);
+  assert.equal(img.getAttribute("data-asset-version"), null);
+});
+
+test("main.js import: getTestIndex returning empty tests yields no cards", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  window.getTestIndex = async () => ({ tests: null });
+
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-idx-empty`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  assert.equal(document.querySelectorAll(".NewTestShell").length, 0);
 });

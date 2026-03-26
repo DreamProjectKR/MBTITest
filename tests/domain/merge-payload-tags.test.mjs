@@ -76,3 +76,17 @@ test("mergeTestDetailPayload: truthy string bodyJson does not spread (typeof !==
   assert.equal(p.title, "T");
   assert.equal("0" in p, false);
 });
+
+test("mergeTestDetailPayload: null bodyJson does not spread", () => {
+  const p = mergeTestDetailPayload(
+    {
+      test_id: "x",
+      title: "T",
+      tags_json: "[]",
+    },
+    null,
+  );
+  assert.equal(p.id, "x");
+  assert.equal(p.title, "T");
+  assert.deepEqual(p.tags, []);
+});
