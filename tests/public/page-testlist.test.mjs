@@ -583,3 +583,36 @@ test("testlist.js sorts by createdAt when updatedAt is absent", async () => {
 
   assert.equal(document.querySelector(".NewTestShell h4")?.textContent, "Newer");
 });
+
+test("testlist.js card without thumbnail omits data-asset-src on img", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = TESTLIST_PAGE_HTML;
+
+  const row = {
+    id: "no-thumb-list",
+    title: "NoThumbCard",
+    path: "no-thumb-list/test.json",
+    thumbnail: "",
+    tags: ["a"],
+    createdAt: "2026-01-01",
+    updatedAt: "2026-02-01",
+    is_published: true,
+  };
+
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ tests: [row] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+
+  await import("../../public/scripts/config.js");
+  await import(testlistImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 45));
+
+  assert.ok(document.body.textContent?.includes("NoThumbCard"));
+  const img = document.querySelector(".NewTestList .NewTest img");
+  assert.ok(img);
+  assert.equal(img.getAttribute("data-asset-src"), null);
+  assert.equal(img.alt, "NoThumbCard");
+});

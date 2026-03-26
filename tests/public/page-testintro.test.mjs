@@ -740,3 +740,124 @@ test("testintro.js Start second click returns early while first warm-up is pendi
   await new Promise((r) => setTimeout(r, 120));
   assert.equal(hrefSets, 1);
 });
+
+test("testintro.js desktop scroll fixes header without mobile margin", async () => {
+  const t = minimalPublishedQuizTest("intro-scroll-desktop");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  window.matchMedia = (q) => ({
+    media: q,
+    matches: false,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  });
+
+  await import("../../public/scripts/config.js");
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  const headEl = document.querySelector(".Head");
+  const headerScroll = document.querySelector("header");
+  assert.ok(headEl);
+  assert.ok(headerScroll);
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    get: () => 9999,
+  });
+  window.dispatchEvent(new Event("scroll"));
+  assert.ok(headEl.classList.contains("fixed-header"));
+  assert.equal(headerScroll.style.marginBottom, "");
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    get: () => 0,
+  });
+  window.dispatchEvent(new Event("scroll"));
+  assert.equal(headEl.classList.contains("fixed-header"), false);
+});
+
+test("testintro.js scroll is a no-op when .Head element is missing", async () => {
+  const t = minimalPublishedQuizTest("intro-no-head-el");
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML.replace(
+    '<div class="Head"></div>',
+    "",
+  );
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  await import("../../public/scripts/config.js");
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+
+  assert.equal(document.querySelector(".Head"), null);
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    get: () => 5000,
+  });
+  assert.doesNotThrow(() => window.dispatchEvent(new Event("scroll")));
+});
+
+test("testintro.js shows error when API fails and index lacks test id", async () => {
+  const missingId = "intro-index-miss-xyz";
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(missingId)}`,
+  });
+  document.body.innerHTML = TESTINTRO_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes(`/api/tests/${encodeURIComponent(missingId)}`)) {
+      return new Response("", { status: 404 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  window.getTestIndex = async () => ({
+    tests: [{ id: "other-row", path: "other/test.json", title: "Other" }],
+  });
+
+  await import("../../public/scripts/config.js");
+  await import(testintroImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 80));
+
+  assert.equal(
+    document.querySelector(".IntroShellTextBox h2")?.textContent,
+    "테스트를 불러올 수 없습니다.",
+  );
+  assert.equal(
+    document.querySelector(".IntroDescription")?.textContent,
+    "테스트 정보를 불러오지 못했습니다.",
+  );
+});

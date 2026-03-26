@@ -380,16 +380,21 @@ test("testresult.js versioned: share uses navigator.share when available", async
     shared = payload;
   };
 
-  globalThis.fetch = async () => new Response("{}", { status: 404 });
+  const prevFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
-  await import(testresultHref("share-nav"));
-  dispatchDomContentLoaded(window);
-  await new Promise((r) => setTimeout(r, 40));
+    await import("../../public/scripts/config.js");
+    await import(testresultHref("share-nav"));
+    dispatchDomContentLoaded(window);
+    await new Promise((r) => setTimeout(r, 40));
 
-  document.querySelector(".ResultBtnShell .TestShare button")?.click();
-  await new Promise((r) => setTimeout(r, 20));
+    document.querySelector(".ResultBtnShell .TestShare button")?.click();
+    await new Promise((r) => setTimeout(r, 20));
 
-  assert.ok(shared && String(shared.url || "").includes("testresult.html"));
-  assert.ok(String(shared.title || "").includes(mbti));
+    assert.ok(shared && String(shared.url || "").includes("testresult.html"));
+    assert.ok(String(shared.title || "").includes(mbti));
+  } finally {
+    globalThis.fetch = prevFetch;
+  }
 });
