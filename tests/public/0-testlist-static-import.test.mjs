@@ -150,3 +150,67 @@ test("testlist.js fetch path without config and lazy loading on second card", as
   assert.equal(imgs[0].getAttribute("loading"), "eager");
   assert.equal(imgs[1].getAttribute("loading"), "lazy");
 });
+
+test("testlist.js: desktop viewport does not add headerScroll margin when scrolled", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = TESTLIST_PAGE_HTML;
+  const hdr = document.getElementById("header");
+  assert.ok(hdr);
+  Object.defineProperty(hdr, "offsetTop", {
+    configurable: true,
+    enumerable: true,
+    get: () => 25,
+  });
+  window.matchMedia = () => ({
+    media: "(max-width: 900px)",
+    matches: false,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  });
+  const pub = minimalPublishedQuizTest("list-desk-scroll");
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/api/tests") || u.includes("/assets/index.json")) {
+      return new Response(
+        JSON.stringify({
+          tests: [
+            {
+              id: pub.id,
+              title: pub.title,
+              path: pub.path,
+              thumbnail: pub.thumbnail,
+              tags: pub.tags,
+              createdAt: pub.createdAt,
+              updatedAt: pub.updatedAt,
+              is_published: true,
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    return new Response("{}", { status: 404 });
+  };
+  const listUrl = new URL("../../public/scripts/testlist.js", import.meta.url);
+  listUrl.searchParams.set(
+    "v",
+    `${stableImportV(import.meta.url)}-desk-scroll-margin`,
+  );
+  await import(listUrl.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 55));
+  const headerScroll = document.getElementById("headerScroll");
+  const headerEl = document.getElementById("header");
+  assert.ok(headerScroll && headerEl);
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    get: () => 500,
+  });
+  window.dispatchEvent(new Event("scroll"));
+  assert.equal(headerScroll.style.marginBottom, "");
+  assert.ok(headerEl.classList.contains("fixed-header"));
+});

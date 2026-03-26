@@ -711,3 +711,132 @@ test("main.js: protocol-relative thumbnail flows through assetUrl", async () => 
     "//cdn.example.com/t.png",
   );
 });
+
+test("main.js: scroll add/remove classes when header offsetTop is zero", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  const hdr = document.getElementById("header");
+  assert.ok(hdr);
+  Object.defineProperty(hdr, "offsetTop", {
+    configurable: true,
+    enumerable: true,
+    get: () => 0,
+  });
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ tests: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-scroll-top-zero`);
+  await import(u.href);
+  const header = document.getElementById("header");
+  assert.ok(header);
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    get: () => 0,
+  });
+  window.dispatchEvent(new Event("scroll"));
+  assert.ok(!header.classList.contains("fixed-header"));
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    get: () => 1,
+  });
+  window.dispatchEvent(new Event("scroll"));
+  assert.ok(header.classList.contains("fixed-header"));
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    get: () => 0,
+  });
+  window.dispatchEvent(new Event("scroll"));
+  assert.ok(!header.classList.contains("fixed-header"));
+});
+
+test("main.js: uppercase HTTPS thumbnail uses assetUrl regex in resolveThumbnailPath", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [
+          {
+            id: "uphttps",
+            title: "UpHttps",
+            thumbnail: "HTTPS://CDN.EXAMPLE/T.PNG",
+            tags: ["t"],
+            path: "up/p.json",
+            updatedAt: "2026-01-01",
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-upper-https-thumb`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+  assert.ok(document.body.textContent?.includes("UpHttps"));
+});
+
+test("main.js: fetch JSON with non-array tests renders no cards", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ tests: "not-array" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-tests-not-array`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+  assert.equal(document.querySelectorAll(".NewTestShell").length, 0);
+});
+
+test("main.js: getTestIndex non-array tests yields no cards", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  window.getTestIndex = async () => ({ tests: 123 });
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-idx-tests-num`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 40));
+  assert.equal(document.querySelectorAll(".NewTestShell").length, 0);
+});
+
+test("main.js: window.assetResizeUrl and window.assetUrl both used for relative thumb", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.body.innerHTML = MAIN_PAGE_HTML;
+  window.assetUrl = (p) => `AU:${p}`;
+  let resizeSeen = false;
+  window.assetResizeUrl = (path, opts) => {
+    resizeSeen = true;
+    return `AR:${path}:${opts.width}`;
+  };
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        tests: [
+          {
+            id: "both",
+            title: "BothAUAR",
+            thumbnail: "assets/both/x.png",
+            tags: [],
+            path: "both/p.json",
+            updatedAt: "2026-01-01",
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  const u = new URL("../../public/scripts/main.js", import.meta.url);
+  u.searchParams.set("v", `${stableImportV(import.meta.url)}-both-au-ar`);
+  await import(u.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+  assert.equal(resizeSeen, true);
+  assert.ok(document.body.textContent?.includes("BothAUAR"));
+});
