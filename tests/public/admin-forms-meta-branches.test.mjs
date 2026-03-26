@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { ADMIN_MINIMAL_HTML } from "./fixtures-admin-html.mjs";
 import { createBrowserEnv } from "./setup-happy-dom.mjs";
@@ -8,7 +9,7 @@ test("admin forms: meta change on non-INPUT skips image upload handler", async (
   createBrowserEnv();
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"
@@ -56,7 +57,7 @@ test("admin forms: meta change on file input with no file skips upload", async (
   createBrowserEnv();
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"

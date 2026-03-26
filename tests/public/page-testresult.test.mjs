@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { TESTRESULT_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
@@ -24,7 +25,7 @@ test("testresult.js clamps percent query params to 0–100", async () => {
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -45,7 +46,7 @@ test("testresult.js renders title when result image path is empty", async () => 
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -68,7 +69,7 @@ test("testresult.js renders from cache + query params", async () => {
 
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
 
@@ -90,7 +91,7 @@ test("testresult.js shows error when API fetch fails", async () => {
 
   globalThis.fetch = async () => new Response("", { status: 500 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
 
@@ -118,7 +119,7 @@ test("testresult.js shows error when API body is not valid JSON", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -153,7 +154,7 @@ test("testresult.js share uses clipboard when navigator.share is absent", async 
   });
   globalThis.alert = () => {};
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
 
@@ -181,7 +182,7 @@ test("testresult.js share uses navigator.share when available", async () => {
     shared = data;
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
 
@@ -205,7 +206,7 @@ test("testresult.js renders when applyAssetAttributes is unavailable", async () 
 
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.applyAssetAttributes;
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
@@ -235,7 +236,7 @@ test("testresult.js skips corrupt sessionStorage JSON and loads from API", async
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -271,7 +272,7 @@ test("testresult.js still renders when sessionStorage.setItem throws", async () 
   };
 
   try {
-    await import("../../public/scripts/config.js");
+    installMbtiConfig(window, document);
     await import(testresultImportHref());
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 80));
@@ -289,7 +290,7 @@ test("testresult.js shows error when testId query is missing", async () => {
   });
   document.body.innerHTML = TESTRESULT_PAGE_HTML;
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -307,7 +308,7 @@ test("testresult.js shows error when result query is missing", async () => {
   });
   document.body.innerHTML = TESTRESULT_PAGE_HTML;
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -338,7 +339,7 @@ test("testresult.js Restart navigates to testquiz with testId", async () => {
     },
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -366,7 +367,7 @@ test("testresult.js share title uses MBTI 결과 when test title is empty", asyn
     shared = data;
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -392,7 +393,7 @@ test("testresult.js preloadCriticalImage uses raw href when assetUrl and resize 
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.assetUrl;
   delete window.assetResizeUrl;
   delete window.parseResizeOptions;
@@ -416,7 +417,7 @@ test("testresult.js preloadCriticalImage swallows head.appendChild errors", asyn
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   const origAppend = document.head.appendChild.bind(document.head);
   document.head.appendChild = function (node) {
     if (node && node.getAttribute && node.getAttribute("data-preload-key")) {
@@ -462,7 +463,7 @@ test("testresult.js renderError skips missing thumbnail img element", async () =
 
   globalThis.fetch = async () => new Response("", { status: 500 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -483,7 +484,7 @@ test("testresult.js preloadCriticalImage uses assetUrl when parseResizeOptions i
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.parseResizeOptions;
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
@@ -518,7 +519,7 @@ test("testresult.js renderAxisBreakdown appends when ResultBtnShell is nested", 
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 55));
@@ -546,7 +547,7 @@ test("testresult.js invokes applyAssetAttributes on result thumbnail", async () 
     if (el?.getAttribute?.("data-asset-src")) applyCalls += 1;
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 45));

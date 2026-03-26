@@ -3,6 +3,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { TESTINTRO_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
@@ -30,7 +31,7 @@ test("testintro.js stable URL: renders title from API detail", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(
     new URL("../../public/scripts/testintro.js", import.meta.url).href
   );
@@ -72,7 +73,7 @@ test("testintro.js stable URL: mobile scroll adds Sticky header margin", async (
     dispatchEvent: () => false,
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   const introScrollUrl = new URL(
     "../../public/scripts/testintro.js",
     import.meta.url,
@@ -130,7 +131,7 @@ test("testintro.js stable URL: API non-OK falls back to getTestIndex + assetUrl 
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   window.getTestIndex = async () => ({
     tests: [
       {

@@ -23,7 +23,7 @@
     "seed:generate": "node scripts/generate_d1_seed.cjs > seed/d1_seed_from_assets.sql",
     "format": "prettier --write \"./**/*.{ts,tsx,js,jsx,json,css,md,mdx}\"",
     "test": "node --test --experimental-strip-types",
-    "test:coverage": "node --test --experimental-test-coverage --experimental-strip-types --test-coverage-include='worker/**/*.ts' --test-coverage-include='public/scripts/**/*.js' --test-coverage-exclude='**/node_modules/**' tests/**/*.mjs tests/**/**/*.mjs",
+    "test:coverage": "node --test --experimental-test-coverage --experimental-strip-types --test-coverage-include='worker/**/*.ts' --test-coverage-include='public/scripts/**/*.js' --test-coverage-include='public/scripts/**/*.mjs' --test-coverage-exclude='**/node_modules/**' tests/**/*.mjs tests/**/**/*.mjs",
     "test:e2e": "playwright test --config=e2e/playwright.config.mjs",
     "test:all": "npm test && npm run test:e2e",
     "verify:dreamp": "node scripts/verify-dreamp.mjs"

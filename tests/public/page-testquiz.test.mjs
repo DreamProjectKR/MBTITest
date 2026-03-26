@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { TESTQUIZ_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
@@ -58,7 +59,7 @@ test("testquiz.js answers one question and navigates to result", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
 
@@ -110,7 +111,7 @@ test("testquiz.js falls back to local compute when edge returns empty mbti", asy
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -167,7 +168,7 @@ test("testquiz.js uses edge compute MBTI and percent query params when API succe
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
 
@@ -218,7 +219,7 @@ test("testquiz.js goToResultPage only adds finite percent query keys from edge p
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -262,7 +263,7 @@ test("testquiz.js renderQuestion skips options when TestSelectBtn is absent", as
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 55));
@@ -275,7 +276,7 @@ test("testquiz.js shows error when testId is missing", async () => {
   createBrowserEnv({ url: "http://127.0.0.1:8788/testquiz.html" });
   document.body.innerHTML = TESTQUIZ_PAGE_HTML;
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
 
@@ -311,7 +312,7 @@ test("testquiz.js shows message when question has no answers", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
 
@@ -373,7 +374,7 @@ test("testquiz.js advances through two questions then navigates to result", asyn
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -415,7 +416,7 @@ test("testquiz.js shows error when detail API body is not valid JSON", async () 
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -452,7 +453,7 @@ test("testquiz.js uses sessionStorage cache without fetching detail JSON", async
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -489,7 +490,7 @@ test("testquiz.js still renders when sessionStorage.setItem throws (persist)", a
   };
 
   try {
-    await import("../../public/scripts/config.js");
+    installMbtiConfig(window, document);
     await import(testquizImportHref());
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 50));
@@ -535,7 +536,7 @@ test("testquiz.js falls back to local MBTI when compute response.json rejects", 
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -579,7 +580,7 @@ test("testquiz.js falls back to local compute when edge compute fetch throws", a
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -626,7 +627,7 @@ test("testquiz.js image onerror clears src after fallback", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -679,7 +680,7 @@ test("testquiz.js shuffles with Math.random when global crypto is unavailable", 
   };
 
   try {
-    await import("../../public/scripts/config.js");
+    installMbtiConfig(window, document);
     await import(testquizImportHref());
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 50));
@@ -720,7 +721,7 @@ test("testquiz.js invalid sessionStorage cache JSON triggers fetch of test detai
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -761,7 +762,7 @@ test("testquiz.js uses convention image paths when questionImage is absent", asy
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -809,7 +810,7 @@ test("testquiz.js resolves question image from image alias field", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -834,7 +835,7 @@ test("testquiz.js shows error when detail fetch returns non-OK", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -864,7 +865,7 @@ test("testquiz.js shows error when payload has no questions", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -892,7 +893,7 @@ test("testquiz.js shows error when questions field is not an array", async () =>
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -921,7 +922,7 @@ test("testquiz.js skips first-question preload when buildAssetUrl is missing", a
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   const prev = window.buildAssetUrl;
   try {
     delete window.buildAssetUrl;
@@ -973,7 +974,7 @@ test("testquiz.js resolves question image from questionImg alias field", async (
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -1020,7 +1021,7 @@ test("testquiz.js resolves question image from question_image alias field", asyn
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -1051,7 +1052,7 @@ test("testquiz.js hides QuizFooter while question is shown", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -1094,7 +1095,7 @@ test("testquiz.js falls back to local MBTI when compute body is invalid JSON", a
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -1146,7 +1147,7 @@ test("testquiz.js loads detail when sessionStorage is null", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -1176,7 +1177,7 @@ test("testquiz.js skips hydrate when applyAssetAttributes is absent", async () =
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.applyAssetAttributes;
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
@@ -1216,7 +1217,7 @@ test("testquiz.js clears question img when there is no id and no image fields", 
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testquizImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -1257,7 +1258,7 @@ test("testquiz.js fetches detail when sessionStorage.getItem throws", async () =
   };
 
   try {
-    await import("../../public/scripts/config.js");
+    installMbtiConfig(window, document);
     await import(testquizImportHref());
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 60));
@@ -1305,7 +1306,7 @@ test("testquiz.js still loads when first-question preload appendChild throws", a
   };
 
   try {
-    await import("../../public/scripts/config.js");
+    installMbtiConfig(window, document);
     await import(testquizImportHref());
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 50));

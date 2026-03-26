@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import {
   ADMIN_MINIMAL_HTML,
@@ -49,7 +50,7 @@ test("admin main bootstraps with mocked admin API", async () => {
     return new Response(JSON.stringify({ error: "nf" }), { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   const { initAdmin } = await import("../../public/scripts/admin/main.js");
   await initAdmin();
   dispatchDomContentLoaded(window);
@@ -98,7 +99,7 @@ test("admin main bootstraps when test select element is absent", async () => {
     return new Response(JSON.stringify({ error: "nf" }), { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   const { initAdmin } = await import("../../public/scripts/admin/main.js");
   await initAdmin();
   dispatchDomContentLoaded(window);
@@ -166,7 +167,7 @@ test("admin main: changing test select loads another test", async () => {
     return new Response(JSON.stringify({ error: "nf" }), { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   /** Static URL so `effects.loadTest(event.target.value)` (line 14) maps to the stable module in coverage. */
   const { initAdmin } = await import("../../public/scripts/admin/main.js");
   await initAdmin();
@@ -203,7 +204,7 @@ test("admin main: bootstrap failure shows error toast", async () => {
     throw new Error("bootstrap-net-fail");
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   /** Same module URL as other tests in this file so coverage merges `effects.loadTest` (line 14). */
   const { initAdmin } = await import("../../public/scripts/admin/main.js");
   await initAdmin();

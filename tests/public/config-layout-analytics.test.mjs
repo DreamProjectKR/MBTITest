@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { LAYOUT_PARTIAL_HTML } from "./fixtures-pages.mjs";
 import {
@@ -7,7 +8,7 @@ import {
   dispatchDomContentLoaded,
 } from "./setup-happy-dom.mjs";
 
-/** Unique `?v=` per import so `config.js` IIFE re-runs with each test's `window`. */
+/** Unique `?v=` per import so `layout.js` / `analytics.js` re-run with each test `window`. */
 function scriptHref(relativeToTestFile) {
   const u = new URL(relativeToTestFile, import.meta.url);
   u.searchParams.set("v", `${Date.now()}-${Math.random()}`);
@@ -17,7 +18,7 @@ function scriptHref(relativeToTestFile) {
 test("config.js hydrates globals on localhost", async () => {
   createBrowserEnv({ url: "http://127.0.0.1:8788/" });
   document.documentElement.innerHTML = "<body></body>";
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   assert.equal(typeof window.assetUrl, "function");
   assert.equal(typeof window.assetResizeUrl, "function");
   const local = window.assetResizeUrl("assets/x.png", { width: 100 });

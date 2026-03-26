@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { TESTINTRO_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
@@ -39,7 +40,7 @@ test("testintro.js renders intro from GET /api/tests/:id", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
 
@@ -55,7 +56,7 @@ test("testintro.js shows error when testId is missing", async () => {
 
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
 
@@ -95,7 +96,7 @@ test("testintro.js falls back to index + asset fetch when detail API fails", asy
     });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   window.getTestIndex = async () => ({
     tests: [
       {
@@ -144,7 +145,7 @@ test("testintro.js adds mobile header margin on scroll", async () => {
     dispatchEvent: () => false,
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
 
@@ -197,7 +198,7 @@ test("testintro.js TestShare uses clipboard when navigator.share is absent", asy
   const alerts = [];
   globalThis.alert = (msg) => alerts.push(String(msg));
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
 
@@ -233,7 +234,7 @@ test("testintro.js TestShare uses navigator.share when available", async () => {
     shared = data;
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
 
@@ -272,7 +273,7 @@ test("testintro.js registers service worker when supported", async () => {
     },
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
 
   assert.ok(swCall);
@@ -311,7 +312,7 @@ test("testintro.js Start navigates to testquiz after warm-up", async () => {
     },
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
 
@@ -361,7 +362,7 @@ test("testintro.js Start navigates when detail fails, cache JSON is corrupt, war
     },
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   window.getTestIndex = async () => ({ tests: [] });
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
@@ -387,8 +388,7 @@ test("testintro.js uses fetch for index when getTestIndex is absent", async () =
   });
   document.body.innerHTML = TESTINTRO_PAGE_HTML;
 
-  // config.js runs only once (module cache); each test gets a new Window without
-  // TEST_INDEX_URL / assetUrl. Mirror the bits loadIntroData needs for the fetch fallback.
+  // Install config, then drop getTestIndex so loadIntroData uses fetch(TEST_INDEX_URL).
   window.ASSETS_BASE = "/assets";
   window.API_TESTS_BASE = "/api/tests";
   window.TEST_INDEX_URL = "/api/tests";
@@ -433,7 +433,7 @@ test("testintro.js uses fetch for index when getTestIndex is absent", async () =
     });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.getTestIndex;
   delete globalThis.getTestIndex;
   await import(testintroImportHref());
@@ -480,7 +480,7 @@ test("testintro.js shows error when test.json fetch fails after index match", as
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.getTestIndex;
   delete globalThis.getTestIndex;
   await import(testintroImportHref());
@@ -524,7 +524,7 @@ test("testintro.js schedules runRest with setTimeout when requestIdleCallback ab
   };
 
   try {
-    await import("../../public/scripts/config.js");
+    installMbtiConfig(window, document);
     await import(testintroImportHref());
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 200));
@@ -557,7 +557,7 @@ test("testintro.js renders string description and skips tags when not an array",
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -601,7 +601,7 @@ test("testintro.js renders when sessionStorage.setItem fails during persist", as
   };
 
   try {
-    await import("../../public/scripts/config.js");
+    installMbtiConfig(window, document);
     await import(testintroImportHref());
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 60));
@@ -648,7 +648,7 @@ test("testintro.js loads when IntroBtnShell has no TestShare block", async () =>
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -690,7 +690,7 @@ test("testintro.js loads when IntroBtnShell has no TestStart button", async () =
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -717,7 +717,7 @@ test("testintro.js Start second click returns early while first warm-up is pendi
     return new Response(new Uint8Array([0xd7]), { status: 200 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 80));
@@ -770,7 +770,7 @@ test("testintro.js desktop scroll fixes header without mobile margin", async () 
     dispatchEvent: () => false,
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -815,7 +815,7 @@ test("testintro.js scroll is a no-op when .Head element is missing", async () =>
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -847,7 +847,7 @@ test("testintro.js shows error when API fails and index lacks test id", async ()
     tests: [{ id: "other-row", path: "other/test.json", title: "Other" }],
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testintroImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 80));

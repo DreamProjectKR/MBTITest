@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { MAIN_PAGE_HTML } from "./fixtures-pages.mjs";
 import {
@@ -37,7 +38,7 @@ test("main.js loads index and renders cards from /api/tests", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
 
@@ -66,7 +67,7 @@ test("main.js uses window.getTestIndex when available", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   window.getTestIndex = async () => ({ tests: [sample] });
 
   await import(mainImportHref());
@@ -112,7 +113,7 @@ test("main.js sticky header toggles classes on scroll", async () => {
       headers: { "Content-Type": "application/json" },
     });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
 
   const header = document.getElementById("header");
@@ -155,7 +156,7 @@ test("main.js navigates to testintro when a card is clicked", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
 
   let hrefSnap = "";
@@ -200,7 +201,7 @@ test("main.js assetResizeUrl falls back to assetUrl when window.assetResizeUrl m
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.assetResizeUrl;
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
@@ -274,7 +275,7 @@ test("main.js dedupes same id+path and sorts by updatedAt", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -307,7 +308,7 @@ test("main.js createTestCard handles empty thumbnail", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -342,7 +343,7 @@ test("main.js newtest and toptest cards use different data-asset-srcset widths",
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -379,7 +380,7 @@ test("main.js keeps absolute https thumbnail on card data-asset-src", async () =
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -424,7 +425,7 @@ test("main.js skips rendering when fewer than two NewTestList sections", async (
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -445,7 +446,7 @@ test("main.js uses fetch when getTestIndex is removed", async () => {
     });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.getTestIndex;
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
@@ -477,7 +478,7 @@ test("main.js keeps http (non-https) thumbnail on data-asset-src", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -501,7 +502,7 @@ test("main.js fetchTestsAjax uses window.TEST_INDEX_URL when getTestIndex is abs
     });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.getTestIndex;
   window.TEST_INDEX_URL = "/custom-tests-index";
   await import(mainImportHref());
@@ -542,7 +543,7 @@ test("main.js sorts by createdAt when updatedAt is absent", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -575,7 +576,7 @@ test("main.js card click navigates with empty testId when id is missing", async 
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(mainImportHref());
 
   let hrefSnap = "";
@@ -601,7 +602,7 @@ test("main.js treats getTestIndex tests as empty when not an array", async () =>
 
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   window.getTestIndex = async () => ({ tests: "not-array" });
 
   await import(mainImportHref());

@@ -4,6 +4,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { TESTRESULT_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
@@ -11,7 +12,6 @@ import {
   createBrowserEnv,
   dispatchDomContentLoaded,
 } from "./setup-happy-dom.mjs";
-import { stableImportV } from "./stable-import.mjs";
 
 function testresultHref(v) {
   const u = new URL("../../public/scripts/testresult.js", import.meta.url);
@@ -25,7 +25,7 @@ test("testresult.js static import: missing testId or result shows early error", 
   });
   document.body.innerHTML = TESTRESULT_PAGE_HTML;
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultHref("early-err"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -42,7 +42,7 @@ test("testresult.js static import: result param without testId shows early error
   });
   document.body.innerHTML = TESTRESULT_PAGE_HTML;
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultHref("result-only"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -71,7 +71,7 @@ test("testresult.js static import: fetch JSON when cache empty", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultHref("fetch-json"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -100,7 +100,7 @@ test("testresult.js static import: invalid sessionStorage JSON falls back to fet
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultHref("bad-cache"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -126,7 +126,7 @@ test("testresult.js static import: fetch 200 with non-JSON body shows error", as
       headers: { "Content-Type": "application/json" },
     });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultHref("fetch-nonjson"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -148,7 +148,7 @@ test("testresult.js static import: cached test without results entry still rende
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultHref("res-miss"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -170,7 +170,7 @@ test("testresult.js static import: invalid pS skips axis breakdown (not all four
   document.body.innerHTML = TESTRESULT_PAGE_HTML;
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultHref("partial-p"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -201,7 +201,7 @@ test("testresult.js static import: axis stats append when ResultBtnShell not dir
 `;
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testresultHref("nested-axis"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -221,12 +221,7 @@ test("testresult.js static import: preload uses assetResizeUrl when config provi
   document.body.innerHTML = TESTRESULT_PAGE_HTML;
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
 
-  const configUrl = new URL("../../public/scripts/config.js", import.meta.url);
-  configUrl.searchParams.set(
-    "v",
-    `${stableImportV(import.meta.url)}-preload-resize`,
-  );
-  await import(configUrl.href);
+  installMbtiConfig(window, document);
   assert.equal(typeof window.parseResizeOptions, "function");
   assert.equal(typeof window.assetResizeUrl, "function");
 
@@ -257,7 +252,7 @@ test("testresult.js static import: preload uses raw path when assetUrl and asset
   document.body.innerHTML = TESTRESULT_PAGE_HTML;
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   const origApply = window.applyAssetAttributes;
   const origResize = window.assetResizeUrl;
   const origAssetUrl = window.assetUrl;
@@ -289,13 +284,15 @@ test("testresult.js static import: hydrateAssetElement calls applyAssetAttribute
   document.body.innerHTML = TESTRESULT_PAGE_HTML;
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
 
+  installMbtiConfig(window, document);
   let applyCalls = 0;
+  const origApply = window.applyAssetAttributes;
   window.applyAssetAttributes = (el) => {
     applyCalls += 1;
     assert.equal(String(el?.tagName || "").toLowerCase(), "img");
+    if (typeof origApply === "function") origApply(el);
   };
 
-  await import("../../public/scripts/config.js");
   await import(testresultHref("hydrate-apply"));
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -312,7 +309,7 @@ test("testresult.js static import: hydrateAssetElement skips when applyAssetAttr
   document.body.innerHTML = TESTRESULT_PAGE_HTML;
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.applyAssetAttributes;
 
   await import(testresultHref("hydrate-no-fn"));
@@ -351,7 +348,7 @@ test("testresult.js static import: persistTestJson ignores sessionStorage setIte
       return new Response("{}", { status: 404 });
     };
 
-    await import("../../public/scripts/config.js");
+    installMbtiConfig(window, document);
     await import(testresultHref("persist-throw"));
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 60));
@@ -384,7 +381,7 @@ test("testresult.js versioned: share uses navigator.share when available", async
   try {
     globalThis.fetch = async () => new Response("{}", { status: 404 });
 
-    await import("../../public/scripts/config.js");
+    installMbtiConfig(window, document);
     await import(testresultHref("share-nav"));
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 40));

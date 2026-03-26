@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { ADMIN_MINIMAL_HTML } from "./fixtures-admin-html.mjs";
 import { createBrowserEnv } from "./setup-happy-dom.mjs";
@@ -8,7 +9,7 @@ test("createAdminEffects loadTest shows toast when fetchTestDetail fails", async
   createBrowserEnv();
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"
@@ -59,7 +60,7 @@ test("createAdminEffects loadTest shows toast when fetchTestDetail fails", async
 test("createAdminEffects refreshImageList skips sync when active test id mismatches", async () => {
   createBrowserEnv();
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"
@@ -107,7 +108,7 @@ test("createAdminEffects refreshImageList skips sync when active test id mismatc
 test("createAdminEffects refreshImageList keeps existing questionImage when list has Q1 file", async () => {
   createBrowserEnv();
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"
@@ -167,7 +168,7 @@ test("createAdminEffects refreshImageList keeps existing questionImage when list
 test("createAdminEffects refreshImageList catch clears image list", async () => {
   createBrowserEnv();
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"
@@ -198,7 +199,7 @@ test("createAdminEffects refreshImageList catch clears image list", async () => 
 test("saveActiveTest validation error sets status and toast", async () => {
   createBrowserEnv();
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"
@@ -240,7 +241,7 @@ test("addQuestion with image file uses uploaded path", async () => {
   createBrowserEnv();
   const { File: DomFile } = globalThis.window;
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"
@@ -319,7 +320,7 @@ test("addQuestion image upload failure shows error toast", async () => {
   createBrowserEnv();
   const { File: DomFile } = globalThis.window;
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"

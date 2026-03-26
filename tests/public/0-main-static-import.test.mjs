@@ -3,6 +3,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { MAIN_PAGE_HTML } from "./fixtures-pages.mjs";
 import {
@@ -48,7 +49,7 @@ test("main.js static import: renders cards and toggles header on scroll", async 
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import("../../public/scripts/main.js");
 
   let hrefSnap = "";
@@ -121,7 +122,7 @@ test("main.js static import: toptest section uses 520 srcset list (not 640)", as
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   const mainUrl = new URL("../../public/scripts/main.js", import.meta.url);
   mainUrl.searchParams.set("v", `${stableImportV(import.meta.url)}-toptest-srcset`);
   await import(mainUrl.href);
@@ -858,7 +859,7 @@ test("main.js: getTestIndex non-array tests yields no cards", async () => {
 test("main.js: getTestIndex rejection logs load failure when config defined getTestIndex", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.body.innerHTML = MAIN_PAGE_HTML;
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   window.getTestIndex = async () => {
     throw new Error("index boom");
   };

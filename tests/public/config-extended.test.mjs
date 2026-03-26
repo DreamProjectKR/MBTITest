@@ -1,23 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import {
   createBrowserEnv,
   dispatchDomContentLoaded,
 } from "./setup-happy-dom.mjs";
 
-/** Unique `?v=` per import so `config.js` IIFE re-runs with each test's `window` (Node ESM cache). */
-function scriptHref(rel) {
-  const u = new URL(rel, import.meta.url);
-  u.searchParams.set("v", `${Date.now()}-${Math.random()}`);
-  return u.href;
-}
-
 test("config: appendVersion falls back when URL() rejects invalid href", async () => {
   createBrowserEnv({ url: "http://127.0.0.1:8788/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const prev = window.assetUrl;
   window.assetUrl = () => "http://%%%";
   document.body.innerHTML =
@@ -32,7 +26,7 @@ test("config: production host uses /cdn-cgi/image for assetResizeUrl", async () 
   createBrowserEnv({ url: "https://example.com/page" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const out = window.assetResizeUrl("images/x.png", {
     width: 400,
     extra: { gravity: "auto" },
@@ -46,7 +40,7 @@ test("config: parseResizeOptions handles pairs and numeric keys", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   assert.deepEqual(window.parseResizeOptions(""), {});
   assert.deepEqual(window.parseResizeOptions("  "), {});
   assert.equal(window.parseResizeOptions("width=120").width, 120);
@@ -69,7 +63,7 @@ test("config: buildAssetUrl merges resize, version, and empty path", async () =>
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   assert.equal(window.buildAssetUrl("", null, "1"), "");
   const withResize = window.buildAssetUrl(
     "assets/a.png",
@@ -86,7 +80,7 @@ test("config: buildAssetUrl keeps existing v query when version param also passe
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const u = window.buildAssetUrl("assets/keep.png?v=first", null, "second");
   assert.ok(u.includes("v=first"));
   assert.ok(!u.includes("v=second"));
@@ -96,7 +90,7 @@ test("config: assetResizeUrl on localhost skips cdn-cgi image", async () => {
   createBrowserEnv({ url: "http://127.0.0.1:8788/page" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const out = window.assetResizeUrl("assets/local.png", {
     width: 640,
     quality: 80,
@@ -114,7 +108,7 @@ test("config: lazy image hydrates without lazy observer when IntersectionObserve
   globalThis.IntersectionObserver = class {};
   delete globalThis.IntersectionObserverEntry;
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     const img = document.createElement("img");
     img.setAttribute("data-asset-src", "assets/images/no-lazy-io.png");
     img.setAttribute("data-asset-lazy", "true");
@@ -150,7 +144,7 @@ test("config: lazy off-screen img hydrates when IntersectionObserver fires", asy
     unobserve() {}
     disconnect() {}
   };
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const img = document.createElement("img");
   img.setAttribute("data-asset-src", "assets/images/lazy.png");
   img.setAttribute("data-asset-lazy", "true");
@@ -178,7 +172,7 @@ test("config: IntersectionObserver constructor failure leaves lazy observer disa
     }
   };
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     assert.equal(typeof window.applyAssetAttributes, "function");
   } finally {
     globalThis.IntersectionObserver = OrigIo;
@@ -189,7 +183,7 @@ test("config: buildAssetUrl falls back when absolute href is invalid for URL()",
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const orig = window.assetUrl;
   window.assetUrl = () => "http://a b.com/assets/x.png";
   try {
@@ -213,7 +207,7 @@ test("config: getTestIndex memoizes and validates JSON", async () => {
       headers: { "Content-Type": "application/json; charset=utf-8" },
     });
   };
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const a = await window.getTestIndex();
   const b = await window.getTestIndex();
   assert.equal(calls, 1);
@@ -228,7 +222,7 @@ test("config: getTestIndex rejects when fetch throws", async () => {
   globalThis.fetch = async () => {
     throw new Error("getTestIndex fetch boom");
   };
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   await assert.rejects(() => window.getTestIndex(), /getTestIndex fetch boom/);
 });
 
@@ -241,7 +235,7 @@ test("config: getTestIndex rejects when JSON body is invalid", async () => {
       status: 200,
       headers: { "Content-Type": "application/json; charset=utf-8" },
     });
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   await assert.rejects(() => window.getTestIndex(), SyntaxError);
 });
 
@@ -250,7 +244,7 @@ test("config: getTestIndex rejects non-ok response", async () => {
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
   globalThis.fetch = async () => new Response("", { status: 502 });
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   await assert.rejects(() => window.getTestIndex(), /502/);
 });
 
@@ -263,7 +257,7 @@ test("config: getTestIndex rejects non-JSON content-type", async () => {
       status: 200,
       headers: { "Content-Type": "text/html" },
     });
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   await assert.rejects(() => window.getTestIndex(), /JSON/);
 });
 
@@ -276,7 +270,7 @@ test("config: getTestIndex HTML response hint mentions Worker / static page", as
       status: 200,
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   await assert.rejects(
     () => window.getTestIndex(),
     /Worker가 아닌 정적 페이지/,
@@ -292,7 +286,7 @@ test("config: getTestIndex non-JSON non-HTML hint includes content-type", async 
       status: 200,
       headers: { "Content-Type": "text/plain" },
     });
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   await assert.rejects(
     () => window.getTestIndex(),
     /content-type: text\/plain/,
@@ -303,7 +297,7 @@ test("config: parseResizeOptions ignores non-finite width and minWidth", async (
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   assert.deepEqual(window.parseResizeOptions("width=nan"), {});
   assert.deepEqual(window.parseResizeOptions("minWidth=0"), {});
 });
@@ -312,7 +306,7 @@ test("config: parseResizeOptions quality keeps string when not finite", async ()
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   assert.equal(window.parseResizeOptions("quality=auto").quality, "auto");
 });
 
@@ -327,7 +321,7 @@ test("config: MutationObserver constructor failure uses fallback hydration", asy
     }
   };
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     assert.equal(typeof window.applyAssetAttributes, "function");
   } finally {
     globalThis.MutationObserver = Orig;
@@ -355,7 +349,7 @@ test("config: MutationObserver failure + readyState complete hydrates without DC
   });
 
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     await new Promise((r) => setTimeout(r, 20));
     const el = document.getElementById("mo-complete-fallback");
     assert.ok(
@@ -371,7 +365,7 @@ test("config: sets CSS custom properties on documentElement", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const style = document.documentElement.style;
   assert.ok(style.getPropertyValue("--ASSETS_BASE").length > 0);
   assert.ok(style.getPropertyValue("--asset-header-bg").includes("url("));
@@ -381,7 +375,7 @@ test("config: buildAssetUrl omits v param when version is empty string", async (
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const u = window.buildAssetUrl("assets/nov.png", "width=100", "");
   assert.ok(!/[?&]v=/.test(u), String(u));
 });
@@ -394,7 +388,7 @@ test("config: computeMeasuredWidthPx uses devicePixelRatio when set", async () =
     configurable: true,
     value: 2,
   });
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const img = document.createElement("img");
   img.setAttribute("data-asset-src", "assets/images/dpr.png");
   img.setAttribute("data-asset-resize", "width=200,minWidth=100,maxWidth=800");
@@ -411,7 +405,7 @@ test("config: trims trailing slashes on window.ASSETS_BASE", async () => {
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
   window.ASSETS_BASE = "/my-assets///";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   assert.equal(window.ASSETS_BASE, "/my-assets");
 });
 
@@ -436,7 +430,7 @@ test("config: MutationObserver failure + readyState loading hydrates on DOMConte
   });
 
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     dispatchDomContentLoaded(window);
     await new Promise((r) => setTimeout(r, 20));
     const el = document.getElementById("mo-dcl");
@@ -467,7 +461,7 @@ test("config: lazy observe throws — falls through to immediate hydration", asy
     disconnect() {}
   };
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     const img = document.createElement("img");
     img.setAttribute("data-asset-src", "assets/images/lazy-obs-fail.png");
     img.setAttribute("data-asset-lazy", "true");
@@ -495,12 +489,12 @@ test("config: prefetchImageAsset uses requestIdleCallback when available", async
     cb({ didTimeout: false });
   };
   const loads = [];
-  globalThis.Image = class MockImage {
+  window.Image = class MockImage {
     set src(_v) {
       loads.push("set");
     }
   };
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   window.prefetchImageAsset("assets/p.png", null, "1");
   assert.ok(idleRan);
   assert.equal(loads.length, 1);
@@ -511,25 +505,25 @@ test("config: prefetchImageAsset falls back to setTimeout without rIC", async ()
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
   const prevRic = globalThis.requestIdleCallback;
-  const prevSt = globalThis.setTimeout;
+  const prevSt = window.setTimeout;
   delete globalThis.requestIdleCallback;
-  globalThis.setTimeout = (fn, _ms) => {
+  window.setTimeout = (fn, _ms) => {
     fn();
     return 0;
   };
   const loads = [];
-  globalThis.Image = class MockImage {
+  window.Image = class MockImage {
     set src(_v) {
       loads.push("set");
     }
   };
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     window.prefetchImageAsset("assets/q.png", null, null);
     assert.equal(loads.length, 1);
   } finally {
     globalThis.requestIdleCallback = prevRic;
-    globalThis.setTimeout = prevSt;
+    window.setTimeout = prevSt;
   }
 });
 
@@ -537,12 +531,12 @@ test("config: loadImageAsset resolves true on load", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  globalThis.Image = class {
+  window.Image = class {
     set src(_v) {
       queueMicrotask(() => this.onload && this.onload());
     }
   };
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const ok = await window.loadImageAsset("assets/ok.png", null, "v");
   assert.equal(ok, true);
 });
@@ -551,12 +545,12 @@ test("config: loadImageAsset resolves false on error", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  globalThis.Image = class {
+  window.Image = class {
     set src(_v) {
       queueMicrotask(() => this.onerror && this.onerror());
     }
   };
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const ok = await window.loadImageAsset("assets/bad.png", "width=10", null);
   assert.equal(ok, false);
 });
@@ -565,7 +559,7 @@ test("config: loadImageAsset empty path resolves false", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const ok = await window.loadImageAsset("  ", null, null);
   assert.equal(ok, false);
 });
@@ -574,18 +568,18 @@ test("config: loadImageAsset resolves false when Image constructor throws", asyn
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  const Orig = globalThis.Image;
-  globalThis.Image = class {
+  const Orig = window.Image;
+  window.Image = class {
     constructor() {
       throw new Error("no Image");
     }
   };
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     const ok = await window.loadImageAsset("assets/throws.png", null, "1");
     assert.equal(ok, false);
   } finally {
-    globalThis.Image = Orig;
+    window.Image = Orig;
   }
 });
 
@@ -593,7 +587,7 @@ test("config: applyAssetAttributes skips data-asset-bg when backgroundImage alre
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const div = document.createElement("div");
   div.style.backgroundImage = 'url("https://example.com/keep-this.png")';
   div.setAttribute("data-asset-bg", "assets/other-bg.png");
@@ -613,7 +607,7 @@ test("config: applyAssetAttributes sets img src and link href on production", as
     <a id="l" data-asset-href="assets/doc.pdf" data-asset-version="2"></a>
     <div id="g" data-asset-bg="assets/bg.png" data-asset-resize="width=1200"></div>
   `;
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const img = document.getElementById("i");
   assert.ok(String(img.getAttribute("src") || "").includes("/cdn-cgi/image/"));
   const link = document.getElementById("l");
@@ -635,7 +629,7 @@ test("config: applyAssetAttributes builds srcset when data-asset-srcset is set",
       data-asset-version="3"
     />
   `;
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const srcset = document.getElementById("s").getAttribute("srcset");
   assert.ok(srcset && srcset.includes("400w"));
   assert.ok(srcset.includes("800w"));
@@ -645,7 +639,7 @@ test("config: invalid data-asset-srcset widths skip srcset but still set src", a
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const img = document.createElement("img");
   img.setAttribute("data-asset-src", "assets/images/no-srcset.png");
   img.setAttribute("data-asset-srcset", "foo,bar,12zz");
@@ -669,7 +663,7 @@ test("config: lazy off-screen hydrates when IntersectionObserver.observe throws"
     disconnect() {}
   };
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     const img = document.createElement("img");
     img.setAttribute("data-asset-src", "assets/images/observe-throw.png");
     img.setAttribute("data-asset-lazy", "true");
@@ -707,7 +701,7 @@ test("config: lazy IO callback swallows unobserve errors", async () => {
     disconnect() {}
   };
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     const img = document.createElement("img");
     img.setAttribute("data-asset-src", "assets/images/unobserve-throw.png");
     img.setAttribute("data-asset-lazy", "true");
@@ -731,7 +725,7 @@ test("config: applyAssetAttributes swallows addEventListener throw on resize fal
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const img = document.createElement("img");
   img.setAttribute("data-asset-src", "assets/images/addevent-fail.png");
   img.setAttribute("data-asset-resize", "width=640");
@@ -753,7 +747,7 @@ test("config: resize load error retries once then falls back to raw /assets", as
       data-asset-resize="width=640,quality=80"
     />
   `;
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const img = document.getElementById("errimg");
   img.dispatchEvent(new Event("error"));
   assert.equal(img.getAttribute("data-asset-resize-retried"), "1");
@@ -768,7 +762,7 @@ test("config: prefetchImageAsset swallows errors when assetUrl throws", async ()
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const prev = window.assetUrl;
   window.assetUrl = () => {
     throw new Error("prefetch-assetUrl-boom");
@@ -786,7 +780,7 @@ test("config: MutationObserver hydrates dynamically appended data-asset-src", as
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const img = document.createElement("img");
   img.setAttribute("data-asset-src", "assets/images/mo-append.png");
   document.body.appendChild(img);
@@ -805,7 +799,7 @@ test("config: auto-width retries measure when layout width is zero", async () =>
     return 0;
   };
   try {
-    await import(scriptHref("../../public/scripts/config.js"));
+    installMbtiConfig(window, document);
     const img = document.createElement("img");
     img.id = "auto";
     img.setAttribute("data-asset-src", "assets/images/auto.png");
@@ -826,7 +820,7 @@ test("config: parseResizeOptions ignores unknown keys in pairs", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   assert.deepEqual(window.parseResizeOptions("width=10,unknownKey=x"), {
     width: 10,
   });
@@ -837,7 +831,7 @@ test("config: buildAssetUrl returns empty when path is whitespace only", async (
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   assert.equal(window.buildAssetUrl("  \t\n", null, "v"), "");
 });
 
@@ -846,7 +840,7 @@ test("config: prefetchImageAsset returns early for falsy path", async () => {
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
   let images = 0;
-  globalThis.Image = class {
+  window.Image = class {
     set src(_v) {
       images += 1;
     }
@@ -854,7 +848,7 @@ test("config: prefetchImageAsset returns early for falsy path", async () => {
   globalThis.requestIdleCallback = (cb) => {
     cb({ didTimeout: false });
   };
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   window.prefetchImageAsset("", null, null);
   window.prefetchImageAsset(undefined, null, null);
   await new Promise((r) => setTimeout(r, 5));
@@ -865,7 +859,7 @@ test("config: applyAssetAttributes sets sizes from data-asset-sizes on productio
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const img = document.createElement("img");
   img.setAttribute("data-asset-src", "assets/images/sizes-attr.png");
   img.setAttribute("data-asset-srcset", "320,640");
@@ -882,7 +876,7 @@ test("config: assetResizeUrl builds cdn-cgi path for absolute https asset URL", 
   createBrowserEnv({ url: "https://example.com/page" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  await import(scriptHref("../../public/scripts/config.js"));
+  installMbtiConfig(window, document);
   const out = window.assetResizeUrl("https://cdn.example.net/remote.png", {
     width: 200,
     quality: 80,

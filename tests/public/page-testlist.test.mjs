@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { TESTLIST_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
@@ -45,7 +46,7 @@ test("testlist.js loads published tests from /assets/index.json", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
 
@@ -66,7 +67,7 @@ test("testlist.js uses window.getTestIndex when available", async () => {
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   window.getTestIndex = async () => ({
     tests: [
       {
@@ -122,7 +123,7 @@ test("testlist.js filters out unpublished rows", async () => {
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 40));
@@ -157,7 +158,7 @@ test("testlist.js adds mobile header margin when scroll past header", async () =
     dispatchEvent: () => false,
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
 
   const header = document.getElementById("header");
@@ -190,7 +191,7 @@ test("testlist.js uses fetch when getTestIndex is removed", async () => {
     });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.getTestIndex;
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
@@ -211,7 +212,7 @@ test("testlist.js console.error when index fetch is not ok", async () => {
 
   globalThis.fetch = async () => new Response("", { status: 502 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.getTestIndex;
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
@@ -231,7 +232,7 @@ test("testlist.js .test1 sets location to testintro.html", async () => {
       headers: { "Content-Type": "application/json" },
     });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
 
   let hrefSnap = "";
@@ -295,7 +296,7 @@ test("testlist.js renders multiple rows and dedupes duplicate id+path", async ()
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
@@ -329,7 +330,7 @@ test("testlist.js card click navigates to testintro with testId", async () => {
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
 
   let hrefSnap = "";
@@ -373,7 +374,7 @@ test("testlist.js desktop scroll fixes header without mobile margin", async () =
     dispatchEvent: () => false,
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
 
   const header = document.getElementById("header");
@@ -403,7 +404,7 @@ test("testlist.js treats getTestIndex tests as empty when not an array", async (
   globalThis.fetch = async () =>
     new Response("should-not-run", { status: 500 });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   window.getTestIndex = async () => ({ tests: null });
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
@@ -438,7 +439,7 @@ test("testlist.js first card uses eager loading and later cards use lazy", async
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -458,7 +459,7 @@ test("testlist.js console.error when getTestIndex rejects", async () => {
   const prev = console.error;
   console.error = (...a) => logs.push(a.join(" "));
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   window.getTestIndex = async () => {
     throw new Error("index boom");
   };
@@ -484,7 +485,7 @@ test("testlist.js console.error when index response is not JSON", async () => {
       headers: { "Content-Type": "application/json" },
     });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.getTestIndex;
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
@@ -516,7 +517,7 @@ test("testlist.js renders when tags field is not an array", async () => {
       headers: { "Content-Type": "application/json" },
     });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -537,7 +538,7 @@ test("testlist.js fetchTestIndex uses window.TEST_INDEX_URL when getTestIndex is
     });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   delete window.getTestIndex;
   window.TEST_INDEX_URL = "/custom-testlist-index";
   await import(testlistImportHref());
@@ -576,7 +577,7 @@ test("testlist.js sorts by createdAt when updatedAt is absent", async () => {
       headers: { "Content-Type": "application/json" },
     });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
@@ -605,7 +606,7 @@ test("testlist.js card without thumbnail omits data-asset-src on img", async () 
       headers: { "Content-Type": "application/json" },
     });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(testlistImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 45));

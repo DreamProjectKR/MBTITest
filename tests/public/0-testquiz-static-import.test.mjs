@@ -4,6 +4,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { TESTQUIZ_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
@@ -49,7 +50,7 @@ test("testquiz.js stable URL: ensureProgressFill creates .ProgressFill", async (
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(
     new URL("../../public/scripts/testquiz.js", import.meta.url).href
   );

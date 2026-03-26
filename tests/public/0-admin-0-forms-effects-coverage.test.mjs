@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { ADMIN_MINIMAL_HTML } from "./fixtures-admin-html.mjs";
 import { sampleAdminFullTest } from "./sample-test-json.mjs";
@@ -89,7 +90,7 @@ test("admin forms + createAdminEffects branch coverage (single DOM snapshot)", a
   const { DataTransfer, File: DomFile } = globalThis.window;
   document.body.innerHTML = ADMIN_MINIMAL_HTML;
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
 
   const { adminReducer, initialAdminState } = await import(
     "../../public/scripts/admin/reducer.js"

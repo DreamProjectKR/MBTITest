@@ -4,6 +4,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
+import { installMbtiConfig } from "./config-install.mjs";
 
 import { TESTLIST_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
@@ -53,7 +54,7 @@ test("testlist.js static import: list fetch, mobile scroll margin, and test1 lin
     dispatchEvent: () => false,
   });
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   await import(
     new URL("../../public/scripts/testlist.js", import.meta.url).href
   );
@@ -121,7 +122,7 @@ test("testlist.js static import: dynamic card click navigates with testId", asyn
     return new Response("{}", { status: 404 });
   };
 
-  await import("../../public/scripts/config.js");
+  installMbtiConfig(window, document);
   const listUrl = new URL("../../public/scripts/testlist.js", import.meta.url);
   listUrl.searchParams.set("v", `${stableImportV(import.meta.url)}-card-nav`);
   await import(listUrl.href);
@@ -140,6 +141,49 @@ test("testlist.js static import: dynamic card click navigates with testId", asyn
   document.querySelector(".NewTestList .NewTestShell")?.click();
   assert.ok(hrefSnap.includes("testintro.html"));
   assert.ok(hrefSnap.includes(encodeURIComponent(pub.id)));
+});
+
+test("testlist.js static import: published row with empty thumbnail skips data-asset-src", async () => {
+  createBrowserEnv();
+  document.body.innerHTML = TESTLIST_PAGE_HTML;
+
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (u.includes("/api/tests") || u.includes("/assets/index.json")) {
+      return new Response(
+        JSON.stringify({
+          tests: [
+            {
+              id: "list-no-thumb",
+              title: "No Thumbnail Row",
+              path: "list-no-thumb/test.json",
+              thumbnail: "",
+              tags: ["a", "b", "c"],
+              createdAt: "2025-01-01",
+              updatedAt: "2026-02-02",
+              is_published: true,
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  installMbtiConfig(window, document);
+  const listUrl = new URL("../../public/scripts/testlist.js", import.meta.url);
+  listUrl.searchParams.set("v", `${stableImportV(import.meta.url)}-no-thumb`);
+  await import(listUrl.href);
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 65));
+
+  const img = document.querySelector(".NewTestList img");
+  assert.ok(img);
+  assert.equal(img.getAttribute("data-asset-src"), null);
+  assert.ok(String(img.alt || "").includes("No Thumbnail"));
+  const tags = document.querySelectorAll(".NewTestHashTag .HashTag");
+  assert.equal(tags.length, 3);
 });
 
 test("testlist.js fetch path without config and lazy loading on second card", async () => {
