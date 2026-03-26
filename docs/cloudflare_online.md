@@ -21,6 +21,10 @@ MBTI ZOO 프로젝트에서 사용하는 Cloudflare 서비스의 **무료(Free)*
 - **Rocket Loader**: OFF (Speed > Optimization). `type="module"`/`defer` 스크립트 사용 시 불필요.
 - **Early Hints**: `_headers`의 `Link`로 preconnect/preload 설정 시 Pages가 103 Early Hints로 활용.
 
+**CSP (Content-Security-Policy) 콘솔 경고**
+
+대시보드·Transform Rules 등에서 `Content-Security-Policy-Report-Only`에 `script-src 'none'` 또는 `connect-src 'none'`이 걸리면, 브라우저가 **위반만 로그**하고(Report-Only) 차단은 하지 않을 수 있습니다. 이 레포의 `_headers`가 아니라 **계정/도메인 쪽 정책**인 경우가 많습니다. 소음을 줄이려면 해당 Report-Only 규칙을 끄거나, `script-src 'self'`, `connect-src 'self'` 등 실제 사이트에 맞게 조정하세요. `script-src 'none'`을 **강제(enforce)** 하면 동일 출처 스크립트도 막힙니다.
+
 ---
 
 ## 2. Workers / Pages Functions
