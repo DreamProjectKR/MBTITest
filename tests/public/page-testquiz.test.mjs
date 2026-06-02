@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { installMbtiConfig } from "./config-install.mjs";
 
+import { installMbtiConfig } from "./config-install.mjs";
 import { TESTQUIZ_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
 import {
@@ -129,7 +129,10 @@ test("testquiz.js falls back to local compute when edge returns empty mbti", asy
       return "";
     }
   })();
-  assert.ok(result === "ESTJ" || result === "ISTJ", `expected ESTJ|ISTJ, got ${result}`);
+  assert.ok(
+    result === "ESTJ" || result === "ISTJ",
+    `expected ESTJ|ISTJ, got ${result}`,
+  );
 });
 
 test("testquiz.js uses edge compute MBTI and percent query params when API succeeds", async () => {
@@ -269,7 +272,9 @@ test("testquiz.js renderQuestion skips options when TestSelectBtn is absent", as
   await new Promise((r) => setTimeout(r, 55));
 
   assert.equal(document.querySelector(".TestSelectBtn"), null);
-  assert.ok(document.querySelector(".TestImg img")?.getAttribute("data-asset-src"));
+  assert.ok(
+    document.querySelector(".TestImg img")?.getAttribute("data-asset-src"),
+  );
 });
 
 test("testquiz.js shows error when testId is missing", async () => {
@@ -398,6 +403,92 @@ test("testquiz.js advances through two questions then navigates to result", asyn
   assert.ok(hrefSnap.includes("result="));
 });
 
+test("testquiz.js ignores rapid double-clicks on the same choice", async () => {
+  const t = minimalPublishedQuizTest("quiz-double-tap");
+  t.questions = [
+    {
+      id: "q1",
+      label: "Q1",
+      questionImage: `assets/${t.id}/images/q1.png`,
+      answers: [
+        { mbtiAxis: "EI", direction: "E", label: "E" },
+        { mbtiAxis: "EI", direction: "I", label: "I" },
+      ],
+    },
+    {
+      id: "q2",
+      label: "Q2",
+      questionImage: `assets/${t.id}/images/q2.png`,
+      answers: [
+        { mbtiAxis: "SN", direction: "S", label: "S" },
+        { mbtiAxis: "SN", direction: "N", label: "N" },
+      ],
+    },
+  ];
+
+  createBrowserEnv({
+    url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
+  });
+  document.body.innerHTML = TESTQUIZ_PAGE_HTML;
+
+  let hrefSnap = "";
+  Object.defineProperty(window.location, "href", {
+    configurable: true,
+    get: () => String(window.location),
+    set: (v) => {
+      hrefSnap = String(v);
+    },
+  });
+
+  let computeCalls = 0;
+  globalThis.fetch = async (url) => {
+    const u = String(url);
+    if (isTestDetailRequest(u, t.id)) {
+      return new Response(JSON.stringify(t), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (isComputeRequest(u, t.id)) {
+      computeCalls += 1;
+      return new Response("{}", { status: 500 });
+    }
+    return new Response("{}", { status: 404 });
+  };
+
+  installMbtiConfig(window, document);
+  await import(testquizImportHref());
+  dispatchDomContentLoaded(window);
+  await new Promise((r) => setTimeout(r, 50));
+
+  const firstBtn = document.querySelector(".TestSelectBtn button");
+  assert.ok(firstBtn);
+  firstBtn.click();
+  firstBtn.click();
+
+  await new Promise((r) => setTimeout(r, 0));
+  await new Promise((r) => setTimeout(r, 0));
+
+  assert.ok(
+    !hrefSnap.includes("testresult.html"),
+    "double-tap on first question must not skip to result",
+  );
+  assert.equal(computeCalls, 0, "double-tap must not finish the quiz early");
+  assert.equal(
+    document.querySelectorAll(".TestSelectBtn button").length,
+    2,
+    "expected two choices for the next question",
+  );
+
+  const secondQuestionBtn = document.querySelector(".TestSelectBtn button");
+  secondQuestionBtn.click();
+  secondQuestionBtn.click();
+  await new Promise((r) => setTimeout(r, 50));
+
+  assert.ok(hrefSnap.includes("testresult.html"));
+  assert.equal(computeCalls, 1, "result compute should run once");
+});
+
 test("testquiz.js shows error when detail API body is not valid JSON", async () => {
   const t = minimalPublishedQuizTest("quiz-bad-json-body");
   createBrowserEnv({
@@ -431,10 +522,7 @@ test("testquiz.js uses sessionStorage cache without fetching detail JSON", async
   createBrowserEnv({
     url: `http://127.0.0.1:8788/testquiz.html?testId=${encodeURIComponent(t.id)}`,
   });
-  window.sessionStorage.setItem(
-    `mbtitest:testdata:${t.id}`,
-    JSON.stringify(t),
-  );
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
   document.body.innerHTML = TESTQUIZ_PAGE_HTML;
 
   let detailFetches = 0;
@@ -817,7 +905,10 @@ test("testquiz.js resolves question image from image alias field", async () => {
 
   const img = document.querySelector(".TestImg img");
   assert.ok(img);
-  assert.equal(img.getAttribute("data-asset-src"), `${ip}/from-image-field.png`);
+  assert.equal(
+    img.getAttribute("data-asset-src"),
+    `${ip}/from-image-field.png`,
+  );
 });
 
 test("testquiz.js shows error when detail fetch returns non-OK", async () => {

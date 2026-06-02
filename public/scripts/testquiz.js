@@ -16,6 +16,8 @@ let state = {
   totalQuestions: 0,
   scores: {},
   answers: [],
+  /** True while advancing to the next question or result (blocks double-tap). */
+  isAdvancing: false,
 };
 
 function setQuizState(update) {
@@ -376,6 +378,7 @@ function initializeStateFromTestJson(testJson) {
     currentIndex: 0,
     scores: {},
     answers: [],
+    isAdvancing: false,
   });
 
   injectFirstQuestionPreload();
@@ -435,7 +438,28 @@ function recordScore(answer) {
   });
 }
 
+function disableOptionButtons() {
+  if (!dom.options) return;
+  dom.options.querySelectorAll("button").forEach((btn) => {
+    btn.disabled = true;
+  });
+}
+
+function releaseAnswerAdvanceLock() {
+  const schedule =
+    typeof requestAnimationFrame === "function" ?
+      requestAnimationFrame
+    : (cb) => setTimeout(cb, 0);
+  schedule(() => setQuizState({ isAdvancing: false }));
+}
+
 function handleAnswer(answer) {
+  if (state.isAdvancing) return;
+  if (state.answers.length !== state.currentIndex) return;
+
+  setQuizState({ isAdvancing: true });
+  disableOptionButtons();
+
   setQuizState({ answers: [...state.answers, answer] });
   recordScore(answer);
 
@@ -447,6 +471,7 @@ function handleAnswer(answer) {
 
   setQuizState({ currentIndex: nextIndex });
   renderQuestion();
+  releaseAnswerAdvanceLock();
 }
 
 /** Pure: derive 4-letter MBTI from state.scores (no mutation). */
@@ -529,6 +554,7 @@ async function renderResult() {
   const edgeComputed = await computeMbtiOnEdge();
   const mbti = edgeComputed?.mbti || computeMbti();
   if (!mbti) {
+    setQuizState({ isAdvancing: false });
     renderError("결과를 계산하지 못했습니다.");
     return;
   }
