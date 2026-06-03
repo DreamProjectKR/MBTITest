@@ -847,10 +847,13 @@ test("config: auto-width retries measure when layout width is zero", async () =>
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
   const prevRaf = globalThis.requestAnimationFrame;
-  globalThis.requestAnimationFrame = (cb) => {
+  const prevWinRaf = window.requestAnimationFrame;
+  const syncRaf = (cb) => {
     cb();
     return 0;
   };
+  globalThis.requestAnimationFrame = syncRaf;
+  window.requestAnimationFrame = syncRaf;
   try {
     installMbtiConfig(window, document);
     const img = document.createElement("img");
@@ -863,6 +866,7 @@ test("config: auto-width retries measure when layout width is zero", async () =>
     window.applyAssetAttributes(img);
   } finally {
     globalThis.requestAnimationFrame = prevRaf;
+    window.requestAnimationFrame = prevWinRaf;
   }
   const img = document.getElementById("auto");
   assert.equal(img.getAttribute("data-asset-measure-tries"), "2");

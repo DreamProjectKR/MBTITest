@@ -585,7 +585,7 @@ export function installMbtiConfig(win, doc) {
     win.loadImageAsset = function loadImageAsset(path, resizeRaw, versionRaw) {
       return new Promise((resolve) => {
         try {
-          const p = String(path || "");
+          const p = String(path || "").trim();
           if (!p) return resolve(false);
 
           const href = (function () {
