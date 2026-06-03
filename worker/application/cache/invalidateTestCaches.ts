@@ -5,6 +5,8 @@ import {
   deleteTestDetailCache,
   getTestDetailCacheKey,
 } from "../../infrastructure/repositories/kv/testDetailCacheRepository.ts";
+import { deleteTestIndexCache } from "../../infrastructure/repositories/kv/testIndexCacheRepository.ts";
+import { refreshPublishedTestsIndexSnapshot } from "./refreshPublishedTestsIndexSnapshot.ts";
 
 type CacheContext = Pick<
   PagesContext<MbtiEnv>,
@@ -19,7 +21,10 @@ export function invalidatePublicTestCaches(
   const kv = context.env.MBTI_KV;
   if (kv) {
     context.waitUntil(deleteTestDetailCache(kv, testId));
+    context.waitUntil(deleteTestIndexCache(kv));
   }
+
+  refreshPublishedTestsIndexSnapshot(context);
 
   const cache = getDefaultCache();
   if (!cache) return;

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { installMbtiConfig } from "./config-install.mjs";
 
+import { installMbtiConfig } from "./config-install.mjs";
 import { TESTINTRO_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
 import {
@@ -65,9 +65,9 @@ test("testintro.js shows error when testId is missing", async () => {
   const h2 = document.querySelector(".IntroShellTextBox h2");
   assert.equal(h2?.textContent, "테스트를 불러올 수 없습니다.");
   assert.ok(
-    document.querySelector(".IntroDescription")?.textContent?.includes(
-      "testId",
-    ),
+    document
+      .querySelector(".IntroDescription")
+      ?.textContent?.includes("testId"),
   );
 });
 
@@ -247,11 +247,12 @@ test("testintro.js TestShare uses navigator.share when available", async () => {
   assert.equal(shared.title, t.title);
 });
 
-test("testintro.js registers service worker when supported", async () => {
+test("installMbtiConfig registers service worker on production host", async () => {
   const t = minimalPublishedQuizTest("intro-sw");
   createBrowserEnv({
-    url: `http://127.0.0.1:8788/testintro.html?testId=${encodeURIComponent(t.id)}`,
+    url: `https://dreamp.org/testintro.html?testId=${encodeURIComponent(t.id)}`,
   });
+  window.__MBTI_DISABLE_SERVICE_WORKER__ = false;
   document.body.innerHTML = TESTINTRO_PAGE_HTML;
 
   globalThis.fetch = async (url) => {
@@ -274,7 +275,6 @@ test("testintro.js registers service worker when supported", async () => {
   };
 
   installMbtiConfig(window, document);
-  await import(testintroImportHref());
 
   assert.ok(swCall);
   assert.equal(swCall.url, "/sw.js");
@@ -332,10 +332,7 @@ test("testintro.js Start navigates when detail fails, cache JSON is corrupt, war
   });
   document.body.innerHTML = TESTINTRO_PAGE_HTML;
 
-  window.sessionStorage.setItem(
-    `mbtitest:testdata:${t.id}`,
-    "{not-valid-json",
-  );
+  window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, "{not-valid-json");
 
   globalThis.fetch = async (url) => {
     const u = String(url);
@@ -568,8 +565,7 @@ test("testintro.js renders string description and skips tags when not an array",
       ?.textContent?.includes("단일 줄 소개문"),
   );
   assert.equal(
-    document.querySelectorAll(".IntroShellImg .NewTestHashTag .HashTag")
-      .length,
+    document.querySelectorAll(".IntroShellImg .NewTestHashTag .HashTag").length,
     0,
   );
 });
@@ -653,7 +649,10 @@ test("testintro.js loads when IntroBtnShell has no TestShare block", async () =>
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
 
-  assert.equal(document.querySelector(".IntroShellTextBox h2")?.textContent, t.title);
+  assert.equal(
+    document.querySelector(".IntroShellTextBox h2")?.textContent,
+    t.title,
+  );
   assert.equal(document.querySelector(".TestShare button"), null);
 });
 
@@ -695,7 +694,10 @@ test("testintro.js loads when IntroBtnShell has no TestStart button", async () =
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 60));
 
-  assert.equal(document.querySelector(".IntroShellTextBox h2")?.textContent, t.title);
+  assert.equal(
+    document.querySelector(".IntroShellTextBox h2")?.textContent,
+    t.title,
+  );
   assert.equal(document.querySelector(".TestStart button"), null);
 });
 

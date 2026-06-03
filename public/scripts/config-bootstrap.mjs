@@ -53,8 +53,7 @@ export function installMbtiConfig(win, doc) {
 
     // Local dev (wrangler pages dev): `/cdn-cgi/image` is not reliably available.
     // To keep asset loading consistent, disable resize and just return `/assets/...`.
-    const host =
-      win != null && win.location ? win.location.hostname : "";
+    const host = win != null && win.location ? win.location.hostname : "";
     const isLocalhost = host === "localhost" || host === "127.0.0.1";
     if (isLocalhost) return base;
 
@@ -101,34 +100,82 @@ export function installMbtiConfig(win, doc) {
   const DEFAULT_TEST_INDEX_URL = String(
     API_TESTS_BASE || DEFAULT_API_TESTS_BASE,
   );
+  const DEFAULT_STATIC_TEST_INDEX_URL = "/assets/index.json";
   win.TEST_INDEX_URL = win.TEST_INDEX_URL || DEFAULT_TEST_INDEX_URL;
+  win.STATIC_TEST_INDEX_URL =
+    win.STATIC_TEST_INDEX_URL || DEFAULT_STATIC_TEST_INDEX_URL;
 
-  // index.json을 한 번만 가져오도록 메모이즈.
+  async function fetchTestIndexJson(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(url + " 요청 실패: " + res.status);
+    const contentType = (res.headers.get("content-type") || "").toLowerCase();
+    if (!contentType.includes("application/json")) {
+      const text = await res.text();
+      const head = text.slice(0, 80).replace(/\s+/g, " ");
+      const isHtml = contentType.includes("text/html");
+      const hint =
+        isHtml ?
+          " API 경로(" +
+          url +
+          ")가 Worker가 아닌 정적 페이지로 갔습니다. Cloudflare에서 Worker 라우트(*도메인/api/*, *도메인/assets/*)를 연결했는지 확인하세요."
+        : " (content-type: " + contentType + ', head: "' + head + '")';
+      throw new Error("테스트 목록 응답이 JSON이 아닙니다." + hint);
+    }
+    return res.json();
+  }
+
+  // Memoized index: prefer R2/Pages snapshot, revalidate from API in background.
   win.getTestIndex = (function createGetTestIndex() {
-    let memo = null;
-    return async function getTestIndex() {
-      if (memo) return memo;
-      const url = win.TEST_INDEX_URL;
-      memo = fetch(url).then(async (res) => {
-        if (!res.ok) throw new Error(url + " 요청 실패: " + res.status);
-        const contentType = (
-          res.headers.get("content-type") || ""
-        ).toLowerCase();
-        if (!contentType.includes("application/json")) {
-          const text = await res.text();
-          const head = text.slice(0, 80).replace(/\s+/g, " ");
-          const isHtml = contentType.includes("text/html");
-          const hint =
-            isHtml ?
-              " API 경로(" +
-              url +
-              ")가 Worker가 아닌 정적 페이지로 갔습니다. Cloudflare에서 Worker 라우트(*도메인/api/*, *도메인/assets/*)를 연결했는지 확인하세요."
-            : " (content-type: " + contentType + ', head: "' + head + '")';
-          throw new Error("테스트 목록 응답이 JSON이 아닙니다." + hint);
+    let loadPromise = null;
+    let resolved = null;
+    let revalidateScheduled = false;
+
+    function notifyTestIndexUpdated(data) {
+      try {
+        win.dispatchEvent(
+          new CustomEvent("mbti:test-index-updated", { detail: data }),
+        );
+      } catch (e) {
+        // CustomEvent unsupported in very old browsers.
+      }
+    }
+
+    function scheduleTestIndexRevalidate() {
+      if (revalidateScheduled) return;
+      revalidateScheduled = true;
+      const apiUrl = win.TEST_INDEX_URL;
+      void fetchTestIndexJson(apiUrl)
+        .then((data) => {
+          if (!data || !Array.isArray(data.tests)) return;
+          resolved = data;
+          notifyTestIndexUpdated(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          revalidateScheduled = false;
+        });
+    }
+
+    async function loadTestIndex() {
+      const apiUrl = win.TEST_INDEX_URL;
+      const staticUrl = win.STATIC_TEST_INDEX_URL;
+      try {
+        const staticData = await fetchTestIndexJson(staticUrl);
+        if (staticData && Array.isArray(staticData.tests)) {
+          scheduleTestIndexRevalidate();
+          return staticData;
         }
-        return res.json();
-      });
-      return memo;
+      } catch {
+        // No snapshot yet; fall through to API.
+      }
+      return fetchTestIndexJson(apiUrl);
+    }
+
+    return async function getTestIndex() {
+      if (resolved) return resolved;
+      if (!loadPromise) loadPromise = loadTestIndex();
+      resolved = await loadPromise;
+      return resolved;
     };
   })();
 
@@ -449,8 +496,7 @@ export function installMbtiConfig(win, doc) {
   function nearViewport(el) {
     if (!el || typeof el.getBoundingClientRect !== "function") return true;
     const rect = el.getBoundingClientRect();
-    const h =
-      win.innerHeight || doc.documentElement.clientHeight || 0;
+    const h = win.innerHeight || doc.documentElement.clientHeight || 0;
     return rect.top < h + 250 && rect.bottom > -250;
   }
 
@@ -536,14 +582,10 @@ export function installMbtiConfig(win, doc) {
 
     // Promise-based image loader (used for intro "gate" preloading).
     // This actually creates an Image() so callers can await completion.
-    win.loadImageAsset = function loadImageAsset(
-      path,
-      resizeRaw,
-      versionRaw,
-    ) {
+    win.loadImageAsset = function loadImageAsset(path, resizeRaw, versionRaw) {
       return new Promise((resolve) => {
         try {
-          const p = String(path || "");
+          const p = String(path || "").trim();
           if (!p) return resolve(false);
 
           const href = (function () {
@@ -604,5 +646,20 @@ export function installMbtiConfig(win, doc) {
         applyAssetAttributes(doc);
       }
     }
+  }
+
+  const swHost = win.location?.hostname || "";
+  const swLocal =
+    swHost === "localhost" || swHost === "127.0.0.1" || swHost === "";
+  if (
+    !swLocal &&
+    !win.__MBTI_DISABLE_SERVICE_WORKER__ &&
+    typeof navigator !== "undefined" &&
+    navigator.serviceWorker &&
+    typeof navigator.serviceWorker.register === "function" &&
+    !win.__mbtiServiceWorkerRegistered
+  ) {
+    win.__mbtiServiceWorkerRegistered = true;
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
   }
 }

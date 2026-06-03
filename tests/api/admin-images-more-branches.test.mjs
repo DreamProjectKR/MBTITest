@@ -163,7 +163,8 @@ test("admin images PUT: raw image/gif and image/webp map extensions", async () =
     }),
   );
   assert.equal(resGif.status, 200);
-  assert.match(String(keys[0]), /\.gif$/);
+  const imageKeys = () => keys.filter((k) => String(k).includes("/images/"));
+  assert.match(String(imageKeys()[0]), /\.gif$/);
   const resWebp = await onRequestPut(
     createContext({
       url: "https://example.com/api/admin/tests/t1/images",
@@ -178,7 +179,7 @@ test("admin images PUT: raw image/gif and image/webp map extensions", async () =
     }),
   );
   assert.equal(resWebp.status, 200);
-  assert.match(String(keys[1]), /\.webp$/);
+  assert.match(String(imageKeys()[1]), /\.webp$/);
 });
 
 test("admin images PUT: raw image/jpeg maps to jpg extension", async () => {
@@ -615,10 +616,7 @@ test("admin images PUT: multipart File with empty type uses header fallback", as
   };
   const fd = new FormData();
   fd.set("name", "emptytype");
-  fd.set(
-    "file",
-    new File([new Uint8Array([1])], "x.bin", { type: "" }),
-  );
+  fd.set("file", new File([new Uint8Array([1])], "x.bin", { type: "" }));
   const res = await onRequestPut(
     createContext({
       url: "https://example.com/api/admin/tests/t1/images",

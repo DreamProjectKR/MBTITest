@@ -34,10 +34,13 @@ published 상태인 테스트 목록만 반환합니다.
 
 **캐싱**: `Cache-Control: public, max-age=30, s-maxage=300, stale-while-revalidate=600, stale-if-error=1500`
 
+- **KV** (`MBTI_KV`, 키 `tests:index`, TTL 300초): Cache API miss 시 D1 조회 전에 목록 JSON 반환. 어드민 저장·이미지 업로드 시 키 삭제.
+- **R2 스냅샷**: 어드민 mutation 후 `assets/index.json`을 published 목록으로 갱신(비동기). 브라우저는 `/assets/index.json`을 먼저 읽고 API로 revalidate 가능.
+
 **관측 헤더**:
 
-- `X-MBTI-Edge-Cache`: `HIT` | `MISS`
-- `Server-Timing`: `cache`, `d1`, `total`
+- `X-MBTI-Edge-Cache`: `HIT` | `MISS` | `BYPASS` (KV hit 시 `BYPASS`)
+- `Server-Timing`: `cache`, `kv`, `d1`, `total`
 
 ---
 

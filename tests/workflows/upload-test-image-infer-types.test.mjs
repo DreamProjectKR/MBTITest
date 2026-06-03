@@ -104,7 +104,11 @@ test("uploadTestImageWorkflow: invalidates Cache API only when MBTI_KV absent", 
       },
     );
     await Promise.all(waitUntilCalls);
-    assert.equal(waitUntilCalls.length, 2);
+    assert.equal(
+      waitUntilCalls.length,
+      3,
+      "2 Cache API deletes + 1 index snapshot refresh when MBTI_KV absent",
+    );
     assert.ok(deletedUrls.includes("/api/tests"));
     assert.ok(deletedUrls.includes("/api/tests/t1"));
   } finally {
@@ -136,8 +140,8 @@ test("uploadTestImageWorkflow: KV invalidation when Cache API absent", async () 
     );
     assert.equal(
       waitUntilCalls.length,
-      1,
-      "only KV delete when Cache API is unavailable",
+      3,
+      "KV deletes (detail + index) + index snapshot refresh when Cache API is unavailable",
     );
   } finally {
     globalThis.caches = prevCaches;
@@ -173,7 +177,11 @@ test("uploadTestImageWorkflow: KV delete plus Cache API when both present", asyn
       },
     );
     await Promise.all(waitUntilCalls);
-    assert.equal(waitUntilCalls.length, 3);
+    assert.equal(
+      waitUntilCalls.length,
+      5,
+      "detail + index KV deletes + index snapshot refresh + 2 Cache API deletes",
+    );
   } finally {
     globalThis.caches = prevCaches;
   }

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { installMbtiConfig } from "./config-install.mjs";
 
+import { installMbtiConfig } from "./config-install.mjs";
 import {
   createBrowserEnv,
   dispatchDomContentLoaded,
@@ -200,8 +200,11 @@ test("config: getTestIndex memoizes and validates JSON", async () => {
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
   let calls = 0;
-  globalThis.fetch = async () => {
+  globalThis.fetch = async (url) => {
     calls += 1;
+    if (String(url).includes("index.json")) {
+      return new Response("", { status: 404 });
+    }
     return new Response(JSON.stringify({ tests: [{ id: "t1" }] }), {
       status: 200,
       headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -210,16 +213,45 @@ test("config: getTestIndex memoizes and validates JSON", async () => {
   installMbtiConfig(window, document);
   const a = await window.getTestIndex();
   const b = await window.getTestIndex();
-  assert.equal(calls, 1);
+  assert.equal(calls, 2);
   assert.equal(a.tests[0].id, "t1");
   assert.strictEqual(a, b);
+});
+
+test("config: getTestIndex prefers static snapshot then revalidates API", async () => {
+  createBrowserEnv({ url: "https://example.com/" });
+  document.documentElement.innerHTML =
+    "<html><head></head><body></body></html>";
+  const urls = [];
+  globalThis.fetch = async (url) => {
+    urls.push(String(url));
+    if (String(url).includes("index.json")) {
+      return new Response(JSON.stringify({ tests: [{ id: "snap" }] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      });
+    }
+    return new Response(JSON.stringify({ tests: [{ id: "api" }] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+    });
+  };
+  installMbtiConfig(window, document);
+  const first = await window.getTestIndex();
+  assert.equal(first.tests[0].id, "snap");
+  assert.ok(urls.some((u) => u.includes("index.json")));
+  await new Promise((r) => setTimeout(r, 0));
+  assert.ok(urls.some((u) => u.includes("/api/tests")));
 });
 
 test("config: getTestIndex rejects when fetch throws", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  globalThis.fetch = async () => {
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("index.json")) {
+      return new Response("", { status: 404 });
+    }
     throw new Error("getTestIndex fetch boom");
   };
   installMbtiConfig(window, document);
@@ -230,11 +262,15 @@ test("config: getTestIndex rejects when JSON body is invalid", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  globalThis.fetch = async () =>
-    new Response("not-json-{", {
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("index.json")) {
+      return new Response("", { status: 404 });
+    }
+    return new Response("not-json-{", {
       status: 200,
       headers: { "Content-Type": "application/json; charset=utf-8" },
     });
+  };
   installMbtiConfig(window, document);
   await assert.rejects(() => window.getTestIndex(), SyntaxError);
 });
@@ -243,7 +279,12 @@ test("config: getTestIndex rejects non-ok response", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  globalThis.fetch = async () => new Response("", { status: 502 });
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("index.json")) {
+      return new Response("", { status: 404 });
+    }
+    return new Response("", { status: 502 });
+  };
   installMbtiConfig(window, document);
   await assert.rejects(() => window.getTestIndex(), /502/);
 });
@@ -252,11 +293,15 @@ test("config: getTestIndex rejects non-JSON content-type", async () => {
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  globalThis.fetch = async () =>
-    new Response("<!doctype html><title>x</title>", {
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("index.json")) {
+      return new Response("", { status: 404 });
+    }
+    return new Response("<!doctype html><title>x</title>", {
       status: 200,
       headers: { "Content-Type": "text/html" },
     });
+  };
   installMbtiConfig(window, document);
   await assert.rejects(() => window.getTestIndex(), /JSON/);
 });
@@ -265,11 +310,15 @@ test("config: getTestIndex HTML response hint mentions Worker / static page", as
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  globalThis.fetch = async () =>
-    new Response("<html></html>", {
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("index.json")) {
+      return new Response("", { status: 404 });
+    }
+    return new Response("<html></html>", {
       status: 200,
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
+  };
   installMbtiConfig(window, document);
   await assert.rejects(
     () => window.getTestIndex(),
@@ -281,11 +330,15 @@ test("config: getTestIndex non-JSON non-HTML hint includes content-type", async 
   createBrowserEnv({ url: "https://example.com/" });
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
-  globalThis.fetch = async () =>
-    new Response("not json", {
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("index.json")) {
+      return new Response("", { status: 404 });
+    }
+    return new Response("not json", {
       status: 200,
       headers: { "Content-Type": "text/plain" },
     });
+  };
   installMbtiConfig(window, document);
   await assert.rejects(
     () => window.getTestIndex(),
@@ -794,10 +847,13 @@ test("config: auto-width retries measure when layout width is zero", async () =>
   document.documentElement.innerHTML =
     "<html><head></head><body></body></html>";
   const prevRaf = globalThis.requestAnimationFrame;
-  globalThis.requestAnimationFrame = (cb) => {
+  const prevWinRaf = window.requestAnimationFrame;
+  const syncRaf = (cb) => {
     cb();
     return 0;
   };
+  globalThis.requestAnimationFrame = syncRaf;
+  window.requestAnimationFrame = syncRaf;
   try {
     installMbtiConfig(window, document);
     const img = document.createElement("img");
@@ -810,6 +866,7 @@ test("config: auto-width retries measure when layout width is zero", async () =>
     window.applyAssetAttributes(img);
   } finally {
     globalThis.requestAnimationFrame = prevRaf;
+    window.requestAnimationFrame = prevWinRaf;
   }
   const img = document.getElementById("auto");
   assert.equal(img.getAttribute("data-asset-measure-tries"), "2");

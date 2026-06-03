@@ -536,14 +536,6 @@ function renderIntro(data) {
 
 document.addEventListener("DOMContentLoaded", loadIntroData);
 
-if (
-  typeof navigator !== "undefined" &&
-  navigator.serviceWorker &&
-  typeof navigator.serviceWorker.register === "function"
-) {
-  navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
-}
-
 function setupShareButton(test) {
   const shareBtn = document.querySelector(".TestShare button");
   if (!shareBtn) return;

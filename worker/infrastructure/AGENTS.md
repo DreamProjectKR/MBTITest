@@ -6,7 +6,7 @@ The only place for storage access. Repositories take the binding as an argument;
 
 - `repositories/d1/` — `testMetadataRepository`, `testImageRepository` (system of record for metadata).
 - `repositories/r2/` — `testBodyRepository` (`assets/<testId>/test.json`), `assetRepository` (image binaries).
-- `repositories/kv/` — `testDetailCacheRepository` (`test:<id>` public detail cache).
+- `repositories/kv/` — `testDetailCacheRepository` (`test:<id>`), `testIndexCacheRepository` (`tests:index` list cache).
 
 ## Contracts
 

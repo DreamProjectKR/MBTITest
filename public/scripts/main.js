@@ -206,4 +206,19 @@ function initTestSectionsAjax() {
     .catch((err) => console.error("테스트 목록 로딩 실패:", err));
 }
 
+function onTestIndexUpdated(event) {
+  const tests = event?.detail?.tests;
+  if (!Array.isArray(tests) || !tests.length) return;
+  try {
+    renderSections(normalizeTests(tests));
+    if (typeof window.applyAssetAttributes === "function") {
+      window.applyAssetAttributes(document);
+    }
+  } catch (err) {
+    console.warn("테스트 목록 갱신 렌더 실패:", err);
+  }
+}
+
+window.addEventListener("mbti:test-index-updated", onTestIndexUpdated);
+
 document.addEventListener("DOMContentLoaded", initTestSectionsAjax);
