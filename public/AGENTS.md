@@ -7,6 +7,7 @@ Plain HTML/CSS/JS served by Cloudflare Pages. Pages is static only; all dynamic 
 - `_routes.json` disables Pages Functions (`include: []`). Keep it — dynamic logic stays in `worker/`.
 - Never hardcode asset URLs. Use the globals installed by `config-bootstrap.mjs` (`assetUrl`, `assetResizeUrl`, `buildAssetUrl`, `prefetchImageAsset`, `loadImageAsset`) via `data-asset-*` attributes; hydration is centralized there.
 - `config.js` must stay dynamic `import()` only (no static top-level `import`) so it still runs as a classic script when `type="module"` is missing (stale HTML / broken proxies). Home images with only `data-asset-src` need `installMbtiConfig` to run.
+- `getTestIndex()` reads `/assets/index.json` first, then revalidates `/api/tests`; list pages listen for `mbti:test-index-updated`. Service Worker registers once from `installMbtiConfig`.
 - Image preload/prefetch must use the SAME full URLs as the quiz, including `/cdn-cgi/image` width variants (e.g. 360/480/720). Raw vs resized are different HTTP cache keys.
 - On `localhost` / `127.0.0.1`, `/cdn-cgi/image` is skipped (not in `wrangler pages dev`); expect raw `/assets/*` locally.
 

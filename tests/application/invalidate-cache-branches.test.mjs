@@ -45,7 +45,7 @@ test("invalidatePublicTestCaches schedules KV delete and two cache deletes", asy
       "tid",
     );
     await Promise.all(waitUntilCalls);
-    assert.equal(waitUntilCalls.length, 3);
+    assert.equal(waitUntilCalls.length, 4);
     assert.ok(deletedPaths.includes("/api/tests"));
     assert.ok(deletedPaths.includes("/api/tests/tid"));
   } finally {

@@ -48,6 +48,7 @@ export function createBrowserEnv(options = {}) {
   }
 
   installMatchMedia(window);
+  window.__MBTI_DISABLE_SERVICE_WORKER__ = true;
 
   return window;
 }

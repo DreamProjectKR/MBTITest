@@ -136,8 +136,8 @@ test("uploadTestImageWorkflow: KV invalidation when Cache API absent", async () 
     );
     assert.equal(
       waitUntilCalls.length,
-      1,
-      "only KV delete when Cache API is unavailable",
+      2,
+      "KV deletes (detail + index) when Cache API is unavailable",
     );
   } finally {
     globalThis.caches = prevCaches;

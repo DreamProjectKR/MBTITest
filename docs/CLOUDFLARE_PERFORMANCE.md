@@ -29,6 +29,14 @@
 - **쓰기**: 어드민 저장 시 KV 키 삭제
 - **바인딩**: `MBTI_KV` (worker/wrangler.toml)
 
+`GET /api/tests` 목록도 KV(`tests:index`, TTL 300초)에 캐싱합니다. 어드민 mutation 시 `tests:index`와 `test:{id}`를 함께 삭제합니다.
+
+### 목록 스냅샷 + 클라이언트 SWR (구현됨)
+
+- 어드민 mutation 후 Worker가 R2 `assets/index.json`을 published 목록으로 갱신합니다.
+- `config-bootstrap.mjs`의 `getTestIndex()`는 기본적으로 `/assets/index.json`을 먼저 읽고, 백그라운드에서 `/api/tests`로 revalidate합니다. 갱신 시 `mbti:test-index-updated` 이벤트를 발행합니다.
+- Service Worker(`/sw.js`)는 `installMbtiConfig` 시 모든 공개 페이지에서 1회 등록합니다.
+
 **속도 제한 (구현됨)**: 동일 KV 네임스페이스에 `POST /api/tests/:id/compute` 및 `PUT /api/admin/tests/:id/images`용 카운터를 둡니다. IP는 `CF-Connecting-IP` 우선. 상수·동작은 [docs/API.md](API.md) 및 `worker/api/_utils/rateLimit.ts` 참고.
 
 ### Tiered Cache (Worker) — fetch+cf 적용됨

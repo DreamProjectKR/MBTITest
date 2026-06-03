@@ -25,7 +25,7 @@ function setQuizState(update) {
 }
 
 // Quiz question images often include text; avoid cropping.
-// format=webp: faster encode than AVIF, reduces 400~800ms cold latency (Image.md B.2)
+// format=webp: faster encode than AVIF, reduces 400~800ms cold latency
 /** Single display width + webp only — avoids 320/480 double fetch + format split (Solution.md §5). */
 const QUESTION_IMAGE_RESIZE = "width=480,quality=82,fit=contain,format=webp";
 const QUESTION_IMAGE_RESIZE_BASE = "quality=82,fit=contain,format=webp";
@@ -387,7 +387,7 @@ function initializeStateFromTestJson(testJson) {
   return true;
 }
 
-/** Inject preload for first question image to improve LCP (Image.md B.1). */
+/** Inject preload for first question image to improve LCP. */
 function injectFirstQuestionPreload() {
   try {
     const firstQuestion = state.test?.questions?.[0];

@@ -114,12 +114,10 @@
 
 ## 7. 문서 상호 참조
 
-| 문서                                                   | 내용                        |
-| ------------------------------------------------------ | --------------------------- |
-| [Result.md](../Result.md)                              | 측정·원인                   |
-| [Image.md](Image.md)                                   | 단일 요청 지연·preload 전략 |
-| [IMAGE_LOADING_FIX.md](IMAGE_LOADING_FIX.md)           | SW 디바운스·캐시 이름 등    |
-| [CLOUDFLARE_PERFORMANCE.md](CLOUDFLARE_PERFORMANCE.md) | Tiered Cache·Cache-Tag      |
+| 문서                                                   | 내용                   |
+| ------------------------------------------------------ | ---------------------- |
+| [Result.md](../Result.md)                              | 측정·원인              |
+| [CLOUDFLARE_PERFORMANCE.md](CLOUDFLARE_PERFORMANCE.md) | Tiered Cache·Cache-Tag |
 
 ---
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { installMbtiConfig } from "./config-install.mjs";
 
+import { installMbtiConfig } from "./config-install.mjs";
 import { TESTLIST_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
 import {
@@ -198,7 +198,9 @@ test("testlist.js uses fetch when getTestIndex is removed", async () => {
   await new Promise((r) => setTimeout(r, 50));
 
   assert.ok(
-    fetchedUrl.includes("/assets/index.json") || fetchedUrl.includes("index"),
+    fetchedUrl.includes("/assets/index.json") ||
+      fetchedUrl.includes("/api/tests") ||
+      fetchedUrl.includes("index"),
   );
 });
 
@@ -582,7 +584,10 @@ test("testlist.js sorts by createdAt when updatedAt is absent", async () => {
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 50));
 
-  assert.equal(document.querySelector(".NewTestShell h4")?.textContent, "Newer");
+  assert.equal(
+    document.querySelector(".NewTestShell h4")?.textContent,
+    "Newer",
+  );
 });
 
 test("testlist.js card without thumbnail omits data-asset-src on img", async () => {

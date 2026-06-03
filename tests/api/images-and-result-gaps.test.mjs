@@ -102,7 +102,8 @@ test("admin images PUT: multipart name canonicalizes enfp and q3", async () => {
     }),
   );
   assert.equal(res1.status, 200);
-  assert.match(String(keys[0]), /ENFP\.png$/i);
+  const imageKeys = keys.filter((k) => String(k).includes("/images/"));
+  assert.match(String(imageKeys[0]), /ENFP\.png$/i);
   const fd2 = new FormData();
   fd2.set("name", "q3");
   fd2.set(
@@ -120,7 +121,8 @@ test("admin images PUT: multipart name canonicalizes enfp and q3", async () => {
     }),
   );
   assert.equal(res2.status, 200);
-  assert.match(String(keys[1]), /Q3\.png$/i);
+  const imageKeysAfterQ3 = keys.filter((k) => String(k).includes("/images/"));
+  assert.match(String(imageKeysAfterQ3[1]), /Q3\.png$/i);
 });
 
 test("admin images PUT: multipart without file returns 400", async () => {

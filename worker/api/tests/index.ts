@@ -9,6 +9,10 @@ import type { HeadersInit, MbtiEnv, PagesContext } from "../../_types.ts";
 import { listAdminTestsQuery } from "../../application/queries/listAdminTests.ts";
 import { listPublishedTestsQuery } from "../../application/queries/listPublishedTests.ts";
 import {
+  readTestIndexCache,
+  writeTestIndexCache,
+} from "../../infrastructure/repositories/kv/testIndexCacheRepository.ts";
+import {
   JSON_HEADERS,
   cacheKeyForGet,
   getDefaultCache,
@@ -34,6 +38,7 @@ export async function listTests(
   const startedAt = performance.now();
   let d1Ms = 0;
   let cacheMs = 0;
+  let kvMs = 0;
   const db = context.env.MBTI_DB;
   if (!db) {
     return jsonResponse(
@@ -46,6 +51,49 @@ export async function listTests(
   const url = new URL(context.request.url);
   const cacheKey = cacheKeyForGet(url);
   const ifNoneMatch = context.request.headers.get("if-none-match");
+  const kv = options.useCache ? context.env.MBTI_KV : undefined;
+  if (kv) {
+    try {
+      const kvStart = performance.now();
+      const cached = await readTestIndexCache(kv);
+      kvMs = performance.now() - kvStart;
+      if (cached?.body && Array.isArray(cached.body.tests)) {
+        const cachedEtag = cached?.etag ? String(cached.etag) : "";
+        if (ifNoneMatch && cachedEtag && ifNoneMatch === cachedEtag) {
+          const headers = withCacheHeaders(JSON_HEADERS, {
+            etag: cachedEtag,
+            maxAge: 30,
+            sMaxAge: 300,
+            staleWhileRevalidate: 600,
+          });
+          headers.set("Cache-Tag", CACHE_TAG_API_TESTS);
+          headers.set("X-MBTI-Edge-Cache", "BYPASS");
+          setServerTiming(headers, [
+            { name: "kv", dur: kvMs, desc: "HIT" },
+            { name: "cache", dur: cacheMs, desc: "BYPASS" },
+            { name: "total", dur: performance.now() - startedAt },
+          ]);
+          return new Response(null, { status: 304, headers });
+        }
+        const headers = withCacheHeaders(JSON_HEADERS, {
+          etag: cachedEtag || undefined,
+          maxAge: 30,
+          sMaxAge: 300,
+          staleWhileRevalidate: 600,
+        });
+        headers.set("Cache-Tag", CACHE_TAG_API_TESTS);
+        headers.set("X-MBTI-Edge-Cache", "BYPASS");
+        setServerTiming(headers, [
+          { name: "kv", dur: kvMs, desc: "HIT" },
+          { name: "cache", dur: cacheMs, desc: "BYPASS" },
+          { name: "total", dur: performance.now() - startedAt },
+        ]);
+        return jsonResponse(cached.body, { status: 200, headers });
+      }
+    } catch {
+      // Best effort: continue with Cache API + D1.
+    }
+  }
   if (cache) {
     const cacheStart = performance.now();
     const cached = await cache.match(cacheKey);
@@ -55,6 +103,7 @@ export async function listTests(
       const cachedEtag = headers.get("ETag");
       headers.set("X-MBTI-Edge-Cache", "HIT");
       setServerTiming(headers, [
+        { name: "kv", dur: kvMs, desc: kvMs ? "MISS" : "BYPASS" },
         { name: "cache", dur: cacheMs, desc: "HIT" },
         { name: "total", dur: performance.now() - startedAt },
       ]);
@@ -100,6 +149,7 @@ export async function listTests(
         dur: cacheMs,
         desc: options.useCache ? "MISS" : "BYPASS",
       },
+      { name: "kv", dur: kvMs, desc: kvMs ? "MISS" : "BYPASS" },
       { name: "d1", dur: d1Ms },
       { name: "total", dur: performance.now() - startedAt },
     ]);
@@ -136,10 +186,16 @@ export async function listTests(
   }
   setServerTiming(response.headers, [
     { name: "cache", dur: cacheMs, desc: options.useCache ? "MISS" : "BYPASS" },
+    { name: "kv", dur: kvMs, desc: kvMs ? "MISS" : "BYPASS" },
     { name: "d1", dur: d1Ms },
     { name: "total", dur: performance.now() - startedAt },
   ]);
   if (cache) context.waitUntil(cache.put(cacheKey, response.clone()));
+  if (kv) {
+    context.waitUntil(
+      writeTestIndexCache(kv, { etag, body: { tests } }).catch(() => {}),
+    );
+  }
   return response;
 }
 

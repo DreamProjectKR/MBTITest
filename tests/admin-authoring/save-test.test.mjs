@@ -152,7 +152,7 @@ test("PUT /api/admin/tests/:id persists publish transition and invalidates cache
   assert.equal(response.status, 200);
   assert.equal(body.ok, true);
   assert.ok(objects.has("assets/test-valid/test.json"));
-  assert.deepEqual(kvDeletes, ["test:test-valid"]);
+  assert.deepEqual(kvDeletes.sort(), ["test:test-valid", "tests:index"].sort());
   assert.equal(cacheCalls.delete.length, 2);
   const bindCall = calls.find((call) => call.type === "bind");
   assert.equal(bindCall.args[0], "test-valid");
