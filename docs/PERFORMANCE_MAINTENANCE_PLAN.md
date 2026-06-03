@@ -66,15 +66,17 @@ Cloudflare 공식 문서 검색을 바탕으로, 현재 배포된 **Pages, Funct
 
 ## 4. 적용 체크리스트
 
-| 항목                               | 상태   | 비고                                                  |
-| ---------------------------------- | ------ | ----------------------------------------------------- |
-| D1 batch() in result image handler | 적용   | store에 `upsertTestImageMetaAndTouchBatch`, 타입 확장 |
-| R2 Range in assets proxy           | 적용   | Range 헤더 → 206 + Content-Range                      |
-| Worker index.ts 에러 처리          | 적용   | 스택 미노출, JSON `{ error }`                         |
-| D1Database / R2Bucket 타입 확장    | 적용   | batch, get options                                    |
-| Tiered Cache fetch+cf 적용         | 적용   | worker/index.ts, CLOUDFLARE_PERFORMANCE.md            |
-| 환경별 wrangler                    | 문서화 | 필요 시 env.dev/production 적용                       |
-| wrangler compatibility_date        | 적용   | 2025-01-01로 갱신 (Cloudflare Cursor 플러그인 계획)   |
+| 항목                               | 상태   | 비고                                                         |
+| ---------------------------------- | ------ | ------------------------------------------------------------ |
+| D1 batch() in result image handler | 적용   | store에 `upsertTestImageMetaAndTouchBatch`, 타입 확장        |
+| R2 Range in assets proxy           | 적용   | Range 헤더 → 206 + Content-Range                             |
+| Worker index.ts 에러 처리          | 적용   | 스택 미노출, JSON `{ error }`                                |
+| D1Database / R2Bucket 타입 확장    | 적용   | batch, get options                                           |
+| Tiered Cache fetch+cf 적용         | 적용   | worker/index.ts, CLOUDFLARE_PERFORMANCE.md                   |
+| GET /api/tests KV + R2 index.json  | 적용   | `tests:index` KV, `assets/index.json` 스냅샷, 클라이언트 SWR |
+| SW 전역 등록 + 비동기 폰트         | 적용   | `config-bootstrap.mjs`, 공개 HTML `preload` 폰트             |
+| 환경별 wrangler                    | 문서화 | 필요 시 env.dev/production 적용                              |
+| wrangler compatibility_date        | 적용   | 2025-01-01로 갱신 (Cloudflare Cursor 플러그인 계획)          |
 
 ---
 

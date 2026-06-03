@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { installMbtiConfig } from "./config-install.mjs";
 
+import { installMbtiConfig } from "./config-install.mjs";
 import { TESTRESULT_PAGE_HTML } from "./fixtures-pages.mjs";
 import { minimalPublishedQuizTest } from "./sample-test-json.mjs";
 import {
@@ -403,7 +403,9 @@ test("testresult.js preloadCriticalImage uses raw href when assetUrl and resize 
 
   const link = document.head.querySelector("link[data-preload-key]");
   assert.ok(link);
-  assert.ok(String(link.getAttribute("href") || link.href).includes("absolute-result"));
+  assert.ok(
+    String(link.getAttribute("href") || link.href).includes("absolute-result"),
+  );
 });
 
 test("testresult.js preloadCriticalImage swallows head.appendChild errors", async () => {
@@ -542,12 +544,13 @@ test("testresult.js invokes applyAssetAttributes on result thumbnail", async () 
   window.sessionStorage.setItem(`mbtitest:testdata:${t.id}`, JSON.stringify(t));
   globalThis.fetch = async () => new Response("{}", { status: 404 });
 
+  installMbtiConfig(window, document);
+  const realApply = window.applyAssetAttributes;
   let applyCalls = 0;
   window.applyAssetAttributes = (el) => {
     if (el?.getAttribute?.("data-asset-src")) applyCalls += 1;
+    if (typeof realApply === "function") return realApply(el);
   };
-
-  installMbtiConfig(window, document);
   await import(testresultImportHref());
   dispatchDomContentLoaded(window);
   await new Promise((r) => setTimeout(r, 45));
